@@ -78,6 +78,11 @@ jobs:
         run: |
           ./gradlew ktfmtCheck
 
+      # Step to decode the Base64-encoded keystore from secrets and save it as a file
+      - name: Decode debug keystore
+        run: |
+          echo ${{ secrets.DEBUG_KEYSTORE }} | base64 -d > ./app/external/debug.keystore
+
       # This step runs gradle commands to build the application
       - name: Assemble
         run: |
