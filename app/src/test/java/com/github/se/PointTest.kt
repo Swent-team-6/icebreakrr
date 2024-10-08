@@ -1,5 +1,6 @@
-package com.android.sample
+package com.github.se
 
+import com.github.se.icebreakrr.Point
 import org.junit.Assert.assertEquals
 import org.junit.Test
 

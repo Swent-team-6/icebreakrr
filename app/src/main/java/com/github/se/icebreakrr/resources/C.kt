@@ -1,4 +1,4 @@
-package com.android.sample.resources
+package com.github.se.icebreakrr.resources
 
 // Like R, but C
 object C {

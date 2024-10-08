@@ -1,4 +1,4 @@
-package com.android.sample
+package com.github.se
 
 import org.junit.Assert.*
 import org.junit.Test
