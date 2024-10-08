@@ -78,10 +78,9 @@ jobs:
         run: |
           ./gradlew ktfmtCheck
 
-      # Step to decode the Base64-encoded keystore from secrets and save it as a file
-      - name: Decode debug keystore
-        run: |
-          echo ${{ secrets.DEBUG_KEYSTORE }} | base64 -d > ./app/external/debug.keystore
+      # Create external/debug.keystore file
+      - name: Create file debug keystore
+        run: mkdir ./app/keystore && touch ./app/keystore/debug.keystore.base64 | base64 && touch ./app/keystore/debug.keystore
 
       # This step runs gradle commands to build the application
       - name: Assemble
