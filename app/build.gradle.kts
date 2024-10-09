@@ -36,11 +36,11 @@ android {
         getByName("debug") {
             storeFile = file("$rootDir/keystore/debug.keystore")
             storePassword = keystoreProperties["ANDROID_KEYSTORE_PASSWORD"]?.toString()
-                ?: System.getenv("ANDROID_KEYSTORE_PASSWORD") ?: "default_password"
+                ?: System.getenv("ANDROID_KEYSTORE_PASSWORD")
             keyAlias = keystoreProperties["ANDROID_KEY_ALIAS"]?.toString()
-                ?: System.getenv("ANDROID_KEY_ALIAS") ?: "androiddebugkey"
+                ?: System.getenv("ANDROID_KEY_ALIAS")
             keyPassword = keystoreProperties["ANDROID_KEY_PASSWORD"]?.toString()
-                ?: System.getenv("ANDROID_KEY_PASSWORD") ?: "default_password"
+                ?: System.getenv("ANDROID_KEY_PASSWORD")
         }
     }
 
