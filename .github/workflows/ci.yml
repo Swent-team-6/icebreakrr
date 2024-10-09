@@ -80,13 +80,19 @@ jobs:
 
       # Create external/debug.keystore file
       - name: Create file debug keystore
-        run: mkdir ./app/keystore && touch ./app/keystore/debug.keystore.base64 | base64 && touch ./app/keystore/debug.keystore
+        run: |
+          mkdir -p ./app/keystore
+          echo "${{ secrets.DEBUG_KEYSTORE }}" | base64 --decode > ./app/keystore/debug.keystore
 
       # This step runs gradle commands to build the application
       - name: Assemble
         run: |
           # To run the CI with debug information, add --info
           ./gradlew assemble lint --parallel --build-cache
+        env:
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
 
       # Run Unit tests
       - name: Run tests

@@ -1,9 +1,18 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsKotlinAndroid)
     alias(libs.plugins.ktfmt)
     alias(libs.plugins.sonar)
     id("jacoco")
+}
+
+val keystorePropertiesFile = rootProject.file("local.properties")
+val keystoreProperties = Properties()
+
+if (keystorePropertiesFile.exists()) {
+    keystoreProperties.load(keystorePropertiesFile.inputStream())
 }
 
 android {
@@ -26,9 +35,12 @@ android {
     signingConfigs {
         getByName("debug") {
             storeFile = file("$rootDir/keystore/debug.keystore")
-            storePassword = "android"
-            keyAlias = "androiddebugkey"
-            keyPassword = "android"
+            storePassword = keystoreProperties["ANDROID_KEYSTORE_PASSWORD"]?.toString()
+                ?: System.getenv("ANDROID_KEYSTORE_PASSWORD") ?: "default_password"
+            keyAlias = keystoreProperties["ANDROID_KEY_ALIAS"]?.toString()
+                ?: System.getenv("ANDROID_KEY_ALIAS") ?: "androiddebugkey"
+            keyPassword = keystoreProperties["ANDROID_KEY_PASSWORD"]?.toString()
+                ?: System.getenv("ANDROID_KEY_PASSWORD") ?: "default_password"
         }
     }
 
