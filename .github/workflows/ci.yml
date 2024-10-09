@@ -78,11 +78,11 @@ jobs:
         run: |
           ./gradlew ktfmtCheck
 
-      # Create external/debug.keystore file
+      # Create keystore/debug.keystore file
       - name: Create file debug keystore
         run: |
-          mkdir -p ./app/keystore
-          echo "${{ secrets.DEBUG_KEYSTORE }}" | base64 --decode > ./app/keystore/debug.keystore
+          mkdir -p ./keystore
+          echo "${{ secrets.DEBUG_KEYSTORE }}" | base64 --decode > ./keystore/debug.keystore
 
       # This step runs gradle commands to build the application
       - name: Assemble
