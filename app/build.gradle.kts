@@ -35,9 +35,9 @@ android {
     signingConfigs {
         getByName("debug") {
             storeFile = file("$rootDir/keystore/debug.keystore")
-            storePassword = System.getenv("ANDROID_KEYSTORE_PASSWORD") ?: keystoreProperties["ANDROID_KEYSTORE_PASSWORD"].toString()
-            keyAlias = System.getenv("ANDROID_KEY_ALIAS") ?: keystoreProperties["ANDROID_KEY_ALIAS"].toString()
-            keyPassword = System.getenv("ANDROID_KEY_PASSWORD") ?: keystoreProperties["ANDROID_KEY_PASSWORD"].toString()
+            storePassword = System.getenv("KEYSTORE_PASSWORD") ?: keystoreProperties["KEYSTORE_PASSWORD"].toString()
+            keyAlias = System.getenv("KEY_ALIAS") ?: keystoreProperties["KEY_ALIAS"].toString()
+            keyPassword = System.getenv("KEY_PASSWORD") ?: keystoreProperties["KEY_PASSWORD"].toString()
         }
     }
 
