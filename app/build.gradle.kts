@@ -1,9 +1,18 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsKotlinAndroid)
     alias(libs.plugins.ktfmt)
     alias(libs.plugins.sonar)
     id("jacoco")
+}
+
+val keystorePropertiesFile = rootProject.file("local.properties")
+val keystoreProperties = Properties()
+
+if (keystorePropertiesFile.exists()) {
+    keystoreProperties.load(keystorePropertiesFile.inputStream())
 }
 
 android {
@@ -23,6 +32,15 @@ android {
         }
     }
 
+    signingConfigs {
+        getByName("debug") {
+            storeFile = file("$rootDir/keystore/debug.keystore")
+            storePassword = System.getenv("KEYSTORE_PASSWORD") ?: keystoreProperties["KEYSTORE_PASSWORD"].toString()
+            keyAlias = System.getenv("KEY_ALIAS") ?: keystoreProperties["KEY_ALIAS"].toString()
+            keyPassword = System.getenv("KEY_PASSWORD") ?: keystoreProperties["KEY_PASSWORD"].toString()
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = false
@@ -35,6 +53,7 @@ android {
         debug {
             enableUnitTestCoverage = true
             enableAndroidTestCoverage = true
+            signingConfig = signingConfigs.getByName("debug")
         }
     }
 
