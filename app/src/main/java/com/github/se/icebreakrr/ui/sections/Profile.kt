@@ -21,12 +21,12 @@ import com.github.se.icebreakrr.ui.navigation.NavigationActions
 @Composable
 fun ProfileScreen(navigationActions: NavigationActions) {
   Scaffold(
-      modifier = Modifier.testTag("aroundYouScreen"),
+      modifier = Modifier.testTag("profileScreen"),
       bottomBar = {
         BottomNavigationMenu(
             onTabSelect = { route -> navigationActions.navigateTo(route) },
             tabList = LIST_TOP_LEVEL_DESTINATIONS,
             selectedItem = navigationActions.currentRoute())
       },
-      content = { Text(text = "Profile screen") })
+      content = { Text(text = "Profile screen") }) //TODO Placeholder
 }
