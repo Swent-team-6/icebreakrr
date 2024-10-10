@@ -28,5 +28,5 @@ fun AroundYouScreen(navigationActions: NavigationActions) {
             tabList = LIST_TOP_LEVEL_DESTINATIONS,
             selectedItem = navigationActions.currentRoute())
       },
-      content = { Text(text = "Around You screen") }) //TODO Placeholder
+      content = { Text(text = "Around You screen") }) // TODO Placeholder
 }

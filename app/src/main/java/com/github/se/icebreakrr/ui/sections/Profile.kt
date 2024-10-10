@@ -28,5 +28,5 @@ fun ProfileScreen(navigationActions: NavigationActions) {
             tabList = LIST_TOP_LEVEL_DESTINATIONS,
             selectedItem = navigationActions.currentRoute())
       },
-      content = { Text(text = "Profile screen") }) //TODO Placeholder
+      content = { Text(text = "Profile screen") }) // TODO Placeholder
 }

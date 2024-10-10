@@ -28,5 +28,5 @@ fun NotificationScreen(navigationActions: NavigationActions) {
             tabList = LIST_TOP_LEVEL_DESTINATIONS,
             selectedItem = navigationActions.currentRoute())
       },
-      content = { Text(text = "Notification screen") }) //TODO Placeholder
+      content = { Text(text = "Notification screen") }) // TODO Placeholder
 }
