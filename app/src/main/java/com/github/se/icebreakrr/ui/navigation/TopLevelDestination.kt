@@ -5,6 +5,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Menu
 import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material.icons.outlined.Person
+import androidx.compose.material.icons.outlined.Place
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.github.se.icebreakrr.R
 
@@ -32,7 +33,7 @@ object Screen {
 object TopLevelDestinations {
   val AROUND_YOU =
       TopLevelDestination(
-          route = Route.AROUND_YOU, icon = Icons.Outlined.Menu, textId = R.string.around_you)
+          route = Route.AROUND_YOU, icon = Icons.Outlined.Place, textId = R.string.around_you)
   val PROFILE =
       TopLevelDestination(
           route = Route.PROFILE, icon = Icons.Outlined.Person, textId = R.string.profile)
