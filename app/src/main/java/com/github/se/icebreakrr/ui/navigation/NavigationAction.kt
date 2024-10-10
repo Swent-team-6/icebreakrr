@@ -46,6 +46,6 @@ open class NavigationActions(
    * @return The current route
    */
   open fun currentRoute(): String {
-    return navController.currentDestination?.route ?: ""
+    return navController.currentDestination?.route ?: "unknown"
   }
 }
