@@ -21,12 +21,12 @@ import com.github.se.icebreakrr.ui.navigation.NavigationActions
 @Composable
 fun NotificationScreen(navigationActions: NavigationActions) {
   Scaffold(
-      modifier = Modifier.testTag("aroundYouScreen"),
+      modifier = Modifier.testTag("notificationScreen"),
       bottomBar = {
         BottomNavigationMenu(
             onTabSelect = { route -> navigationActions.navigateTo(route) },
             tabList = LIST_TOP_LEVEL_DESTINATIONS,
             selectedItem = navigationActions.currentRoute())
       },
-      content = { Text(text = "Notification screen") })
+      content = { Text(text = "Notification screen") }) //TODO Placeholder
 }
