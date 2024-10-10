@@ -13,18 +13,21 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.tooling.preview.Preview
 import com.github.se.icebreakrr.resources.C
+import com.github.se.icebreakrr.ui.authentication.SignInScreen
 import com.github.se.icebreakrr.ui.theme.SampleAppTheme
+import com.google.firebase.FirebaseApp
 
 class MainActivity : ComponentActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
+      FirebaseApp.initializeApp(this)
     setContent {
       SampleAppTheme {
         // A surface container using the 'background' color from the theme
         Surface(
             modifier = Modifier.fillMaxSize().semantics { testTag = C.Tag.main_screen_container },
             color = MaterialTheme.colorScheme.background) {
-              Greeting("Android")
+               SignInScreen()
             }
       }
     }
