@@ -46,6 +46,13 @@ open class NavigationActions(
    * @return The current route
    */
   open fun currentRoute(): String {
-    return navController.currentDestination?.route ?: "unknown"
+    val currentRoute = navController.currentDestination?.route
+    return if (currentRoute == null) {
+      // Redirect to the authentication screen if the current route is null
+      navController.navigate(Route.AUTH)
+      Route.AUTH
+    } else {
+      currentRoute
+    }
   }
 }
