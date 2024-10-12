@@ -5,6 +5,6 @@
     <string name="default_web_client_id">579784939748-6e63a67fhpe0r74ik3qapu6kd4hm04r9.apps.googleusercontent.com</string>
 
     <string name="around_you">Around You</string>
-    <string name="profile">Profile</string>
+    <string name="settings">Settings</string>
     <string name="notifications">Notifications</string>
 </resources>
