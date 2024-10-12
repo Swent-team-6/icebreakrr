@@ -16,7 +16,7 @@ import com.github.se.icebreakrr.ui.navigation.Route
 import com.github.se.icebreakrr.ui.navigation.Screen
 import com.github.se.icebreakrr.ui.sections.AroundYouScreen
 import com.github.se.icebreakrr.ui.sections.NotificationScreen
-import com.github.se.icebreakrr.ui.sections.ProfileScreen
+import com.github.se.icebreakrr.ui.sections.SettingsScreen
 import com.github.se.icebreakrr.ui.theme.SampleAppTheme
 
 class MainActivity : ComponentActivity() {
@@ -34,7 +34,7 @@ class MainActivity : ComponentActivity() {
  * including screens such as "Around You", "Profile", and "Notifications".
  *
  * @see AroundYouScreen
- * @see ProfileScreen
+ * @see SettingsScreen
  * @see NotificationScreen
  */
 @Composable
@@ -52,10 +52,10 @@ fun IcebreakrrApp() {
     }
 
     navigation(
-        startDestination = Screen.PROFILE,
-        route = Route.PROFILE,
+        startDestination = Screen.SETTINGS,
+        route = Route.SETTINGS,
     ) {
-      composable(Screen.PROFILE) { ProfileScreen(navigationActions) }
+      composable(Screen.SETTINGS) { SettingsScreen(navigationActions) }
     }
 
     navigation(
