@@ -1,6 +1,7 @@
 package com.github.se.icebreakrr.ui.sections
 
 import android.annotation.SuppressLint
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -19,7 +20,7 @@ import com.github.se.icebreakrr.ui.navigation.NavigationActions
  */
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun ProfileScreen(navigationActions: NavigationActions) {
+fun SettingsScreen(navigationActions: NavigationActions) {
   Scaffold(
       modifier = Modifier.testTag("profileScreen"),
       bottomBar = {
@@ -28,5 +29,11 @@ fun ProfileScreen(navigationActions: NavigationActions) {
             tabList = LIST_TOP_LEVEL_DESTINATIONS,
             selectedItem = navigationActions.currentRoute())
       },
-      content = { Text(text = "Profile screen") }) // TODO Placeholder
+      content = { innerPadding ->
+        // Use the innerPadding to apply padding around your content
+        Text(
+            text = "Settings screen", // TODO PLaceholder
+            modifier = Modifier.padding(innerPadding) // Applying the padding to the content
+            )
+      })
 }
