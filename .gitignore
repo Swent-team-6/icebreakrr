@@ -4,6 +4,7 @@
 /local.properties
 /build
 /captures
+/keystore
 .externalNativeBuild
 .cxx
 local.properties

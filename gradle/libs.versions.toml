@@ -17,6 +17,10 @@ kaspresso = "1.5.5"
 playServicesAuth = "21.2.0"
 robolectric = "4.11.1"
 sonar = "4.4.1.3373"
+navigationCompose = "2.8.2"
+mockitoCore = "5.3.1"
+mockitoKotlin = "5.1.0"
+navigationTesting = "2.8.2"
 firebaseCommonKtx = "21.0.0"
 firebaseAuthKtx = "23.0.0"
 
@@ -48,6 +52,11 @@ play-services-auth = { module = "com.google.android.gms:play-services-auth", ver
 robolectric = { module = "org.robolectric:robolectric", version.ref = "robolectric" }
 firebase-common-ktx = { group = "com.google.firebase", name = "firebase-common-ktx", version.ref = "firebaseCommonKtx" }
 firebase-auth-ktx = { group = "com.google.firebase", name = "firebase-auth-ktx", version.ref = "firebaseAuthKtx" }
+androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigationCompose" }
+
+mockito-core = { group = "org.mockito", name = "mockito-core", version.ref = "mockitoCore" }
+mockito-kotlin = { group = "org.mockito.kotlin", name = "mockito-kotlin", version.ref = "mockitoKotlin" }
+androidx-navigation-testing = { group = "androidx.navigation", name = "navigation-testing", version.ref = "navigationTesting" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

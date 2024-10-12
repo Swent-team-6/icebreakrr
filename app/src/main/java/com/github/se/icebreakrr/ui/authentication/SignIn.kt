@@ -27,6 +27,8 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.github.se.icebreakrr.R
+import com.github.se.icebreakrr.ui.navigation.NavigationActions
+import com.github.se.icebreakrr.ui.navigation.TopLevelDestinations
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
@@ -38,47 +40,54 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
 @Composable
-fun SignInScreen() {
-  var user by remember { mutableStateOf(Firebase.auth.currentUser) }
-  val token = stringResource(R.string.default_web_client_id)
-  val context = LocalContext.current
-  val launcher =
-      rememberFirebaseAuthLauncher(
-          onAuthComplete = { result ->
-            user = result.user
-            Toast.makeText(context, "Login successful!", Toast.LENGTH_LONG).show()
-          },
-          onAuthError = { user = null })
-  Scaffold(
-      modifier = Modifier.testTag("loginScreen"),
-      content = { paddingValues ->
-        Column(
-            modifier = Modifier.fillMaxSize().padding(paddingValues),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center,
-        ) {
-          Text(
-              text = "Welcome",
-              style = MaterialTheme.typography.titleLarge,
-              modifier = Modifier.padding(top = 16.dp, bottom = 32.dp).testTag("loginTitle"))
+fun SignInScreen(navigationActions: NavigationActions) {
+    var user by remember { mutableStateOf(Firebase.auth.currentUser) }
+    val token = stringResource(R.string.default_web_client_id)
+    val context = LocalContext.current
+    val launcher =
+        rememberFirebaseAuthLauncher(
+            onAuthComplete = { result ->
+                user = result.user
+                Toast.makeText(context, "Login successful!", Toast.LENGTH_LONG).show()
+                navigationActions.navigateTo(TopLevelDestinations.AROUND_YOU)
+            },
+            onAuthError = { user = null })
+    Scaffold(
+        modifier = Modifier.testTag("loginScreen"),
+        content = { paddingValues ->
 
-          Button(
-              onClick = {
-                val gso =
-                    GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                        .requestIdToken(token)
-                        .requestEmail()
-                        .build()
-                val googleSignInClient = GoogleSignIn.getClient(context, gso)
-                launcher.launch(googleSignInClient.signInIntent)
-              },
-              modifier = Modifier.testTag("loginButton")) {
-                Text("Sign in via Google")
-              }
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center,
+            ) {
 
-          Toast.makeText(context, "Login successful!", Toast.LENGTH_LONG).show()
-        }
-      })
+                Text(
+                    text = "Welcome",
+                    style = MaterialTheme.typography.titleLarge,
+                    modifier = Modifier
+                        .padding(top = 16.dp, bottom = 32.dp)
+                        .testTag("loginTitle")
+                )
+
+                Button(
+                    onClick = {
+                        val gso =
+                            GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                                .requestIdToken(token)
+                                .requestEmail()
+                                .build()
+                        val googleSignInClient = GoogleSignIn.getClient(context, gso)
+                        launcher.launch(googleSignInClient.signInIntent)
+                    },
+                    modifier = Modifier.testTag("loginButton")
+                ) {
+                    Text("Sign in via Google")
+                }
+            }
+        })
 }
 
 @Composable
@@ -86,19 +95,18 @@ fun rememberFirebaseAuthLauncher(
     onAuthComplete: (AuthResult) -> Unit,
     onAuthError: (ApiException) -> Unit
 ): ManagedActivityResultLauncher<Intent, ActivityResult> {
-  val scope = rememberCoroutineScope()
-  return rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-      result ->
-    val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
-    try {
-      val account = task.getResult(ApiException::class.java)!!
-      val credential = GoogleAuthProvider.getCredential(account.idToken!!, null)
-      scope.launch {
-        val authResult = Firebase.auth.signInWithCredential(credential).await()
-        onAuthComplete(authResult)
-      }
-    } catch (e: ApiException) {
-      onAuthError(e)
+    val scope = rememberCoroutineScope()
+    return rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
+        try {
+            val account = task.getResult(ApiException::class.java)!!
+            val credential = GoogleAuthProvider.getCredential(account.idToken!!, null)
+            scope.launch {
+                val authResult = Firebase.auth.signInWithCredential(credential).await()
+                onAuthComplete(authResult)
+            }
+        } catch (e: ApiException) {
+            onAuthError(e)
+        }
     }
-  }
 }
