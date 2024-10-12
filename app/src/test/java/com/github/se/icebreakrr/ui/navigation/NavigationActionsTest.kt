@@ -31,8 +31,8 @@ class NavigationActionsTest {
     navigationActions.navigateTo(TopLevelDestinations.AROUND_YOU)
     verify(navHostController).navigate(eq(Route.AROUND_YOU), any<NavOptionsBuilder.() -> Unit>())
 
-    navigationActions.navigateTo(Screen.PROFILE)
-    verify(navHostController).navigate(Screen.PROFILE)
+    navigationActions.navigateTo(Screen.SETTINGS)
+    verify(navHostController).navigate(Screen.SETTINGS)
 
     navigationActions.navigateTo(Screen.NOTIFICATIONS)
     verify(navHostController).navigate(Screen.NOTIFICATIONS)
