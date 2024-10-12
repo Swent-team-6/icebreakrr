@@ -18,14 +18,14 @@ data class TopLevelDestination(
 object Route {
   const val AUTH = "Auth"
   const val AROUND_YOU = "AroundYou"
-  const val PROFILE = "Profile"
+  const val SETTINGS = "Settings"
   const val NOTIFICATIONS = "Notifications"
 }
 
 object Screen {
   const val AUTH = "Auth Screen"
   const val AROUND_YOU = "Around You Screen"
-  const val PROFILE = "Profile Screen"
+  const val SETTINGS = "Settings Screen"
   const val NOTIFICATIONS = "Notifications Screen"
 }
 
@@ -33,9 +33,9 @@ object TopLevelDestinations {
   val AROUND_YOU =
       TopLevelDestination(
           route = Route.AROUND_YOU, icon = Icons.Outlined.Place, textId = R.string.around_you)
-  val PROFILE =
+  val SETTINGS =
       TopLevelDestination(
-          route = Route.PROFILE, icon = Icons.Outlined.Person, textId = R.string.profile)
+          route = Route.SETTINGS, icon = Icons.Outlined.Person, textId = R.string.settings)
   val NOTIFICATIONS =
       TopLevelDestination(
           route = Route.NOTIFICATIONS,
@@ -45,6 +45,6 @@ object TopLevelDestinations {
 
 val LIST_TOP_LEVEL_DESTINATIONS =
     listOf(
-        TopLevelDestinations.PROFILE,
+        TopLevelDestinations.SETTINGS,
         TopLevelDestinations.AROUND_YOU,
         TopLevelDestinations.NOTIFICATIONS)
