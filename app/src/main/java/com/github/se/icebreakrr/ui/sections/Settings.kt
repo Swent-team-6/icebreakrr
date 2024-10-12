@@ -22,7 +22,7 @@ import com.github.se.icebreakrr.ui.navigation.NavigationActions
 @Composable
 fun SettingsScreen(navigationActions: NavigationActions) {
   Scaffold(
-      modifier = Modifier.testTag("profileScreen"),
+      modifier = Modifier.testTag("settingsScreen"),
       bottomBar = {
         BottomNavigationMenu(
             onTabSelect = { route -> navigationActions.navigateTo(route) },
