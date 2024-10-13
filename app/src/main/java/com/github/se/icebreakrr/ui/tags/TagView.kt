@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -21,6 +22,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
@@ -72,7 +74,7 @@ fun ClickTag(s: String, tagStyle: TagStyle, onClick: () -> Unit) {
       color = tagStyle.backGroundColor,
       shape = RoundedCornerShape(12.dp)) {
         Text(
-            text = "#$s",
+            text = "#$s x",
             color = tagStyle.textColor,
             fontSize = tagStyle.fontSize,
             modifier = Modifier.padding(8.dp),
@@ -110,7 +112,7 @@ fun TagSelector(
     textSize: TextUnit
 ) {
 
-  Column(modifier = Modifier.fillMaxWidth()) {
+  Column(modifier = Modifier.fillMaxWidth().wrapContentHeight()) {
     OutlinedTextField(
         value = stringQuery.value,
         onValueChange = {
@@ -121,23 +123,26 @@ fun TagSelector(
         label = { Text("Tags") },
         placeholder = { Text("Search for tags") },
         modifier = Modifier.testTag("inputTagSelector"))
-    DropdownMenu(
-        expanded = expanded.value,
-        onDismissRequest = { expanded.value = false },
-        modifier = Modifier.fillMaxWidth(),
-        properties = PopupProperties(focusable = false)) {
-          val tagsList = outputTag.value
-          tagsList.forEach { tag ->
-            DropdownMenuItem(
-                onClick = {
-                  stringQuery.value = ""
-                  expanded.value = false
-                  Log.d("TAG CHOSEN", tag.first)
-                },
-                text = { Tag(tag.first, TagStyle(textColor, tag.second, textSize)) },
-            )
+
+    Box(modifier = Modifier.fillMaxWidth().wrapContentHeight()) {
+      DropdownMenu(
+          expanded = expanded.value,
+          onDismissRequest = { expanded.value = false },
+          properties = PopupProperties(focusable = false),
+          modifier = Modifier.align(Alignment.TopStart)) {
+            val tagsList = outputTag.value
+            tagsList.forEach { tag ->
+              DropdownMenuItem(
+                  onClick = {
+                    stringQuery.value = ""
+                    expanded.value = false
+                    Log.d("TAG CHOSEN", tag.first)
+                  },
+                  text = { Tag(tag.first, TagStyle(textColor, tag.second, textSize)) },
+              )
+            }
           }
-        }
+    }
     LazyColumn(modifier = Modifier.fillMaxSize()) {
       item {
         val profileList = profileTag.value

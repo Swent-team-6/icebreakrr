@@ -23,10 +23,6 @@ mockitoCore = "5.3.1"
 mockitoKotlin = "5.1.0"
 navigationTesting = "2.8.2"
 
-navigationCompose = "2.8.2"
-mockitoCore = "5.3.1"
-mockitoKotlin = "5.1.0"
-navigationTesting = "2.8.2"
 
 [libraries]
 accompanist-flowlayout = { module = "com.google.accompanist:accompanist-flowlayout", version.ref = "accompanistFlowlayout" }
@@ -55,11 +51,6 @@ kaspresso-compose = { group = "com.kaspersky.android-components", name = "kaspre
 
 mockito-android = { module = "org.mockito:mockito-android", version.ref = "mockitoAndroid" }
 robolectric = { module = "org.robolectric:robolectric", version.ref = "robolectric" }
-androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigationCompose" }
-
-mockito-core = { group = "org.mockito", name = "mockito-core", version.ref = "mockitoCore" }
-mockito-kotlin = { group = "org.mockito.kotlin", name = "mockito-kotlin", version.ref = "mockitoKotlin" }
-androidx-navigation-testing = { group = "androidx.navigation", name = "navigation-testing", version.ref = "navigationTesting" }
 
 androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigationCompose" }
 mockito-core = { group = "org.mockito", name = "mockito-core", version.ref = "mockitoCore" }
