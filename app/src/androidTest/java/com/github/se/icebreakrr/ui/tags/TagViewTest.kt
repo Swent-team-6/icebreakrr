@@ -55,7 +55,7 @@ class TagViewTest {
   fun displayClickTag() {
     composeTestRule.setContent { ClickTag("AndroidTest", TagStyle(), {}) }
     composeTestRule.onNodeWithTag("clickTestTag").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("clickTestTag").assertTextEquals("#AndroidTest")
+    composeTestRule.onNodeWithTag("clickTestTag").assertTextEquals("#AndroidTest x")
   }
 
   @Test
@@ -88,7 +88,7 @@ class TagViewTest {
     }
 
     composeTestRule.onNodeWithTag("clickTestTag").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("clickTestTag").assertTextEquals("#salsa")
+    composeTestRule.onNodeWithTag("clickTestTag").assertTextEquals("#salsa x")
     composeTestRule.onNodeWithTag("inputTagSelector").performTextClearance()
     composeTestRule.onNodeWithTag("inputTagSelector").performTextInput(userInput)
     verify(tagSelectorOnStringChanged).invoke(userInput)
