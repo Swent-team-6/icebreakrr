@@ -77,6 +77,12 @@ jobs:
       - name: KTFmt Check
         run: |
           ./gradlew ktfmtCheck
+          
+      # Create and populate google-services.json file
+      - name: Create and populate google-services.json
+        env:
+          GOOGLE_SERVICES: ${{ secrets.GOOGLE_SERVICES }}
+        run: echo $GOOGLE_SERVICES > ./app/google-services.json
 
       # Create keystore/debug.keystore file
       - name: Create file debug keystore
