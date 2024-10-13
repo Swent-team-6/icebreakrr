@@ -69,6 +69,9 @@ jobs:
           disable-animations: false
           script: echo "Generated AVD snapshot for caching."
 
+      - name: Wait for emulator to be ready
+        run: adb wait-for-device
+
       - name: Grant execute permission for gradlew
         run: |
           chmod +x ./gradlew
@@ -115,7 +118,7 @@ jobs:
           api-level: 34
           target: google_apis
           arch: x86_64
-          force-avd-creation: false
+          force-avd-creation: true
           emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           disable-animations: true
           script: ./gradlew connectedCheck --parallel --build-cache
