@@ -46,11 +46,7 @@ class MainActivity : ComponentActivity() {
     setContent {
       // Provide the `isTesting` flag to the entire composable tree
       CompositionLocalProvider(LocalIsTesting provides isTesting) {
-        SampleAppTheme {
-          Surface(modifier = Modifier.fillMaxSize()) {
-            IcebreakrrApp()
-          }
-        }
+        SampleAppTheme { Surface(modifier = Modifier.fillMaxSize()) { IcebreakrrApp() } }
       }
     }
   }
