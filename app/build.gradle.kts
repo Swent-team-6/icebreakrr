@@ -137,6 +137,8 @@ dependencies {
     implementation(libs.material)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(platform(libs.compose.bom))
+    implementation(libs.androidx.navigation.compose)
+    implementation(libs.androidx.navigation.testing)
     testImplementation(libs.junit)
     globalTestImplementation(libs.androidx.junit)
     globalTestImplementation(libs.androidx.espresso.core)
@@ -158,10 +160,6 @@ dependencies {
     implementation(libs.compose.preview)
     // Accompanist Flow Layout dependency
     implementation("com.google.accompanist:accompanist-flowlayout:0.32.0")
-
-    implementation(libs.androidx.navigation.compose)
-    implementation(libs.androidx.navigation.testing)
-
 
     debugImplementation(libs.compose.tooling)
     // UI Tests
