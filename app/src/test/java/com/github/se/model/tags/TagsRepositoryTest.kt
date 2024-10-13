@@ -2,6 +2,7 @@ package com.github.se.model.tags
 
 import android.util.Log
 import androidx.compose.ui.graphics.Color
+import androidx.test.core.app.ApplicationProvider
 import androidx.test.platform.app.InstrumentationRegistry
 import com.github.se.icebreakrr.model.tags.CategoryString
 import com.github.se.icebreakrr.model.tags.TagsCategory
@@ -227,7 +228,7 @@ class TagsRepositoryTest {
   }
   @Test
   fun addCategory(){
-    FirebaseApp.initializeApp(InstrumentationRegistry.getInstrumentation().targetContext)
+    FirebaseApp.initializeApp(ApplicationProvider.getApplicationContext())
     val repo = TagsRepository(FirebaseFirestore.getInstance())
     repo.addCategory({}, "Sport",
       listOf("Football",

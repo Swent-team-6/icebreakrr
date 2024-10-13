@@ -132,6 +132,9 @@ fun DependencyHandlerScope.globalTestImplementation(dep: Any) {
 }
 
 dependencies {
+    //implementation(libs.firebase.bom) // Add Firebase BOM here
+    //implementation(libs.google.firebase.firestore.ktx) // Add Firestore KTX with BOM
+
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
