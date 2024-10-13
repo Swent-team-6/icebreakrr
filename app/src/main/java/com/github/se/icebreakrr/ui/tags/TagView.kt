@@ -24,6 +24,7 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.PopupProperties
@@ -44,11 +45,13 @@ fun Tag(s: String, color: Color) {
                   shape = RoundedCornerShape(16.dp)
                   )
               .wrapContentSize()
-              .padding(horizontal = 12.dp, vertical = 6.dp)) {
+              .padding(horizontal = 12.dp, vertical = 6.dp)
+  ) {
         Text(
             text = "#$s",
             color = Color(0xFF4A4A4A), // Dark gray text color
-            fontSize = 16.sp // Font size
+            fontSize = 16.sp,
+            modifier = Modifier.testTag("testTag")
             )
       }
 }
@@ -69,14 +72,16 @@ fun ClickTag(s: String, color: Color, onClick: () -> Unit){
                 shape = RoundedCornerShape(16.dp)
             )
             .wrapContentSize()
-            .padding(horizontal = 12.dp, vertical = 6.dp)) {
+            .padding(horizontal = 12.dp, vertical = 6.dp)
+    ) {
         Button(
             onClick =  onClick,
-            colors = ButtonColors(color, color, color, color)
+            colors = ButtonColors(color, color, color, color),
+            modifier = Modifier.testTag("clickTestTag")
             ) {
             Text(text = "#$s",
-                color = Color(0xFF4A4A4A), // Dark gray text color
-                fontSize = 16.sp // Font size
+                color = Color(0xFF4A4A4A),
+                fontSize = 16.sp,
             )
         }
     }
@@ -93,7 +98,7 @@ fun ClickTag(s: String, color: Color, onClick: () -> Unit){
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun TagSelector(
-    ProfileTag: MutableState<List<Pair<String, Color>>>,
+    profileTag: MutableState<List<Pair<String, Color>>>,
     tagsViewModel: TagsViewModel,
     stringQuery: MutableState<String>,
     expanded: MutableState<Boolean>,
@@ -130,7 +135,7 @@ fun TagSelector(
         }
     LazyColumn(modifier = Modifier.fillMaxSize()) {
         item {
-            val profileList = ProfileTag.value
+            val profileList = profileTag.value
             FlowRow(
                 modifier = Modifier.padding(8.dp),
                 horizontalArrangement = Arrangement.Start,

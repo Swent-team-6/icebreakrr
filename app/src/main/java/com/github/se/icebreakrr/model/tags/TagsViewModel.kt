@@ -1,6 +1,8 @@
 package com.github.se.icebreakrr.model.tags
 
 import androidx.compose.ui.graphics.Color
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -14,6 +16,17 @@ class TagsViewModel() {
   // modified each time a user enters a new letter
   private val outputTags_ = MutableStateFlow<List<Pair<String, Color>>>(emptyList())
   var outputTags: StateFlow<List<Pair<String, Color>>> = outputTags_.asStateFlow()
+
+    // create factory
+    companion object {
+        val Factory: ViewModelProvider.Factory =
+            object : ViewModelProvider.Factory {
+                @Suppress("UNCHECKED_CAST")
+                override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                    return TagsViewModel() as T
+                }
+            }
+    }
 
   fun getTagsWithName(query: String) {
     outputTags_.update { l ->

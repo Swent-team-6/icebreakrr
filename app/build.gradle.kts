@@ -70,12 +70,12 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
     }
 
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = "11"
     }
 
     packaging {
@@ -159,6 +159,9 @@ dependencies {
     // Accompanist Flow Layout dependency
     implementation("com.google.accompanist:accompanist-flowlayout:0.32.0")
 
+    implementation(libs.androidx.navigation.compose)
+    implementation(libs.androidx.navigation.testing)
+
 
     debugImplementation(libs.compose.tooling)
     // UI Tests
@@ -171,6 +174,13 @@ dependencies {
 
     // ----------       Robolectric     ------------
     testImplementation(libs.robolectric)
+
+    // ------------       Mockito     --------------
+    testImplementation(libs.mockito.core)
+    testImplementation(libs.mockito.kotlin)
+
+    androidTestImplementation(libs.mockito.core)
+    androidTestImplementation(libs.mockito.kotlin)
 
 }
 

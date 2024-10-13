@@ -1,65 +1,72 @@
-//package com.github.se.icebreakrr.ui.tags
-//
-//import androidx.compose.ui.test.assertIsDisplayed
-//import androidx.compose.ui.test.assertTextEquals
-//import androidx.compose.ui.test.junit4.createComposeRule
-//import androidx.compose.ui.test.onNodeWithTag
-//import androidx.compose.ui.test.performClick
-//import androidx.compose.ui.test.performTextClearance
-//import androidx.compose.ui.test.performTextInput
-//import org.junit.Before
-//import org.junit.Rule
-//import org.junit.Test
-//import org.mockito.Mockito.mock
-//import org.mockito.Mockito.`when`
-//import org.mockito.kotlin.any
-//import org.mockito.kotlin.never
-//import org.mockito.kotlin.verify
-//
-//class AddToDoScreenTest {
-//    private lateinit var toDosRepository: ToDosRepository
-//    private lateinit var navigationActions: NavigationActions
-//    private lateinit var listToDosViewModel: ListToDosViewModel
-//
-//    @get:Rule val composeTestRule = createComposeRule()
-//
-//    @Before
-//    fun setUp() {
-//        // Mock is a way to create a fake object that can be used in place of a real object
-//        toDosRepository = mock(ToDosRepository::class.java)
-//        navigationActions = mock(NavigationActions::class.java)
-//        listToDosViewModel = ListToDosViewModel(toDosRepository)
-//
-//        // Mock the current route to be the add todo screen
-//        `when`(navigationActions.currentRoute()).thenReturn(Screen.ADD_TODO)
-//    }
-//
-//    @Test
-//    fun displayAllComponents() {
-//        composeTestRule.setContent { AddToDoScreen(listToDosViewModel, navigationActions) }
-//
-//        composeTestRule.onNodeWithTag("addScreen").assertIsDisplayed()
-//        composeTestRule.onNodeWithTag("addTodoTitle").assertIsDisplayed()
-//        composeTestRule.onNodeWithTag("addTodoTitle").assertTextEquals("Create a new task")
-//        composeTestRule.onNodeWithTag("goBackButton").assertIsDisplayed()
-//        composeTestRule.onNodeWithTag("todoSave").assertIsDisplayed()
-//        composeTestRule.onNodeWithTag("todoSave").assertTextEquals("Save")
-//
-//        composeTestRule.onNodeWithTag("inputTodoTitle").assertIsDisplayed()
-//        composeTestRule.onNodeWithTag("inputTodoDescription").assertIsDisplayed()
-//        composeTestRule.onNodeWithTag("inputTodoAssignee").assertIsDisplayed()
-//        composeTestRule.onNodeWithTag("inputTodoLocation").assertIsDisplayed()
-//        composeTestRule.onNodeWithTag("inputTodoDate").assertIsDisplayed()
-//    }
-//
-//    @Test
-//    fun doesNotSubmitWithInvalidDate() {
-//        composeTestRule.setContent { AddToDoScreen(listToDosViewModel, navigationActions) }
-//
-//        composeTestRule.onNodeWithTag("inputTodoDate").performTextClearance()
-//        composeTestRule.onNodeWithTag("inputTodoDate").performTextInput("notadate")
-//        composeTestRule.onNodeWithTag("todoSave").performClick()
-//
-//        verify(toDosRepository, never()).updateToDo(any(), any(), any())
-//    }
-//}
+package com.github.se.icebreakrr.ui.tags
+
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertTextEquals
+import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.performClick
+import com.github.se.icebreakrr.model.tags.TagsViewModel
+import org.junit.Before
+import org.junit.Rule
+import org.junit.Test
+import org.mockito.MockitoAnnotations
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.verify
+
+class TagViewTest {
+    private lateinit var profileTag : MutableState<List<Pair<String, Color>>>
+    private lateinit var tagsViewModel : TagsViewModel
+    private lateinit var stringQuery : MutableState<String>
+    private lateinit var expanded : MutableState<Boolean>
+    private lateinit var onClickMock : () -> Unit
+    private lateinit var hasBeenClicked: MutableState<Boolean>
+
+    @get:Rule val composeTestRule = createComposeRule()
+
+    @Before
+    fun setUp() {
+
+        // Initialize Mockito annotations
+        MockitoAnnotations.openMocks(this)
+
+        profileTag = mutableStateOf(listOf(Pair("a", Color.Red), Pair("b", Color.Yellow)))
+        tagsViewModel = mock()
+        stringQuery = mutableStateOf("")
+        expanded = mutableStateOf(false)
+        onClickMock = mock<() -> Unit>()
+        hasBeenClicked = mutableStateOf(false)
+
+        //`when`(tagsViewModel.outputTags).thenReturn(mutableStateOf(listOf(Pair("Tennis", Color.Red))))
+    }
+
+    @Test
+    fun displayTag() {
+        composeTestRule.setContent { Tag("AndroidTest", Color.Red) }
+        val node = composeTestRule.onNodeWithTag("testTag")
+        node.assertIsDisplayed()
+        node.assertTextEquals("#AndroidTest")
+    }
+
+    @Test
+    fun displayClickTag() {
+        composeTestRule.setContent { ClickTag("AndroidTest", Color.Red, {}) }
+        composeTestRule.onNodeWithTag("clickTestTag").assertIsDisplayed()
+        composeTestRule.onNodeWithTag("clickTestTag").assertTextEquals("#AndroidTest")
+    }
+
+    @Test
+    fun testClickTag_onClickCalled() {
+        composeTestRule.setContent {
+            ClickTag("AndroidTest", Color.Red, onClickMock)
+        }
+
+        // Simulate a click on the node with the test tag
+        composeTestRule.onNodeWithTag("clickTestTag").performClick()
+
+        // Verify that the onClick function was called
+        verify(onClickMock).invoke()
+    }
+}
