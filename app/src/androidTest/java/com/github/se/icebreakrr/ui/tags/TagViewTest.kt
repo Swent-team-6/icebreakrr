@@ -24,6 +24,7 @@ class TagViewTest {
   private lateinit var expanded: MutableState<Boolean>
   private lateinit var onClickMock: () -> Unit
   private lateinit var tagSelectorOnClickMock: (String) -> Unit
+  private lateinit var tagSelectorOnClickDropDownMenu: (String) -> Unit
   private lateinit var tagSelectorOnStringChanged: (String) -> Unit
 
   @get:Rule val composeTestRule = createComposeRule()
@@ -38,6 +39,7 @@ class TagViewTest {
     onClickMock = mock<() -> Unit>()
     tagSelectorOnClickMock = mock<(String) -> Unit>()
     tagSelectorOnStringChanged = mock<(String) -> Unit>()
+    tagSelectorOnClickDropDownMenu = mock<(String) -> Unit>()
 
     // `when`(tagsViewModel.outputTags).thenReturn(mutableStateOf(listOf(Pair("Tennis",
     // Color.Red))))
@@ -82,6 +84,7 @@ class TagViewTest {
           stringQuery,
           expanded,
           tagSelectorOnClickMock,
+          tagSelectorOnClickDropDownMenu,
           tagSelectorOnStringChanged,
           textColor,
           textSize)
