@@ -215,7 +215,7 @@ fun TagSelector(
 ) {
 
     Box (
-        modifier = Modifier.size(width, height)
+        modifier = Modifier.size(width, height).testTag("sizeTagSelector")
     ) {
         Column(modifier = Modifier.fillMaxWidth().wrapContentHeight()) {
           OutlinedTextField(

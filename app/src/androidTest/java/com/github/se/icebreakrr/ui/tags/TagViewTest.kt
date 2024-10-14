@@ -4,8 +4,10 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.test.assertCountEquals
+import androidx.compose.ui.test.assertHeightIsEqualTo
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertTextEquals
+import androidx.compose.ui.test.assertWidthIsEqualTo
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onAllNodesWithText
@@ -14,6 +16,7 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.junit.Before
 import org.junit.Rule
@@ -122,7 +125,10 @@ class TagViewTest {
           tagSelectorOnClickDropDownMenu,
           tagSelectorOnStringChanged,
           textColor,
-          textSize)
+          textSize,
+          200.dp,
+          100.dp
+      )
     }
     composeTestRule.onAllNodesWithTag("clickTestTag").onFirst().assertIsDisplayed()
     composeTestRule.onAllNodesWithText("#salsa x").onFirst().assertIsDisplayed()
@@ -144,5 +150,9 @@ class TagViewTest {
     composeTestRule.onAllNodesWithText("#pesto").onFirst().assertIsDisplayed()
     composeTestRule.onAllNodesWithText("#pesto").onFirst().performClick()
     verify(tagSelectorOnClickDropDownMenu).invoke("pesto")
+
+    composeTestRule.onNodeWithTag("sizeTagSelector").assertWidthIsEqualTo(200.dp).assertHeightIsEqualTo(100.dp)
+
+
   }
 }
