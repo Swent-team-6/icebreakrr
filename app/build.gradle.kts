@@ -182,6 +182,8 @@ dependencies {
     // ------------       Mockito     --------------
     testImplementation(libs.mockito.core)
     testImplementation(libs.mockito.kotlin)
+    androidTestImplementation(libs.mockito.kotlin)
+    androidTestImplementation(libs.mockito.android)
 
 }
 
