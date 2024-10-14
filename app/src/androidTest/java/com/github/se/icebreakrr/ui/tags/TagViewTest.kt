@@ -3,9 +3,13 @@ package com.github.se.icebreakrr.ui.tags
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onAllNodesWithTag
+import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextClearance
@@ -18,7 +22,7 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 
 class TagViewTest {
-  private lateinit var profileTag: MutableState<List<Pair<String, Color>>>
+  private lateinit var selectedTag: MutableState<List<Pair<String, Color>>>
   private lateinit var outputTag: MutableState<List<Pair<String, Color>>>
   private lateinit var stringQuery: MutableState<String>
   private lateinit var expanded: MutableState<Boolean>
@@ -32,17 +36,28 @@ class TagViewTest {
   @Before
   fun setUp() {
 
-    profileTag = mutableStateOf(listOf(Pair("salsa", Color.Red)))
-    outputTag = mutableStateOf(listOf(Pair("pesto", Color.Green)))
+    selectedTag =
+        mutableStateOf(
+            listOf(
+                Pair("salsa", Color.Red),
+                Pair("pizza", Color.Red),
+                Pair("coca-cola", Color.Red),
+                Pair("pepsi", Color.Red),
+                Pair("fanta", Color.Red)))
+    outputTag =
+        mutableStateOf(
+            listOf(
+                Pair("pesto", Color.Green),
+                Pair("broccoli", Color.Green),
+                Pair("beans", Color.Green),
+                Pair("peanut", Color.Green),
+                Pair("butter", Color.Green)))
     stringQuery = mutableStateOf("")
     expanded = mutableStateOf(false)
     onClickMock = mock<() -> Unit>()
     tagSelectorOnClickMock = mock<(String) -> Unit>()
     tagSelectorOnStringChanged = mock<(String) -> Unit>()
     tagSelectorOnClickDropDownMenu = mock<(String) -> Unit>()
-
-    // `when`(tagsViewModel.outputTags).thenReturn(mutableStateOf(listOf(Pair("Tennis",
-    // Color.Red))))
   }
 
   @Test
@@ -63,12 +78,32 @@ class TagViewTest {
   @Test
   fun testClickTag_onClickCalled() {
     composeTestRule.setContent { ClickTag("AndroidTest", TagStyle(), onClickMock) }
-
-    // Simulate a click on the node with the test tag
     composeTestRule.onNodeWithTag("clickTestTag").performClick()
-
-    // Verify that the onClick function was called
     verify(onClickMock).invoke()
+  }
+
+  @Test
+  fun testRowOfTags() {
+    composeTestRule.setContent { RowOfTags(selectedTag.value, TagStyle()) }
+    composeTestRule.onAllNodesWithTag("testTag").onFirst().assertIsDisplayed()
+    composeTestRule.onNodeWithTag("testExtendTag").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("testExtendTag").assertTextEquals("...")
+    composeTestRule.onNodeWithTag("testExtendTag").performClick()
+    composeTestRule.onAllNodesWithTag("testTag").assertCountEquals(5)
+  }
+
+  @Test
+  fun testRowOfClickableTags() {
+    composeTestRule.setContent {
+      RowOfClickTags(selectedTag.value, TagStyle()) { s -> tagSelectorOnClickMock(s) }
+    }
+    composeTestRule.onAllNodesWithTag("clickTestTag").onFirst().assertIsDisplayed()
+    composeTestRule.onNodeWithTag("testExtendTag").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("testExtendTag").assertTextEquals("...")
+    composeTestRule.onNodeWithTag("testExtendTag").performClick()
+    composeTestRule.onAllNodesWithTag("clickTestTag").assertCountEquals(5)
+    composeTestRule.onAllNodesWithText("#salsa x").onFirst().performClick()
+    verify(tagSelectorOnClickMock).invoke("salsa")
   }
 
   @Test
@@ -79,7 +114,7 @@ class TagViewTest {
 
     composeTestRule.setContent {
       TagSelector(
-          profileTag,
+          selectedTag,
           outputTag,
           stringQuery,
           expanded,
@@ -89,15 +124,25 @@ class TagViewTest {
           textColor,
           textSize)
     }
+    composeTestRule.onAllNodesWithTag("clickTestTag").onFirst().assertIsDisplayed()
+    composeTestRule.onAllNodesWithText("#salsa x").onFirst().assertIsDisplayed()
+    composeTestRule.onAllNodesWithText("#salsa x").onFirst().performClick()
+    verify(tagSelectorOnClickMock).invoke("salsa")
 
-    composeTestRule.onNodeWithTag("clickTestTag").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("clickTestTag").assertTextEquals("#salsa x")
     composeTestRule.onNodeWithTag("inputTagSelector").performTextClearance()
     composeTestRule.onNodeWithTag("inputTagSelector").performTextInput(userInput)
     verify(tagSelectorOnStringChanged).invoke(userInput)
     composeTestRule.waitForIdle()
-    composeTestRule.onNodeWithTag("testTag", useUnmergedTree = true).assertExists()
-    composeTestRule.onNodeWithTag("testTag", useUnmergedTree = true).assertIsDisplayed()
-    composeTestRule.onNodeWithTag("testTag", useUnmergedTree = true).assertTextEquals("#pesto")
+    composeTestRule.onAllNodesWithTag("testTag", useUnmergedTree = true).onFirst().assertExists()
+    composeTestRule
+        .onAllNodesWithTag("testTag", useUnmergedTree = true)
+        .onFirst()
+        .assertIsDisplayed()
+    composeTestRule.onAllNodesWithText("#pesto").onFirst().assertIsDisplayed()
+
+    composeTestRule.onAllNodesWithTag("tagSelectorDropDownMenuItem").onFirst().assertIsDisplayed()
+    composeTestRule.onAllNodesWithText("#pesto").onFirst().assertIsDisplayed()
+    composeTestRule.onAllNodesWithText("#pesto").onFirst().performClick()
+    verify(tagSelectorOnClickDropDownMenu).invoke("pesto")
   }
 }

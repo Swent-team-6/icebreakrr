@@ -21,6 +21,8 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -83,6 +85,102 @@ fun ClickTag(s: String, tagStyle: TagStyle, onClick: () -> Unit) {
 }
 
 /**
+ * A tag that is used to hide a large list of tags
+ *
+ * @param tagStyle: the style of the tag
+ * @param onClick: the click event when the user clicks on the tag
+ */
+@Composable
+fun ExtendTag(tagStyle: TagStyle, onClick: () -> Unit) {
+  Surface(
+      modifier = Modifier.padding(4.dp).clickable(onClick = onClick).testTag("testExtendTag"),
+      color = Color(red = 220, green = 220, blue = 220),
+      shape = RoundedCornerShape(12.dp)) {
+        Text(
+            text = "...",
+            color = tagStyle.textColor,
+            fontSize = tagStyle.fontSize,
+            modifier = Modifier.padding(8.dp),
+            textAlign = TextAlign.Center,
+        )
+      }
+}
+
+/**
+ * This Composable is a row of tags that are that adapts dynamically to the space it has available
+ *
+ * @param l: The list of tags to show
+ * @param tagStyle: the style of your tags
+ */
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+fun RowOfTags(l: List<Pair<String, Color>>, tagStyle: TagStyle) {
+  val isExtended = remember { mutableStateOf(false) }
+  LazyColumn(modifier = Modifier.fillMaxSize()) {
+    item {
+      FlowRow(
+          modifier = Modifier.padding(8.dp),
+          horizontalArrangement = Arrangement.Start,
+          verticalArrangement = Arrangement.Top) {
+            if (isExtended.value) {
+              l.forEach { pair ->
+                Tag(pair.first, TagStyle(tagStyle.textColor, pair.second, tagStyle.fontSize))
+              }
+            } else {
+              val notExtendedList = l.take(3)
+              notExtendedList.forEach { pair ->
+                Tag(pair.first, TagStyle(tagStyle.textColor, pair.second, tagStyle.fontSize))
+              }
+              if (notExtendedList.size >= 3) {
+                ExtendTag(tagStyle) { isExtended.value = true }
+              }
+            }
+          }
+    }
+  }
+}
+
+/**
+ * This Composable is a row of tags that are clickable and that adapts dynamically to the space it
+ * has available
+ *
+ * @param l: The list of tags to show
+ * @param tagStyle: the style of your tags
+ * @param onClick: the event when the user clicks on a tag
+ */
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+fun RowOfClickTags(l: List<Pair<String, Color>>, tagStyle: TagStyle, onClick: (String) -> Unit) {
+  val isExtended = remember { mutableStateOf(false) }
+  LazyColumn(modifier = Modifier.fillMaxSize()) {
+    item {
+      FlowRow(
+          modifier = Modifier.padding(8.dp),
+          horizontalArrangement = Arrangement.Start,
+          verticalArrangement = Arrangement.Top) {
+            if (isExtended.value) {
+              l.forEach { pair ->
+                ClickTag(pair.first, TagStyle(tagStyle.textColor, pair.second, tagStyle.fontSize)) {
+                  onClick(pair.first)
+                }
+              }
+            } else {
+              val notExtendedList = l.take(3)
+              notExtendedList.forEach { pair ->
+                ClickTag(pair.first, TagStyle(tagStyle.textColor, pair.second, tagStyle.fontSize)) {
+                  onClick(pair.first)
+                }
+              }
+              if (notExtendedList.size >= 3) {
+                ExtendTag(tagStyle) { isExtended.value = true }
+              }
+            }
+          }
+    }
+  }
+}
+
+/**
  * This Composable is used in the Edit Profile, allows a user to enter a text in a text field ant to
  * get a list of tags to choose from We also get a collection of all the tags we have already
  * selected
@@ -92,13 +190,13 @@ fun ClickTag(s: String, tagStyle: TagStyle, onClick: () -> Unit) {
  * @param stringQuery : The text that is modified by the user
  * @param expanded : Choose if the drop down menu is activated or not
  * @param onTagClick : The event happening when the user clicks on a tag
+ * @param onDropDownItemClicked : The event when the user clicks on a DropDownMenuItem
  * @param onStringChanged : The event when the string is changed by the user
  * @param textColor : The color of the text we want in the tags selected and on the tags in the drop
  *   down menu
  * @param textSize : The size of the text in the tags selected and on the tags in the drop down menu
  *   The color in the tag depends on the category of the tag
  */
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun TagSelector(
     selectedTag: MutableState<List<Pair<String, Color>>>,
@@ -139,24 +237,12 @@ fun TagSelector(
                     onDropDownItemClicked(tag.first)
                   },
                   text = { Tag(tag.first, TagStyle(textColor, tag.second, textSize)) },
-              )
+                  modifier = Modifier.testTag("tagSelectorDropDownMenuItem"))
             }
           }
     }
-    LazyColumn(modifier = Modifier.fillMaxSize()) {
-      item {
-        val profileList = selectedTag.value
-        FlowRow(
-            modifier = Modifier.padding(8.dp),
-            horizontalArrangement = Arrangement.Start,
-            verticalArrangement = Arrangement.Top) {
-              profileList.forEach { pair ->
-                ClickTag(pair.first, TagStyle(textColor, pair.second, textSize)) {
-                  onTagClick(pair.first)
-                }
-              }
-            }
-      }
+    RowOfClickTags(selectedTag.value, TagStyle(textColor, Color.Red, textSize)) { s ->
+      onTagClick(s)
     }
   }
 }
