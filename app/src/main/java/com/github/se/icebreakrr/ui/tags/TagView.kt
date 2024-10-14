@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
@@ -28,6 +29,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -207,42 +209,48 @@ fun TagSelector(
     onDropDownItemClicked: (String) -> Unit,
     onStringChanged: (String) -> Unit,
     textColor: Color,
-    textSize: TextUnit
+    textSize: TextUnit,
+    width: Dp,
+    height: Dp
 ) {
 
-  Column(modifier = Modifier.fillMaxWidth().wrapContentHeight()) {
-    OutlinedTextField(
-        value = stringQuery.value,
-        onValueChange = {
-          stringQuery.value = it
-          onStringChanged(stringQuery.value)
-          expanded.value = true
-        },
-        label = { Text("Tags") },
-        placeholder = { Text("Search for tags") },
-        modifier = Modifier.testTag("inputTagSelector"))
+    Box (
+        modifier = Modifier.size(width, height)
+    ) {
+        Column(modifier = Modifier.fillMaxWidth().wrapContentHeight()) {
+          OutlinedTextField(
+              value = stringQuery.value,
+              onValueChange = {
+                stringQuery.value = it
+                onStringChanged(stringQuery.value)
+                expanded.value = true
+              },
+              label = { Text("Tags") },
+              placeholder = { Text("Search for tags") },
+              modifier = Modifier.testTag("inputTagSelector"))
 
-    Box(modifier = Modifier.fillMaxWidth().wrapContentHeight()) {
-      DropdownMenu(
-          expanded = expanded.value,
-          onDismissRequest = { expanded.value = false },
-          properties = PopupProperties(focusable = false),
-          modifier = Modifier.align(Alignment.TopStart)) {
-            val tagsList = outputTag.value
-            tagsList.forEach { tag ->
-              DropdownMenuItem(
-                  onClick = {
-                    stringQuery.value = ""
-                    expanded.value = false
-                    onDropDownItemClicked(tag.first)
-                  },
-                  text = { Tag(tag.first, TagStyle(textColor, tag.second, textSize)) },
-                  modifier = Modifier.testTag("tagSelectorDropDownMenuItem"))
-            }
+          Box(modifier = Modifier.fillMaxWidth().wrapContentHeight()) {
+            DropdownMenu(
+                expanded = expanded.value,
+                onDismissRequest = { expanded.value = false },
+                properties = PopupProperties(focusable = false),
+                modifier = Modifier.align(Alignment.TopStart)) {
+                  val tagsList = outputTag.value
+                  tagsList.forEach { tag ->
+                    DropdownMenuItem(
+                        onClick = {
+                          stringQuery.value = ""
+                          expanded.value = false
+                          onDropDownItemClicked(tag.first)
+                        },
+                        text = { Tag(tag.first, TagStyle(textColor, tag.second, textSize)) },
+                        modifier = Modifier.testTag("tagSelectorDropDownMenuItem"))
+                  }
+                }
           }
+          RowOfClickTags(selectedTag.value, TagStyle(textColor, Color.Red, textSize)) { s ->
+            onTagClick(s)
+          }
+        }
     }
-    RowOfClickTags(selectedTag.value, TagStyle(textColor, Color.Red, textSize)) { s ->
-      onTagClick(s)
-    }
-  }
 }
