@@ -88,8 +88,8 @@ fun ClickTag(s: String, tagStyle: TagStyle, onClick: () -> Unit) {
  * get a list of tags to choose from We also get a collection of all the tags we have already
  * selected
  *
- * @param profileTag : all the tags in the ProfileViewModel of a user
- * @param outputTag : The tags gotten with the TagsViewModel when searching with the stringQuery
+ * @param selectedTag : all the tags in the that have already been selected
+ * @param outputTag : the tags that drop down in the DropDownMenu
  * @param stringQuery : The text that is modified by the user
  * @param expanded : Choose if the drop down menu is activated or not
  * @param onTagClick : The event happening when the user clicks on a tag
@@ -102,11 +102,12 @@ fun ClickTag(s: String, tagStyle: TagStyle, onClick: () -> Unit) {
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun TagSelector(
-    profileTag: MutableState<List<Pair<String, Color>>>,
+    selectedTag: MutableState<List<Pair<String, Color>>>,
     outputTag: MutableState<List<Pair<String, Color>>>,
     stringQuery: MutableState<String>,
     expanded: MutableState<Boolean>,
     onTagClick: (String) -> Unit,
+    onDropDownItemClicked: (String) -> Unit,
     onStringChanged: (String) -> Unit,
     textColor: Color,
     textSize: TextUnit
@@ -136,7 +137,7 @@ fun TagSelector(
                   onClick = {
                     stringQuery.value = ""
                     expanded.value = false
-                    Log.d("TAG CHOSEN", tag.first)
+                    onDropDownItemClicked(tag.first)
                   },
                   text = { Tag(tag.first, TagStyle(textColor, tag.second, textSize)) },
               )
@@ -145,7 +146,7 @@ fun TagSelector(
     }
     LazyColumn(modifier = Modifier.fillMaxSize()) {
       item {
-        val profileList = profileTag.value
+        val profileList = selectedTag.value
         FlowRow(
             modifier = Modifier.padding(8.dp),
             horizontalArrangement = Arrangement.Start,
