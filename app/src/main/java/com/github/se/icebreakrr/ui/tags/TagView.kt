@@ -214,43 +214,43 @@ fun TagSelector(
     height: Dp
 ) {
 
-    Box (
-        modifier = Modifier.size(width, height).testTag("sizeTagSelector")
-    ) {
-        Column(modifier = Modifier.fillMaxWidth().wrapContentHeight()) {
-          OutlinedTextField(
-              value = stringQuery.value,
-              onValueChange = {
-                stringQuery.value = it
-                onStringChanged(stringQuery.value)
-                expanded.value = true
-              },
-              label = { Text("Tags") },
-              placeholder = { Text("Search for tags") },
-              modifier = Modifier.testTag("inputTagSelector"))
+  Box(modifier = Modifier.size(width, height).testTag("sizeTagSelector")) {
+    Column(modifier = Modifier.fillMaxWidth().wrapContentHeight()) {
+      OutlinedTextField(
+          value = stringQuery.value,
+          onValueChange = {
+            stringQuery.value = it
+            onStringChanged(stringQuery.value)
+            expanded.value = true
+          },
+          label = { Text("Tags", modifier = Modifier.testTag("labelTagSelector")) },
+          placeholder = {
+            Text("Search for tags", modifier = Modifier.testTag("placeholderTagSelector"))
+          },
+          modifier = Modifier.testTag("inputTagSelector"))
 
-          Box(modifier = Modifier.fillMaxWidth().wrapContentHeight()) {
-            DropdownMenu(
-                expanded = expanded.value,
-                onDismissRequest = { expanded.value = false },
-                properties = PopupProperties(focusable = false),
-                modifier = Modifier.align(Alignment.TopStart)) {
-                  val tagsList = outputTag.value
-                  tagsList.forEach { tag ->
-                    DropdownMenuItem(
-                        onClick = {
-                          stringQuery.value = ""
-                          expanded.value = false
-                          onDropDownItemClicked(tag.first)
-                        },
-                        text = { Tag(tag.first, TagStyle(textColor, tag.second, textSize)) },
-                        modifier = Modifier.testTag("tagSelectorDropDownMenuItem"))
-                  }
-                }
-          }
-          RowOfClickTags(selectedTag.value, TagStyle(textColor, Color.Red, textSize)) { s ->
-            onTagClick(s)
-          }
-        }
+      Box(modifier = Modifier.fillMaxWidth().wrapContentHeight()) {
+        DropdownMenu(
+            expanded = expanded.value,
+            onDismissRequest = { expanded.value = false },
+            properties = PopupProperties(focusable = false),
+            modifier = Modifier.align(Alignment.TopStart)) {
+              val tagsList = outputTag.value
+              tagsList.forEach { tag ->
+                DropdownMenuItem(
+                    onClick = {
+                      stringQuery.value = ""
+                      expanded.value = false
+                      onDropDownItemClicked(tag.first)
+                    },
+                    text = { Tag(tag.first, TagStyle(textColor, tag.second, textSize)) },
+                    modifier = Modifier.testTag("tagSelectorDropDownMenuItem"))
+              }
+            }
+      }
+      RowOfClickTags(selectedTag.value, TagStyle(textColor, Color.Red, textSize)) { s ->
+        onTagClick(s)
+      }
     }
+  }
 }

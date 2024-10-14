@@ -91,6 +91,7 @@ class TagViewTest {
     composeTestRule.onAllNodesWithTag("testTag").onFirst().assertIsDisplayed()
     composeTestRule.onNodeWithTag("testExtendTag").assertIsDisplayed()
     composeTestRule.onNodeWithTag("testExtendTag").assertTextEquals("...")
+    composeTestRule.onAllNodesWithTag("testTag").assertCountEquals(3)
     composeTestRule.onNodeWithTag("testExtendTag").performClick()
     composeTestRule.onAllNodesWithTag("testTag").assertCountEquals(5)
   }
@@ -103,6 +104,7 @@ class TagViewTest {
     composeTestRule.onAllNodesWithTag("clickTestTag").onFirst().assertIsDisplayed()
     composeTestRule.onNodeWithTag("testExtendTag").assertIsDisplayed()
     composeTestRule.onNodeWithTag("testExtendTag").assertTextEquals("...")
+    composeTestRule.onAllNodesWithTag("clickTestTag").assertCountEquals(3)
     composeTestRule.onNodeWithTag("testExtendTag").performClick()
     composeTestRule.onAllNodesWithTag("clickTestTag").assertCountEquals(5)
     composeTestRule.onAllNodesWithText("#salsa x").onFirst().performClick()
@@ -126,10 +128,11 @@ class TagViewTest {
           tagSelectorOnStringChanged,
           textColor,
           textSize,
-          200.dp,
-          100.dp
-      )
+          300.dp,
+          300.dp)
     }
+    composeTestRule.onAllNodesWithText("Tags").onFirst().assertIsDisplayed()
+
     composeTestRule.onAllNodesWithTag("clickTestTag").onFirst().assertIsDisplayed()
     composeTestRule.onAllNodesWithText("#salsa x").onFirst().assertIsDisplayed()
     composeTestRule.onAllNodesWithText("#salsa x").onFirst().performClick()
@@ -151,8 +154,9 @@ class TagViewTest {
     composeTestRule.onAllNodesWithText("#pesto").onFirst().performClick()
     verify(tagSelectorOnClickDropDownMenu).invoke("pesto")
 
-    composeTestRule.onNodeWithTag("sizeTagSelector").assertWidthIsEqualTo(200.dp).assertHeightIsEqualTo(100.dp)
-
-
+    composeTestRule
+        .onNodeWithTag("sizeTagSelector")
+        .assertWidthIsEqualTo(300.dp)
+        .assertHeightIsEqualTo(300.dp)
   }
 }
