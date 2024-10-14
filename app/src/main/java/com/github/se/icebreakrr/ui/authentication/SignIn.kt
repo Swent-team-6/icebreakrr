@@ -36,6 +36,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
@@ -78,6 +79,24 @@ fun SignInScreen(navigationActions: NavigationActions) {
   // Check if the app is running in test mode
   val isTesting = LocalIsTesting.current
 
+  // Get screen configuration to dynamically adjust layout
+  val configuration = LocalConfiguration.current
+  val screenHeight = configuration.screenHeightDp
+  val screenWidth = configuration.screenWidthDp
+
+  // Set padding dynamically based on screen size
+  val verticalPadding =
+      when {
+        screenHeight > 800 -> 150.dp
+        else -> 100.dp
+      }
+
+  val verticalSpacing =
+      when {
+        screenHeight > 800 -> 250.dp
+        else -> 150.dp
+      }
+
   val launcher =
       rememberFirebaseAuthLauncher(
           onAuthComplete = { result ->
@@ -104,9 +123,9 @@ fun SignInScreen(navigationActions: NavigationActions) {
             modifier =
                 Modifier.background(brush = gradientBrush)
                     .fillMaxSize()
-                    .padding(top = 185.dp, bottom = 185.dp)
+                    .padding(vertical = verticalPadding)
                     .padding(paddingValues),
-            verticalArrangement = Arrangement.spacedBy(321.dp, Alignment.Top),
+            verticalArrangement = Arrangement.spacedBy(verticalSpacing, Alignment.Top),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
           Text(
