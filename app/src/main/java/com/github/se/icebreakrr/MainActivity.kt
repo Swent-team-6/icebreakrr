@@ -11,6 +11,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
+import com.github.se.icebreakrr.model.tags.TagsRepository
 import com.github.se.icebreakrr.ui.navigation.NavigationActions
 import com.github.se.icebreakrr.ui.navigation.Route
 import com.github.se.icebreakrr.ui.navigation.Screen
@@ -18,8 +19,7 @@ import com.github.se.icebreakrr.ui.sections.AroundYouScreen
 import com.github.se.icebreakrr.ui.sections.NotificationScreen
 import com.github.se.icebreakrr.ui.sections.SettingsScreen
 import com.github.se.icebreakrr.ui.theme.SampleAppTheme
-
-// import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.FirebaseFirestore
 
 class MainActivity : ComponentActivity() {
 
@@ -43,7 +43,7 @@ class MainActivity : ComponentActivity() {
 fun IcebreakrrApp() {
   val navController = rememberNavController()
   val navigationActions = NavigationActions(navController)
-  // val tagsRepository = TagsRepository(FirebaseFirestore.getInstance())
+  val tagsRepository = TagsRepository(FirebaseFirestore.getInstance())
 
   // TODO Implement Auth Screen navigation
   NavHost(navController = navController, startDestination = Route.AROUND_YOU) {

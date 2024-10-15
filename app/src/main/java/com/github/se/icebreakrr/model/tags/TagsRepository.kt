@@ -4,7 +4,6 @@ import android.util.Log
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.QuerySnapshot
-import kotlin.Unit
 
 class TagsRepository(private val db: FirebaseFirestore) {
   private val collectionPath = "Tags"
@@ -172,14 +171,14 @@ class TagsRepository(private val db: FirebaseFirestore) {
         { tagList = it }, { Log.e("TagsRepository", "[deleteTag] error while getting tags : $it") })
     val tagCategory =
         try {
-          tagList.filter { it.name.equals(category.name) }.get(0)
+            tagList.filter { it.name == category.name }[0]
         } catch (e: Exception) {
           null
         }
     if (tagCategory != null && tagCategory.subtags.contains(name)) {
       db.collection(collectionPath)
           .document(category.name)
-          .update("subtags", tagCategory.subtags.filter { !it.equals(name) })
+          .update("subtags", tagCategory.subtags.filter { it != name })
           .addOnSuccessListener {}
           .addOnFailureListener { e: Exception ->
             Log.e("TagsRepository", "[deleteTag] Failed to update the document : $e")
@@ -207,7 +206,7 @@ class TagsRepository(private val db: FirebaseFirestore) {
         { Log.e("TagsRepository", "[deleteCategory] error while getting tags : $it") })
     val tagCategory =
         try {
-          tagList.filter { it.name.equals(category.name) }.get(0)
+            tagList.filter { it.name == category.name }[0]
         } catch (e: Exception) {
           null
         }
