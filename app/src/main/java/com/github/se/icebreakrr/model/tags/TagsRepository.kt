@@ -8,10 +8,6 @@ import kotlin.Unit
 class TagsRepository(private val db: FirebaseFirestore) {
   private val collectionPath = "Tags"
 
-  fun getNewUid(): String {
-    return db.collection(collectionPath).document().id
-  }
-
   /**
    * Function that get all the tags present in the firestore database
    *
@@ -31,7 +27,6 @@ class TagsRepository(private val db: FirebaseFirestore) {
         .addOnSuccessListener { docs ->
           for (doc in docs.documents) {
             if (doc.exists()) {
-              Log.e("TESTTAGADD", "okay good")
               firestoreToTags(
                   doc,
                   { categories.add(it) },
@@ -43,7 +38,6 @@ class TagsRepository(private val db: FirebaseFirestore) {
                   })
             }
           }
-          Log.e("TESTTAGADD", "cagtegories : ${categories.size}")
           onSuccess(categories)
         }
   }

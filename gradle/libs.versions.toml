@@ -25,6 +25,7 @@ navigationTesting = "2.8.2"
 firebaseFirestoreKtx = "25.1.0"
 
 
+
 [libraries]
 accompanist-flowlayout = { module = "com.google.accompanist:accompanist-flowlayout", version.ref = "accompanistFlowlayout" }
 accompanist-flowlayout-vlatestversion = { module = "com.google.accompanist:accompanist-flowlayout", version.ref = "accompanistFlowlayoutVersion" }
