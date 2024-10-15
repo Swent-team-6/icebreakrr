@@ -1,19 +1,16 @@
 package com.github.se.icebreakrr.model.tags
 
 import android.util.Log
-import androidx.compose.ui.text.toUpperCase
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlin.Unit
 
 class TagsRepository(private val db: FirebaseFirestore) {
   private val collectionPath = "Tags"
 
-    fun getNewUid(): String {
-        return db.collection(collectionPath).document().id
-    }
+  fun getNewUid(): String {
+    return db.collection(collectionPath).document().id
+  }
 
   /**
    * Function that get all the tags present in the firestore database
@@ -34,6 +31,7 @@ class TagsRepository(private val db: FirebaseFirestore) {
         .addOnSuccessListener { docs ->
           for (doc in docs.documents) {
             if (doc.exists()) {
+                Log.e("TESTTAGADD", "okay good")
               firestoreToTags(
                   doc,
                   { categories.add(it) },
@@ -45,18 +43,19 @@ class TagsRepository(private val db: FirebaseFirestore) {
                   })
             }
           }
+            Log.e("TESTTAGADD", "cagtegories : ${categories.size}")
           onSuccess(categories)
         }
   }
 
-    /**
-     * Function to add a tag to firebase in a category
-     * @param onFailure : could happen when the document is retrieved, when we convert
-     * document into TagsCategory, when the tag already exists in this category or if
-     * the category doesn't exist
-     * @param category : category in which you want to add a tag
-     * @param name : name of the new tag that you want to add
-     */
+  /**
+   * Function to add a tag to firebase in a category
+   *
+   * @param onFailure : could happen when the document is retrieved, when we convert document into
+   *   TagsCategory, when the tag already exists in this category or if the category doesn't exist
+   * @param category : category in which you want to add a tag
+   * @param name : name of the new tag that you want to add
+   */
   fun addTag(onFailure: (Exception) -> Unit, category: CategoryString, name: String) {
     val docRef = db.collection(collectionPath).document(category.name)
     docRef
@@ -67,7 +66,7 @@ class TagsRepository(private val db: FirebaseFirestore) {
         }
         .addOnSuccessListener { documentSnapshot ->
           if (documentSnapshot.exists()) {
-            var tagsCategory = TagsCategory(0, "", "#FFFFFFFF", listOf())
+            var tagsCategory = TagsCategory("", "#FFFFFFFF", listOf())
             firestoreToTags(
                 documentSnapshot,
                 { tagCategoryCallback -> tagsCategory = tagCategoryCallback },
@@ -96,63 +95,143 @@ class TagsRepository(private val db: FirebaseFirestore) {
             }
           } else {
             Log.d(
-                "TagsRepository",
-                "[addTag] Document does not exist for category: ${category.name}")
+                "TagsRepository", "[addTag] Document does not exist for category: ${category.name}")
             onFailure(Exception("Document does not exist"))
           }
         }
   }
 
-    /**
-     * Function that adds a new category to the firestore (as a document) based on a name and a list
-     * of subtags. If the category on firebase already exists, add elements of the subcateries that are not in the
-     * category already present in the firebase to the category on firebase. Else it just create a new
-     * category with the subtags in it.
-     * IMPORTANT : the name of the new category must be put manually before into the enum CategoryString
-     * in model/tags/Tags.kt
-     * @param onFailure : callback function called if there is an error
-     * @param name : name of the new category
-     * @param subcategories : list of subcategories to have under the name category
-     */
-    fun addCategory(onFailure: (Exception) -> Unit, name: String, subcategories: List<String>, color: String){
-        //check if the category is already in the database
-        if (CategoryString.values().any { it.name.equals(name, ignoreCase = true) }){
-            db.collection(collectionPath).document(name).get()
-                .addOnSuccessListener {documentSnapshot: DocumentSnapshot ->
-                    var tagsCategory = TagsCategory(0, "", "#FFFFFFFF", listOf())
-                    firestoreToTags(
-                        documentSnapshot,
-                        { tagCategoryCallback -> tagsCategory = tagCategoryCallback },
-                        { e ->
-                            Log.e("TagsRepository", "[addCategory] error while converting firebase to Tags : $e")
-                            onFailure(e)
-                        })
-                    val subtags = tagsCategory.subtags.toMutableList()
-                    subtags.addAll(subcategories.filter { it !in subtags })
-                    db.collection(collectionPath).document(name).update("subtags", subtags.toList())
-                        .addOnSuccessListener {}
-                        .addOnFailureListener { exception ->
-                            Log.e("TagsRepository", "[addCategory] Could not update the document: $exception")
-                            onFailure(exception)
-                        }
-                }.addOnFailureListener{e: Exception ->
-                    Log.e("TagsRepository", "[addCategory] fail to get the document :  $e")
-                    onFailure(e)
+  /**
+   * Function that adds a new category to the firestore (as a document) based on a name and a list
+   * of subtags. If the category on firebase already exists, add elements of the subcateries that
+   * are not in the category already present in the firebase to the category on firebase. Else it
+   * just create a new category with the subtags in it. IMPORTANT : the name of the new category
+   * must be put manually after the execution of the function into the enum CategoryString in model/tags/Tags.kt
+   *
+   * @param onFailure : callback function called if there is an error
+   * @param categoryName : name of the new category
+   * @param subcategories : list of subcategories to have under the name category
+   */
+  fun addCategory(
+      onFailure: (Exception) -> Unit,
+      categoryName: String,
+      subcategories: List<String>,
+      color: String
+  ) {
+    // check if the category is already in the database
+    if (CategoryString.values().any { it.name.equals(categoryName, ignoreCase = true) }) {
+      db.collection(collectionPath)
+          .document(categoryName)
+          .get()
+          .addOnSuccessListener { documentSnapshot: DocumentSnapshot ->
+            var tagsCategory = TagsCategory("", "#FFFFFFFF", listOf())
+            firestoreToTags(
+                documentSnapshot,
+                { tagCategoryCallback -> tagsCategory = tagCategoryCallback },
+                { e ->
+                  Log.e(
+                      "TagsRepository",
+                      "[addCategory] error while converting firebase to Tags : $e")
+                  onFailure(e)
+                })
+            val subtags = tagsCategory.subtags.toMutableList()
+            subtags.addAll(subcategories.filter { it !in subtags })
+            db.collection(collectionPath)
+                .document(categoryName)
+                .update("subtags", subtags.toList())
+                .addOnSuccessListener {}
+                .addOnFailureListener { exception ->
+                  Log.e("TagsRepository", "[addCategory] Could not update the document: $exception")
+                  onFailure(exception)
                 }
-        }else{
-            db.collection(collectionPath).document(name)
-                .set(TagsCategory(0, name, color, subcategories))
-                .addOnSuccessListener{
-
-                }.addOnFailureListener{e: Exception ->
-                    Log.e("TagsRepository", "[addCategory] could not set the new category :  $e")
-                    onFailure(e)
-                }
-        }
+          }
+          .addOnFailureListener { e: Exception ->
+            Log.e("TagsRepository", "[addCategory] fail to get the document :  $e")
+            onFailure(e)
+          }
+    } else {
+      db.collection(collectionPath)
+          .document(categoryName)
+          .set(TagsCategory(categoryName, color, subcategories))
+          .addOnSuccessListener {}
+          .addOnFailureListener { e: Exception ->
+            Log.e("TagsRepository", "[addCategory] could not set the new category :  $e")
+            onFailure(e)
+          }
     }
+  }
+
+  /**
+   * use this function to delete a tag in a certain category. If the tag isn't in the category, or
+   * the category doesn't exist, the method does nothing.
+   *
+   * @param onFailure : happens if the tags can't be fetch from the database or if the update of the
+   *   database fails
+   * @param name : name of the tag to delete
+   * @param category : category in which the tag you want to suppress is
+   */
+  fun deleteTag(onFailure: (Exception) -> Unit, name: String, category: CategoryString) {
+    var tagList = emptyList<TagsCategory>()
+    getAllTags(
+        { tagList = it }, { Log.e("TagsRepository", "[deleteTag] error while getting tags : $it") })
+    val tagCategory =
+        try {
+          tagList.filter { it.name.equals(category.name) }.get(0)
+        } catch (e: Exception) {
+          null
+        }
+    if (tagCategory != null && tagCategory.subtags.contains(name)) {
+      db.collection(collectionPath)
+          .document(category.name)
+          .update("subtags", tagCategory.subtags.filter { !it.equals(name) })
+          .addOnSuccessListener {}
+          .addOnFailureListener {
+            Log.e("TagsRepository", "[deleteTag] Failed to update the document : $it")
+            onFailure(it)
+          }
+    }
+    Log.d(
+        "TagsRepository",
+        "[deleteTag] the tag wasn't in the database or the category doesn't exist : $name")
+  }
+
+  /**
+   * Use this function to delete a category. The function does nothing if the category doesn't
+   * exist. IMPORTANT : once this method is used (and successful) you need to manually remove the
+   * category you decided to suppress in CategoryString located in model/tags/Tags
+   *
+   * @param onFailure : this method can fails if there is an error while fetching the tags in the
+   *   database or on the deletion of the category
+   * @param category : category you want to suppress
+   */
+  fun deleteCategory(onFailure: (Exception) -> Unit, category: CategoryString) {
+    var tagList = emptyList<TagsCategory>()
+    getAllTags(
+        { tagList = it },
+        { Log.e("TagsRepository", "[deleteCategory] error while getting tags : $it") })
+    val tagCategory =
+        try {
+          tagList.filter { it.name.equals(category.name) }.get(0)
+        } catch (e: Exception) {
+          null
+        }
+    if (tagCategory != null) {
+      db.collection(collectionPath)
+          .document(category.name)
+          .delete()
+          .addOnSuccessListener {}
+          .addOnFailureListener {
+            Log.e("TagsRepository", "[deleteCategory] failed to delete the category : $it")
+            onFailure(it)
+          }
+    } else {
+      Log.d("TagsRepository", "[deleteCategory] category doesn't exist")
+    }
+  }
 
   /**
    * Private function that converts items from the firebase to a TagsCategory
+   *
    * @param onSuccess : deserialize the tag category and returns it in the onSuccess
    * @param onFailure : logs an error and returns the error in the onFailure
    */
@@ -162,11 +241,10 @@ class TagsRepository(private val db: FirebaseFirestore) {
       onFailure: (Exception) -> Unit
   ) {
     try {
-      val uid = doc.getLong("uid") ?: 0
       val name = doc.getString("name") ?: ""
-      val color = doc.getString("color") ?: "#00000000"
+      val color = doc.getString("color") ?: "0x00000000"
       val subtags = doc.get("subtags") as? List<String> ?: emptyList()
-      onSuccess(TagsCategory(uid, name, color, subtags))
+      onSuccess(TagsCategory(name, color, subtags))
     } catch (e: Exception) {
       Log.e(
           "TagsRepository", "[firestoreToTags] Failure in the deserialization of json objects : $e")
