@@ -1,8 +1,7 @@
 ./idea
 
-/app/google-services.json
+app/google-services.json
 
 /build
 /app/build
 local.properties
-src/main/google-services.json
