@@ -5,3 +5,5 @@ app/google-services.json
 /build
 /app/build
 local.properties
+
+google-services.json
