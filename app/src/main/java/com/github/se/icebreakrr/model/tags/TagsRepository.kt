@@ -21,7 +21,7 @@ class TagsRepository(private val db: FirebaseFirestore) {
     val categories: MutableList<TagsCategory> = mutableListOf()
     db.collection(collectionPath)
         .get()
-        .addOnFailureListener {e: Exception ->
+        .addOnFailureListener { e: Exception ->
           Log.e("TagsRepository", "[getAllTags] Could not get the tags : $e")
           onFailure(e)
         }
@@ -181,7 +181,7 @@ class TagsRepository(private val db: FirebaseFirestore) {
           .document(category.name)
           .update("subtags", tagCategory.subtags.filter { !it.equals(name) })
           .addOnSuccessListener {}
-          .addOnFailureListener {e: Exception ->
+          .addOnFailureListener { e: Exception ->
             Log.e("TagsRepository", "[deleteTag] Failed to update the document : $e")
             onFailure(e)
           }
@@ -216,7 +216,7 @@ class TagsRepository(private val db: FirebaseFirestore) {
           .document(category.name)
           .delete()
           .addOnSuccessListener {}
-          .addOnFailureListener {e: Exception ->
+          .addOnFailureListener { e: Exception ->
             Log.e("TagsRepository", "[deleteCategory] failed to delete the category : $e")
             onFailure(e)
           }
