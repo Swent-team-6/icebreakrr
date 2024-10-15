@@ -119,7 +119,7 @@ class TagsRepository(private val db: FirebaseFirestore) {
           .document(categoryName)
           .get()
           .addOnSuccessListener { documentSnapshot: DocumentSnapshot ->
-            var tagsCategory = TagsCategory("", "#FFFFFFFF", listOf())
+            var tagsCategory = TagsCategory()
             firestoreToTags(
                 documentSnapshot,
                 { tagCategoryCallback -> tagsCategory = tagCategoryCallback },
