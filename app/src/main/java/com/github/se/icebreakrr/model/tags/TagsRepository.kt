@@ -31,7 +31,7 @@ class TagsRepository(private val db: FirebaseFirestore) {
         .addOnSuccessListener { docs ->
           for (doc in docs.documents) {
             if (doc.exists()) {
-                Log.e("TESTTAGADD", "okay good")
+              Log.e("TESTTAGADD", "okay good")
               firestoreToTags(
                   doc,
                   { categories.add(it) },
@@ -43,7 +43,7 @@ class TagsRepository(private val db: FirebaseFirestore) {
                   })
             }
           }
-            Log.e("TESTTAGADD", "cagtegories : ${categories.size}")
+          Log.e("TESTTAGADD", "cagtegories : ${categories.size}")
           onSuccess(categories)
         }
   }
@@ -106,7 +106,8 @@ class TagsRepository(private val db: FirebaseFirestore) {
    * of subtags. If the category on firebase already exists, add elements of the subcateries that
    * are not in the category already present in the firebase to the category on firebase. Else it
    * just create a new category with the subtags in it. IMPORTANT : the name of the new category
-   * must be put manually after the execution of the function into the enum CategoryString in model/tags/Tags.kt
+   * must be put manually after the execution of the function into the enum CategoryString in
+   * model/tags/Tags.kt
    *
    * @param onFailure : callback function called if there is an error
    * @param categoryName : name of the new category

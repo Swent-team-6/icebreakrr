@@ -1,7 +1,6 @@
 package com.github.se.icebreakrr
 
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
@@ -12,7 +11,6 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
-import com.github.se.icebreakrr.model.tags.TagsCategory
 import com.github.se.icebreakrr.model.tags.TagsRepository
 import com.github.se.icebreakrr.ui.navigation.NavigationActions
 import com.github.se.icebreakrr.ui.navigation.Route
@@ -27,13 +25,7 @@ class MainActivity : ComponentActivity() {
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
-    setContent {
-      SampleAppTheme {
-        Surface(modifier = Modifier.fillMaxSize()) {
-          IcebreakrrApp()
-        }
-      }
-    }
+    setContent { SampleAppTheme { Surface(modifier = Modifier.fillMaxSize()) { IcebreakrrApp() } } }
   }
 }
 
@@ -51,6 +43,7 @@ class MainActivity : ComponentActivity() {
 fun IcebreakrrApp() {
   val navController = rememberNavController()
   val navigationActions = NavigationActions(navController)
+  val tagsRepository = TagsRepository(FirebaseFirestore.getInstance())
 
   // TODO Implement Auth Screen navigation
   NavHost(navController = navController, startDestination = Route.AROUND_YOU) {
@@ -75,19 +68,4 @@ fun IcebreakrrApp() {
       composable(Screen.NOTIFICATIONS) { NotificationScreen(navigationActions) }
     }
   }
-}
-
-fun testGet(){
-    val repo = TagsRepository(FirebaseFirestore.getInstance())
-    var allTags = emptyList<TagsCategory>()
-    repo.getAllTags({
-        var i = 0
-        for (tag in it){
-            for (subtag in tag.subtags){
-                Log.e("TESTTAGADD", "$subtag")
-                i++
-            }
-        }
-        Log.e("TESTTAGADD","number of tags : $i")
-    }, {})
 }

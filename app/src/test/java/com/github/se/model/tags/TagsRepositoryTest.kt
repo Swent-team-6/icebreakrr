@@ -412,15 +412,4 @@ class TagsRepositoryTest {
     repository.getAllTags(onSuccess = { allTags = it }, onFailure = {})
     assertEquals(repoAllTags, allTags)
   }
-
-  /**
-   * @Test fun addCategory(){ val repo = TagsRepository(FirebaseFirestore.getInstance())
-   *   repo.addCategory({}, "Sport", listOf("Football", "Basketball", "Sport", "Tennis", "PingPong",
-   *   "Running", "Trail", "Cycling", "Racing", "Climbing", "Fitness", "Yoga", "Rugby", "Cricket",
-   *   "Volleyball", "Hockey", "Handball", "WaterPolo", "Ultimate", "Badminton", "Squash", "Boxing",
-   *   "Judo", "Karate", "Taekwondo", "MMA", "Kickboxing", "Swimming", "Surf", "Sailing", "Diving",
-   *   "Kayaking", "Canoeing", "Windsurfing", "Athletism", "Ski", "Snowboard", "Karting",
-   *   "Skateboarding", "Parkour", "Golf", "Bowling", "HorseRacing", "Polo", "CrossFit", "Camping",
-   *   "Hiking", "Fitness" ), Color.Green.toString() ) }*
-   */
 }
