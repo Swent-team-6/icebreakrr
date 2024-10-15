@@ -171,7 +171,7 @@ class TagsRepository(private val db: FirebaseFirestore) {
         { tagList = it }, { Log.e("TagsRepository", "[deleteTag] error while getting tags : $it") })
     val tagCategory =
         try {
-            tagList.filter { it.name == category.name }[0]
+          tagList.filter { it.name == category.name }[0]
         } catch (e: Exception) {
           null
         }
@@ -206,7 +206,7 @@ class TagsRepository(private val db: FirebaseFirestore) {
         { Log.e("TagsRepository", "[deleteCategory] error while getting tags : $it") })
     val tagCategory =
         try {
-            tagList.filter { it.name == category.name }[0]
+          tagList.filter { it.name == category.name }[0]
         } catch (e: Exception) {
           null
         }
