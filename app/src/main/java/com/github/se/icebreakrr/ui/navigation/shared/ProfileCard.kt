@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -26,26 +27,21 @@ fun ProfileCard(profile: Profile, onclick: () -> Unit)
 {
     Card(
         onClick = onclick,
-        shape = RoundedCornerShape(
-            topStart = 16.dp,
-            topEnd = 16.dp,
-            bottomStart = 16.dp,
-            bottomEnd = 16.dp
-        ),
-        modifier = Modifier.fillMaxWidth()
+        shape = RoundedCornerShape(14.dp),
+        modifier = Modifier.fillMaxWidth().heightIn(max=150.dp),
     ) {
         Row (
             horizontalArrangement = Arrangement.spacedBy(18.dp),
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 10.dp, vertical = 4.dp)
+                .padding(horizontal = 10.dp, vertical = 6.dp)
         )
         {
 
             //todo: replace this with the actual image
-            Canvas(modifier = Modifier.size(90.dp)) {
-                drawCircle(color = Color.Gray, radius = 45.dp.toPx())
+            Canvas(modifier = Modifier.size(80.dp)) {
+                drawCircle(color = Color.Gray, radius = 40.dp.toPx())
             }
 
             Column (
@@ -56,7 +52,7 @@ fun ProfileCard(profile: Profile, onclick: () -> Unit)
             {
                 Text(text = profile.name, fontSize = 24.sp, fontWeight = FontWeight.Bold)
 
-                Text(text = "\"${profile.description}\"", fontSize = 16.sp)
+                Text(text = "\"${profile.catchPhrase}\"", fontSize = 16.sp)
 
                 Spacer(modifier = Modifier.padding(6.dp))
 
