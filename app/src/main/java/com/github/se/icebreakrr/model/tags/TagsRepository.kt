@@ -3,6 +3,7 @@ package com.github.se.icebreakrr.model.tags
 import android.util.Log
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.QuerySnapshot
 import kotlin.Unit
 
 class TagsRepository(private val db: FirebaseFirestore) {
@@ -20,11 +21,11 @@ class TagsRepository(private val db: FirebaseFirestore) {
     val categories: MutableList<TagsCategory> = mutableListOf()
     db.collection(collectionPath)
         .get()
-        .addOnFailureListener {
-          Log.e("TagsRepository", "[getAllTags] Could not get the tags : $it")
-          onFailure(it)
+        .addOnFailureListener {e: Exception ->
+          Log.e("TagsRepository", "[getAllTags] Could not get the tags : $e")
+          onFailure(e)
         }
-        .addOnSuccessListener { docs ->
+        .addOnSuccessListener { docs: QuerySnapshot ->
           for (doc in docs.documents) {
             if (doc.exists()) {
               firestoreToTags(
@@ -54,11 +55,11 @@ class TagsRepository(private val db: FirebaseFirestore) {
     val docRef = db.collection(collectionPath).document(category.name)
     docRef
         .get()
-        .addOnFailureListener { exception ->
+        .addOnFailureListener { exception: Exception ->
           Log.e("TagsRepository", "[addTag] Could not retrieve the document: $exception")
           onFailure(exception)
         }
-        .addOnSuccessListener { documentSnapshot ->
+        .addOnSuccessListener { documentSnapshot: DocumentSnapshot ->
           if (documentSnapshot.exists()) {
             var tagsCategory = TagsCategory("", "#FFFFFFFF", listOf())
             firestoreToTags(
@@ -69,14 +70,14 @@ class TagsRepository(private val db: FirebaseFirestore) {
                   onFailure(e)
                 })
 
-            tagsCategory.let { category ->
+            tagsCategory.let { category: TagsCategory ->
               if (!category.subtags.contains(name)) {
                 val updatedSubtags = category.subtags.toMutableList()
                 updatedSubtags.add(name)
 
                 docRef
                     .update("subtags", updatedSubtags)
-                    .addOnFailureListener { exception ->
+                    .addOnFailureListener { exception: Exception ->
                       Log.e("TagsRepository", "[addTag] Could not update the document: $exception")
                       onFailure(exception)
                     }
@@ -123,7 +124,7 @@ class TagsRepository(private val db: FirebaseFirestore) {
             firestoreToTags(
                 documentSnapshot,
                 { tagCategoryCallback -> tagsCategory = tagCategoryCallback },
-                { e ->
+                { e: Exception ->
                   Log.e(
                       "TagsRepository",
                       "[addCategory] error while converting firebase to Tags : $e")
@@ -135,7 +136,7 @@ class TagsRepository(private val db: FirebaseFirestore) {
                 .document(categoryName)
                 .update("subtags", subtags.toList())
                 .addOnSuccessListener {}
-                .addOnFailureListener { exception ->
+                .addOnFailureListener { exception: Exception ->
                   Log.e("TagsRepository", "[addCategory] Could not update the document: $exception")
                   onFailure(exception)
                 }
@@ -180,9 +181,9 @@ class TagsRepository(private val db: FirebaseFirestore) {
           .document(category.name)
           .update("subtags", tagCategory.subtags.filter { !it.equals(name) })
           .addOnSuccessListener {}
-          .addOnFailureListener {
-            Log.e("TagsRepository", "[deleteTag] Failed to update the document : $it")
-            onFailure(it)
+          .addOnFailureListener {e: Exception ->
+            Log.e("TagsRepository", "[deleteTag] Failed to update the document : $e")
+            onFailure(e)
           }
     }
     Log.d(
@@ -215,9 +216,9 @@ class TagsRepository(private val db: FirebaseFirestore) {
           .document(category.name)
           .delete()
           .addOnSuccessListener {}
-          .addOnFailureListener {
-            Log.e("TagsRepository", "[deleteCategory] failed to delete the category : $it")
-            onFailure(it)
+          .addOnFailureListener {e: Exception ->
+            Log.e("TagsRepository", "[deleteCategory] failed to delete the category : $e")
+            onFailure(e)
           }
     } else {
       Log.d("TagsRepository", "[deleteCategory] category doesn't exist")
@@ -230,6 +231,7 @@ class TagsRepository(private val db: FirebaseFirestore) {
    * @param onSuccess : deserialize the tag category and returns it in the onSuccess
    * @param onFailure : logs an error and returns the error in the onFailure
    */
+  @Suppress("UNCHECKED_CAST")
   private fun firestoreToTags(
       doc: DocumentSnapshot,
       onSuccess: (TagsCategory) -> Unit,
