@@ -1,4 +1,4 @@
-package com.github.se.icebreakrr.tags
+package com.github.se.icebreakrr.model.profile.tags
 
 import androidx.compose.ui.graphics.Color
 import com.github.se.icebreakrr.model.tags.TagsCategory
@@ -10,7 +10,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.doAnswer
 import org.mockito.Mockito.mock
-import org.mockito.Mockito.`when`
 import org.mockito.kotlin.anyOrNull
 import org.robolectric.RobolectricTestRunner
 

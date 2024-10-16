@@ -1,4 +1,4 @@
-package com.github.se.icebreakrr.tags
+package com.github.se.icebreakrr.model.profile.tags
 
 import android.util.Log
 import com.github.se.icebreakrr.model.tags.CategoryString
