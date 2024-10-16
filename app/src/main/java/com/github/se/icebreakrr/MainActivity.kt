@@ -27,8 +27,7 @@ class MainActivity : ComponentActivity() {
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
-    auth = FirebaseAuth.getInstance()
-    auth.currentUser?.let { auth.signOut() }
+    FirebaseAuth.getInstance()
     setContent { SampleAppTheme { Surface(modifier = Modifier.fillMaxSize()) { IcebreakrrApp() } } }
   }
 }

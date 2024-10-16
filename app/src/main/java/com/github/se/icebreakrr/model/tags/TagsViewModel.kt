@@ -12,8 +12,7 @@ import kotlinx.coroutines.flow.StateFlow
 
 data class TagsViewModel(private val repository: TagsRepository) : ViewModel() {
   // observable variable containing all the tags from the firestore
-  private val allTags_ = MutableStateFlow<List<TagsCategory>>(emptyList())
-  val allTags: StateFlow<List<TagsCategory>> = allTags_
+  val allTags: MutableList<TagsCategory> = mutableListOf()
 
   // observable variable containing the queries in Edit profile or Filter
   private val query_ = MutableStateFlow("")
@@ -25,12 +24,12 @@ data class TagsViewModel(private val repository: TagsRepository) : ViewModel() {
   val tagsSuggestions: StateFlow<List<String>> = tagsSuggestions_
 
   // observable variable containing tags that you can see in the Around you
-  private var tagsFiltered_ = MutableStateFlow(emptyList<String>())
-  val tagsFiltered: StateFlow<List<String>> = tagsFiltered_
+  private var filteredTags_ = MutableStateFlow(emptyList<String>())
+  val filteredTags: StateFlow<List<String>> = filteredTags_
 
   // observable variable containing the tags from which you want to filter
-  private var selectedFilterTags_ = MutableStateFlow(emptyList<String>())
-  val selectedFilterTags: StateFlow<List<String>> = selectedFilterTags_
+  private var filteringTags_ = MutableStateFlow(emptyList<String>())
+  val filteringTags: StateFlow<List<String>> = filteringTags_
 
   init {
     getTags()
@@ -51,7 +50,9 @@ data class TagsViewModel(private val repository: TagsRepository) : ViewModel() {
    */
   private fun getTags() {
     repository.getAllTags(
-        onSuccess = { allTags_.value = it },
+        onSuccess = {
+          allTags.clear()
+          allTags.addAll(it) },
         onFailure = { Log.e("TagsViewModel", "[getAllTags] failed to get the tags : $it") })
   }
 
@@ -61,8 +62,8 @@ data class TagsViewModel(private val repository: TagsRepository) : ViewModel() {
    * @param tag : string that represents the tag
    * @return the TagsCategory corresponding or TagsCategory("", "0xFFFFFFFF", emptyList())
    */
-  private fun TagToCategory(tag: String): TagsCategory {
-    allTags_.value.forEach { tagsCategory: TagsCategory ->
+  private fun tagToCategory(tag: String): TagsCategory {
+    allTags.forEach { tagsCategory: TagsCategory ->
       if (tagsCategory.subtags.contains(tag)) {
         return tagsCategory
       }
@@ -76,8 +77,8 @@ data class TagsViewModel(private val repository: TagsRepository) : ViewModel() {
    * @param tag : string representing the name of the tag
    * @return the Color of this tag or Color("0xFFFFFFFF") if this tag is not present in the firebase
    */
-  fun TagToColor(tag: String): Color {
-    return Color(TagToCategory(tag).color.removePrefix("0x").toLong(16))
+  fun tagToColor(tag: String): Color {
+    return Color(tagToCategory(tag).color.removePrefix("0x").toLong(16))
   }
 
   /**
@@ -91,7 +92,7 @@ data class TagsViewModel(private val repository: TagsRepository) : ViewModel() {
   fun setQuery(inputQuery: String, selectedTags: List<String>) {
     query_.value = inputQuery
     val tempTagSuggestion: MutableList<String> = mutableListOf()
-    allTags_.value.forEach { tagCategory: TagsCategory ->
+    allTags.forEach { tagCategory: TagsCategory ->
       tagCategory.subtags.forEach { tag: String ->
         if (tag.lowercase(Locale.ROOT).contains(query_.value.lowercase(Locale.ROOT))) {
           tempTagSuggestion.add(tag)
@@ -107,13 +108,13 @@ data class TagsViewModel(private val repository: TagsRepository) : ViewModel() {
    */
   fun applyFilters() {
     val tempTagsFiltered: MutableList<String> = mutableListOf()
-    selectedFilterTags_.value.forEach { tag: String ->
+    filteringTags_.value.forEach { tag: String ->
       // if the tag is a category tag :
       if (enumValues<CategoryString>().any { it.name == tag }) {
         // check if another tag is in this category :
         var countThisTag = true
-        val tagCategory = TagToCategory(tag)
-        selectedFilterTags_.value.forEach { subtag: String ->
+        val tagCategory = tagToCategory(tag)
+        filteringTags_.value.forEach { subtag: String ->
           if (tagCategory.subtags.filter { it != tag }.contains(subtag)) {
             countThisTag = false
           }
@@ -126,7 +127,7 @@ data class TagsViewModel(private val repository: TagsRepository) : ViewModel() {
         tempTagsFiltered.add(tag)
       }
     }
-    tagsFiltered_.value = tempTagsFiltered
+    filteredTags_.value = tempTagsFiltered
   }
 
   /**
@@ -135,7 +136,7 @@ data class TagsViewModel(private val repository: TagsRepository) : ViewModel() {
    * @param tag : tag to add
    */
   fun addFilter(tag: String) {
-    selectedFilterTags_.value += tag
+    filteringTags_.value += tag
   }
 
   /**
@@ -144,7 +145,7 @@ data class TagsViewModel(private val repository: TagsRepository) : ViewModel() {
    * @param : tag to remove
    */
   fun removeFilter(tag: String) {
-    selectedFilterTags_.value = selectedFilterTags_.value.filter { it != tag }
+    filteringTags_.value = filteringTags_.value.filter { it != tag }
   }
 
   /**

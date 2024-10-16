@@ -40,7 +40,7 @@ class TagsViewModelTest {
         .getAllTags(anyOrNull(), anyOrNull())
 
     viewModel = TagsViewModel(repository)
-    assertEquals(fakeTags, viewModel.allTags.value)
+    assertEquals(fakeTags, viewModel.allTags)
   }
 
   @Test
@@ -56,13 +56,13 @@ class TagsViewModelTest {
         .getAllTags(anyOrNull(), anyOrNull())
 
     viewModel = TagsViewModel(repository)
-    val color1 = viewModel.TagToColor("Football")
+    val color1 = viewModel.tagToColor("Football")
     assertEquals(
         Color(0xFF00FF00),
         color1,
     )
 
-    val color2 = viewModel.TagToColor("Art")
+    val color2 = viewModel.tagToColor("Art")
     assertEquals(Color(0xFFFFFFFF), color2)
   }
 
@@ -116,13 +116,13 @@ class TagsViewModelTest {
     viewModel.addFilter("Philosophy")
     assertEquals(
         listOf("Sport", "Basketball", "Art", "BBQ Ribs", "Philosophy"),
-        viewModel.selectedFilterTags.value)
+        viewModel.filteringTags.value)
     viewModel.removeFilter("BBQ Ribs")
     viewModel.removeFilter("Philosophy")
-    assertEquals(listOf("Sport", "Basketball", "Art"), viewModel.selectedFilterTags.value)
+    assertEquals(listOf("Sport", "Basketball", "Art"), viewModel.filteringTags.value)
 
     viewModel.applyFilters()
-    assertEquals(listOf("Basketball", "Art", "Photography", "Museum"), viewModel.tagsFiltered.value)
+    assertEquals(listOf("Basketball", "Art", "Photography", "Museum"), viewModel.filteredTags.value)
 
     viewModel.removeFilter("Art")
     viewModel.removeFilter("Basketball")
@@ -130,9 +130,9 @@ class TagsViewModelTest {
     viewModel.addFilter("Basketball")
     viewModel.addFilter("Sport")
     viewModel.addFilter("Art")
-    assertEquals(listOf("Basketball", "Sport", "Art"), viewModel.selectedFilterTags.value)
+    assertEquals(listOf("Basketball", "Sport", "Art"), viewModel.filteringTags.value)
 
     viewModel.applyFilters()
-    assertEquals(listOf("Basketball", "Art", "Photography", "Museum"), viewModel.tagsFiltered.value)
+    assertEquals(listOf("Basketball", "Art", "Photography", "Museum"), viewModel.filteredTags.value)
   }
 }
