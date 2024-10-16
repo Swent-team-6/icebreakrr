@@ -55,7 +55,7 @@ fun IcebreakrrApp() {
         startDestination = Screen.AROUND_YOU,
         route = Route.AROUND_YOU,
     ) {
-      composable(Screen.AROUND_YOU) { AroundYouScreen(navigationActions) }
+      composable(Screen.AROUND_YOU) { AroundYouScreen(navigationActions, tagsViewModel) }
     }
 
     navigation(
@@ -69,7 +69,7 @@ fun IcebreakrrApp() {
         startDestination = Screen.NOTIFICATIONS,
         route = Route.NOTIFICATIONS,
     ) {
-      composable(Screen.NOTIFICATIONS) { NotificationScreen(navigationActions) }
+      composable(Screen.NOTIFICATIONS) { NotificationScreen(navigationActions, tagsViewModel) }
     }
   }
 }

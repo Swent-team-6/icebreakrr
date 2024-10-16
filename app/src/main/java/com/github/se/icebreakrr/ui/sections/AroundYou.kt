@@ -7,6 +7,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import com.github.se.icebreakrr.model.tags.TagsViewModel
 import com.github.se.icebreakrr.ui.navigation.BottomNavigationMenu
 import com.github.se.icebreakrr.ui.navigation.LIST_TOP_LEVEL_DESTINATIONS
 import com.github.se.icebreakrr.ui.navigation.NavigationActions
@@ -20,7 +21,7 @@ import com.github.se.icebreakrr.ui.navigation.NavigationActions
  */
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun AroundYouScreen(navigationActions: NavigationActions) {
+fun AroundYouScreen(navigationActions: NavigationActions, tagsViewModel: TagsViewModel) {
   Scaffold(
       modifier = Modifier.testTag("aroundYouScreen"),
       bottomBar = {
