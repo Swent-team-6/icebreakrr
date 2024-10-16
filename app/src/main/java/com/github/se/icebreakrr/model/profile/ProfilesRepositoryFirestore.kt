@@ -174,10 +174,16 @@ class ProfilesRepositoryFirestore(private val db: FirebaseFirestore) : ProfilesR
    */
   private fun documentToProfile(document: DocumentSnapshot): Profile? {
     return try {
-      val uid = document.id
-      val name = document.getString("name") ?: return null
-      val genderString = document.getString("gender") ?: return null
-      val gender = Gender.valueOf(genderString) // Convert string to Gender enum
+        val uid = document.id
+        val name = document.getString("name") ?: return null
+        val genderString = document.getString("gender") ?: return null
+
+        // Fallback to null if gender is not a valid enum value
+        val gender = try {
+            Gender.valueOf(genderString)
+        } catch (e: IllegalArgumentException) {
+            return null // Return null if the gender does not match any enum
+        }
       val birthDate = document.getTimestamp("birthDate") ?: return null
       val catchPhrase = document.getString("catchPhrase") ?: return null
       val description = document.getString("description") ?: return null
