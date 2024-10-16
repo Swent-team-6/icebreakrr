@@ -1,4 +1,6 @@
 [versions]
+accompanistFlowlayout = "0.32.0"
+accompanistFlowlayoutVersion = "0.32.0"
 agp = "8.3.0"
 firebaseBom = "33.4.0"
 kotlin = "1.8.10"
@@ -25,7 +27,10 @@ navigationTesting = "2.8.2"
 firebaseCommonKtx = "21.0.0"
 firebaseAuthKtx = "23.0.0"
 
+
 [libraries]
+accompanist-flowlayout = { module = "com.google.accompanist:accompanist-flowlayout", version.ref = "accompanistFlowlayout" }
+accompanist-flowlayout-vlatestversion = { module = "com.google.accompanist:accompanist-flowlayout", version.ref = "accompanistFlowlayoutVersion" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
@@ -53,8 +58,8 @@ play-services-auth = { module = "com.google.android.gms:play-services-auth", ver
 robolectric = { module = "org.robolectric:robolectric", version.ref = "robolectric" }
 firebase-common-ktx = { group = "com.google.firebase", name = "firebase-common-ktx", version.ref = "firebaseCommonKtx" }
 firebase-auth-ktx = { group = "com.google.firebase", name = "firebase-auth-ktx", version.ref = "firebaseAuthKtx" }
-androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigationCompose" }
 
+androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigationCompose" }
 mockito-core = { group = "org.mockito", name = "mockito-core", version.ref = "mockitoCore" }
 mockito-kotlin = { group = "org.mockito.kotlin", name = "mockito-kotlin", version.ref = "mockitoKotlin" }
 mockito-android = { module = "org.mockito:mockito-android", version.ref = "mockitoAndroid" }
