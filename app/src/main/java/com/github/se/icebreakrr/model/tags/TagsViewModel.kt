@@ -52,7 +52,8 @@ data class TagsViewModel(private val repository: TagsRepository) : ViewModel() {
     repository.getAllTags(
         onSuccess = {
           allTags.clear()
-          allTags.addAll(it) },
+          allTags.addAll(it)
+        },
         onFailure = { Log.e("TagsViewModel", "[getAllTags] failed to get the tags : $it") })
   }
 
