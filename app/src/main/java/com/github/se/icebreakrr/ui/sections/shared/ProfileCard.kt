@@ -1,4 +1,4 @@
-package com.github.se.icebreakrr.ui.navigation.shared
+package com.github.se.icebreakrr.ui.sections.shared
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Arrangement
