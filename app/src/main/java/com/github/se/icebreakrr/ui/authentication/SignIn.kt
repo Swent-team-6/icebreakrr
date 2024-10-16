@@ -5,7 +5,6 @@ package com.github.se.icebreakrr.ui.authentication
 // The code has been highly inspired by the bootcamp examples and modified for this project.
 
 import android.content.Intent
-import android.widget.Toast
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResult
@@ -82,26 +81,14 @@ fun SignInScreen(navigationActions: NavigationActions) {
   // Get screen configuration to dynamically adjust layout
   val configuration = LocalConfiguration.current
   val screenHeight = configuration.screenHeightDp
-  val screenWidth = configuration.screenWidthDp
 
-  // Set padding dynamically based on screen size
-  val verticalPadding =
-      when {
-        screenHeight > 800 -> 150.dp
-        else -> 100.dp
-      }
-
-  val verticalSpacing =
-      when {
-        screenHeight > 800 -> 250.dp
-        else -> 150.dp
-      }
+  // Define padding and spacing as percentages of the screen height
+  val verticalPadding = (screenHeight * 0.2).dp // 20%
 
   val launcher =
       rememberFirebaseAuthLauncher(
           onAuthComplete = { result ->
             user = result.user
-            Toast.makeText(context, "Login successful!", Toast.LENGTH_LONG).show()
             navigationActions.navigateTo(TopLevelDestinations.AROUND_YOU)
           },
           onAuthError = { user = null })
@@ -125,7 +112,7 @@ fun SignInScreen(navigationActions: NavigationActions) {
                     .fillMaxSize()
                     .padding(vertical = verticalPadding)
                     .padding(paddingValues),
-            verticalArrangement = Arrangement.spacedBy(verticalSpacing, Alignment.Top),
+            verticalArrangement = Arrangement.SpaceBetween,
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
           Text(
@@ -143,7 +130,7 @@ fun SignInScreen(navigationActions: NavigationActions) {
 
           // Authenticate With Google Button
           GoogleSignInButton(
-              onSignInClick = {
+              onClick = {
 
                 // If in test mode, simulate a logged-in user
                 if (isTesting) {
@@ -169,9 +156,9 @@ fun SignInScreen(navigationActions: NavigationActions) {
  * @param onSignInClick Callback invoked when the button is clicked.
  */
 @Composable
-fun GoogleSignInButton(onSignInClick: () -> Unit) {
+fun GoogleSignInButton(onClick: () -> Unit) {
   Button(
-      onClick = onSignInClick,
+      onClick = onClick,
       colors = ButtonDefaults.buttonColors(containerColor = Color.White), // Button color
       shape = RoundedCornerShape(50), // Circular edges for the button
       border = BorderStroke(1.dp, Color.LightGray),

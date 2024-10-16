@@ -30,15 +30,15 @@ class MainActivity : ComponentActivity() {
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
+
     // Initialize Firebase Auth
+    FirebaseApp.initializeApp(this)
     auth = FirebaseAuth.getInstance()
     auth.currentUser?.let {
       // Sign out the user if they are already signed in
       // This is useful for testing purposes
       auth.signOut()
     }
-
-    FirebaseApp.initializeApp(this)
 
     // Retrieve the testing flag from the Intent
     val isTesting = intent?.getBooleanExtra("IS_TESTING", false) ?: false
@@ -67,7 +67,6 @@ fun IcebreakrrApp() {
   val navController = rememberNavController()
   val navigationActions = NavigationActions(navController)
 
-  // TODO Implement Auth Screen navigation
   NavHost(navController = navController, startDestination = Route.AUTH) {
     navigation(
         startDestination = Screen.AUTH,
