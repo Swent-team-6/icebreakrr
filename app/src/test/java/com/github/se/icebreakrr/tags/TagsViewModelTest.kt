@@ -1,4 +1,4 @@
-package com.github.se.model.tags
+package com.github.se.icebreakrr.tags
 
 import androidx.compose.ui.graphics.Color
 import com.github.se.icebreakrr.model.tags.TagsCategory
