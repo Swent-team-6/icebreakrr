@@ -16,6 +16,12 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
+        // Add JitPack repository
+        maven("https://jitpack.io") {
+            content {
+                includeGroupByRegex("com\\.github.*") // Scope to GitHub repositories
+            }
+        }
     }
 }
 
