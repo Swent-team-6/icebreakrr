@@ -24,55 +24,42 @@ import androidx.compose.ui.unit.sp
 import com.github.se.icebreakrr.ui.Profile
 
 @Composable
-fun ProfileCard(profile: Profile, onclick: () -> Unit)
-{
-    Card(
-        onClick = onclick,
-        shape = RoundedCornerShape(14.dp),
-        modifier = Modifier.fillMaxWidth().heightIn(max=150.dp).testTag("profileCard"),
-    ) {
-        Row (
-            horizontalArrangement = Arrangement.spacedBy(18.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 10.dp, vertical = 6.dp)
-        )
-        {
+fun ProfileCard(profile: Profile, onclick: () -> Unit) {
+  Card(
+      onClick = onclick,
+      shape = RoundedCornerShape(14.dp),
+      modifier = Modifier.fillMaxWidth().heightIn(max = 150.dp).testTag("profileCard"),
+  ) {
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(18.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 10.dp, vertical = 6.dp)) {
 
-            //todo: replace this with the actual image
-            Canvas(modifier = Modifier.size(80.dp)) {
-                drawCircle(color = Color.Gray, radius = 40.dp.toPx())
-            }
+          // todo: replace this with the actual image
+          Canvas(modifier = Modifier.size(80.dp)) {
+            drawCircle(color = Color.Gray, radius = 40.dp.toPx())
+          }
 
-            Column (
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.Start,
+          Column(
+              verticalArrangement = Arrangement.Center,
+              horizontalAlignment = Alignment.Start,
+          ) {
+            Text(text = profile.name, fontSize = 24.sp, fontWeight = FontWeight.Bold)
 
-            )
-            {
-                Text(text = profile.name, fontSize = 24.sp, fontWeight = FontWeight.Bold)
+            Text(text = "\"${profile.catchPhrase}\"", fontSize = 16.sp)
 
-                Text(text = "\"${profile.catchPhrase}\"", fontSize = 16.sp)
+            Spacer(modifier = Modifier.padding(6.dp))
 
-                Spacer(modifier = Modifier.padding(6.dp))
-
-                //put the 5 first tags in a string
-                val tags = profile.tags.take(5).joinToString(" ") { "#$it" }
-                Text(text = tags, fontSize = 16.sp)
-            }
+            // put the 5 first tags in a string
+            val tags = profile.tags.take(5).joinToString(" ") { "#$it" }
+            Text(text = tags, fontSize = 16.sp)
+          }
         }
-
-
-    }
-
-
+  }
 }
+
 @Preview(showBackground = true)
 @Composable
 fun ProfileCardPreview() {
-    ProfileCard(
-        Profile.getMockedProfiles()[0],
-        onclick = { TODO()}
-    )
+  ProfileCard(Profile.getMockedProfiles()[0], onclick = { TODO() })
 }

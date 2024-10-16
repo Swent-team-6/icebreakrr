@@ -17,22 +17,19 @@ import androidx.compose.ui.unit.sp
 
 @Composable
 fun TopBar() {
-    Box(
-        contentAlignment = Alignment.Center,
-        modifier = Modifier
-            .background(Color(0xFF1FAEF0)) //fixme: use icebreakrr blue
-            .fillMaxWidth()
-            .heightIn(90.dp)
-            .testTag("topBar")
-    ) {
+  Box(
+      contentAlignment = Alignment.Center,
+      modifier =
+          Modifier.background(Color(0xFF1FAEF0)) // fixme: use icebreakrr blue
+              .fillMaxWidth()
+              .heightIn(90.dp)
+              .testTag("topBar")) {
         Text(
             text = "Around You",
             fontSize = 40.sp,
             color = Color.White,
             fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Center,
-            modifier = Modifier.fillMaxWidth()
-
-        )
-    }
+            modifier = Modifier.fillMaxWidth())
+      }
 }
