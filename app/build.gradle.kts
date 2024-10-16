@@ -142,7 +142,6 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.navigation.testing)
     implementation(libs.firebase.firestore.ktx)
-    implementation(libs.firebase.auth.ktx)
     testImplementation(libs.junit)
     globalTestImplementation(libs.androidx.junit)
     globalTestImplementation(libs.androidx.espresso.core)
