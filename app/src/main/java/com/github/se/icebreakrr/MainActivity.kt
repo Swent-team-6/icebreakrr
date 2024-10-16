@@ -15,6 +15,7 @@ import com.github.se.icebreakrr.ui.navigation.NavigationActions
 import com.github.se.icebreakrr.ui.navigation.Route
 import com.github.se.icebreakrr.ui.navigation.Screen
 import com.github.se.icebreakrr.ui.sections.AroundYouScreen
+import com.github.se.icebreakrr.ui.sections.FilterScreen
 import com.github.se.icebreakrr.ui.sections.NotificationScreen
 import com.github.se.icebreakrr.ui.sections.SettingsScreen
 import com.github.se.icebreakrr.ui.theme.SampleAppTheme
@@ -42,7 +43,6 @@ fun IcebreakrrApp() {
   val navController = rememberNavController()
   val navigationActions = NavigationActions(navController)
 
-  // TODO Implement Auth Screen navigation
   NavHost(navController = navController, startDestination = Route.AROUND_YOU) {
     navigation(
         startDestination = Screen.AROUND_YOU,
@@ -64,5 +64,12 @@ fun IcebreakrrApp() {
     ) {
       composable(Screen.NOTIFICATIONS) { NotificationScreen(navigationActions) }
     }
+
+      navigation(
+          startDestination = Screen.FILTER,
+          route = Route.FILTER,
+      ) {
+          composable(Screen.FILTER) {FilterScreen(navigationActions)}
+      }
   }
 }
