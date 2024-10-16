@@ -5,6 +5,8 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.android.gms.tasks.Tasks
 import com.google.firebase.FirebaseApp
 import com.google.firebase.Timestamp
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.DocumentSnapshot
@@ -36,6 +38,10 @@ class ProfilesRepositoryFirestoreTest {
 
   @Mock private lateinit var mockProfileQuerySnapshot: QuerySnapshot
 
+  @Mock private lateinit var mockAuth: FirebaseAuth
+
+  @Mock private lateinit var mockUser: FirebaseUser
+
   private lateinit var profilesRepositoryFirestore: ProfilesRepositoryFirestore
 
   private val profile =
@@ -65,6 +71,7 @@ class ProfilesRepositoryFirestoreTest {
     `when`(mockCollectionReference.document()).thenReturn(mockDocumentReference)
   }
 
+  // Test for getNewProfileId()
   @Test
   fun getNewProfileId_shouldReturnNewId() {
     `when`(mockDocumentReference.id).thenReturn("1")
@@ -72,7 +79,20 @@ class ProfilesRepositoryFirestoreTest {
     assert(newId == "1")
   }
 
-  // TODO need to change for the final implementation of getProfilesInRadius
+  // Test when init is called without authenticated user
+  @Test
+  fun init_shouldNotCallOnSuccessWhenUserIsNotAuthenticated() {
+    // Simulate no logged-in user
+    `when`(mockAuth.currentUser).thenReturn(null)
+
+    var onSuccessCalled = false
+
+    profilesRepositoryFirestore.init { onSuccessCalled = true }
+
+    // Ensure onSuccess is not called if the user is not authenticated
+    assert(!onSuccessCalled)
+  }
+
   @Test
   fun getProfilesInRadius_shouldFetchAllProfiles() {
     `when`(mockCollectionReference.get()).thenReturn(Tasks.forResult(mockProfileQuerySnapshot))
@@ -88,11 +108,24 @@ class ProfilesRepositoryFirestoreTest {
         },
         onFailure = { fail("Failure callback should not be called") })
 
-    // Ensure asynchronous tasks complete
     shadowOf(Looper.getMainLooper()).idle()
 
     // Verify that 'documents' field was accessed after Firestore query
     verify(mockProfileQuerySnapshot).documents
+  }
+
+  @Test
+  fun getProfilesInRadius_shouldCallFailureCallback_onError() {
+    `when`(mockCollectionReference.get())
+        .thenReturn(Tasks.forException(Exception("Test exception")))
+
+    profilesRepositoryFirestore.getProfilesInRadius(
+        center = GeoPoint(0.0, 0.0),
+        radiusInMeters = 1000.0,
+        onSuccess = { fail("Success callback should not be called") },
+        onFailure = { exception -> assert(exception.message == "Test exception") })
+
+    shadowOf(Looper.getMainLooper()).idle()
   }
 
   @Test
@@ -105,6 +138,19 @@ class ProfilesRepositoryFirestoreTest {
 
     // Ensure Firestore collection method was called to reference the "profiles" collection
     verify(mockDocumentReference).set(any())
+  }
+
+  @Test
+  fun addNewProfile_shouldCallFailureCallback_onError() {
+    `when`(mockDocumentReference.set(any()))
+        .thenReturn(Tasks.forException(Exception("Test exception")))
+
+    profilesRepositoryFirestore.addNewProfile(
+        profile,
+        onSuccess = { fail("Success callback should not be called") },
+        onFailure = { exception -> assert(exception.message == "Test exception") })
+
+    shadowOf(Looper.getMainLooper()).idle()
   }
 
   @Test
@@ -122,6 +168,19 @@ class ProfilesRepositoryFirestoreTest {
 
     // Verify that Firestore 'set()' method is called to update the profile
     verify(mockDocumentReference).set(any())
+  }
+
+  @Test
+  fun updateProfile_shouldCallFailureCallback_onError() {
+    `when`(mockDocumentReference.set(any()))
+        .thenReturn(Tasks.forException(Exception("Test exception")))
+
+    profilesRepositoryFirestore.updateProfile(
+        profile = profile,
+        onSuccess = { fail("Success callback should not be called") },
+        onFailure = { exception -> assert(exception.message == "Test exception") })
+
+    shadowOf(Looper.getMainLooper()).idle()
   }
 
   @Test
@@ -147,6 +206,18 @@ class ProfilesRepositoryFirestoreTest {
   }
 
   @Test
+  fun getProfileByUid_shouldCallFailureCallback_onError() {
+    `when`(mockDocumentReference.get()).thenReturn(Tasks.forException(Exception("Test exception")))
+
+    profilesRepositoryFirestore.getProfileByUid(
+        uid = "1",
+        onSuccess = { fail("Success callback should not be called") },
+        onFailure = { exception -> assert(exception.message == "Test exception") })
+
+    shadowOf(Looper.getMainLooper()).idle()
+  }
+
+  @Test
   fun deleteProfileByUid_shouldCallDocumentReferenceDelete() {
     `when`(mockDocumentReference.delete()).thenReturn(Tasks.forResult(null))
 
@@ -155,5 +226,18 @@ class ProfilesRepositoryFirestoreTest {
     shadowOf(Looper.getMainLooper()).idle() // Ensure all asynchronous operations complete
 
     verify(mockDocumentReference).delete()
+  }
+
+  @Test
+  fun deleteProfileByUid_shouldCallFailureCallback_onError() {
+    `when`(mockDocumentReference.delete())
+        .thenReturn(Tasks.forException(Exception("Test exception")))
+
+    profilesRepositoryFirestore.deleteProfileByUid(
+        uid = "1",
+        onSuccess = { fail("Success callback should not be called") },
+        onFailure = { exception -> assert(exception.message == "Test exception") })
+
+    shadowOf(Looper.getMainLooper()).idle()
   }
 }
