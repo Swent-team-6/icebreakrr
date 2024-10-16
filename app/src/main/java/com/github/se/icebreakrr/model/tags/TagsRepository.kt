@@ -29,8 +29,8 @@ class TagsRepository(private val db: FirebaseFirestore) {
             if (doc.exists()) {
               firestoreToTags(
                   doc,
-                  { categories.add(it) },
-                  {
+                  onSuccess = { categories.add(it) },
+                  onFailure = {
                     Log.e(
                         "TagsRepository",
                         "[getAllTags] Could not fetch firebase to get the tags : $it")
@@ -63,8 +63,8 @@ class TagsRepository(private val db: FirebaseFirestore) {
             var tagsCategory = TagsCategory("", "#FFFFFFFF", listOf())
             firestoreToTags(
                 documentSnapshot,
-                { tagCategoryCallback -> tagsCategory = tagCategoryCallback },
-                { e ->
+                onSuccess = { tagCategoryCallback -> tagsCategory = tagCategoryCallback },
+                onFailure = { e ->
                   Log.e("TagsRepository", "[addTag] error while converting firebase to Tags $e")
                   onFailure(e)
                 })
@@ -113,7 +113,7 @@ class TagsRepository(private val db: FirebaseFirestore) {
       subcategories: List<String>,
       color: String
   ) {
-    // check if the category is already in the database
+    // check if the category is already in the data base
     if (CategoryString.values().any { it.name.equals(categoryName, ignoreCase = true) }) {
       db.collection(collectionPath)
           .document(categoryName)
@@ -122,8 +122,8 @@ class TagsRepository(private val db: FirebaseFirestore) {
             var tagsCategory = TagsCategory()
             firestoreToTags(
                 documentSnapshot,
-                { tagCategoryCallback -> tagsCategory = tagCategoryCallback },
-                { e: Exception ->
+                onSuccess = { tagCategoryCallback -> tagsCategory = tagCategoryCallback },
+                onFailure = { e: Exception ->
                   Log.e(
                       "TagsRepository",
                       "[addCategory] error while converting firebase to Tags : $e")
