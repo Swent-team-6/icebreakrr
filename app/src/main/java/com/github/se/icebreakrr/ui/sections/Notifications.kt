@@ -61,11 +61,11 @@ fun NotificationScreen(navigationActions: NavigationActions) {
             selectedItem = navigationActions.currentRoute())
       },
       content = { innerPadding ->
-        LazyColumn(modifier = Modifier.padding(innerPadding).fillMaxSize()){
+        LazyColumn(modifier = Modifier.padding(innerPadding).fillMaxSize().testTag("notificationScroll")){
             item{
                 Text(
                     text = "Pending meeting requests",
-                    modifier = Modifier.padding(innerPadding)
+                    modifier = Modifier.padding(innerPadding).testTag("notificationFirstText")
                     )
                 Column {
                     cardList.value.forEach { s ->
@@ -74,7 +74,7 @@ fun NotificationScreen(navigationActions: NavigationActions) {
                     }
                 Text(
                         text = "Passed",
-                        modifier = Modifier.padding(innerPadding)
+                        modifier = Modifier.padding(innerPadding).testTag("notificationSecondText")
                     )
                 Column {
                     cardList.value.forEach { s ->
@@ -91,7 +91,7 @@ fun NotificationScreen(navigationActions: NavigationActions) {
               containerColor = IceBreakrrBlue,
               contentColor = Color.White
           ) {
-              Icon(imageVector = FilterIcon, contentDescription = "Add")
+              Icon(imageVector = FilterIcon, contentDescription = "Filter")
           }
       },
   )
@@ -113,7 +113,7 @@ fun TopAppBarNotification(){
             title =
             {
                 Text(
-                    modifier = Modifier.fillMaxSize().align(Alignment.CenterVertically).padding(25.dp),
+                    modifier = Modifier.fillMaxSize().align(Alignment.CenterVertically).padding(25.dp).testTag("notificationTopAppBar"),
                     text = "Inbox",
                     style = TextStyle(
                         fontSize = 40.sp,
