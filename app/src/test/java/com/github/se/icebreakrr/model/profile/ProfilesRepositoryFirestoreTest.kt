@@ -6,18 +6,19 @@ import com.google.android.gms.tasks.Tasks
 import com.google.firebase.FirebaseApp
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.GeoPoint
 import com.google.firebase.firestore.QuerySnapshot
+import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.fail
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
+import org.mockito.Mockito.mock
 import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.any
@@ -39,8 +40,6 @@ class ProfilesRepositoryFirestoreTest {
   @Mock private lateinit var mockProfileQuerySnapshot: QuerySnapshot
 
   @Mock private lateinit var mockAuth: FirebaseAuth
-
-  @Mock private lateinit var mockUser: FirebaseUser
 
   private lateinit var profilesRepositoryFirestore: ProfilesRepositoryFirestore
 
@@ -237,6 +236,51 @@ class ProfilesRepositoryFirestoreTest {
         uid = "1",
         onSuccess = { fail("Success callback should not be called") },
         onFailure = { exception -> assert(exception.message == "Test exception") })
+
+    shadowOf(Looper.getMainLooper()).idle()
+  }
+
+  @Test
+  fun getProfilesInRadius_shouldConvertDocumentsToProfiles() {
+    // Mock valid DocumentSnapshots
+    val validDocument1: DocumentSnapshot = mock(DocumentSnapshot::class.java)
+    val validDocument2: DocumentSnapshot = mock(DocumentSnapshot::class.java)
+
+    // Set up the first valid document
+    `when`(validDocument1.id).thenReturn("1")
+    `when`(validDocument1.getString("name")).thenReturn("John Doe")
+    `when`(validDocument1.getString("gender")).thenReturn("MEN")
+    `when`(validDocument1.getTimestamp("birthDate")).thenReturn(Timestamp.now())
+    `when`(validDocument1.getString("catchPhrase")).thenReturn("Hello World")
+    `when`(validDocument1.getString("description")).thenReturn("Sample description")
+    `when`(validDocument1.get("tags")).thenReturn(listOf("tag1", "tag2"))
+    `when`(validDocument1.getString("profilePictureUrl"))
+        .thenReturn("http://example.com/profile.jpg")
+
+    // Set up the second valid document
+    `when`(validDocument2.id).thenReturn("2")
+    `when`(validDocument2.getString("name")).thenReturn("Jane Doe")
+    `when`(validDocument2.getString("gender")).thenReturn("WOMEN")
+    `when`(validDocument2.getTimestamp("birthDate")).thenReturn(Timestamp.now())
+    `when`(validDocument2.getString("catchPhrase")).thenReturn("Greetings")
+    `when`(validDocument2.getString("description")).thenReturn("Another sample profile")
+    `when`(validDocument2.get("tags")).thenReturn(listOf("tag3", "tag4"))
+    `when`(validDocument2.getString("profilePictureUrl")).thenReturn("http://example.com/jane.jpg")
+
+    // Mock the QuerySnapshot
+    `when`(mockProfileQuerySnapshot.documents).thenReturn(listOf(validDocument1, validDocument2))
+    `when`(mockCollectionReference.get()).thenReturn(Tasks.forResult(mockProfileQuerySnapshot))
+
+    profilesRepositoryFirestore.getProfilesInRadius(
+        center = GeoPoint(0.0, 0.0),
+        radiusInMeters = 1000.0,
+        onSuccess = { profiles ->
+          // Assert that the profiles were converted correctly
+          assertEquals(2, profiles.size)
+          assertEquals("John Doe", profiles[0].name)
+          assertEquals("Jane Doe", profiles[1].name)
+        },
+        onFailure = { fail("Failure callback should not be called") })
 
     shadowOf(Looper.getMainLooper()).idle()
   }
