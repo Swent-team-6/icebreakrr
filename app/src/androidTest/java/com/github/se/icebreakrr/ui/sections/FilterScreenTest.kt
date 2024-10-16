@@ -22,7 +22,6 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
 import com.github.se.icebreakrr.ui.navigation.NavigationActions
-import com.github.se.icebreakrr.ui.navigation.Screen
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -275,7 +274,7 @@ class FilterScreenTest {
     // Click the filter button
     composeTestRule.onNodeWithTag("FilterButton").performClick()
     // Verify that the navigation action is called
-    verify(navigationActionsMock).navigateTo(Screen.AROUND_YOU)
+    verify(navigationActionsMock).goBack()
   }
 
   @Test

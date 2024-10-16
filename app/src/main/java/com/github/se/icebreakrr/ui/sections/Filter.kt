@@ -47,7 +47,6 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.github.se.icebreakrr.ui.navigation.NavigationActions
-import com.github.se.icebreakrr.ui.navigation.Screen
 import com.github.se.icebreakrr.ui.tags.TagSelector
 
 const val textSizeFactor = 0.3f
@@ -277,7 +276,7 @@ fun FilterScreen(navigationActions: NavigationActions) {
               textSize = (tagSelectorHeight.value * tagSelectorTextSizeFactor).sp)
           Box(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
             Button(
-                onClick = { navigationActions.navigateTo(Screen.AROUND_YOU) },
+                onClick = { navigationActions.goBack() },
                 modifier =
                     Modifier.width(buttonWidth)
                         .height(buttonHeight)
