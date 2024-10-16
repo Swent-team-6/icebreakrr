@@ -3,3 +3,13 @@ plugins {
     alias(libs.plugins.androidApplication) apply false
     alias(libs.plugins.jetbrainsKotlinAndroid) apply false
 }
+
+buildscript {
+    repositories {
+        google() // Ensure this is present
+        mavenCentral()
+    }
+    dependencies {
+        classpath(libs.google.services) // Ensure this points to the correct Google services dependency
+    }
+}

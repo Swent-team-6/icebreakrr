@@ -64,7 +64,7 @@ jobs:
           api-level: 34
           target: google_apis
           arch: x86_64
-          force-avd-creation: false
+          force-avd-creation: true
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           disable-animations: false
           script: echo "Generated AVD snapshot for caching."
@@ -77,6 +77,10 @@ jobs:
       - name: KTFmt Check
         run: |
           ./gradlew ktfmtCheck
+
+      # Create and populate google-services.json file
+      - name: Create and populate google-services.json
+        run: echo ${{ secrets.GOOGLE_SERVICES }} | base64 --decode > ./app/google-services.json
 
       # Create keystore/debug.keystore file
       - name: Create file debug keystore
@@ -111,7 +115,7 @@ jobs:
           api-level: 34
           target: google_apis
           arch: x86_64
-          force-avd-creation: false
+          force-avd-creation: true
           emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           disable-animations: true
           script: ./gradlew connectedCheck --parallel --build-cache

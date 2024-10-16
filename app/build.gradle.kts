@@ -1,11 +1,13 @@
 import java.util.Properties
 
+
 plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsKotlinAndroid)
     alias(libs.plugins.ktfmt)
     alias(libs.plugins.sonar)
     id("jacoco")
+    id("com.google.gms.google-services")
 }
 
 val keystorePropertiesFile = rootProject.file("local.properties")
@@ -139,6 +141,7 @@ dependencies {
     implementation(platform(libs.compose.bom))
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.navigation.testing)
+    implementation(libs.firebase.firestore.ktx)
     testImplementation(libs.junit)
     globalTestImplementation(libs.androidx.junit)
     globalTestImplementation(libs.androidx.espresso.core)
@@ -167,6 +170,9 @@ dependencies {
     implementation(libs.compose.viewmodel)
     // Android Studio Preview support
     implementation(libs.compose.preview)
+    // Accompanist Flow Layout dependency
+    implementation("com.google.accompanist:accompanist-flowlayout:0.32.0")
+
     debugImplementation(libs.compose.tooling)
     // UI Tests
     globalTestImplementation(libs.compose.test.junit)
@@ -182,6 +188,14 @@ dependencies {
     // ------------       Mockito     --------------
     testImplementation(libs.mockito.core)
     testImplementation(libs.mockito.kotlin)
+
+    androidTestImplementation(libs.mockito.android)
+    androidTestImplementation(libs.mockito.kotlin)
+
+    implementation(libs.google.services)
+
+    androidTestImplementation(libs.mockito.android)
+    androidTestImplementation(libs.mockito.kotlin)
 
 }
 
