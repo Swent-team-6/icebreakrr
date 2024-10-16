@@ -240,60 +240,60 @@ class ProfilesRepositoryFirestoreTest {
     shadowOf(Looper.getMainLooper()).idle()
   }
 
-    @Test
-    fun getProfilesInRadius_shouldConvertDocumentsToProfiles() {
-        // Mock valid DocumentSnapshots
-        val validDocument1: DocumentSnapshot = mock(DocumentSnapshot::class.java)
-        val validDocument2: DocumentSnapshot = mock(DocumentSnapshot::class.java)
-        val invalidDocument: DocumentSnapshot = mock(DocumentSnapshot::class.java)
+  @Test
+  fun getProfilesInRadius_shouldConvertDocumentsToProfiles() {
+    // Mock valid DocumentSnapshots
+    val validDocument1: DocumentSnapshot = mock(DocumentSnapshot::class.java)
+    val validDocument2: DocumentSnapshot = mock(DocumentSnapshot::class.java)
+    val invalidDocument: DocumentSnapshot = mock(DocumentSnapshot::class.java)
 
-        // Set up the first valid document
-        `when`(validDocument1.id).thenReturn("1")
-        `when`(validDocument1.getString("name")).thenReturn("John Doe")
-        `when`(validDocument1.getString("gender")).thenReturn("MEN")
-        `when`(validDocument1.getTimestamp("birthDate")).thenReturn(Timestamp.now())
-        `when`(validDocument1.getString("catchPhrase")).thenReturn("Hello World")
-        `when`(validDocument1.getString("description")).thenReturn("Sample description")
-        `when`(validDocument1.get("tags")).thenReturn(listOf("tag1", "tag2"))
-        `when`(validDocument1.getString("profilePictureUrl"))
-            .thenReturn("http://example.com/profile.jpg")
+    // Set up the first valid document
+    `when`(validDocument1.id).thenReturn("1")
+    `when`(validDocument1.getString("name")).thenReturn("John Doe")
+    `when`(validDocument1.getString("gender")).thenReturn("MEN")
+    `when`(validDocument1.getTimestamp("birthDate")).thenReturn(Timestamp.now())
+    `when`(validDocument1.getString("catchPhrase")).thenReturn("Hello World")
+    `when`(validDocument1.getString("description")).thenReturn("Sample description")
+    `when`(validDocument1.get("tags")).thenReturn(listOf("tag1", "tag2"))
+    `when`(validDocument1.getString("profilePictureUrl"))
+        .thenReturn("http://example.com/profile.jpg")
 
-        // Set up the second valid document
-        `when`(validDocument2.id).thenReturn("2")
-        `when`(validDocument2.getString("name")).thenReturn("Jane Doe")
-        `when`(validDocument2.getString("gender")).thenReturn("WOMEN")
-        `when`(validDocument2.getTimestamp("birthDate")).thenReturn(Timestamp.now())
-        `when`(validDocument2.getString("catchPhrase")).thenReturn("Greetings")
-        `when`(validDocument2.getString("description")).thenReturn("Another sample profile")
-        `when`(validDocument2.get("tags")).thenReturn(listOf("tag3", "tag4"))
-        `when`(validDocument2.getString("profilePictureUrl")).thenReturn("http://example.com/jane.jpg")
+    // Set up the second valid document
+    `when`(validDocument2.id).thenReturn("2")
+    `when`(validDocument2.getString("name")).thenReturn("Jane Doe")
+    `when`(validDocument2.getString("gender")).thenReturn("WOMEN")
+    `when`(validDocument2.getTimestamp("birthDate")).thenReturn(Timestamp.now())
+    `when`(validDocument2.getString("catchPhrase")).thenReturn("Greetings")
+    `when`(validDocument2.getString("description")).thenReturn("Another sample profile")
+    `when`(validDocument2.get("tags")).thenReturn(listOf("tag3", "tag4"))
+    `when`(validDocument2.getString("profilePictureUrl")).thenReturn("http://example.com/jane.jpg")
 
-        // Set up an invalid document (missing required fields)
-        `when`(invalidDocument.id).thenReturn("3")
-        `when`(invalidDocument.getString("name")).thenReturn(null) // Name is missing
-        `when`(invalidDocument.getString("gender")).thenReturn("UNKNOWN") // Invalid gender
-        `when`(invalidDocument.getTimestamp("birthDate")).thenReturn(Timestamp.now())
-        `when`(invalidDocument.getString("catchPhrase")).thenReturn("Oops")
-        `when`(invalidDocument.getString("description")).thenReturn("Invalid profile")
-        `when`(invalidDocument.get("tags")).thenReturn(listOf(""))
-        `when`(invalidDocument.getString("profilePictureUrl")).thenReturn(null) // Nullable field
+    // Set up an invalid document (missing required fields)
+    `when`(invalidDocument.id).thenReturn("3")
+    `when`(invalidDocument.getString("name")).thenReturn(null) // Name is missing
+    `when`(invalidDocument.getString("gender")).thenReturn("UNKNOWN") // Invalid gender
+    `when`(invalidDocument.getTimestamp("birthDate")).thenReturn(Timestamp.now())
+    `when`(invalidDocument.getString("catchPhrase")).thenReturn("Oops")
+    `when`(invalidDocument.getString("description")).thenReturn("Invalid profile")
+    `when`(invalidDocument.get("tags")).thenReturn(listOf(""))
+    `when`(invalidDocument.getString("profilePictureUrl")).thenReturn(null) // Nullable field
 
-        // Mock the QuerySnapshot
-        `when`(mockProfileQuerySnapshot.documents).thenReturn(listOf(validDocument1, validDocument2, invalidDocument))
-        `when`(mockCollectionReference.get()).thenReturn(Tasks.forResult(mockProfileQuerySnapshot))
+    // Mock the QuerySnapshot
+    `when`(mockProfileQuerySnapshot.documents)
+        .thenReturn(listOf(validDocument1, validDocument2, invalidDocument))
+    `when`(mockCollectionReference.get()).thenReturn(Tasks.forResult(mockProfileQuerySnapshot))
 
-        profilesRepositoryFirestore.getProfilesInRadius(
-            center = GeoPoint(0.0, 0.0),
-            radiusInMeters = 1000.0,
-            onSuccess = { profiles ->
-                // Assert that the profiles were converted correctly
-                assertEquals(2, profiles.size) // Ensure only valid profiles are returned
-                assertEquals("John Doe", profiles[0].name)
-                assertEquals("Jane Doe", profiles[1].name)
-            },
-            onFailure = { fail("Failure callback should not be called") }
-        )
+    profilesRepositoryFirestore.getProfilesInRadius(
+        center = GeoPoint(0.0, 0.0),
+        radiusInMeters = 1000.0,
+        onSuccess = { profiles ->
+          // Assert that the profiles were converted correctly
+          assertEquals(2, profiles.size) // Ensure only valid profiles are returned
+          assertEquals("John Doe", profiles[0].name)
+          assertEquals("Jane Doe", profiles[1].name)
+        },
+        onFailure = { fail("Failure callback should not be called") })
 
-        shadowOf(Looper.getMainLooper()).idle()
-    }
+    shadowOf(Looper.getMainLooper()).idle()
+  }
 }
