@@ -223,7 +223,7 @@ class TagsRepositoryTest {
   }
 
   @Test
-  fun deleteTagSuccessfullTest() {
+  fun deleteTagSuccessfulTest() {
     val collectionReference = mock(CollectionReference::class.java)
     val documentReference = mock(DocumentReference::class.java)
     val updateTask: Task<Void> = mock(Task::class.java) as Task<Void>

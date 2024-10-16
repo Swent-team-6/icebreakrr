@@ -14,7 +14,7 @@ class TagsRepository(private val db: FirebaseFirestore) {
    * @param onSuccess : when the operation is successful, returns the list of TagsCategory got from
    *   the database
    * @param onFailure : When the operation fails, log an error and returns the onFailure with the
-   *   erorr
+   *   error
    */
   fun getAllTags(onSuccess: (List<TagsCategory>) -> Unit, onFailure: (Exception) -> Unit) {
     val categories: MutableList<TagsCategory> = mutableListOf()
@@ -166,28 +166,24 @@ class TagsRepository(private val db: FirebaseFirestore) {
    * @param category : category in which the tag you want to suppress is
    */
   fun deleteTag(onFailure: (Exception) -> Unit, name: String, category: CategoryString) {
-    var tagList = emptyList<TagsCategory>()
     getAllTags(
-        { tagList = it }, { Log.e("TagsRepository", "[deleteTag] error while getting tags : $it") })
-    val tagCategory =
-        try {
-          tagList.filter { it.name == category.name }[0]
-        } catch (e: Exception) {
-          null
-        }
-    if (tagCategory != null && tagCategory.subtags.contains(name)) {
-      db.collection(collectionPath)
-          .document(category.name)
-          .update("subtags", tagCategory.subtags.filter { it != name })
-          .addOnSuccessListener {}
-          .addOnFailureListener { e: Exception ->
-            Log.e("TagsRepository", "[deleteTag] Failed to update the document : $e")
-            onFailure(e)
+        { tagList: List<TagsCategory> ->
+          val tagCategory = tagList.find { it.name == category.name }
+          if (tagCategory != null && tagCategory.subtags.contains(name)) {
+            db.collection(collectionPath)
+                .document(category.name)
+                .update("subtags", tagCategory.subtags.filter { it != name })
+                .addOnSuccessListener {}
+                .addOnFailureListener { e: Exception ->
+                  Log.e("TagsRepository", "[deleteTag] Failed to update the document : $e")
+                  onFailure(e)
+                }
           }
-    }
-    Log.d(
-        "TagsRepository",
-        "[deleteTag] the tag wasn't in the database or the category doesn't exist : $name")
+          Log.d(
+              "TagsRepository",
+              "[deleteTag] the tag wasn't in the database or the category doesn't exist : $name")
+        },
+        { Log.e("TagsRepository", "[deleteTag] error while getting tags : $it") })
   }
 
   /**
@@ -200,28 +196,23 @@ class TagsRepository(private val db: FirebaseFirestore) {
    * @param category : category you want to suppress
    */
   fun deleteCategory(onFailure: (Exception) -> Unit, category: CategoryString) {
-    var tagList = emptyList<TagsCategory>()
     getAllTags(
-        { tagList = it },
-        { Log.e("TagsRepository", "[deleteCategory] error while getting tags : $it") })
-    val tagCategory =
-        try {
-          tagList.filter { it.name == category.name }[0]
-        } catch (e: Exception) {
-          null
-        }
-    if (tagCategory != null) {
-      db.collection(collectionPath)
-          .document(category.name)
-          .delete()
-          .addOnSuccessListener {}
-          .addOnFailureListener { e: Exception ->
-            Log.e("TagsRepository", "[deleteCategory] failed to delete the category : $e")
-            onFailure(e)
+        { tagList: List<TagsCategory> ->
+          val tagCategory = tagList.find { it.name == category.name }
+          if (tagCategory != null) {
+            db.collection(collectionPath)
+                .document(category.name)
+                .delete()
+                .addOnSuccessListener {}
+                .addOnFailureListener { e: Exception ->
+                  Log.e("TagsRepository", "[deleteCategory] failed to delete the category : $e")
+                  onFailure(e)
+                }
+          } else {
+            Log.d("TagsRepository", "[deleteCategory] category doesn't exist")
           }
-    } else {
-      Log.d("TagsRepository", "[deleteCategory] category doesn't exist")
-    }
+        },
+        { Log.e("TagsRepository", "[deleteCategory] error while getting tags : $it") })
   }
 
   /**
