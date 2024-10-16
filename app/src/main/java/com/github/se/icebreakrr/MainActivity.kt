@@ -65,11 +65,11 @@ fun IcebreakrrApp() {
       composable(Screen.NOTIFICATIONS) { NotificationScreen(navigationActions) }
     }
 
-      navigation(
-          startDestination = Screen.FILTER,
-          route = Route.FILTER,
-      ) {
-          composable(Screen.FILTER) {FilterScreen(navigationActions)}
-      }
+    navigation(
+        startDestination = Screen.FILTER,
+        route = Route.FILTER,
+    ) {
+      composable(Screen.FILTER) { FilterScreen(navigationActions) }
+    }
   }
 }

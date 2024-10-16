@@ -3,7 +3,6 @@ package com.github.se.icebreakrr.ui.navigation
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
@@ -38,8 +37,7 @@ fun BottomNavigationMenu(
   NavigationBar(
       modifier = Modifier.fillMaxWidth().height(60.dp).testTag("bottomNavigationMenu"),
       containerColor = IceBreakrrBlue,
-      contentColor = Color.White
-  ) {
+      contentColor = Color.White) {
         tabList.forEach { tab ->
           NavigationBarItem(
               icon = { Icon(tab.icon, contentDescription = stringResource(id = tab.textId)) },

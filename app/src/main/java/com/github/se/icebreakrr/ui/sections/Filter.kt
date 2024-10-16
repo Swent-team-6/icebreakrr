@@ -7,8 +7,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
-import com.github.se.icebreakrr.ui.navigation.BottomNavigationMenu
-import com.github.se.icebreakrr.ui.navigation.LIST_TOP_LEVEL_DESTINATIONS
 import com.github.se.icebreakrr.ui.navigation.NavigationActions
 
 /**
@@ -21,13 +19,13 @@ import com.github.se.icebreakrr.ui.navigation.NavigationActions
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun FilterScreen(navigationActions: NavigationActions) {
-    Scaffold(
-        modifier = Modifier.testTag("aroundYouScreen"),
-        content = { innerPadding ->
-            // Use the innerPadding to apply padding around your content
-            Text(
-                text = "Filter screen", // TODO PLaceholder
-                modifier = Modifier.padding(innerPadding) // Applying the padding to the content
+  Scaffold(
+      modifier = Modifier.testTag("filterScreen"),
+      content = { innerPadding ->
+        // Use the innerPadding to apply padding around your content
+        Text(
+            text = "Filter screen",
+            modifier = Modifier.padding(innerPadding) // Applying the padding to the content
             )
-        })
+      })
 }

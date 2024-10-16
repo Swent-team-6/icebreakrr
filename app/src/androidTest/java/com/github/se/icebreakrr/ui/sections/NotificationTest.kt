@@ -1,53 +1,49 @@
 package com.github.se.icebreakrr.ui.sections
 
 import androidx.compose.ui.test.assertIsDisplayed
-import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
-import com.github.se.icebreakrr.MainActivity
-import com.github.se.icebreakrr.R
 import com.github.se.icebreakrr.ui.navigation.NavigationActions
 import com.github.se.icebreakrr.ui.navigation.Screen
-import com.github.se.icebreakrr.ui.tags.Tag
-import com.github.se.icebreakrr.ui.tags.TagStyle
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.mockito.kotlin.mock
-import org.mockito.kotlin.whenever
+import org.mockito.kotlin.verify
 
 class NotificationTest {
-    private lateinit var navigationActionsMock: NavigationActions
-    private lateinit var onClickMock: () -> Unit
-    private lateinit var navFilterMock:() -> Unit
-    private lateinit var navSettingsMock:() -> Unit
-    @get:Rule
-    val composeTestRule = createAndroidComposeRule<MainActivity>()
+  private lateinit var navigationActionsMock: NavigationActions
 
-    @Before
-    fun setUp() {
-        navigationActionsMock = mock()
-        onClickMock = mock()
-        navFilterMock = mock()
-        navSettingsMock = mock()
-        whenever(navigationActionsMock.navigateTo(Screen.FILTER)).then { navFilterMock }
-        whenever(navigationActionsMock.navigateTo(Screen.SETTINGS)).then { navSettingsMock }
+  @get:Rule val composeTestRule = createComposeRule()
 
-    }
+  @Before
+  fun setUp() {
+    navigationActionsMock = mock()
+  }
 
-    @Test
-    fun aroundYouScreenIsDisplayedOnLaunch() {
-        composeTestRule.setContent { NotificationScreen(navigationActionsMock) }
-        composeTestRule.onNodeWithTag("notificationScreen").assertIsDisplayed()
-    }
+  @Test
+  fun notificationIsDisplayedOnLaunch() {
+    composeTestRule.setContent { NotificationScreen(navigationActionsMock) }
+    composeTestRule.onNodeWithTag("notificationScreen").assertIsDisplayed()
+  }
 
-    @Test
-    fun allIsDisplayed() {
-        composeTestRule.onNodeWithTag("bottomNavigationMenu").assertIsDisplayed()
-    }
+  @Test
+  fun allIsDisplayed() {
+    composeTestRule.setContent { NotificationScreen(navigationActionsMock) }
+    composeTestRule.onNodeWithTag("bottomNavigationMenu").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("notificationScroll").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("notificationFirstText").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("notificationSecondText").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("filterButton").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("notificationTopAppBar").assertIsDisplayed()
+  }
 
-    @Test
-    fun navigationWorks() {
-
-    }
+  @Test
+  fun navigationToFilterWorks() {
+    composeTestRule.setContent { NotificationScreen(navigationActionsMock) }
+    composeTestRule.onNodeWithTag("filterButton").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("filterButton").performClick()
+    verify(navigationActionsMock).navigateTo(screen = Screen.FILTER)
+  }
 }
