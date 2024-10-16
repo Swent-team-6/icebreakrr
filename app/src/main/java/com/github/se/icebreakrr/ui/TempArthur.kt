@@ -1,6 +1,12 @@
 package com.github.se.icebreakrr.ui
 
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import com.google.firebase.Firebase
 import com.google.firebase.Timestamp
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
 data class Profile(
     val uid: String,
@@ -44,5 +50,32 @@ enum class Gender(val displayName: String) {
     WOMAN("Woman"),
     MAN("Man"),
     OTHER("Other")
+}
+
+class ProfileViewModel : ViewModel() {
+    private val _profiles = MutableStateFlow<List<Profile>>(emptyList())
+    val profiles: StateFlow<List<Profile>> = _profiles.asStateFlow()
+
+    private val _selectedProfile = MutableStateFlow<Profile?>(null)
+    val selectedProfile: StateFlow<Profile?> = _selectedProfile.asStateFlow()
+
+    init {
+        getProfiles()
+    }
+
+    private fun getProfiles() {
+        _profiles.value = Profile.getMockedProfiles()
+    }
+
+    // create factory
+    companion object {
+        val Factory: ViewModelProvider.Factory =
+            object : ViewModelProvider.Factory {
+                @Suppress("UNCHECKED_CAST")
+                override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                    return ProfileViewModel() as T
+                }
+            }
+    }
 }
 
