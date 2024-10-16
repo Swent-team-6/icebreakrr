@@ -27,6 +27,7 @@ object Screen {
   const val AROUND_YOU = "Around You Screen"
   const val SETTINGS = "Settings Screen"
   const val NOTIFICATIONS = "Notifications Screen"
+  const val FILTER = "Filter Screen"
 }
 
 object TopLevelDestinations {
