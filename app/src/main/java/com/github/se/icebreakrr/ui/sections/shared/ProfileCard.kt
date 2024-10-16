@@ -16,6 +16,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -28,7 +29,7 @@ fun ProfileCard(profile: Profile, onclick: () -> Unit)
     Card(
         onClick = onclick,
         shape = RoundedCornerShape(14.dp),
-        modifier = Modifier.fillMaxWidth().heightIn(max=150.dp),
+        modifier = Modifier.fillMaxWidth().heightIn(max=150.dp).testTag("profileCard"),
     ) {
         Row (
             horizontalArrangement = Arrangement.spacedBy(18.dp),

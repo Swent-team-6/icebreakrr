@@ -36,7 +36,8 @@ import com.github.se.icebreakrr.ui.navigation.BottomNavigationMenu
 import com.github.se.icebreakrr.ui.navigation.LIST_TOP_LEVEL_DESTINATIONS
 import com.github.se.icebreakrr.ui.navigation.NavigationActions
 import com.github.se.icebreakrr.ui.navigation.Screen
-import com.github.se.icebreakrr.ui.navigation.shared.ProfileCard
+import com.github.se.icebreakrr.ui.sections.shared.ProfileCard
+import com.github.se.icebreakrr.ui.sections.shared.TopBar
 
 
 /**
@@ -66,25 +67,8 @@ fun AroundYouScreen(
             )
         },
 
-        topBar = {
-            Box(
-                contentAlignment = Alignment.Center,
-                modifier = Modifier
-                    .background(Color(0xFF1FAEF0)) //fixme: use icebreakrr blue
-                    .fillMaxWidth()
-                    .heightIn(90.dp)
-            ) {
-                Text(
-                    text = "Around You",
-                    fontSize = 40.sp,
-                    color = Color.White,
-                    fontWeight = FontWeight.Bold,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.fillMaxWidth()
+        topBar= {TopBar()},
 
-                )
-            }
-        },
         content = { innerPadding ->
             if (profiles.value.isNotEmpty()) {
                 LazyColumn(
@@ -108,7 +92,7 @@ fun AroundYouScreen(
                     modifier = Modifier.fillMaxSize().padding(innerPadding)
                 ) {
                     Text(
-                        modifier = Modifier.padding(innerPadding),
+                        modifier = Modifier.padding(innerPadding).testTag("emptyProfilePrompt"),
                         text = "There is no one around. Try moving!",
                         fontSize = 20.sp,
                         fontWeight = FontWeight.Bold,
@@ -120,7 +104,9 @@ fun AroundYouScreen(
         floatingActionButton = {
             FloatingActionButton(
                 onClick = { /* todo: navigate to add profile */ },
-                containerColor = Color(0xFF1FAEF0) //fixme: use icebreakrr blue
+                containerColor = Color(0xFF1FAEF0), //fixme: use icebreakrr blue
+                contentColor = Color.White,
+                modifier = Modifier.testTag("filterButton")
             ) {
                 Icon(painter = painterResource(R.drawable.filter_24), contentDescription = "Add")
             }
