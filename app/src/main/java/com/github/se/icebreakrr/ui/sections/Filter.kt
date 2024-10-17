@@ -51,21 +51,20 @@ import com.github.se.icebreakrr.ui.tags.TagSelector
 
 const val textSizeFactor = 0.3f
 val IcebreakrrBlue: Color = Color(0xFF1FAEF0)
+const val textFieldHeightFactor = 0.08f
+const val textFieldWidthFactor = 0.2f
+const val buttonHeightFactor = 0.07f
+const val buttonWidthFactor = 0.3f
+const val tagSelectorHeightFactor = 0.25f
+const val tagSelectorWidthFactor = 0.8f
+const val tagSelectorTextSizeFactor = 0.1f
+const val titleFontSizeFactor = 0.03f
 
 // This file was written with the help of Cursor, Claude, ChatGPT
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FilterScreen(navigationActions: NavigationActions) {
   val context = LocalContext.current
-
-  val textFieldHeightFactor = 0.08f
-  val textFieldWidthFactor = 0.2f
-  val buttonHeightFactor = 0.07f
-  val buttonWidthFactor = 0.3f
-  val tagSelectorHeightFactor = 0.25f
-  val tagSelectorWidthFactor = 0.8f
-  val tagSelectorTextSizeFactor = 0.1f
-  val titleFontSizeFactor = 0.03f
 
   val configuration = LocalConfiguration.current
   val screenHeight = configuration.screenHeightDp.dp
@@ -97,12 +96,12 @@ fun FilterScreen(navigationActions: NavigationActions) {
   val stringQuery = remember { mutableStateOf("") }
   val expanded = remember { mutableStateOf(false) }
 
-  var ageFromText by remember { mutableStateOf("") }
-  var ageToText by remember { mutableStateOf("") }
+  var ageFromInput by remember { mutableStateOf("") }
+  var ageToInput by remember { mutableStateOf("") }
   var ageRangeError by remember { mutableStateOf(false) }
 
   fun validateAndUpdateAgeFrom(input: String) {
-    ageFromText = input
+      ageFromInput = input
     if (input.isEmpty()) {
       ageFrom = null
       ageRangeError = false
@@ -119,7 +118,7 @@ fun FilterScreen(navigationActions: NavigationActions) {
   }
 
   fun validateAndUpdateAgeTo(input: String) {
-    ageToText = input
+      ageToInput = input
     if (input.isEmpty()) {
       ageTo = null
       ageRangeError = false
@@ -139,20 +138,20 @@ fun FilterScreen(navigationActions: NavigationActions) {
     when {
       ageRangeError -> {
         Toast.makeText(context, "Invalid age range", Toast.LENGTH_SHORT).show()
-        ageToText = ""
-        ageFromText = ""
+        ageToInput = ""
+        ageFromInput = ""
         return // exit early so that there aren't 3 overlapping toasts as the next 2 would also be
         // called
       }
-      ageFromText.isNotEmpty() && ageFrom == null -> {
+      ageFromInput.isNotEmpty() && ageFrom == null -> {
         Toast.makeText(context, "Please enter a valid 'From' age (13 or older)", Toast.LENGTH_SHORT)
             .show()
-        ageFromText = "" // Clear invalid input
+        ageFromInput = "" // Clear invalid input
       }
-      ageToText.isNotEmpty() && ageTo == null -> {
+      ageToInput.isNotEmpty() && ageTo == null -> {
         Toast.makeText(context, "Please enter a valid 'To' age (13 or older)", Toast.LENGTH_SHORT)
             .show()
-        ageToText = "" // Clear invalid input
+        ageToInput = "" // Clear invalid input
       }
     }
   }
@@ -210,7 +209,7 @@ fun FilterScreen(navigationActions: NavigationActions) {
               modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
               horizontalArrangement = Arrangement.Center) {
                 OutlinedTextField(
-                    value = ageFromText,
+                    value = ageFromInput,
                     onValueChange = { validateAndUpdateAgeFrom(it) },
                     modifier =
                         Modifier.height(IntrinsicSize.Min)
@@ -221,7 +220,7 @@ fun FilterScreen(navigationActions: NavigationActions) {
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     textStyle = TextStyle(fontSize = (textFieldHeight.value * textSizeFactor).sp),
-                    isError = ageFromText.isNotEmpty() && (ageFrom == null || ageRangeError))
+                    isError = ageFromInput.isNotEmpty() && (ageFrom == null || ageRangeError))
                 Spacer(modifier = Modifier.width(screenWidth * 0.02f))
                 Text(
                     " - ",
@@ -231,7 +230,7 @@ fun FilterScreen(navigationActions: NavigationActions) {
                     fontWeight = FontWeight.Bold)
                 Spacer(modifier = Modifier.width(screenWidth * 0.02f))
                 OutlinedTextField(
-                    value = ageToText,
+                    value = ageToInput,
                     onValueChange = { validateAndUpdateAgeTo(it) },
                     modifier =
                         Modifier.height(IntrinsicSize.Min)
@@ -242,7 +241,7 @@ fun FilterScreen(navigationActions: NavigationActions) {
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     textStyle = TextStyle(fontSize = (textFieldHeight.value * textSizeFactor).sp),
-                    isError = ageToText.isNotEmpty() && (ageTo == null || ageRangeError))
+                    isError = ageToInput.isNotEmpty() && (ageTo == null || ageRangeError))
               }
 
           val tagSelectorHeight = screenHeight * tagSelectorHeightFactor
