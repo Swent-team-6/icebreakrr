@@ -42,7 +42,7 @@ class ProfilesViewModelTest {
           uid = "2",
           name = "Jane Smith",
           gender = Gender.WOMEN,
-          birthDate = Timestamp.now(),
+          birthDate = birthDate2002,
           catchPhrase = "Adventure awaits!",
           description = "Always looking for new experiences.",
           tags = listOf("adventurous", "outgoing"))
@@ -65,13 +65,50 @@ class ProfilesViewModelTest {
           onSuccess(profilesList)
         }
 
-    // Test filtering by gender and tags
+    // Test filtering by a list of genders and tags
     profilesViewModel.getFilteredProfilesInRadius(
-        center, radiusInMeters, Gender.MEN, 20..30, listOf("friendly"))
+        center, radiusInMeters, listOf(Gender.MEN), 20..30, listOf("friendly"))
 
     verify(profilesRepository).getProfilesInRadius(eq(center), eq(radiusInMeters), any(), any())
     assertThat(profilesViewModel.profiles.value.size, `is`(1)) // Should return only profile1
     assertThat(profilesViewModel.profiles.value[0].uid, `is`("1")) // profile1 should be returned
+  }
+
+  @Test
+  fun getFilteredProfilesInRadiusWithMultipleGenders() = runBlocking {
+    val center = GeoPoint(0.0, 0.0)
+    val radiusInMeters = 1000.0
+
+    val profilesList = listOf(profile1, profile2)
+    whenever(profilesRepository.getProfilesInRadius(eq(center), eq(radiusInMeters), any(), any()))
+        .thenAnswer {
+          val onSuccess = it.getArgument<(List<Profile>) -> Unit>(2)
+          onSuccess(profilesList)
+        }
+
+    // Test filtering by a list of genders (both MEN and WOMEN)
+    profilesViewModel.getFilteredProfilesInRadius(
+        center, radiusInMeters, listOf(Gender.MEN, Gender.WOMEN), 20..30, null)
+
+    verify(profilesRepository).getProfilesInRadius(eq(center), eq(radiusInMeters), any(), any())
+    assertThat(profilesViewModel.profiles.value.size, `is`(2)) // Should return both profiles
+  }
+
+  @Test
+  fun getFilteredProfilesInRadiusHandlesError() = runBlocking {
+    val center = GeoPoint(0.0, 0.0)
+    val radiusInMeters = 1000.0
+    val exception = Exception("Test exception")
+
+    whenever(profilesRepository.getProfilesInRadius(eq(center), eq(radiusInMeters), any(), any()))
+        .thenAnswer {
+          val onFailure = it.getArgument<(Exception) -> Unit>(3)
+          onFailure(exception)
+        }
+
+    profilesViewModel.getFilteredProfilesInRadius(center, radiusInMeters)
+
+    assertThat(profilesViewModel.error.value, `is`(exception))
   }
 
   @Test
@@ -106,23 +143,6 @@ class ProfilesViewModelTest {
     profilesViewModel.deleteProfileByUid("1")
 
     verify(profilesRepository).deleteProfileByUid(eq("1"), any(), any())
-  }
-
-  @Test
-  fun getFilteredProfilesInRadiusHandlesError() = runBlocking {
-    val center = GeoPoint(0.0, 0.0)
-    val radiusInMeters = 1000.0
-    val exception = Exception("Test exception")
-
-    whenever(profilesRepository.getProfilesInRadius(eq(center), eq(radiusInMeters), any(), any()))
-        .thenAnswer {
-          val onFailure = it.getArgument<(Exception) -> Unit>(3)
-          onFailure(exception)
-        }
-
-    profilesViewModel.getFilteredProfilesInRadius(center, radiusInMeters)
-
-    assertThat(profilesViewModel.error.value, `is`(exception))
   }
 
   @Test
