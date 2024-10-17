@@ -2,6 +2,8 @@ package com.github.se.icebreakrr.ui.navigation
 
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.onAllNodesWithTag
+import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -34,7 +36,20 @@ class NavigationTest {
     composeTestRule.onNodeWithTag("aroundYouScreen").assertIsDisplayed()
 
     composeTestRule.onNodeWithTag("navItem_${R.string.settings}").performClick()
-    composeTestRule.onNodeWithTag("settingsScreen").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("profileScreen").assertIsDisplayed()
+
+    composeTestRule.onNodeWithTag("editButton").performClick()
+    composeTestRule.onNodeWithTag("profileEditScreen").assertIsDisplayed()
+
+    composeTestRule.onNodeWithTag("goBackButton").performClick()
+    composeTestRule.onNodeWithTag("discardChangesOption").performClick()
+
+    composeTestRule.onNodeWithTag("profileScreen").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("goBackButton").performClick()
+
+    composeTestRule.onAllNodesWithTag("profileCard").onFirst().performClick()
+    composeTestRule.onNodeWithTag("profileScreen").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("goBackButton").performClick()
 
     composeTestRule.onNodeWithTag("navItem_${R.string.notifications}").performClick()
     composeTestRule.onNodeWithTag("notificationScreen").assertIsDisplayed()
