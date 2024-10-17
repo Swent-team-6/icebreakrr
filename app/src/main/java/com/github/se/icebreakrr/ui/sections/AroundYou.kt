@@ -30,6 +30,7 @@ import com.github.se.icebreakrr.model.profile.MockProfileViewModel
 import com.github.se.icebreakrr.ui.navigation.BottomNavigationMenu
 import com.github.se.icebreakrr.ui.navigation.LIST_TOP_LEVEL_DESTINATIONS
 import com.github.se.icebreakrr.ui.navigation.NavigationActions
+import com.github.se.icebreakrr.ui.navigation.Screen
 import com.github.se.icebreakrr.ui.sections.shared.ProfileCard
 import com.github.se.icebreakrr.ui.sections.shared.TopBar
 
@@ -59,7 +60,6 @@ fun AroundYouScreen(
       },
       topBar = { TopBar() },
       content = { innerPadding ->
-        val context = LocalContext.current
         if (profiles.value.isNotEmpty()) {
           LazyColumn(
               contentPadding = PaddingValues(vertical = 16.dp),
@@ -68,7 +68,7 @@ fun AroundYouScreen(
                 items(profiles.value.size) { index ->
                   ProfileCard(
                       profile = profiles.value[index],
-                      onclick = { navigationActions.navigateTo("Settings Screen") })
+                      onclick = { navigationActions.navigateTo(Screen.PROFILE_DISPLAY) })
                 }
               }
         } else {
@@ -85,10 +85,9 @@ fun AroundYouScreen(
         }
       },
       floatingActionButton = {
-        val context = LocalContext.current
         FloatingActionButton(
             onClick = {
-              Toast.makeText(context, "Filter button clicked", Toast.LENGTH_SHORT).show()
+              navigationActions.navigateTo(Screen.FILTER)
             },
             containerColor = Color(0xFF1FAEF0), // fixme: use icebreakrr blue
             contentColor = Color.White,
