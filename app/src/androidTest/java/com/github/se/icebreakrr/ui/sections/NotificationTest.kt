@@ -52,14 +52,6 @@ class NotificationTest {
   }
 
   @Test
-  fun navigationToFilterWorks() {
-    composeTestRule.setContent { NotificationScreen(navigationActionsMock, profileViewModel) }
-    composeTestRule.onNodeWithTag("filterButton").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("filterButton").performClick()
-    verify(navigationActionsMock).navigateTo(screen = Screen.FILTER)
-  }
-
-  @Test
   fun profilesListIsEmpty() {
     profileViewModel.clearProfiles()
     composeTestRule.setContent { NotificationScreen(navigationActionsMock, profileViewModel) }

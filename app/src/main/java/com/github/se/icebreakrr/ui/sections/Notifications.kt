@@ -12,6 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.github.se.icebreakrr.model.profile.MockProfileViewModel
 import com.github.se.icebreakrr.ui.navigation.BottomNavigationMenu
@@ -56,15 +57,17 @@ fun NotificationScreen(
           item {
             Text(
                 text = "Pending meeting requests",
-                modifier = Modifier.padding(innerPadding).testTag("notificationFirstText"))
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(vertical = 16.dp).testTag("notificationFirstText"))
             Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-              cardList.value.forEach { p -> ProfileCard(p, onclick = navFunction) }
+              cardList.value.take(4).forEach { p -> ProfileCard(p, onclick=navFunction) }
             }
             Text(
                 text = "Passed",
-                modifier = Modifier.padding(innerPadding).testTag("notificationSecondText"))
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(vertical = 16.dp).testTag("notificationSecondText"))
             Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-              cardList.value.forEach { p -> ProfileCard(p, onclick = navFunction) }
+              cardList.value.drop(4).forEach { p -> ProfileCard(p, onclick=navFunction) }
             }
           }
         }
