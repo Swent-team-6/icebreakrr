@@ -58,13 +58,13 @@ fun NotificationScreen(
                 text = "Pending meeting requests",
                 modifier = Modifier.padding(innerPadding).testTag("notificationFirstText"))
             Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-              cardList.value.forEach { p -> ProfileCard(p, navFunction) }
+              cardList.value.forEach { p -> ProfileCard(p, onclick = navFunction) }
             }
             Text(
                 text = "Passed",
                 modifier = Modifier.padding(innerPadding).testTag("notificationSecondText"))
             Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-              cardList.value.forEach { p -> ProfileCard(p, navFunction) }
+              cardList.value.forEach { p -> ProfileCard(p, onclick = navFunction) }
             }
           }
         }
