@@ -50,15 +50,14 @@ fun SettingsScreen(navigationActions: NavigationActions) {
             navigationActions.navigateTo(Screen.PROFILE)
           }
 
-        Spacer(modifier = Modifier.padding(vertical = 8.dp))
+          Spacer(modifier = Modifier.padding(vertical = 8.dp))
 
-
-        ToggleOptionBox(label = "Toggle Location")
+          ToggleOptionBox(label = "Toggle Location")
           ToggleOptionBox(label = "Option 1")
           ToggleOptionBox(label = "Option 2")
           ToggleOptionBox(label = "Option 3")
 
-        Spacer(modifier = Modifier.padding(vertical = 16.dp))
+          Spacer(modifier = Modifier.padding(vertical = 16.dp))
 
           Button(
               onClick = {
@@ -68,7 +67,6 @@ fun SettingsScreen(navigationActions: NavigationActions) {
               modifier = Modifier.fillMaxWidth().testTag("logOutButton")) {
                 Text("Log Out", color = Color.White)
               }
-
         }
   }
 }
