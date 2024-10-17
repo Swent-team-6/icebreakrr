@@ -1,7 +1,6 @@
 package com.github.se.icebreakrr
 
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
@@ -20,28 +19,28 @@ import com.github.se.icebreakrr.ui.navigation.NavigationActions
 import com.github.se.icebreakrr.ui.navigation.Route
 import com.github.se.icebreakrr.ui.navigation.Screen
 import com.github.se.icebreakrr.ui.profile.ProfileEditingScreen
-import com.github.se.icebreakrr.ui.profile.ProfileView
 import com.github.se.icebreakrr.ui.sections.AroundYouScreen
 import com.github.se.icebreakrr.ui.sections.FilterScreen
 import com.github.se.icebreakrr.ui.sections.NotificationScreen
 import com.github.se.icebreakrr.ui.sections.SettingsScreen
 import com.github.se.icebreakrr.ui.theme.SampleAppTheme
-import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.FirebaseApp
+import com.google.firebase.auth.FirebaseAuth
 
 class MainActivity : ComponentActivity() {
   private lateinit var auth: FirebaseAuth
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
-      // Initialize Firebase Auth
-      FirebaseApp.initializeApp(this)
-      auth = FirebaseAuth.getInstance()
-      auth.currentUser?.let {
-          // Sign out the user if they are already signed in
-          // This is useful for testing purposes
-          auth.signOut()
-      }
+    auth = FirebaseAuth.getInstance()
+    // Initialize Firebase Auth
+    FirebaseApp.initializeApp(this)
+    auth = FirebaseAuth.getInstance()
+    auth.currentUser?.let {
+      // Sign out the user if they are already signed in
+      // This is useful for testing purposes
+      auth.signOut()
+    }
     FirebaseAuth.getInstance()
 
     // Retrieve the testing flag from the Intent
@@ -92,7 +91,6 @@ fun IcebreakrrApp() {
         route = Route.SETTINGS,
     ) {
       composable(Screen.SETTINGS) { SettingsScreen(navigationActions) }
-      composable(Screen.PROFILE) { ProfileView(navigationActions) }
     }
 
     navigation(
