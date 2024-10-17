@@ -20,7 +20,6 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.github.se.icebreakrr.model.profile.Gender
 import com.github.se.icebreakrr.model.profile.Profile
-import com.github.se.icebreakrr.model.profile.ProfilesRepositoryFirestore
 import com.github.se.icebreakrr.ui.navigation.NavigationActions
 import com.google.firebase.Timestamp
 
@@ -28,160 +27,136 @@ import com.google.firebase.Timestamp
 @Composable
 fun ProfileEditingScreen(navigationActions: NavigationActions) {
 
-    val configuration = LocalConfiguration.current
-    val screenWidth = configuration.screenWidthDp.dp
+  val configuration = LocalConfiguration.current
+  val screenWidth = configuration.screenWidthDp.dp
 
-    // Define dynamic padding and text size based on screen size
-    val padding = screenWidth * 0.02f // 2% of screen width
-    val textSize = screenWidth * 0.06f // 6% of screen width
+  // Define dynamic padding and text size based on screen size
+  val padding = screenWidth * 0.02f // 2% of screen width
+  val textSize = screenWidth * 0.06f // 6% of screen width
 
-    //TODO : make the padding and text size dynamic based on screen size
+  // TODO : make the padding and text size dynamic based on screen size
 
-    val user = Profile(
-        uid = "",
-        name = "",
-        gender = Gender.OTHER,
-        birthDate = Timestamp.now(),
-        catchPhrase = "",
-        description = "",
-        tags = listOf(),
-        profilePictureUrl = ""
-    )
+  val user =
+      Profile(
+          uid = "",
+          name = "",
+          gender = Gender.OTHER,
+          birthDate = Timestamp.now(),
+          catchPhrase = "",
+          description = "",
+          tags = listOf(),
+          profilePictureUrl = "")
 
-    val profilePicture by remember {
-        mutableStateOf(
-            user.profilePictureUrl)
-    }
-    var catchphrase by remember {
-        mutableStateOf(TextFieldValue(user.catchPhrase))
-    }
-    var description by remember { mutableStateOf(TextFieldValue(user.description)) }
-    var showDialog by remember { mutableStateOf(false) }
-    var searchQuery by remember { mutableStateOf("") }
+  val profilePicture by remember { mutableStateOf(user.profilePictureUrl) }
+  var catchphrase by remember { mutableStateOf(TextFieldValue(user.catchPhrase)) }
+  var description by remember { mutableStateOf(TextFieldValue(user.description)) }
+  var showDialog by remember { mutableStateOf(false) }
+  var searchQuery by remember { mutableStateOf("") }
 
-    // to POST the new profile, I will use Arthur's viewModel
+  // to POST the new profile, I will use Arthur's viewModel
 
-    // for tags display, I will use Samuel's tags viewProfile to load the tags
+  // for tags display, I will use Samuel's tags viewProfile to load the tags
 
-    Scaffold(
-        modifier = Modifier.testTag("profileEditScreen"),
-        topBar = {
-            TopAppBar(
-                title = { Text("") },
-                navigationIcon = {
-                    IconButton(
-                        modifier = Modifier.testTag("goBackButton"),
-                        onClick = {
-                            // TODO : verify that the profile has been modified before showing the modal
-                            showDialog = true
-                        }) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
-                    }
-                },
-                actions = {
-                    IconButton(
-                        modifier = Modifier.testTag("checkButton"),
-                        onClick = {
-                            // TODO : handle save action
-                        }) {
-                        Icon(Icons.Default.Check, contentDescription = "Save")
-                    }
-                })
-        }) {
+  Scaffold(
+      modifier = Modifier.testTag("profileEditScreen"),
+      topBar = {
+        TopAppBar(
+            title = { Text("") },
+            navigationIcon = {
+              IconButton(
+                  modifier = Modifier.testTag("goBackButton"),
+                  onClick = {
+                    // TODO : verify that the profile has been modified before showing the modal
+                    showDialog = true
+                  }) {
+                    Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                  }
+            },
+            actions = {
+              IconButton(
+                  modifier = Modifier.testTag("checkButton"),
+                  onClick = {
+                    // TODO : handle save action
+                  }) {
+                    Icon(Icons.Default.Check, contentDescription = "Save")
+                  }
+            })
+      }) {
         Column(
-            modifier = Modifier
-                .padding(it)
-                .padding(padding),
+            modifier = Modifier.padding(it).padding(padding),
             horizontalAlignment = Alignment.CenterHorizontally) {
-            AsyncImage( //TODO : implement image uploading
-                model = profilePicture,
-                contentDescription = "Profile Picture",
-                modifier =
-                Modifier
-                    .size(100.dp)
-                    .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.primary)
-                    .testTag("profilePicture")) // Added test tag
+              AsyncImage( // TODO : implement image uploading
+                  model = profilePicture,
+                  contentDescription = "Profile Picture",
+                  modifier =
+                      Modifier.size(100.dp)
+                          .clip(CircleShape)
+                          .background(MaterialTheme.colorScheme.primary)
+                          .testTag("profilePicture")) // Added test tag
 
-            Spacer(modifier = Modifier.height(padding))
+              Spacer(modifier = Modifier.height(padding))
 
-            // Name Input
-            Text(
-                text = "${user.name}, ${user.calculateAge()}",
-                style = TextStyle(fontSize = textSize.value.sp),
-                modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .wrapContentWidth(Alignment.CenterHorizontally)
-                    .testTag("nameAndAge"))
-            Spacer(modifier = Modifier.height(padding))
+              // Name Input
+              Text(
+                  text = "${user.name}, ${user.calculateAge()}",
+                  style = TextStyle(fontSize = textSize.value.sp),
+                  modifier =
+                      Modifier.fillMaxWidth()
+                          .wrapContentWidth(Alignment.CenterHorizontally)
+                          .testTag("nameAndAge"))
+              Spacer(modifier = Modifier.height(padding))
 
-            // Catchphrase Input
-            OutlinedTextField(
-                value = catchphrase,
-                onValueChange = { catchphrase = it },
-                label = { Text("Catchphrase") },
-                modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .height(60.dp)
-                    .testTag("catchphrase"))
+              // Catchphrase Input
+              OutlinedTextField(
+                  value = catchphrase,
+                  onValueChange = { catchphrase = it },
+                  label = { Text("Catchphrase") },
+                  modifier = Modifier.fillMaxWidth().height(60.dp).testTag("catchphrase"))
 
-            Spacer(modifier = Modifier.height(padding))
+              Spacer(modifier = Modifier.height(padding))
 
-            // Description Input
-            OutlinedTextField(
-                value = description,
-                onValueChange = { description = it },
-                label = { Text("Description") },
-                modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .height(100.dp)
-                    .testTag("description"))
-            Spacer(modifier = Modifier.height(padding))
+              // Description Input
+              OutlinedTextField(
+                  value = description,
+                  onValueChange = { description = it },
+                  label = { Text("Description") },
+                  modifier = Modifier.fillMaxWidth().height(100.dp).testTag("description"))
+              Spacer(modifier = Modifier.height(padding))
 
-            //TODO: This is temporary for tests and will be replaced with the actual tag selector of Maximo
-            OutlinedTextField(
-                value = searchQuery,
-                onValueChange = { searchQuery = it },
-                label = { Text("Search Tags") },
-                modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .height(60.dp)
-                    .testTag("searchTags")
-            )
-            Spacer(modifier = Modifier.height(padding))
+              // TODO: This is temporary for tests and will be replaced with the actual tag selector
+              // of Maximo
+              OutlinedTextField(
+                  value = searchQuery,
+                  onValueChange = { searchQuery = it },
+                  label = { Text("Search Tags") },
+                  modifier = Modifier.fillMaxWidth().height(60.dp).testTag("searchTags"))
+              Spacer(modifier = Modifier.height(padding))
 
-            //TODO : This will be replaced by the actual tags
-            Text(
-                "Tags",
-                style = MaterialTheme.typography.titleMedium,
-                modifier =
-                Modifier
-                    .align(Alignment.Start)
-                    .testTag("userTags"))
+              // TODO : This will be replaced by the actual tags
+              Text(
+                  "Tags",
+                  style = MaterialTheme.typography.titleMedium,
+                  modifier = Modifier.align(Alignment.Start).testTag("userTags"))
 
-            //TODO: implement tags query and display with Maximo's tags UI and Samuel's viewProfile
+              // TODO: implement tags query and display with Maximo's tags UI and Samuel's
+              // viewProfile
 
-            // Modal for unsaved changes on leave page with back button
-            if (showDialog) {
+              // Modal for unsaved changes on leave page with back button
+              if (showDialog) {
                 AlertDialog(
                     onDismissRequest = { showDialog = false },
                     title = { Text("You are about to leave this page") },
                     text = { Text("Do you want to save your changes?") },
                     confirmButton = {
-                        TextButton(onClick = { navigationActions.goBack() }) {
-                            Text("Discard changes")
-                        }
+                      TextButton(onClick = { navigationActions.goBack() }) {
+                        Text("Discard changes")
+                      }
                     },
                     dismissButton = {
-                        TextButton(onClick = { showDialog = false }) { Text("Cancel") }
+                      TextButton(onClick = { showDialog = false }) { Text("Cancel") }
                     },
-                    modifier = Modifier.testTag("alertDialog")
-                )
+                    modifier = Modifier.testTag("alertDialog"))
+              }
             }
-        }
-    }
+      }
 }
