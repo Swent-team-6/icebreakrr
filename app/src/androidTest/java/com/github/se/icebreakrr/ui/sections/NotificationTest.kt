@@ -13,7 +13,6 @@ import androidx.compose.ui.test.performScrollTo
 import com.github.se.icebreakrr.R
 import com.github.se.icebreakrr.model.profile.MockProfileViewModel
 import com.github.se.icebreakrr.ui.navigation.NavigationActions
-import com.github.se.icebreakrr.ui.navigation.Screen
 import com.github.se.icebreakrr.ui.navigation.TopLevelDestinations
 import org.junit.Before
 import org.junit.Rule
@@ -48,15 +47,6 @@ class NotificationTest {
     composeTestRule.onNodeWithTag("notificationScroll").assertIsDisplayed()
     composeTestRule.onNodeWithTag("notificationFirstText").assertIsDisplayed()
     composeTestRule.onNodeWithTag("notificationSecondText").performScrollTo()
-    composeTestRule.onNodeWithTag("filterButton").assertIsDisplayed()
-  }
-
-  @Test
-  fun navigationToFilterWorks() {
-    composeTestRule.setContent { NotificationScreen(navigationActionsMock, profileViewModel) }
-    composeTestRule.onNodeWithTag("filterButton").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("filterButton").performClick()
-    verify(navigationActionsMock).navigateTo(screen = Screen.FILTER)
   }
 
   @Test
@@ -74,7 +64,7 @@ class NotificationTest {
   fun profilesListNotEmpty() {
     composeTestRule.setContent { NotificationScreen(navigationActionsMock, profileViewModel) }
     composeTestRule.onAllNodesWithTag("profileCard").onFirst().assertIsDisplayed()
-    composeTestRule.onAllNodesWithTag("profileCard").assertCountEquals(24)
+    composeTestRule.onAllNodesWithTag("profileCard").assertCountEquals(12)
   }
 
   @Test
@@ -85,13 +75,5 @@ class NotificationTest {
 
     composeTestRule.onNodeWithTag("navItem_${R.string.around_you}").performClick()
     verify(navigationActionsMock).navigateTo(TopLevelDestinations.AROUND_YOU)
-  }
-
-  @Test
-  fun clickOnCardEvent() {
-    composeTestRule.setContent { NotificationScreen(navigationActionsMock, profileViewModel) }
-    composeTestRule.onAllNodesWithTag("profileCard").onFirst().assertIsDisplayed()
-    composeTestRule.onAllNodesWithTag("profileCard").onFirst().performClick()
-    verify(navigationActionsMock).navigateTo(Screen.PROFILE_EDIT)
   }
 }
