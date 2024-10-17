@@ -4,7 +4,6 @@ accompanistFlowlayoutVersion = "0.32.0"
 agp = "8.3.0"
 firebaseBom = "33.4.0"
 coilCompose = "2.1.0"
-firebaseBom = "33.4.0"
 firebaseBomVersion = "32.6.0"
 kotlin = "1.8.10"
 coreKtx = "1.12.0"
@@ -36,7 +35,6 @@ firebaseFirestoreKtx = "25.1.0"
 
 # Firebase
 firebaseAuth = "23.0.0"
-firebaseAuthKtx = "23.0.0"
 firebaseDatabaseKtx = "21.0.0"
 firebaseFirestore = "25.1.0"
 firebaseUiAuth = "8.0.0"
@@ -56,8 +54,6 @@ accompanist-flowlayout-vlatestversion = { module = "com.google.accompanist:accom
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
 coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coilCompose" }
-firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
-firebase-bom-v3260 = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBomVersion" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
@@ -85,12 +81,10 @@ mockito-android = { module = "org.mockito:mockito-android", version.ref = "mocki
 play-services-location = { module = "com.google.android.gms:play-services-location", version.ref = "playServicesLocation" }
 robolectric = { module = "org.robolectric:robolectric", version.ref = "robolectric" }
 firebase-common-ktx = { group = "com.google.firebase", name = "firebase-common-ktx", version.ref = "firebaseCommonKtx" }
-firebase-auth-ktx = { group = "com.google.firebase", name = "firebase-auth-ktx", version.ref = "firebaseAuthKtx" }
 
 androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigationCompose" }
 mockito-core = { group = "org.mockito", name = "mockito-core", version.ref = "mockitoCore" }
 mockito-kotlin = { group = "org.mockito.kotlin", name = "mockito-kotlin", version.ref = "mockitoKotlin" }
-mockito-android = { module = "org.mockito:mockito-android", version.ref = "mockitoAndroid" }
 androidx-navigation-testing = { group = "androidx.navigation", name = "navigation-testing", version.ref = "navigationTesting" }
 firebase-firestore-ktx = { group = "com.google.firebase", name = "firebase-firestore-ktx", version.ref = "firebaseFirestoreKtx" }
 
