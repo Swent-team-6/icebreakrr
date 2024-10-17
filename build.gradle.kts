@@ -4,3 +4,13 @@ plugins {
     alias(libs.plugins.jetbrainsKotlinAndroid) apply false
     id("com.google.gms.google-services") version "4.4.0" apply false
 }
+
+buildscript {
+    repositories {
+        google() // Ensure this is present
+        mavenCentral()
+    }
+    dependencies {
+        classpath(libs.google.services) // Ensure this points to the correct Google services dependency
+    }
+}
