@@ -52,7 +52,7 @@ import com.github.se.icebreakrr.ui.tags.TagStyle
 fun ProfileView(navigationActions: NavigationActions) {
 
   // Predefined user for UI testing
-  var name = "Jean-Michel"
+  var name = "John Do"
   var catchphrase = "This is my catchphrase, there are many like it but this one is mine!"
   var description =
       """
@@ -175,7 +175,7 @@ fun ProfileHeader(navigationActions: NavigationActions) {
 
               // Username
               Text(
-                  text = "Jean Michelle",
+                  text = "Jean Do",
                   fontSize = 24.sp,
                   fontWeight = FontWeight.Bold,
                   color = Color.White,

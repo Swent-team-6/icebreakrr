@@ -36,7 +36,7 @@ class ProfileViewTest {
     composeTestRule.onNodeWithTag("profilePicture").assertIsDisplayed()
     composeTestRule.onNodeWithTag("goBackButton").assertIsDisplayed()
     composeTestRule.onNodeWithTag("editButton").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("username").assertTextEquals("Jean Michelle")
+    composeTestRule.onNodeWithTag("username").assertTextEquals("John Do")
   }
 
   @Test
