@@ -101,7 +101,7 @@ fun FilterScreen(navigationActions: NavigationActions) {
   var ageRangeError by remember { mutableStateOf(false) }
 
   fun validateAndUpdateAgeFrom(input: String) {
-      ageFromInput = input
+    ageFromInput = input
     if (input.isEmpty()) {
       ageFrom = null
       ageRangeError = false
@@ -118,7 +118,7 @@ fun FilterScreen(navigationActions: NavigationActions) {
   }
 
   fun validateAndUpdateAgeTo(input: String) {
-      ageToInput = input
+    ageToInput = input
     if (input.isEmpty()) {
       ageTo = null
       ageRangeError = false
