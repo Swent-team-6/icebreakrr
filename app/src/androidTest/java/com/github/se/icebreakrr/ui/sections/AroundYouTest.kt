@@ -52,8 +52,6 @@ class AroundYouTest {
     verify(navigationActions).navigateTo(screen = Screen.FILTER)
   }
 
-
-
   @Test
   fun hasRequiredComponents() {
     composeTestRule.onNodeWithTag("aroundYouScreen").assertIsDisplayed()
