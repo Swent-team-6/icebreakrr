@@ -60,14 +60,14 @@ fun NotificationScreen(
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(vertical = 16.dp).testTag("notificationFirstText"))
             Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-              cardList.value.take(4).forEach { p -> ProfileCard(p, onclick=navFunction) }
+              cardList.value.take(4).forEach { p -> ProfileCard(p, onclick = navFunction) }
             }
             Text(
                 text = "Passed",
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(vertical = 16.dp).testTag("notificationSecondText"))
             Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-              cardList.value.drop(4).forEach { p -> ProfileCard(p, onclick=navFunction) }
+              cardList.value.drop(4).forEach { p -> ProfileCard(p, onclick = navFunction) }
             }
           }
         }
