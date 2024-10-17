@@ -1,9 +1,13 @@
 package com.github.se.icebreakrr.ui.navigation
 
+import android.content.Intent
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.onAllNodesWithTag
+import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
+import androidx.test.core.app.ActivityScenario
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.github.se.icebreakrr.MainActivity
 import com.github.se.icebreakrr.R
@@ -17,22 +21,26 @@ class NavigationTest {
 
   @get:Rule val composeTestRule = createAndroidComposeRule<MainActivity>()
 
-  @Before fun setUp() {}
-
   @Test
   fun aroundYouScreenIsDisplayedOnLaunch() {
     composeTestRule.onNodeWithTag("aroundYouScreen").assertIsDisplayed()
   }
 
   @Test
-  fun bottomNavigationMenuIsDisplayed() {
-    composeTestRule.onNodeWithTag("bottomNavigationMenu").assertIsDisplayed()
+  fun loginScreenIsDisplayedOnLaunch() {
+    // Assert that the login screen is shown on launch
+    composeTestRule.onNodeWithTag("loginScreen").assertIsDisplayed()
   }
 
   @Test
-  fun navigationWorks() {
+  fun testNavigationAfterLogin() {
+    // Simulate clicking the login button
+    composeTestRule.onNodeWithTag("loginButton").performClick()
+
+    // Check that the "Around You" screen is displayed after login
     composeTestRule.onNodeWithTag("aroundYouScreen").assertIsDisplayed()
 
+    // Test navigation to the Settings screen
     composeTestRule.onNodeWithTag("navItem_${R.string.settings}").performClick()
     composeTestRule.onNodeWithTag("profileScreen").assertIsDisplayed()
 
@@ -45,11 +53,12 @@ class NavigationTest {
     composeTestRule.onNodeWithTag("profileScreen").assertIsDisplayed()
     composeTestRule.onNodeWithTag("goBackButton").performClick()
 
-    //    composeTestRule.onAllNodesWithTag("profileCard").onFirst().performClick()
-    //    composeTestRule.onNodeWithTag("profileScreen").assertIsDisplayed()
-    //    composeTestRule.onNodeWithTag("goBackButton").performClick()
-    //
-    //    composeTestRule.onNodeWithTag("navItem_${R.string.notifications}").performClick()
-    //    composeTestRule.onNodeWithTag("notificationScreen").assertIsDisplayed()
+    composeTestRule.onAllNodesWithTag("profileCard").onFirst().performClick()
+    composeTestRule.onNodeWithTag("profileScreen").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("goBackButton").performClick()
+
+    // Test navigation to the Notifications screen
+    composeTestRule.onNodeWithTag("navItem_${R.string.notifications}").performClick()
+    composeTestRule.onNodeWithTag("notificationScreen").assertIsDisplayed()
   }
 }
