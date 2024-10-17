@@ -1,6 +1,7 @@
 package com.github.se.icebreakrr.ui.sections
 
 import android.annotation.SuppressLint
+import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -11,6 +12,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -37,9 +39,10 @@ fun NotificationScreen(
     navigationActions: NavigationActions,
     profileViewModel: MockProfileViewModel
 ) {
+    val context = LocalContext.current
   val cardList = profileViewModel.profiles.collectAsState()
   val navFunction = {
-    navigationActions.navigateTo(Screen.PROFILE_EDIT)
+    Toast.makeText(context, "Requests are not implemented yet :)", Toast.LENGTH_SHORT).show()
   } // fixme : put Route.View instead
   Scaffold(
       modifier = Modifier.testTag("notificationScreen"),
