@@ -1,7 +1,6 @@
 package com.github.se.icebreakrr.ui.sections
 
 import android.annotation.SuppressLint
-import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -18,7 +17,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -86,9 +84,7 @@ fun AroundYouScreen(
       },
       floatingActionButton = {
         FloatingActionButton(
-            onClick = {
-              navigationActions.navigateTo(Screen.FILTER)
-            },
+            onClick = { navigationActions.navigateTo(Screen.FILTER) },
             containerColor = Color(0xFF1FAEF0), // fixme: use icebreakrr blue
             contentColor = Color.White,
             modifier = Modifier.testTag("filterButton")) {
