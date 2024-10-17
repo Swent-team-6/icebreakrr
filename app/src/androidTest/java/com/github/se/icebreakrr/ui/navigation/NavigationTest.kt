@@ -21,9 +21,16 @@ class NavigationTest {
 
   @get:Rule val composeTestRule = createAndroidComposeRule<MainActivity>()
 
-  @Test
-  fun aroundYouScreenIsDisplayedOnLaunch() {
-    composeTestRule.onNodeWithTag("aroundYouScreen").assertIsDisplayed()
+  @Before
+  fun setup() {
+
+    // Creating a custom flag to disable the sign in to correctly test navigation
+    val intent =
+        Intent(composeTestRule.activity, MainActivity::class.java).apply {
+          putExtra("IS_TESTING", true) // Pass the testing flag via intent
+        }
+
+    ActivityScenario.launch<MainActivity>(intent)
   }
 
   @Test
