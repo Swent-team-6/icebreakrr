@@ -42,14 +42,14 @@ open class ProfilesViewModel(private val repository: ProfilesRepository) : ViewM
    *
    * @param center The center location as a GeoPoint.
    * @param radiusInMeters The radius around the center in meters to search for profiles.
-   * @param gender Optional filter for gender.
+   * @param genders Optional filter for a list of genders.
    * @param ageRange Optional filter for age range.
    * @param tags Optional filter for specific tags.
    */
   fun getFilteredProfilesInRadius(
       center: GeoPoint,
       radiusInMeters: Double,
-      gender: Gender? = null,
+      genders: List<Gender>? = null,
       ageRange: IntRange? = null,
       tags: List<String>? = null
   ) {
@@ -61,8 +61,8 @@ open class ProfilesViewModel(private val repository: ProfilesRepository) : ViewM
           val filteredProfiles =
               profileList.filter { profile ->
 
-                // Filter by gender if specified
-                (gender == null || profile.gender == gender) &&
+                // Filter by genders if specified
+                (genders == null || profile.gender in genders) &&
 
                     // Filter by age range if specified
                     (ageRange == null || profile.calculateAge() in ageRange) &&
@@ -73,10 +73,7 @@ open class ProfilesViewModel(private val repository: ProfilesRepository) : ViewM
           _profiles.value = filteredProfiles
           _loading.value = false
         },
-        onFailure = { exception ->
-          _error.value = exception
-          _loading.value = false
-        })
+        onFailure = { e -> handleError(e) })
   }
 
   /**
@@ -87,12 +84,7 @@ open class ProfilesViewModel(private val repository: ProfilesRepository) : ViewM
   fun addNewProfile(profile: Profile) {
     _loading.value = true
     repository.addNewProfile(
-        profile,
-        onSuccess = { _loading.value = false },
-        onFailure = { exception ->
-          _error.value = exception
-          _loading.value = false
-        })
+        profile, onSuccess = { _loading.value = false }, onFailure = { e -> handleError(e) })
   }
 
   /**
@@ -103,12 +95,7 @@ open class ProfilesViewModel(private val repository: ProfilesRepository) : ViewM
   fun updateProfile(profile: Profile) {
     _loading.value = true
     repository.updateProfile(
-        profile,
-        onSuccess = { _loading.value = false },
-        onFailure = { exception ->
-          _error.value = exception
-          _loading.value = false
-        })
+        profile, onSuccess = { _loading.value = false }, onFailure = { e -> handleError(e) })
   }
 
   /**
@@ -124,10 +111,7 @@ open class ProfilesViewModel(private val repository: ProfilesRepository) : ViewM
           _selectedProfile.value = profile
           _loading.value = false
         },
-        onFailure = { exception ->
-          _error.value = exception
-          _loading.value = false
-        })
+        onFailure = { e -> handleError(e) })
   }
 
   /**
@@ -138,11 +122,16 @@ open class ProfilesViewModel(private val repository: ProfilesRepository) : ViewM
   fun deleteProfileByUid(uid: String) {
     _loading.value = true
     repository.deleteProfileByUid(
-        uid,
-        onSuccess = { _loading.value = false },
-        onFailure = { exception ->
-          _error.value = exception
-          _loading.value = false
-        })
+        uid, onSuccess = { _loading.value = false }, onFailure = { e -> handleError(e) })
+  }
+
+  /**
+   * Handles errors by updating the error and loading states.
+   *
+   * @param exception The exception to log and indicate the error state.
+   */
+  private fun handleError(exception: Exception) {
+    _error.value = exception
+    _loading.value = false
   }
 }
