@@ -2,7 +2,6 @@ package com.github.se.icebreakrr.ui.navigation
 
 import androidx.annotation.StringRes
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.twotone.AccountCircle
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.github.se.icebreakrr.R
@@ -32,6 +31,7 @@ object Screen {
   const val NOTIFICATIONS = "Notifications Screen"
   const val PROFILE_EDIT = "Profile Edit Screen"
   const val FILTER = "Filter Screen"
+  const val PROFILE = "Profile Screen"
 }
 
 object TopLevelDestinations {
