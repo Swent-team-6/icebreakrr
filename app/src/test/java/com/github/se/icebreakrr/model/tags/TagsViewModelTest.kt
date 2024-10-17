@@ -10,6 +10,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.doAnswer
 import org.mockito.Mockito.mock
+import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
 import org.robolectric.RobolectricTestRunner
 
@@ -38,6 +39,14 @@ class TagsViewModelTest {
         .`when`(repository)
         .getAllTags(anyOrNull(), anyOrNull())
 
+    doAnswer { invocation ->
+          val callback = invocation.getArgument<() -> Unit>(0)
+          callback.invoke()
+          null
+        }
+        .`when`(repository)
+        .init(any())
+
     viewModel = TagsViewModel(repository)
     assertEquals(fakeTags, viewModel.allTags)
   }
@@ -52,7 +61,15 @@ class TagsViewModelTest {
           null
         }
         .`when`(repository)
-        .getAllTags(anyOrNull(), anyOrNull())
+        .getAllTags(any(), any())
+
+    doAnswer { invocation ->
+          val callback = invocation.getArgument<() -> Unit>(0)
+          callback.invoke()
+          null
+        }
+        .`when`(repository)
+        .init(any())
 
     viewModel = TagsViewModel(repository)
     val color1 = viewModel.tagToColor("Football")
@@ -81,6 +98,14 @@ class TagsViewModelTest {
         .`when`(repository)
         .getAllTags(anyOrNull(), anyOrNull())
 
+    doAnswer { invocation ->
+          val callback = invocation.getArgument<() -> Unit>(0)
+          callback.invoke()
+          null
+        }
+        .`when`(repository)
+        .init(any())
+
     viewModel = TagsViewModel(repository)
     viewModel.setQuery("a", listOf("Basketball"))
     assertEquals(listOf("Football", "Art", "Photography"), viewModel.tagsSuggestions.value)
@@ -106,6 +131,13 @@ class TagsViewModelTest {
         }
         .`when`(repository)
         .getAllTags(anyOrNull(), anyOrNull())
+    doAnswer { invocation ->
+          val callback = invocation.getArgument<() -> Unit>(0)
+          callback.invoke()
+          null
+        }
+        .`when`(repository)
+        .init(any())
 
     viewModel = TagsViewModel(repository)
     viewModel.addFilter("Sport")

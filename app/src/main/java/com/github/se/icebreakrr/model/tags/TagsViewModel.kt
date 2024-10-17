@@ -32,7 +32,14 @@ data class TagsViewModel(private val repository: TagsRepository) : ViewModel() {
   val filteringTags: StateFlow<List<String>> = filteringTags_
 
   init {
-    getTags()
+    repository.init {
+      repository.getAllTags(
+          onSuccess = {
+            allTags.clear()
+            allTags.addAll(it)
+          },
+          onFailure = { Log.e("TagsViewModel", "[getAllTags] failed to get the tags : $it") })
+    }
   }
 
   companion object {
@@ -43,18 +50,6 @@ data class TagsViewModel(private val repository: TagsRepository) : ViewModel() {
             return TagsViewModel(TagsRepository(Firebase.firestore)) as T
           }
         }
-  }
-
-  /**
-   * Utility function called at the instantiation of the view model. Don't need to be called later.
-   */
-  private fun getTags() {
-    repository.getAllTags(
-        onSuccess = {
-          allTags.clear()
-          allTags.addAll(it)
-        },
-        onFailure = { Log.e("TagsViewModel", "[getAllTags] failed to get the tags : $it") })
   }
 
   /**

@@ -1,6 +1,7 @@
 package com.github.se.icebreakrr
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
@@ -27,7 +28,9 @@ class MainActivity : ComponentActivity() {
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
-    FirebaseAuth.getInstance()
+    auth = FirebaseAuth.getInstance()
+    // auth.currentUser?.let { auth.signOut() }
+    Log.e("TagsR", "[Oncreate] yay")
     setContent { SampleAppTheme { Surface(modifier = Modifier.fillMaxSize()) { IcebreakrrApp() } } }
   }
 }
