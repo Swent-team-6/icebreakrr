@@ -13,6 +13,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
 import com.github.se.icebreakrr.config.LocalIsTesting
+import com.github.se.icebreakrr.model.profile.MockProfileViewModel
 import com.github.se.icebreakrr.ui.authentication.SignInScreen
 import com.github.se.icebreakrr.ui.navigation.NavigationActions
 import com.github.se.icebreakrr.ui.navigation.Route
@@ -69,6 +70,7 @@ class MainActivity : ComponentActivity() {
 fun IcebreakrrApp() {
   val navController = rememberNavController()
   val navigationActions = NavigationActions(navController)
+  val profileViewModel = MockProfileViewModel()
 
   NavHost(navController = navController, startDestination = Route.AUTH) {
     navigation(
@@ -85,6 +87,7 @@ fun IcebreakrrApp() {
       composable(Screen.AROUND_YOU) { AroundYouScreen(navigationActions) }
       composable(Screen.FILTER) { FilterScreen(navigationActions) }
       composable(Screen.PROFILE_DISPLAY) { ProfileView(navigationActions) }
+
     }
 
     navigation(
@@ -98,7 +101,7 @@ fun IcebreakrrApp() {
         startDestination = Screen.NOTIFICATIONS,
         route = Route.NOTIFICATIONS,
     ) {
-      composable(Screen.NOTIFICATIONS) { NotificationScreen(navigationActions) }
+      composable(Screen.NOTIFICATIONS) { NotificationScreen(navigationActions, profileViewModel) }
     }
 
     navigation(
@@ -106,6 +109,13 @@ fun IcebreakrrApp() {
         route = Route.PROFILE_EDIT,
     ) {
       composable(Screen.PROFILE_EDIT) { ProfileEditingScreen(navigationActions) }
+    }
+
+    navigation(
+        startDestination = Screen.FILTER,
+        route = Route.FILTER,
+    ) {
+      composable(Screen.FILTER) { FilterScreen(navigationActions) }
     }
   }
 }
