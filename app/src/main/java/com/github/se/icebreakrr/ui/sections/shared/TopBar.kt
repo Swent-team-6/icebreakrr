@@ -14,16 +14,18 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.github.se.icebreakrr.ui.theme.IceBreakrrBlue
 
 @Composable
-fun TopBar(s: String) {
+fun TopBar() {
   Box(
       contentAlignment = Alignment.Center,
       modifier =
-          Modifier.background(IceBreakrrBlue).fillMaxWidth().heightIn(90.dp).testTag("topBar")) {
+          Modifier.background(Color(0xFF1FAEF0)) // fixme: use icebreakrr blue
+              .fillMaxWidth()
+              .heightIn(90.dp)
+              .testTag("topBar")) {
         Text(
-            text = s,
+            text = "Around You",
             fontSize = 40.sp,
             color = Color.White,
             fontWeight = FontWeight.Bold,
