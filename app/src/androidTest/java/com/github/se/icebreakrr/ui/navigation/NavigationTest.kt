@@ -49,6 +49,9 @@ class NavigationTest {
 
     // Test navigation to the Settings screen
     composeTestRule.onNodeWithTag("navItem_${R.string.settings}").performClick()
+    composeTestRule.onNodeWithTag("settingsScreen").assertIsDisplayed()
+
+    composeTestRule.onNodeWithTag("profileCard").performClick()
     composeTestRule.onNodeWithTag("profileScreen").assertIsDisplayed()
 
     composeTestRule.onNodeWithTag("editButton").performClick()

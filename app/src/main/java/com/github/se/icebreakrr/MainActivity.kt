@@ -14,11 +14,13 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
 import com.github.se.icebreakrr.config.LocalIsTesting
+import com.github.se.icebreakrr.model.profile.MockProfileViewModel
 import com.github.se.icebreakrr.ui.authentication.SignInScreen
 import com.github.se.icebreakrr.ui.navigation.NavigationActions
 import com.github.se.icebreakrr.ui.navigation.Route
 import com.github.se.icebreakrr.ui.navigation.Screen
 import com.github.se.icebreakrr.ui.profile.ProfileEditingScreen
+import com.github.se.icebreakrr.ui.profile.ProfileView
 import com.github.se.icebreakrr.ui.sections.AroundYouScreen
 import com.github.se.icebreakrr.ui.sections.FilterScreen
 import com.github.se.icebreakrr.ui.sections.NotificationScreen
@@ -68,6 +70,7 @@ class MainActivity : ComponentActivity() {
 fun IcebreakrrApp() {
   val navController = rememberNavController()
   val navigationActions = NavigationActions(navController)
+  val profileViewModel = MockProfileViewModel()
 
   NavHost(navController = navController, startDestination = Route.AUTH) {
     navigation(
@@ -82,7 +85,6 @@ fun IcebreakrrApp() {
         route = Route.AROUND_YOU,
     ) {
       composable(Screen.AROUND_YOU) { AroundYouScreen(navigationActions) }
-      composable(Screen.FILTER) { FilterScreen(navigationActions) }
     }
 
     navigation(
@@ -90,13 +92,14 @@ fun IcebreakrrApp() {
         route = Route.SETTINGS,
     ) {
       composable(Screen.SETTINGS) { SettingsScreen(navigationActions) }
+      composable(Screen.PROFILE) { ProfileView(navigationActions) }
     }
 
     navigation(
         startDestination = Screen.NOTIFICATIONS,
         route = Route.NOTIFICATIONS,
     ) {
-      composable(Screen.NOTIFICATIONS) { NotificationScreen(navigationActions) }
+      composable(Screen.NOTIFICATIONS) { NotificationScreen(navigationActions, profileViewModel) }
     }
 
     navigation(
@@ -104,6 +107,13 @@ fun IcebreakrrApp() {
         route = Route.PROFILE_EDIT,
     ) {
       composable(Screen.PROFILE_EDIT) { ProfileEditingScreen(navigationActions) }
+    }
+
+    navigation(
+        startDestination = Screen.FILTER,
+        route = Route.FILTER,
+    ) {
+      composable(Screen.FILTER) { FilterScreen(navigationActions) }
     }
   }
 }
