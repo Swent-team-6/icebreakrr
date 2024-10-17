@@ -37,7 +37,6 @@ import com.github.se.icebreakrr.ui.navigation.Route
 import com.github.se.icebreakrr.ui.navigation.Screen
 import com.github.se.icebreakrr.ui.theme.FilterIcon
 import com.github.se.icebreakrr.ui.theme.IceBreakrrBlue
-import com.google.android.material.floatingactionbutton.FloatingActionButton
 
 /**
  * Composable function for displaying the notification screen.
