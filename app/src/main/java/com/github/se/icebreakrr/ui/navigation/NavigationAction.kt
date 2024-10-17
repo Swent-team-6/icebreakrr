@@ -17,7 +17,7 @@ open class NavigationActions(
     navController.navigate(destination.route) {
       popUpTo(navController.graph.findStartDestination().id) {
         saveState = true
-        inclusive = false // Set to false so as not to delete the beginning
+        inclusive = true
       }
       launchSingleTop = true
       if (destination.route != Route.AUTH) {
