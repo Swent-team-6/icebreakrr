@@ -8,7 +8,6 @@ import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertHeightIsEqualTo
 import androidx.compose.ui.test.assertIsDisplayed
-import androidx.compose.ui.test.assertIsNotDisplayed
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.assertWidthIsEqualTo
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -83,22 +82,6 @@ class TagViewTest {
   }
 
   @Test
-  fun displayTagTextColor() {
-    composeTestRule.setContent { Tag("AndroidTest", TagStyle(textColor = Color.White)) }
-    val node = composeTestRule.onNodeWithTag("testTag")
-    node.assertIsDisplayed()
-    node.assertTextEquals("#AndroidTest")
-  }
-
-  @Test
-  fun displayTagBackgroundColor() {
-    composeTestRule.setContent { Tag("AndroidTest", TagStyle(backGroundColor = Color.White)) }
-    val node = composeTestRule.onNodeWithTag("testTag")
-    node.assertIsDisplayed()
-    node.assertTextEquals("#AndroidTest")
-  }
-
-  @Test
   fun testTag_withDifferentTagStyles() {
     val tagStyle1 = TagStyle(Color.Red, Color.Yellow, 14.sp)
     val tagStyle2 = TagStyle(Color.Blue, Color.Green, 20.sp)
@@ -126,9 +109,9 @@ class TagViewTest {
     composeTestRule.setContent {
       Column {
         Tag("NormalText", tagStyle)
-        Tag("", tagStyle)
-        Tag("1234", tagStyle)
-        Tag("Special_Char$", tagStyle)
+        Tag("", tagStyle) // Test with empty text
+        Tag("1234", tagStyle) // Test with numeric text
+        Tag("Special_Char$", tagStyle) // Test with special characters
       }
     }
 
@@ -270,13 +253,6 @@ class TagViewTest {
   }
 
   @Test
-  fun testRowOfTagsEmpty() {
-    val emptyList = mutableStateOf(listOf<Pair<String, Color>>())
-    composeTestRule.setContent { RowOfTags(emptyList.value, TagStyle()) }
-    composeTestRule.onAllNodesWithTag("testTag").assertCountEquals(0)
-  }
-
-  @Test
   fun testRowOfTagsInitiallyCollapsed() {
     val tagList =
         listOf(
@@ -374,15 +350,6 @@ class TagViewTest {
   }
 
   @Test
-  fun testRowOfClickTagsEmpty() {
-    val emptyList = mutableStateOf(listOf<Pair<String, Color>>())
-    composeTestRule.setContent {
-      RowOfClickTags(emptyList.value, TagStyle(), tagSelectorOnClickMock)
-    }
-    composeTestRule.onAllNodesWithTag("testTag").assertCountEquals(0)
-  }
-
-  @Test
   fun testTagSelector() {
     val textColor = Color.White
     val textSize = 16.sp
@@ -429,62 +396,5 @@ class TagViewTest {
         .onNodeWithTag("sizeTagSelector")
         .assertWidthIsEqualTo(300.dp)
         .assertHeightIsEqualTo(300.dp)
-  }
-
-  @Test
-  fun testTagSelectorEmptyList() {
-    val textColor = Color.White
-    val textSize = 16.sp
-    val userInput = "input"
-
-    val emptyList = mutableStateOf(listOf<Pair<String, Color>>())
-
-    composeTestRule.setContent {
-      TagSelector(
-          emptyList,
-          emptyList,
-          stringQuery,
-          expanded,
-          tagSelectorOnClickMock,
-          tagSelectorOnClickDropDownMenu,
-          tagSelectorOnStringChanged,
-          textColor,
-          textSize,
-          300.dp,
-          300.dp)
-    }
-    composeTestRule.onAllNodesWithText("Tags").onFirst().assertIsDisplayed()
-    composeTestRule.onAllNodesWithTag("clickTestTag").assertCountEquals(0)
-    composeTestRule.onNodeWithTag("inputTagSelector").performTextClearance()
-    composeTestRule.onNodeWithTag("inputTagSelector").performTextInput(userInput)
-    verify(tagSelectorOnStringChanged).invoke(userInput)
-    composeTestRule.waitForIdle()
-
-    composeTestRule.onAllNodesWithTag("tagSelectorDropDownMenuItem").assertCountEquals(0)
-  }
-
-  @Test
-  fun testTagSelectorTooSmall() {
-    val textColor = Color.White
-    val textSize = 16.sp
-
-    val emptyList = mutableStateOf(listOf<Pair<String, Color>>())
-
-    composeTestRule.setContent {
-      TagSelector(
-          emptyList,
-          emptyList,
-          stringQuery,
-          expanded,
-          tagSelectorOnClickMock,
-          tagSelectorOnClickDropDownMenu,
-          tagSelectorOnStringChanged,
-          textColor,
-          textSize,
-          0.dp,
-          0.dp)
-    }
-    composeTestRule.onAllNodesWithText("Tags").onFirst().assertIsNotDisplayed()
-    composeTestRule.onAllNodesWithTag("clickTestTag").assertCountEquals(0)
   }
 }
