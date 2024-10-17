@@ -121,7 +121,7 @@ enum class Gender(val displayName: String) {
   OTHER("Other")
 }
 
-class ProfileViewModel : ViewModel() {
+open class ProfileViewModel : ViewModel() {
   private val _profiles = MutableStateFlow<List<Profile>>(emptyList())
   val profiles: StateFlow<List<Profile>> = _profiles.asStateFlow()
 
@@ -132,8 +132,12 @@ class ProfileViewModel : ViewModel() {
     getProfiles()
   }
 
-  private fun getProfiles() {
+  fun getProfiles() {
     _profiles.value = Profile.getMockedProfiles()
+  }
+
+  fun clearProfiles() {
+    _profiles.value = emptyList()
   }
 
   // create factory
