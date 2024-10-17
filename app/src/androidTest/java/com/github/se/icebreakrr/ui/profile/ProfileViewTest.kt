@@ -28,7 +28,7 @@ class ProfileViewTest {
   }
 
   @Test
-  fun testProfileHeaderDisplaysCorrectly() {
+  fun testProfileHeaderDisplaysCorrectlyAsUser() {
     composeTestRule.setContent { ProfileView(navigationActions = navigationActionsMock) }
 
     // Verify that the profile header and its elements are displayed

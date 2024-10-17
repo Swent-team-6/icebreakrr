@@ -47,6 +47,7 @@ import com.github.se.icebreakrr.ui.tags.TagStyle
  * catchphrase, tags, and description.
  *
  * @param navigationActions Actions to navigate between screens.
+ * @param isUser boolean stating if the profile corresponds to the app user.
  */
 @Composable
 fun ProfileView(navigationActions: NavigationActions) {
@@ -78,6 +79,7 @@ fun ProfileView(navigationActions: NavigationActions) {
         Column(
             modifier = Modifier.fillMaxWidth().padding(paddingValues),
             horizontalAlignment = Alignment.CenterHorizontally) {
+
               // 2 sections one for the profile image with overlay and
               // one for the information section
               ProfileHeader(navigationActions)
