@@ -22,7 +22,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.github.se.icebreakrr.model.profile.Profile
-import com.github.se.icebreakrr.ui.getMockedProfiles
+import com.github.se.icebreakrr.model.profile.getMockedProfiles
 
 @Composable
 fun ProfileCard(profile: Profile, onclick: () -> Unit) {
