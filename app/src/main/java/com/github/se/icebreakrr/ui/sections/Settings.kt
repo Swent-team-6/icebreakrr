@@ -2,7 +2,9 @@ package com.github.se.icebreakrr.ui.sections
 
 import android.widget.Toast
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -32,6 +34,7 @@ import com.github.se.icebreakrr.ui.sections.shared.TopBar
 @Composable
 fun SettingsScreen(navigationActions: NavigationActions) {
   val context = LocalContext.current
+  val scrollState = rememberScrollState()
   Scaffold(
       topBar = { TopBar("Settings") },
       modifier = Modifier.testTag("settingsScreen").fillMaxSize(),
@@ -43,7 +46,8 @@ fun SettingsScreen(navigationActions: NavigationActions) {
       },
   ) { innerPadding ->
     Column(
-        modifier = Modifier.fillMaxSize().padding(innerPadding).padding(16.dp),
+        modifier =
+            Modifier.fillMaxSize().padding(innerPadding).padding(16.dp).verticalScroll(scrollState),
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.Start) {
           ProfileCard(profile = Profile.getMockedProfiles()[0], isSettings = true) {
@@ -54,8 +58,6 @@ fun SettingsScreen(navigationActions: NavigationActions) {
 
           ToggleOptionBox(label = "Toggle Location")
           ToggleOptionBox(label = "Option 1")
-          ToggleOptionBox(label = "Option 2")
-          ToggleOptionBox(label = "Option 3")
 
           Spacer(modifier = Modifier.padding(vertical = 16.dp))
 

@@ -46,10 +46,6 @@ class SettingsTest {
     composeTestRule.onNodeWithTag("Toggle Location").performClick()
     composeTestRule.onNodeWithTag("Option 1").assertIsDisplayed()
     composeTestRule.onNodeWithTag("Option 1").performClick()
-    composeTestRule.onNodeWithTag("Option 2").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("Option 2").performClick()
-    composeTestRule.onNodeWithTag("Option 3").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("Option 3").performClick()
 
     // Assert that the Log Out button is displayed and clickable
     composeTestRule.onNodeWithTag("logOutButton").assertIsDisplayed()
