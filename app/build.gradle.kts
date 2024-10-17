@@ -141,6 +141,10 @@ dependencies {
     implementation(platform(libs.compose.bom))
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.navigation.testing)
+
+    implementation(libs.play.services.location)
+    implementation(libs.coil.compose)
+
     implementation(libs.firebase.firestore.ktx)
     testImplementation(libs.junit)
     globalTestImplementation(libs.androidx.junit)
