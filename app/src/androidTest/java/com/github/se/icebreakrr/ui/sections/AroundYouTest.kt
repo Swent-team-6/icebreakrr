@@ -1,6 +1,5 @@
 package com.github.se.icebreakrr.ui.sections
 
-import android.widget.Toast
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
@@ -12,7 +11,6 @@ import com.github.se.icebreakrr.ui.navigation.Route
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import org.mockito.Mockito
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.`when`
 
@@ -46,4 +44,3 @@ class AroundYouTest {
     composeTestRule.onNodeWithTag("filterButton").assertIsDisplayed()
   }
 }
-
