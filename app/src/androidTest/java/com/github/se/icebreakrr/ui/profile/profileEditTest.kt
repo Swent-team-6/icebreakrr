@@ -27,6 +27,12 @@ class ProfileEditingScreenTest {
 
     composeTestRule.setContent { ProfileEditingScreen(navigationActions) }
 
+    // Check if topAppBar is displayed
+    composeTestRule.onNodeWithTag("topAppBar").assertIsDisplayed()
+
+    // Check if profileEditScreenContent is displayed
+    composeTestRule.onNodeWithTag("profileEditScreenContent").assertIsDisplayed()
+
     // Check if profile picture is displayed
     composeTestRule.onNodeWithTag("profilePicture").assertIsDisplayed()
 

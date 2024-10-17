@@ -61,6 +61,7 @@ fun ProfileEditingScreen(navigationActions: NavigationActions) {
       modifier = Modifier.testTag("profileEditScreen"),
       topBar = {
         TopAppBar(
+            modifier = Modifier.testTag("topAppBar"),
             title = { Text("") },
             navigationIcon = {
               IconButton(
@@ -83,7 +84,7 @@ fun ProfileEditingScreen(navigationActions: NavigationActions) {
             })
       }) {
         Column(
-            modifier = Modifier.padding(it).padding(padding),
+            modifier = Modifier.padding(it).padding(padding).testTag("profileEditScreenContent"),
             horizontalAlignment = Alignment.CenterHorizontally) {
               AsyncImage( // TODO : implement image uploading
                   model = profilePicture,
@@ -110,7 +111,7 @@ fun ProfileEditingScreen(navigationActions: NavigationActions) {
               OutlinedTextField(
                   value = catchphrase,
                   onValueChange = { catchphrase = it },
-                  label = { Text("Catchphrase") },
+                  label = { Text("Catchphrase", modifier = Modifier.testTag("catchphraseLabel")) },
                   modifier = Modifier.fillMaxWidth().height(60.dp).testTag("catchphrase"))
 
               Spacer(modifier = Modifier.height(padding))
