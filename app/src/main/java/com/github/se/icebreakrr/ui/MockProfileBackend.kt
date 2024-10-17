@@ -40,7 +40,7 @@ open class MockProfileViewModel : ViewModel() {
   }
 }
 
-private fun Profile.Companion.getMockedProfiles(): List<Profile> {
+fun Profile.Companion.getMockedProfiles(): List<Profile> {
   return listOf(
       Profile(
           uid = "1",
