@@ -18,6 +18,7 @@ import com.github.se.icebreakrr.ui.navigation.NavigationActions
 import com.github.se.icebreakrr.ui.navigation.Route
 import com.github.se.icebreakrr.ui.navigation.Screen
 import com.github.se.icebreakrr.ui.profile.ProfileEditingScreen
+import com.github.se.icebreakrr.ui.profile.ProfileView
 import com.github.se.icebreakrr.ui.sections.AroundYouScreen
 import com.github.se.icebreakrr.ui.sections.FilterScreen
 import com.github.se.icebreakrr.ui.sections.NotificationScreen
@@ -83,6 +84,7 @@ fun IcebreakrrApp() {
     ) {
       composable(Screen.AROUND_YOU) { AroundYouScreen(navigationActions) }
       composable(Screen.FILTER) { FilterScreen(navigationActions) }
+      composable(Screen.PROFILE_DISPLAY) { ProfileView(navigationActions) }
     }
 
     navigation(

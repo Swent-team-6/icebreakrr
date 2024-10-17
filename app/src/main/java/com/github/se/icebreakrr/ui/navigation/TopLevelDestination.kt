@@ -30,6 +30,7 @@ object Screen {
   const val NOTIFICATIONS = "Notifications Screen"
   const val FILTER = "Filter Screen"
   const val PROFILE_EDIT = "Profile Edit Screen"
+  const val PROFILE_DISPLAY = "Profile display Screen"
 }
 
 object TopLevelDestinations {
