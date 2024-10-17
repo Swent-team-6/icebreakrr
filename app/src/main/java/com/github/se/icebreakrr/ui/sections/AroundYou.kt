@@ -25,6 +25,7 @@ import com.github.se.icebreakrr.model.profile.MockProfileViewModel
 import com.github.se.icebreakrr.ui.navigation.BottomNavigationMenu
 import com.github.se.icebreakrr.ui.navigation.LIST_TOP_LEVEL_DESTINATIONS
 import com.github.se.icebreakrr.ui.navigation.NavigationActions
+import com.github.se.icebreakrr.ui.navigation.Screen
 import com.github.se.icebreakrr.ui.sections.shared.FilterFloatingActionButton
 import com.github.se.icebreakrr.ui.sections.shared.ProfileCard
 import com.github.se.icebreakrr.ui.sections.shared.TopBar
@@ -64,7 +65,7 @@ fun AroundYouScreen(
                 items(profiles.value.size) { index ->
                   ProfileCard(
                       profile = profiles.value[index],
-                      onclick = { navigationActions.navigateTo("Settings Screen") })
+                      onclick = { navigationActions.navigateTo(Screen.PROFILE) })
                 }
               }
         } else {
