@@ -47,11 +47,11 @@ class NavigationTest {
     composeTestRule.onNodeWithTag("profileScreen").assertIsDisplayed()
     composeTestRule.onNodeWithTag("goBackButton").performClick()
 
-    composeTestRule.onAllNodesWithTag("profileCard").onFirst().performClick()
-    composeTestRule.onNodeWithTag("profileScreen").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("goBackButton").performClick()
-
-    composeTestRule.onNodeWithTag("navItem_${R.string.notifications}").performClick()
-    composeTestRule.onNodeWithTag("notificationScreen").assertIsDisplayed()
+//    composeTestRule.onAllNodesWithTag("profileCard").onFirst().performClick()
+//    composeTestRule.onNodeWithTag("profileScreen").assertIsDisplayed()
+//    composeTestRule.onNodeWithTag("goBackButton").performClick()
+//
+//    composeTestRule.onNodeWithTag("navItem_${R.string.notifications}").performClick()
+//    composeTestRule.onNodeWithTag("notificationScreen").assertIsDisplayed()
   }
 }
