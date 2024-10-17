@@ -60,9 +60,4 @@ class AroundYouTest {
     composeTestRule.onAllNodesWithTag("filterButton").onFirst().performClick()
     verify(navigationActions).navigateTo(screen = Screen.FILTER)
   }
-
-
-
-
-
 }
