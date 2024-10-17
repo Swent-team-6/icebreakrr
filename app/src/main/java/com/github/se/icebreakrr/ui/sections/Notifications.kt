@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Scaffold
@@ -21,8 +20,6 @@ import com.github.se.icebreakrr.ui.navigation.BottomNavigationMenu
 import com.github.se.icebreakrr.ui.navigation.LIST_TOP_LEVEL_DESTINATIONS
 import com.github.se.icebreakrr.ui.navigation.NavigationActions
 import com.github.se.icebreakrr.ui.navigation.Route
-import com.github.se.icebreakrr.ui.navigation.Screen
-import com.github.se.icebreakrr.ui.sections.shared.FilterFloatingActionButton
 import com.github.se.icebreakrr.ui.sections.shared.ProfileCard
 import com.github.se.icebreakrr.ui.sections.shared.TopBar
 
@@ -39,7 +36,7 @@ fun NotificationScreen(
     navigationActions: NavigationActions,
     profileViewModel: MockProfileViewModel
 ) {
-    val context = LocalContext.current
+  val context = LocalContext.current
   val cardList = profileViewModel.profiles.collectAsState()
   val navFunction = {
     Toast.makeText(context, "Requests are not implemented yet :)", Toast.LENGTH_SHORT).show()
@@ -55,7 +52,10 @@ fun NotificationScreen(
       },
       content = { innerPadding ->
         LazyColumn(
-            modifier = Modifier.padding(innerPadding).padding(horizontal = 7.dp).testTag("notificationScroll"),
+            modifier =
+                Modifier.padding(innerPadding)
+                    .padding(horizontal = 7.dp)
+                    .testTag("notificationScroll"),
         ) {
           item {
             Text(
@@ -70,9 +70,12 @@ fun NotificationScreen(
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(vertical = 16.dp).testTag("notificationSecondText"))
             Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-              cardList.value.drop(4).forEach { p -> ProfileCard(p, onclick = navFunction, greyedOut = true) }
+              cardList.value.drop(4).forEach { p ->
+                ProfileCard(p, onclick = navFunction, greyedOut = true)
+              }
             }
           }
         }
-      },)
+      },
+  )
 }
