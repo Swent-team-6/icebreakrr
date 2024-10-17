@@ -31,6 +31,10 @@ jobs:
 
       - name: Run tests
         run: ./gradlew test
+        env:
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
 
       - name: Upload Test Results
         uses: actions/upload-artifact@v3
