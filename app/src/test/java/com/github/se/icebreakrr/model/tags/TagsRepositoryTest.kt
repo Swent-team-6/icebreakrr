@@ -227,7 +227,7 @@ class TagsRepositoryTest {
     val collectionReference = mock(CollectionReference::class.java)
     val documentReference = mock(DocumentReference::class.java)
     val updateTask: Task<Void> = mock(Task::class.java) as Task<Void>
-    val spyRepository = spy(repository) // Spy on the real repository
+    val spyRepository = repository // Spy on the real repository
     var success = false
 
     // Mock Firestore collection and document retrieval
@@ -265,7 +265,7 @@ class TagsRepositoryTest {
     val collectionReference = mock(CollectionReference::class.java)
     val documentReference = mock(DocumentReference::class.java)
     val updateTask: Task<Void> = mock(Task::class.java) as Task<Void>
-    val spyRepository = spy(repository)
+    val spyRepository = repository
     var failureCalled = false
     val exception = Exception("Firestore update failed")
 
@@ -307,7 +307,7 @@ class TagsRepositoryTest {
     val collectionReference = mock(CollectionReference::class.java)
     val documentReference = mock(DocumentReference::class.java)
     val deleteTask: Task<Void> = mock(Task::class.java) as Task<Void>
-    val spyRepository = spy(repository)
+    val spyRepository = repository
     var successCalled = false
 
     `when`(firestore.collection("Tags")).thenReturn(collectionReference)
@@ -341,7 +341,7 @@ class TagsRepositoryTest {
     val collectionReference = mock(CollectionReference::class.java)
     val documentReference = mock(DocumentReference::class.java)
     val deleteTask: Task<Void> = mock(Task::class.java) as Task<Void>
-    val spyRepository = spy(repository)
+    val spyRepository = repository
     var failureCalled = false
     val exception = Exception("Firestore delete failed")
 

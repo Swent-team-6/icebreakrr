@@ -140,12 +140,24 @@ dependencies {
     implementation(platform(libs.compose.bom))
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.navigation.testing)
-    implementation(libs.firebase.common.ktx)
-    implementation(libs.firebase.auth.ktx)
+
+    implementation(libs.play.services.location)
+    implementation(libs.coil.compose)
+
     implementation(libs.firebase.firestore.ktx)
     testImplementation(libs.junit)
     globalTestImplementation(libs.androidx.junit)
     globalTestImplementation(libs.androidx.espresso.core)
+
+    // Firebase
+    implementation(libs.firebase.database.ktx)
+    implementation(libs.firebase.firestore)
+    implementation(libs.firebase.ui.auth)
+    implementation(libs.firebase.auth.ktx)
+    implementation(libs.firebase.auth)
+    implementation(libs.geofirestore)
+    implementation(libs.firebase.common.ktx)
+
 
     // ------------- Jetpack Compose ------------------
     val composeBom = platform(libs.compose.bom)

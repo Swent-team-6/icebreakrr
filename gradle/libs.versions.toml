@@ -18,6 +18,7 @@ composeViewModel = "2.8.6"
 lifecycleRuntimeKtx = "2.8.6"
 kaspresso = "1.5.5"
 mockitoAndroid = "5.13.0"
+playServicesLocation = "21.3.0"
 robolectric = "4.11.1"
 sonar = "4.4.1.3373"
 navigationCompose = "2.8.3"
@@ -28,6 +29,15 @@ firebaseCommonKtx = "21.0.0"
 firebaseAuthKtx = "23.0.0"
 firebaseFirestoreKtx = "25.1.0"
 googleServices = "4.4.2"
+coilCompose = "2.1.0"
+firebaseBomVersion = "33.4.0"
+
+# Firebase
+firebaseAuth = "23.0.0"
+firebaseDatabaseKtx = "21.0.0"
+firebaseFirestore = "25.1.0"
+firebaseUiAuth = "8.0.0"
+firebase = "31.0.0"
 
 
 [libraries]
@@ -35,6 +45,8 @@ accompanist-flowlayout = { module = "com.google.accompanist:accompanist-flowlayo
 accompanist-flowlayout-vlatestversion = { module = "com.google.accompanist:accompanist-flowlayout", version.ref = "accompanistFlowlayoutVersion" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
+coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coilCompose" }
+firebase-bom-v3260 = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBomVersion" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
@@ -57,6 +69,7 @@ kaspresso = { group = "com.kaspersky.android-components", name = "kaspresso", ve
 kaspresso-compose = { group = "com.kaspersky.android-components", name = "kaspresso-compose-support", version.ref = "kaspresso" }
 
 mockito-android = { module = "org.mockito:mockito-android", version.ref = "mockitoAndroid" }
+play-services-location = { module = "com.google.android.gms:play-services-location", version.ref = "playServicesLocation" }
 robolectric = { module = "org.robolectric:robolectric", version.ref = "robolectric" }
 
 androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigationCompose" }
@@ -68,6 +81,12 @@ firebase-auth-ktx = { group = "com.google.firebase", name = "firebase-auth-ktx",
 firebase-firestore-ktx = { group = "com.google.firebase", name = "firebase-firestore-ktx", version.ref = "firebaseFirestoreKtx" }
 
 google-services = { module = "com.google.gms:google-services", version.ref = "googleServices" }
+
+firebase-auth = { module = "com.google.firebase:firebase-auth", version.ref = "firebaseAuth" }
+firebase-database-ktx = { module = "com.google.firebase:firebase-database-ktx", version.ref = "firebaseDatabaseKtx" }
+firebase-firestore = { module = "com.google.firebase:firebase-firestore", version.ref = "firebaseFirestore" }
+firebase-ui-auth = { module = "com.firebaseui:firebase-ui-auth", version.ref = "firebaseUiAuth" }
+geofirestore = { module = "com.github.imperiumlabs:GeoFirestore-Android", version = "v1.5.0" }
 
 
 [plugins]

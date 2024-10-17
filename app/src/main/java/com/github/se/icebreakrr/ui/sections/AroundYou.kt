@@ -1,16 +1,38 @@
 package com.github.se.icebreakrr.ui.sections
 
 import android.annotation.SuppressLint
+import android.widget.Toast
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.github.se.icebreakrr.R
+import com.github.se.icebreakrr.model.profile.MockProfileViewModel
 import com.github.se.icebreakrr.model.tags.TagsViewModel
 import com.github.se.icebreakrr.ui.navigation.BottomNavigationMenu
 import com.github.se.icebreakrr.ui.navigation.LIST_TOP_LEVEL_DESTINATIONS
 import com.github.se.icebreakrr.ui.navigation.NavigationActions
+import com.github.se.icebreakrr.ui.sections.shared.ProfileCard
+import com.github.se.icebreakrr.ui.sections.shared.TopBar
 
 /**
  * Composable function for displaying the "Around You" screen.
@@ -21,7 +43,14 @@ import com.github.se.icebreakrr.ui.navigation.NavigationActions
  */
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun AroundYouScreen(navigationActions: NavigationActions, tagsViewModel: TagsViewModel) {
+fun AroundYouScreen(
+    navigationActions: NavigationActions,
+    mockProfileViewModel: MockProfileViewModel = viewModel(factory = MockProfileViewModel.Factory),
+    tagsViewModel: TagsViewModel = viewModel(factory = TagsViewModel.Factory)
+) {
+
+  val profiles = mockProfileViewModel.profiles.collectAsState()
+
   Scaffold(
       modifier = Modifier.testTag("aroundYouScreen"),
       bottomBar = {
@@ -30,11 +59,45 @@ fun AroundYouScreen(navigationActions: NavigationActions, tagsViewModel: TagsVie
             tabList = LIST_TOP_LEVEL_DESTINATIONS,
             selectedItem = navigationActions.currentRoute())
       },
+      topBar = { TopBar() },
       content = { innerPadding ->
-        // Use the innerPadding to apply padding around your content
-        Text(
-            text = "Around You screen", // TODO PLaceholder
-            modifier = Modifier.padding(innerPadding) // Applying the padding to the content
-            )
+        val context = LocalContext.current
+        if (profiles.value.isNotEmpty()) {
+          LazyColumn(
+              contentPadding = PaddingValues(vertical = 16.dp),
+              verticalArrangement = Arrangement.spacedBy(16.dp),
+              modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp).padding(innerPadding)) {
+                items(profiles.value.size) { index ->
+                  ProfileCard(
+                      profile = profiles.value[index],
+                      onclick = {
+                        Toast.makeText(context, "Profile clicked", Toast.LENGTH_SHORT).show()
+                      })
+                }
+              }
+        } else {
+          Box(
+              contentAlignment = Alignment.Center,
+              modifier = Modifier.fillMaxSize().padding(innerPadding)) {
+                Text(
+                    modifier = Modifier.padding(innerPadding).testTag("emptyProfilePrompt"),
+                    text = "There is no one around. Try moving!",
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF575757))
+              }
+        }
+      },
+      floatingActionButton = {
+        val context = LocalContext.current
+        FloatingActionButton(
+            onClick = {
+              Toast.makeText(context, "Filter button clicked", Toast.LENGTH_SHORT).show()
+            },
+            containerColor = Color(0xFF1FAEF0), // fixme: use icebreakrr blue
+            contentColor = Color.White,
+            modifier = Modifier.testTag("filterButton")) {
+              Icon(painter = painterResource(R.drawable.filter_24), contentDescription = "Add")
+            }
       })
 }

@@ -7,6 +7,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.github.se.icebreakrr.model.tags.TagsViewModel
 import com.github.se.icebreakrr.ui.navigation.BottomNavigationMenu
 import com.github.se.icebreakrr.ui.navigation.LIST_TOP_LEVEL_DESTINATIONS
@@ -21,7 +22,10 @@ import com.github.se.icebreakrr.ui.navigation.NavigationActions
  */
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun NotificationScreen(navigationActions: NavigationActions, tagsViewModel: TagsViewModel) {
+fun NotificationScreen(
+    navigationActions: NavigationActions,
+    tagsViewModel: TagsViewModel = viewModel(factory = TagsViewModel.Factory)
+) {
   Scaffold(
       modifier = Modifier.testTag("notificationScreen"),
       bottomBar = {
