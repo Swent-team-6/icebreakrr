@@ -32,6 +32,14 @@ class MainActivity : ComponentActivity() {
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
+      // Initialize Firebase Auth
+      FirebaseApp.initializeApp(this)
+      auth = FirebaseAuth.getInstance()
+      auth.currentUser?.let {
+          // Sign out the user if they are already signed in
+          // This is useful for testing purposes
+          auth.signOut()
+      }
     FirebaseAuth.getInstance()
 
     // Retrieve the testing flag from the Intent
