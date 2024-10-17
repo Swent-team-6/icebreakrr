@@ -1,6 +1,7 @@
 package com.github.se.icebreakrr.ui.sections
 
 import android.annotation.SuppressLint
+import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -17,6 +18,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -57,6 +59,7 @@ fun AroundYouScreen(
       },
       topBar = { TopBar() },
       content = { innerPadding ->
+        val context = LocalContext.current
         if (profiles.value.isNotEmpty()) {
           LazyColumn(
               contentPadding = PaddingValues(vertical = 16.dp),
@@ -65,7 +68,9 @@ fun AroundYouScreen(
                 items(profiles.value.size) { index ->
                   ProfileCard(
                       profile = profiles.value[index],
-                      onclick = { /* todo: change selected profile in VM and navigate to viewprofile*/})
+                      onclick = {
+                        Toast.makeText(context, "Profile clicked", Toast.LENGTH_SHORT).show()
+                      })
                 }
               }
         } else {
@@ -82,8 +87,11 @@ fun AroundYouScreen(
         }
       },
       floatingActionButton = {
+        val context = LocalContext.current
         FloatingActionButton(
-            onClick = { /* todo: navigate to add profile */},
+            onClick = {
+              Toast.makeText(context, "Filter button clicked", Toast.LENGTH_SHORT).show()
+            },
             containerColor = Color(0xFF1FAEF0), // fixme: use icebreakrr blue
             contentColor = Color.White,
             modifier = Modifier.testTag("filterButton")) {
