@@ -142,6 +142,14 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.navigation.testing)
 
+    implementation(libs.play.services.auth)
+
+    //firebase
+    implementation(libs.firebase.common.ktx)
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.auth.ktx)
+
+
     implementation(libs.play.services.location)
     implementation(libs.coil.compose)
 
@@ -194,6 +202,8 @@ dependencies {
     // ------------       Mockito     --------------
     testImplementation(libs.mockito.core)
     testImplementation(libs.mockito.kotlin)
+    androidTestImplementation(libs.mockito.kotlin)
+    androidTestImplementation(libs.mockito.android)
 
     androidTestImplementation(libs.mockito.android)
     androidTestImplementation(libs.mockito.kotlin)
