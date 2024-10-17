@@ -52,7 +52,7 @@ fun NotificationScreen(
       },
       content = { innerPadding ->
         LazyColumn(
-            modifier = Modifier.padding(innerPadding).fillMaxSize().testTag("notificationScroll"),
+            modifier = Modifier.padding(innerPadding).padding(horizontal = 7.dp).testTag("notificationScroll"),
         ) {
           item {
             Text(
@@ -67,11 +67,9 @@ fun NotificationScreen(
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(vertical = 16.dp).testTag("notificationSecondText"))
             Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-              cardList.value.drop(4).forEach { p -> ProfileCard(p, onclick = navFunction) }
+              cardList.value.drop(4).forEach { p -> ProfileCard(p, onclick = navFunction, greyedOut = true) }
             }
           }
         }
-      },
-      floatingActionButton = { FilterFloatingActionButton(navigationActions) },
-  )
+      },)
 }
