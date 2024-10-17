@@ -26,7 +26,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.github.se.icebreakrr.R
-import com.github.se.icebreakrr.ui.ProfileViewModel
+import com.github.se.icebreakrr.ui.MockProfileViewModel
 import com.github.se.icebreakrr.ui.navigation.BottomNavigationMenu
 import com.github.se.icebreakrr.ui.navigation.LIST_TOP_LEVEL_DESTINATIONS
 import com.github.se.icebreakrr.ui.navigation.NavigationActions
@@ -44,10 +44,10 @@ import com.github.se.icebreakrr.ui.sections.shared.TopBar
 @Composable
 fun AroundYouScreen(
     navigationActions: NavigationActions,
-    profileViewModel: ProfileViewModel = viewModel(factory = ProfileViewModel.Factory)
+    mockProfileViewModel: MockProfileViewModel = viewModel(factory = MockProfileViewModel.Factory)
 ) {
 
-  val profiles = profileViewModel.profiles.collectAsState()
+  val profiles = mockProfileViewModel.profiles.collectAsState()
 
   Scaffold(
       modifier = Modifier.testTag("aroundYouScreen"),

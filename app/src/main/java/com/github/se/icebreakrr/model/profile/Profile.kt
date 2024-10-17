@@ -39,6 +39,8 @@ data class Profile(
     }
     return age
   }
+
+    companion object
 }
 
 /**

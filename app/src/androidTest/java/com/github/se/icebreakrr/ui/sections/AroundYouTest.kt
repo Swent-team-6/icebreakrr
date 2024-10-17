@@ -5,7 +5,7 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithTag
-import com.github.se.icebreakrr.ui.ProfileViewModel
+import com.github.se.icebreakrr.ui.MockProfileViewModel
 import com.github.se.icebreakrr.ui.navigation.NavigationActions
 import com.github.se.icebreakrr.ui.navigation.Route
 import org.junit.Before
@@ -16,22 +16,22 @@ import org.mockito.Mockito.`when`
 
 class AroundYouTest {
   private lateinit var navigationActions: NavigationActions
-  private lateinit var profileViewModel: ProfileViewModel
+  private lateinit var mockProfileViewModel: MockProfileViewModel
 
   @get:Rule val composeTestRule = createComposeRule()
 
   @Before
   fun setUp() {
     navigationActions = mock(NavigationActions::class.java)
-    profileViewModel = ProfileViewModel()
+    mockProfileViewModel = MockProfileViewModel()
 
     `when`(navigationActions.currentRoute()).thenReturn(Route.AROUND_YOU)
-    composeTestRule.setContent { AroundYouScreen(navigationActions, profileViewModel) }
+    composeTestRule.setContent { AroundYouScreen(navigationActions, mockProfileViewModel) }
   }
 
   @Test
   fun displayTextWhenEmpty() {
-    profileViewModel.clearProfiles()
+    mockProfileViewModel.clearProfiles()
     composeTestRule.onNodeWithTag("emptyProfilePrompt").assertIsDisplayed()
   }
 
