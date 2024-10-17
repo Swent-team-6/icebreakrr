@@ -50,23 +50,25 @@ fun SettingsScreen(navigationActions: NavigationActions) {
             navigationActions.navigateTo(Screen.PROFILE)
           }
 
-          ToggleOptionBox(label = "Toggle Location")
+        Spacer(modifier = Modifier.padding(vertical = 8.dp))
+
+
+        ToggleOptionBox(label = "Toggle Location")
           ToggleOptionBox(label = "Option 1")
           ToggleOptionBox(label = "Option 2")
           ToggleOptionBox(label = "Option 3")
 
-          Spacer(modifier = Modifier.weight(0.2f))
+        Spacer(modifier = Modifier.padding(vertical = 16.dp))
 
           Button(
               onClick = {
                 Toast.makeText(context, "Log Out (Not yet implemented)", Toast.LENGTH_SHORT).show()
               },
-              colors = ButtonDefaults.buttonColors(containerColor = Color.Red),
+              colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFCE0E00)),
               modifier = Modifier.fillMaxWidth().testTag("logOutButton")) {
                 Text("Log Out", color = Color.White)
               }
 
-          Spacer(modifier = Modifier.weight(1f))
         }
   }
 }
