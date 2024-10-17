@@ -68,9 +68,7 @@ fun AroundYouScreen(
                 items(profiles.value.size) { index ->
                   ProfileCard(
                       profile = profiles.value[index],
-                      onclick = {
-                        Toast.makeText(context, "Profile clicked", Toast.LENGTH_SHORT).show()
-                      })
+                      onclick = { navigationActions.navigateTo("Settings Screen") })
                 }
               }
         } else {
