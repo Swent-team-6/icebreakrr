@@ -177,7 +177,7 @@ fun ProfileHeader(navigationActions: NavigationActions) {
 
               // Username
               Text(
-                  text = "Jean Do",
+                  text = "John Do",
                   fontSize = 24.sp,
                   fontWeight = FontWeight.Bold,
                   color = Color.White,
