@@ -2,7 +2,7 @@ package com.github.se.icebreakrr.model.tags
 
 data class TagsCategory(
     val name: String = "",
-    val color: String = "#FFFFFFFF",
+    val color: String = "0xFFFFFFFF",
     val subtags: List<String> = emptyList()
 )
 

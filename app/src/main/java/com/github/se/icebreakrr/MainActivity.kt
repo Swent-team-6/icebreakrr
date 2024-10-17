@@ -29,12 +29,11 @@ import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.FirebaseAuth
 
 class MainActivity : ComponentActivity() {
-
   private lateinit var auth: FirebaseAuth
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
-
+    auth = FirebaseAuth.getInstance()
     // Initialize Firebase Auth
     FirebaseApp.initializeApp(this)
     auth = FirebaseAuth.getInstance()
@@ -43,6 +42,7 @@ class MainActivity : ComponentActivity() {
       // This is useful for testing purposes
       auth.signOut()
     }
+    FirebaseAuth.getInstance()
 
     // Retrieve the testing flag from the Intent
     val isTesting = intent?.getBooleanExtra("IS_TESTING", false) ?: false

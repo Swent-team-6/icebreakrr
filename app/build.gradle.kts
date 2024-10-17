@@ -1,6 +1,5 @@
 import java.util.Properties
 
-
 plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsKotlinAndroid)
@@ -165,6 +164,7 @@ dependencies {
     implementation(libs.firebase.auth.ktx)
     implementation(libs.firebase.auth)
     implementation(libs.geofirestore)
+    implementation(libs.firebase.common.ktx)
 
 
     // ------------- Jetpack Compose ------------------
@@ -208,11 +208,7 @@ dependencies {
     androidTestImplementation(libs.mockito.android)
     androidTestImplementation(libs.mockito.kotlin)
 
-    implementation(libs.google.services)
-
-    androidTestImplementation(libs.mockito.android)
-    androidTestImplementation(libs.mockito.kotlin)
-
+    implementation(platform(libs.firebase.bom))
 }
 
 tasks.withType<Test> {
@@ -251,6 +247,5 @@ tasks.register("jacocoTestReport", JacocoReport::class) {
         include("outputs/unit_test_code_coverage/debugUnitTest/testDebugUnitTest.exec")
         include("outputs/code_coverage/debugAndroidTest/connected/*/coverage.ec")
     })
-
-
 }
+
