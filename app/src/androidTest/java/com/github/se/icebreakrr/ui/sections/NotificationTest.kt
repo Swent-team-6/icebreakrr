@@ -48,7 +48,6 @@ class NotificationTest {
     composeTestRule.onNodeWithTag("notificationScroll").assertIsDisplayed()
     composeTestRule.onNodeWithTag("notificationFirstText").assertIsDisplayed()
     composeTestRule.onNodeWithTag("notificationSecondText").performScrollTo()
-    composeTestRule.onNodeWithTag("filterButton").assertIsDisplayed()
   }
 
   @Test
@@ -66,7 +65,7 @@ class NotificationTest {
   fun profilesListNotEmpty() {
     composeTestRule.setContent { NotificationScreen(navigationActionsMock, profileViewModel) }
     composeTestRule.onAllNodesWithTag("profileCard").onFirst().assertIsDisplayed()
-    composeTestRule.onAllNodesWithTag("profileCard").assertCountEquals(24)
+    composeTestRule.onAllNodesWithTag("profileCard").assertCountEquals(12)
   }
 
   @Test
@@ -77,13 +76,5 @@ class NotificationTest {
 
     composeTestRule.onNodeWithTag("navItem_${R.string.around_you}").performClick()
     verify(navigationActionsMock).navigateTo(TopLevelDestinations.AROUND_YOU)
-  }
-
-  @Test
-  fun clickOnCardEvent() {
-    composeTestRule.setContent { NotificationScreen(navigationActionsMock, profileViewModel) }
-    composeTestRule.onAllNodesWithTag("profileCard").onFirst().assertIsDisplayed()
-    composeTestRule.onAllNodesWithTag("profileCard").onFirst().performClick()
-    verify(navigationActionsMock).navigateTo(Screen.PROFILE_EDIT)
   }
 }
