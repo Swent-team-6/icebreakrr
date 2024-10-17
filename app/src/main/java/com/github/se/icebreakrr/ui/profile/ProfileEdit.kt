@@ -149,9 +149,11 @@ fun ProfileEditingScreen(navigationActions: NavigationActions) {
                     title = { Text("You are about to leave this page") },
                     text = { Text("Do you want to save your changes?") },
                     confirmButton = {
-                      TextButton(onClick = { navigationActions.goBack() }) {
-                        Text("Discard changes")
-                      }
+                      TextButton(
+                          onClick = { navigationActions.goBack() },
+                          modifier = Modifier.testTag("discardChangesOption")) {
+                            Text("Discard changes")
+                          }
                     },
                     dismissButton = {
                       TextButton(onClick = { showDialog = false }) { Text("Cancel") }

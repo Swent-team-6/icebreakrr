@@ -178,6 +178,8 @@ dependencies {
     implementation("com.google.accompanist:accompanist-flowlayout:0.32.0")
 
     debugImplementation(libs.compose.tooling)
+    implementation(libs.coil.compose)
+
     // UI Tests
     globalTestImplementation(libs.compose.test.junit)
     debugImplementation(libs.compose.test.manifest)
