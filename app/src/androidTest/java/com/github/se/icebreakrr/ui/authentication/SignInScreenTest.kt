@@ -1,4 +1,4 @@
-package com.github.se.icebreakrr.ui
+package com.github.se.icebreakrr.ui.authentication
 
 // This file contains code snippets from the bootcamp
 // and has been highly inspired from it
