@@ -31,7 +31,9 @@ class NavigationTest {
     composeTestRule.onNodeWithTag("aroundYouScreen").assertIsDisplayed()
 
     composeTestRule.onNodeWithTag("navItem_${R.string.settings}").performClick()
-    composeTestRule.onNodeWithTag("settingsScreen").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("profileScreen").assertIsDisplayed()
+
+    composeTestRule.onNodeWithTag("goBackButton").performClick()
 
     composeTestRule.onNodeWithTag("navItem_${R.string.notifications}").performClick()
     composeTestRule.onNodeWithTag("notificationScreen").assertIsDisplayed()
