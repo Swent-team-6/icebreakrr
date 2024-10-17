@@ -1,17 +1,29 @@
 package com.github.se.icebreakrr.ui.sections
 
 import android.annotation.SuppressLint
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.github.se.icebreakrr.model.tags.TagsViewModel
+import androidx.compose.ui.unit.dp
+import com.github.se.icebreakrr.model.profile.MockProfileViewModel
 import com.github.se.icebreakrr.ui.navigation.BottomNavigationMenu
 import com.github.se.icebreakrr.ui.navigation.LIST_TOP_LEVEL_DESTINATIONS
 import com.github.se.icebreakrr.ui.navigation.NavigationActions
+import com.github.se.icebreakrr.ui.navigation.Route
+import com.github.se.icebreakrr.ui.navigation.Screen
+import com.github.se.icebreakrr.ui.sections.shared.FilterFloatingActionButton
+import com.github.se.icebreakrr.ui.sections.shared.ProfileCard
+import com.github.se.icebreakrr.ui.sections.shared.TopBar
 
 /**
  * Composable function for displaying the notification screen.
@@ -24,21 +36,41 @@ import com.github.se.icebreakrr.ui.navigation.NavigationActions
 @Composable
 fun NotificationScreen(
     navigationActions: NavigationActions,
-    tagsViewModel: TagsViewModel = viewModel(factory = TagsViewModel.Factory)
+    profileViewModel: MockProfileViewModel
 ) {
+  val cardList = profileViewModel.profiles.collectAsState()
+  val navFunction = {
+    navigationActions.navigateTo(Screen.PROFILE_EDIT)
+  } // fixme : put Route.View instead
   Scaffold(
       modifier = Modifier.testTag("notificationScreen"),
+      topBar = { TopBar("Inbox") },
       bottomBar = {
         BottomNavigationMenu(
             onTabSelect = { route -> navigationActions.navigateTo(route) },
             tabList = LIST_TOP_LEVEL_DESTINATIONS,
-            selectedItem = navigationActions.currentRoute())
+            selectedItem = Route.NOTIFICATIONS)
       },
       content = { innerPadding ->
-        // Use the innerPadding to apply padding around your content
-        Text(
-            text = "Notification screen", // TODO PLaceholder
-            modifier = Modifier.padding(innerPadding) // Applying the padding to the content
-            )
-      })
+        LazyColumn(
+            modifier = Modifier.padding(innerPadding).fillMaxSize().testTag("notificationScroll"),
+        ) {
+          item {
+            Text(
+                text = "Pending meeting requests",
+                modifier = Modifier.padding(innerPadding).testTag("notificationFirstText"))
+            Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+              cardList.value.forEach { p -> ProfileCard(p, navFunction) }
+            }
+            Text(
+                text = "Passed",
+                modifier = Modifier.padding(innerPadding).testTag("notificationSecondText"))
+            Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+              cardList.value.forEach { p -> ProfileCard(p, navFunction) }
+            }
+          }
+        }
+      },
+      floatingActionButton = { FilterFloatingActionButton(navigationActions) },
+  )
 }

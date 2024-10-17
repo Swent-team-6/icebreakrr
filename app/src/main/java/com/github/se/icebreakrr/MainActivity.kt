@@ -7,30 +7,43 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
+import com.github.se.icebreakrr.config.LocalIsTesting
+import com.github.se.icebreakrr.model.profile.MockProfileViewModel
+import com.github.se.icebreakrr.ui.authentication.SignInScreen
 import com.github.se.icebreakrr.ui.navigation.NavigationActions
 import com.github.se.icebreakrr.ui.navigation.Route
 import com.github.se.icebreakrr.ui.navigation.Screen
 import com.github.se.icebreakrr.ui.profile.ProfileEditingScreen
 import com.github.se.icebreakrr.ui.sections.AroundYouScreen
+import com.github.se.icebreakrr.ui.sections.FilterScreen
 import com.github.se.icebreakrr.ui.sections.NotificationScreen
 import com.github.se.icebreakrr.ui.sections.SettingsScreen
 import com.github.se.icebreakrr.ui.theme.SampleAppTheme
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.FirebaseApp
 
 class MainActivity : ComponentActivity() {
   private lateinit var auth: FirebaseAuth
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
-    auth = FirebaseAuth.getInstance()
-    // auth.currentUser?.let { auth.signOut() }
-    Log.e("TagsR", "[Oncreate] yay")
-    setContent { SampleAppTheme { Surface(modifier = Modifier.fillMaxSize()) { IcebreakrrApp() } } }
+    FirebaseAuth.getInstance()
+
+    // Retrieve the testing flag from the Intent
+    val isTesting = intent?.getBooleanExtra("IS_TESTING", false) ?: false
+
+    setContent {
+      // Provide the `isTesting` flag to the entire composable tree
+      CompositionLocalProvider(LocalIsTesting provides isTesting) {
+        SampleAppTheme { Surface(modifier = Modifier.fillMaxSize()) { IcebreakrrApp() } }
+      }
+    }
   }
 }
 
@@ -48,9 +61,16 @@ class MainActivity : ComponentActivity() {
 fun IcebreakrrApp() {
   val navController = rememberNavController()
   val navigationActions = NavigationActions(navController)
+  val profileViewModel = MockProfileViewModel()
 
-  // TODO Implement Auth Screen navigation
-  NavHost(navController = navController, startDestination = Route.AROUND_YOU) {
+  NavHost(navController = navController, startDestination = Route.AUTH) {
+    navigation(
+        startDestination = Screen.AUTH,
+        route = Route.AUTH,
+    ) {
+      composable(Screen.AUTH) { SignInScreen(navigationActions) }
+    }
+
     navigation(
         startDestination = Screen.AROUND_YOU,
         route = Route.AROUND_YOU,
@@ -69,7 +89,7 @@ fun IcebreakrrApp() {
         startDestination = Screen.NOTIFICATIONS,
         route = Route.NOTIFICATIONS,
     ) {
-      composable(Screen.NOTIFICATIONS) { NotificationScreen(navigationActions) }
+      composable(Screen.NOTIFICATIONS) { NotificationScreen(navigationActions, profileViewModel) }
     }
 
     navigation(
@@ -77,6 +97,13 @@ fun IcebreakrrApp() {
         route = Route.PROFILE_EDIT,
     ) {
       composable(Screen.PROFILE_EDIT) { ProfileEditingScreen(navigationActions) }
+    }
+
+    navigation(
+        startDestination = Screen.FILTER,
+        route = Route.FILTER,
+    ) {
+      composable(Screen.FILTER) { FilterScreen(navigationActions) }
     }
   }
 }
