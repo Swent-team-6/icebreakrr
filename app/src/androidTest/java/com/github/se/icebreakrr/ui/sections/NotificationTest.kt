@@ -13,7 +13,6 @@ import androidx.compose.ui.test.performScrollTo
 import com.github.se.icebreakrr.R
 import com.github.se.icebreakrr.model.profile.MockProfileViewModel
 import com.github.se.icebreakrr.ui.navigation.NavigationActions
-import com.github.se.icebreakrr.ui.navigation.Screen
 import com.github.se.icebreakrr.ui.navigation.TopLevelDestinations
 import org.junit.Before
 import org.junit.Rule
