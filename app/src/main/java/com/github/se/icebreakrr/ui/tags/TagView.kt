@@ -201,9 +201,9 @@ fun RowOfClickTags(l: List<Pair<String, Color>>, tagStyle: TagStyle, onClick: (S
  */
 @Composable
 fun TagSelector(
-    selectedTag: MutableState<List<Pair<String, Color>>>,
-    outputTag: MutableState<List<Pair<String, Color>>>,
-    stringQuery: MutableState<String>,
+    selectedTag: List<Pair<String, Color>>,
+    outputTag: List<Pair<String, Color>>,
+    stringQuery: String,
     expanded: MutableState<Boolean>,
     onTagClick: (String) -> Unit,
     onDropDownItemClicked: (String) -> Unit,
@@ -217,10 +217,9 @@ fun TagSelector(
   Box(modifier = Modifier.size(width, height).testTag("sizeTagSelector")) {
     Column(modifier = Modifier.fillMaxWidth().wrapContentHeight()) {
       OutlinedTextField(
-          value = stringQuery.value,
+          value = stringQuery,
           onValueChange = {
-            stringQuery.value = it
-            onStringChanged(stringQuery.value)
+            onStringChanged(it)
             expanded.value = true
           },
           label = { Text("Tags", modifier = Modifier.testTag("labelTagSelector")) },
@@ -235,11 +234,9 @@ fun TagSelector(
             onDismissRequest = { expanded.value = false },
             properties = PopupProperties(focusable = false),
             modifier = Modifier.align(Alignment.TopStart)) {
-              val tagsList = outputTag.value
-              tagsList.forEach { tag ->
+              outputTag.forEach { tag ->
                 DropdownMenuItem(
                     onClick = {
-                      stringQuery.value = ""
                       expanded.value = false
                       onDropDownItemClicked(tag.first)
                     },
@@ -248,9 +245,7 @@ fun TagSelector(
               }
             }
       }
-      RowOfClickTags(selectedTag.value, TagStyle(textColor, Color.Red, textSize)) { s ->
-        onTagClick(s)
-      }
+      RowOfClickTags(selectedTag, TagStyle(textColor, Color.Red, textSize)) { s -> onTagClick(s) }
     }
   }
 }

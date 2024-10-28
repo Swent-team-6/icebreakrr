@@ -8,12 +8,14 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
 import com.github.se.icebreakrr.config.LocalIsTesting
 import com.github.se.icebreakrr.model.profile.MockProfileViewModel
+import com.github.se.icebreakrr.model.tags.TagsViewModel
 import com.github.se.icebreakrr.ui.authentication.SignInScreen
 import com.github.se.icebreakrr.ui.navigation.NavigationActions
 import com.github.se.icebreakrr.ui.navigation.Route
@@ -71,6 +73,7 @@ fun IcebreakrrApp() {
   val navController = rememberNavController()
   val navigationActions = NavigationActions(navController)
   val profileViewModel = MockProfileViewModel()
+  val tagsViewModel: TagsViewModel = viewModel(factory = TagsViewModel.Factory)
 
   NavHost(navController = navController, startDestination = Route.AUTH) {
     navigation(
@@ -106,14 +109,14 @@ fun IcebreakrrApp() {
         startDestination = Screen.PROFILE_EDIT,
         route = Route.PROFILE_EDIT,
     ) {
-      composable(Screen.PROFILE_EDIT) { ProfileEditingScreen(navigationActions) }
+      composable(Screen.PROFILE_EDIT) { ProfileEditingScreen(navigationActions, tagsViewModel) }
     }
 
     navigation(
         startDestination = Screen.FILTER,
         route = Route.FILTER,
     ) {
-      composable(Screen.FILTER) { FilterScreen(navigationActions) }
+      composable(Screen.FILTER) { FilterScreen(navigationActions, tagsViewModel) }
     }
   }
 }
