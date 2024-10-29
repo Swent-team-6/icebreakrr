@@ -28,6 +28,7 @@ data class TagsViewModel(private val repository: TagsRepository) : ViewModel() {
   val filteredTags: StateFlow<List<String>> = filteredTags_
 
   // observable variable containing the tags from which you want to filter
+  // or the selected tags in the edit profile
   private var filteringTags_ = MutableStateFlow(emptyList<String>())
   val filteringTags: StateFlow<List<String>> = filteringTags_
 
@@ -151,5 +152,6 @@ data class TagsViewModel(private val repository: TagsRepository) : ViewModel() {
   fun leaveUI() {
     query_.value = ""
     tagsSuggestions_.value = emptyList()
+    filteringTags_.value = emptyList()
   }
 }

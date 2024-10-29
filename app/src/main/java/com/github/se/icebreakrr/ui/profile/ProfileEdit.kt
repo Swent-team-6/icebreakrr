@@ -17,18 +17,26 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.github.se.icebreakrr.model.profile.Gender
 import com.github.se.icebreakrr.model.profile.Profile
+import com.github.se.icebreakrr.model.tags.TagsViewModel
 import com.github.se.icebreakrr.ui.navigation.NavigationActions
+import com.github.se.icebreakrr.ui.sections.tagSelectorTextSizeFactor
+import com.github.se.icebreakrr.ui.tags.TagSelector
 import com.google.firebase.Timestamp
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ProfileEditingScreen(navigationActions: NavigationActions) {
+fun ProfileEditingScreen(
+    navigationActions: NavigationActions,
+    tagsViewModel: TagsViewModel = viewModel(factory = TagsViewModel.Factory)
+) {
 
   val configuration = LocalConfiguration.current
   val screenWidth = configuration.screenWidthDp.dp
+  val screenHeight = configuration.screenHeightDp.dp
 
   // Define dynamic padding and text size based on screen size
   val padding = screenWidth * 0.02f // 2% of screen width
@@ -51,11 +59,15 @@ fun ProfileEditingScreen(navigationActions: NavigationActions) {
   var catchphrase by remember { mutableStateOf(TextFieldValue(user.catchPhrase)) }
   var description by remember { mutableStateOf(TextFieldValue(user.description)) }
   var showDialog by remember { mutableStateOf(false) }
-  var searchQuery by remember { mutableStateOf("") }
 
   // to POST the new profile, I will use Arthur's viewModel
 
   // for tags display, I will use Samuel's tags viewProfile to load the tags
+  val selectedTags = tagsViewModel.filteringTags.collectAsState()
+  val tagsSuggestions = tagsViewModel.tagsSuggestions.collectAsState()
+  val stringQuery = tagsViewModel.query.collectAsState()
+
+  val expanded = remember { mutableStateOf(false) }
 
   Scaffold(
       modifier = Modifier.testTag("profileEditScreen"),
@@ -69,6 +81,7 @@ fun ProfileEditingScreen(navigationActions: NavigationActions) {
                   onClick = {
                     // TODO : verify that the profile has been modified before showing the modal
                     showDialog = true
+                    tagsViewModel.leaveUI()
                   }) {
                     Icon(Icons.Default.ArrowBack, contentDescription = "Back")
                   }
@@ -78,6 +91,7 @@ fun ProfileEditingScreen(navigationActions: NavigationActions) {
                   modifier = Modifier.testTag("checkButton"),
                   onClick = {
                     // TODO : handle save action
+                    tagsViewModel.leaveUI()
                   }) {
                     Icon(Icons.Default.Check, contentDescription = "Save")
                   }
@@ -126,11 +140,24 @@ fun ProfileEditingScreen(navigationActions: NavigationActions) {
 
               // TODO: This is temporary for tests and will be replaced with the actual tag selector
               // of Maximo
-              OutlinedTextField(
-                  value = searchQuery,
-                  onValueChange = { searchQuery = it },
-                  label = { Text("Search Tags") },
-                  modifier = Modifier.fillMaxWidth().height(60.dp).testTag("searchTags"))
+              val tagSelectorHeight =
+                  screenHeight * com.github.se.icebreakrr.ui.sections.tagSelectorHeightFactor
+              val tagSelectorWidth =
+                  screenWidth * com.github.se.icebreakrr.ui.sections.tagSelectorWidthFactor
+              TagSelector(
+                  selectedTag =
+                      selectedTags.value.map { tag -> Pair(tag, tagsViewModel.tagToColor(tag)) },
+                  outputTag =
+                      tagsSuggestions.value.map { tag -> Pair(tag, tagsViewModel.tagToColor(tag)) },
+                  stringQuery = stringQuery.value,
+                  expanded = expanded,
+                  onTagClick = { tag -> tagsViewModel.removeFilter(tag) },
+                  onStringChanged = { tagsViewModel.setQuery(it, selectedTags.value) },
+                  textColor = MaterialTheme.colorScheme.onSurface,
+                  onDropDownItemClicked = { tag -> tagsViewModel.addFilter(tag) },
+                  height = tagSelectorHeight,
+                  width = tagSelectorWidth,
+                  textSize = (tagSelectorHeight.value * tagSelectorTextSizeFactor).sp)
               Spacer(modifier = Modifier.height(padding))
 
               // TODO : This will be replaced by the actual tags
@@ -150,7 +177,10 @@ fun ProfileEditingScreen(navigationActions: NavigationActions) {
                     text = { Text("Do you want to save your changes?") },
                     confirmButton = {
                       TextButton(
-                          onClick = { navigationActions.goBack() },
+                          onClick = {
+                            tagsViewModel.leaveUI()
+                            navigationActions.goBack()
+                          },
                           modifier = Modifier.testTag("discardChangesOption")) {
                             Text("Discard changes")
                           }

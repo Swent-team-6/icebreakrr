@@ -1,6 +1,7 @@
 [versions]
 #Google
 googleServices = "4.4.2"
+mockitoInline = "4.0.0"
 playServicesAuth = "21.2.0"
 playServicesLocation = "21.3.0"
 
@@ -49,6 +50,7 @@ ktfmt = "0.17.0"
 
 [libraries]
 #Google
+mockito-inline = { module = "org.mockito:mockito-inline", version.ref = "mockitoInline" }
 play-services-auth = { module = "com.google.android.gms:play-services-auth", version.ref = "playServicesAuth" }
 play-services-location = { module = "com.google.android.gms:play-services-location", version.ref = "playServicesLocation" }
 google-services = { module = "com.google.gms:google-services", version.ref = "googleServices" }
