@@ -278,27 +278,27 @@ class FilterScreenTest {
 
     composeTestRule.setContent {
       GenderButton(
-          selected = selected.value,
-          onClick = { selected.value = !selected.value },
-          label = label.value)
+        selected = selected.value,
+        onClick = { selected.value = !selected.value },
+        label = label.value)
     }
 
     // Test unselected state
     composeTestRule
-        .onNodeWithTag("GenderButton${label.value}")
-        .assertIsDisplayed()
-        .assertIsNotSelected()
-        .assertTextEquals(label.value)
-        .assertHasClickAction()
+      .onNodeWithTag("GenderButton${label.value}")
+      .assertIsDisplayed()
+      .assertIsNotSelected()
+      .assertTextEquals(label.value)
+      .assertHasClickAction()
 
     // Test selected state
     selected.value = true
     composeTestRule
-        .onNodeWithTag("GenderButton${label.value}")
-        .assertIsDisplayed()
-        .assertIsSelected()
-        .assertTextEquals(label.value)
-        .assertHasClickAction()
+      .onNodeWithTag("GenderButton${label.value}")
+      .assertIsDisplayed()
+      .assertIsSelected()
+      .assertTextEquals(label.value)
+      .assertHasClickAction()
 
     // Test empty label
     label.value = ""
