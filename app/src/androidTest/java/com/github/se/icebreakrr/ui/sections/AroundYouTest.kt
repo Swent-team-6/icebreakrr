@@ -7,11 +7,13 @@ import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTouchInput
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.test.espresso.action.ViewActions.swipeDown
 import com.github.se.icebreakrr.model.profile.Gender
 import com.github.se.icebreakrr.model.profile.Profile
 import com.github.se.icebreakrr.model.profile.ProfilesRepository
 import com.github.se.icebreakrr.model.profile.ProfilesViewModel
+import com.github.se.icebreakrr.model.tags.TagsViewModel
 import com.github.se.icebreakrr.ui.navigation.NavigationActions
 import com.github.se.icebreakrr.ui.navigation.Route
 import com.github.se.icebreakrr.ui.navigation.Screen
@@ -43,7 +45,10 @@ class AroundYouScreenTest {
     // Mock initial behavior of repository
     `when`(navigationActions.currentRoute()).thenReturn(Route.AROUND_YOU)
 
-    composeTestRule.setContent { AroundYouScreen(navigationActions, profilesViewModel) }
+    composeTestRule.setContent {
+      AroundYouScreen(
+          navigationActions, profilesViewModel, viewModel(factory = TagsViewModel.Factory))
+    }
   }
 
   @Test
