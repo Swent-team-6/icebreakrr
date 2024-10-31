@@ -6,6 +6,8 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.github.se.icebreakrr.model.profile.ProfilesViewModel
+import com.github.se.icebreakrr.model.tags.TagsViewModel
 import com.github.se.icebreakrr.ui.navigation.NavigationActions
 import com.github.se.icebreakrr.ui.profile.ProfileView
 import org.junit.Before
@@ -21,6 +23,8 @@ class ProfileViewTest {
   @get:Rule val composeTestRule = createComposeRule()
 
   private lateinit var navigationActionsMock: NavigationActions
+  private lateinit var profileViewModel: ProfilesViewModel
+  private lateinit var tagsViewModel: TagsViewModel
 
   @Before
   fun setUp() {
@@ -29,7 +33,7 @@ class ProfileViewTest {
 
   @Test
   fun testProfileHeaderDisplaysCorrectlyAsUser() {
-    composeTestRule.setContent { ProfileView(navigationActions = navigationActionsMock) }
+    composeTestRule.setContent { ProfileView(profileViewModel, tagsViewModel, navigationActions = navigationActionsMock) }
 
     // Verify that the profile header and its elements are displayed
     composeTestRule.onNodeWithTag("profileHeader").assertIsDisplayed()
@@ -41,7 +45,7 @@ class ProfileViewTest {
 
   @Test
   fun testGoBackButtonFunctionality() {
-    composeTestRule.setContent { ProfileView(navigationActions = navigationActionsMock) }
+    composeTestRule.setContent { ProfileView(profileViewModel, tagsViewModel, navigationActions = navigationActionsMock) }
 
     composeTestRule.onNodeWithTag("goBackButton").assertIsDisplayed()
     composeTestRule.onNodeWithTag("goBackButton").performClick()
@@ -51,7 +55,7 @@ class ProfileViewTest {
 
   @Test
   fun testEditButtonFunctionality() {
-    composeTestRule.setContent { ProfileView(navigationActions = navigationActionsMock) }
+    composeTestRule.setContent { ProfileView(profileViewModel, tagsViewModel, navigationActions = navigationActionsMock) }
 
     composeTestRule.onNodeWithTag("editButton").assertIsDisplayed()
     composeTestRule.onNodeWithTag("editButton").performClick()
@@ -61,7 +65,7 @@ class ProfileViewTest {
 
   @Test
   fun testInfoSectionDisplaysCorrectly() {
-    composeTestRule.setContent { ProfileView(navigationActions = navigationActionsMock) }
+    composeTestRule.setContent { ProfileView(profileViewModel, tagsViewModel, navigationActions = navigationActionsMock) }
 
     // Verify that the info section is displayed
     composeTestRule.onNodeWithTag("infoSection").assertIsDisplayed()
@@ -80,7 +84,7 @@ class ProfileViewTest {
 
   @Test
   fun testProfileDescriptionDisplaysCorrectly() {
-    composeTestRule.setContent { ProfileView(navigationActions = navigationActionsMock) }
+    composeTestRule.setContent { ProfileView(profileViewModel, tagsViewModel, navigationActions = navigationActionsMock) }
 
     // Verify that the profile description is displayed correctly
     composeTestRule
