@@ -51,7 +51,7 @@ class AroundYouTest {
   fun navigationOnCardClick() {
     composeTestRule.onAllNodesWithTag("profileCard").onFirst().assertIsDisplayed()
     composeTestRule.onAllNodesWithTag("profileCard").onFirst().performClick()
-    verify(navigationActions).navigateTo(screen = Screen.PROFILE)
+    verify(navigationActions).navigateTo(screen = Screen.AROUND_YOU_PROFILE)
   }
 
   @Test
