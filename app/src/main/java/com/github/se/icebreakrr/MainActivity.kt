@@ -76,7 +76,7 @@ fun IcebreakrrApp() {
   val profileViewModel = MockProfileViewModel()
   val tagsViewModel: TagsViewModel = viewModel(factory = TagsViewModel.Factory)
 
-  NavHost(navController = navController, startDestination = Route.AROUND_YOU) {
+  NavHost(navController = navController, startDestination = Route.AUTH) {
     navigation(
         startDestination = Screen.AUTH,
         route = Route.AUTH,
