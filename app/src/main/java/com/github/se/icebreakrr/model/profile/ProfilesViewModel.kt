@@ -1,6 +1,5 @@
 package com.github.se.icebreakrr.model.profile
 
-import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.google.firebase.Firebase
@@ -11,8 +10,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 
-open class ProfilesViewModel(private val repository: ProfilesRepository,
-                             private val ppRepository: ProfilePicRepository) : ViewModel() {
+open class ProfilesViewModel(
+    private val repository: ProfilesRepository,
+    private val ppRepository: ProfilePicRepository
+) : ViewModel() {
 
   private val _profiles = MutableStateFlow<List<Profile>>(emptyList())
   open val profiles: StateFlow<List<Profile>> = _profiles
@@ -34,7 +35,10 @@ open class ProfilesViewModel(private val repository: ProfilesRepository,
         object : ViewModelProvider.Factory {
           @Suppress("UNCHECKED_CAST")
           override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            return ProfilesViewModel(ProfilesRepositoryFirestore(Firebase.firestore), ProfilePicRepositoryStorage(Firebase.storage)) as T
+            return ProfilesViewModel(
+                ProfilesRepositoryFirestore(Firebase.firestore),
+                ProfilePicRepositoryStorage(Firebase.storage))
+                as T
           }
         }
   }
@@ -145,45 +149,42 @@ open class ProfilesViewModel(private val repository: ProfilesRepository,
     _loading.value = true
     repository.deleteProfileByUid(
         uid, onSuccess = { _loading.value = false }, onFailure = { e -> handleError(e) })
-      ppRepository.deleteProfilePicture(userId = uid, onSuccess = {}, onFailure = { e -> handleError(e) })
+    ppRepository.deleteProfilePicture(
+        userId = uid, onSuccess = {}, onFailure = { e -> handleError(e) })
   }
 
-    /**
-     * Uploads the current user's profile picture to the remote storage system.
-     *
-     * @param imageData The byte array of the image file to be uploaded.
-     * @throws IllegalStateException if the user is not logged in.
-     */
-    fun uploadCurrentUserProfilePicture(imageData: ByteArray) {
-        val userId = selectedProfile.value?.uid ?: throw IllegalStateException("User not logged in")
-        ppRepository.uploadProfilePicture(
-            userId = userId,
-            imageData = imageData,
-            onSuccess = { url ->
-                _selectedProfile.update { selected ->
-                    selected?.copy(profilePictureUrl = url)
-                }
-            },
-            onFailure = { e -> handleError(e) }
-        )
-    }
+  /**
+   * Uploads the current user's profile picture to the remote storage system.
+   *
+   * @param imageData The byte array of the image file to be uploaded.
+   * @throws IllegalStateException if the user is not logged in.
+   */
+  fun uploadCurrentUserProfilePicture(imageData: ByteArray) {
+    val userId = selectedProfile.value?.uid ?: throw IllegalStateException("User not logged in")
+    ppRepository.uploadProfilePicture(
+        userId = userId,
+        imageData = imageData,
+        onSuccess = { url ->
+          _selectedProfile.update { selected -> selected?.copy(profilePictureUrl = url) }
+        },
+        onFailure = { e -> handleError(e) })
+  }
 
-    /**
-     * Deletes the current user's profile picture from the remote storage system.
-     *
-     * @throws IllegalStateException if the user is not logged in.
-     */
-    fun deleteCurrentUserProfilePicture() {
-        ppRepository.deleteProfilePicture(
-            userId = selectedProfile.value?.uid ?: throw IllegalStateException("User not logged in"),
-            onSuccess = {
-                _selectedProfile.update { currentProfile ->
-                    currentProfile?.copy(profilePictureUrl = null)
-                }
-            },
-            onFailure = { e -> handleError(e) })
-    }
-
+  /**
+   * Deletes the current user's profile picture from the remote storage system.
+   *
+   * @throws IllegalStateException if the user is not logged in.
+   */
+  fun deleteCurrentUserProfilePicture() {
+    ppRepository.deleteProfilePicture(
+        userId = selectedProfile.value?.uid ?: throw IllegalStateException("User not logged in"),
+        onSuccess = {
+          _selectedProfile.update { currentProfile ->
+            currentProfile?.copy(profilePictureUrl = null)
+          }
+        },
+        onFailure = { e -> handleError(e) })
+  }
 
   /**
    * Handles errors by updating the error and loading states.
@@ -194,6 +195,4 @@ open class ProfilesViewModel(private val repository: ProfilesRepository,
     _error.value = exception
     _loading.value = false
   }
-
-
 }
