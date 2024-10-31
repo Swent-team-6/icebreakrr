@@ -185,6 +185,18 @@ dependencies {
     // Accompanist Flow Layout dependency
     implementation("com.google.accompanist:accompanist-flowlayout:0.32.0")
 
+    // Add Firebase Cloud Messaging System
+//    implementation("com.google.firebase:firebase-bom:32.0.0")
+    implementation("com.google.firebase:firebase-messaging-ktx")
+//    implementation("com.google.firebase:firebase-database-ktx")
+//    implementation("com.google.firebase:firebase-admin:9.0.0")
+
+    // Retrofit
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation("com.squareup.retrofit2:converter-moshi:2.9.0")
+
+
+
     debugImplementation(libs.compose.tooling)
     implementation(libs.coil.compose)
 

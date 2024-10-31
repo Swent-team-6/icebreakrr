@@ -1,6 +1,7 @@
 package com.github.se.icebreakrr
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
@@ -27,6 +28,7 @@ import com.github.se.icebreakrr.ui.sections.SettingsScreen
 import com.github.se.icebreakrr.ui.theme.SampleAppTheme
 import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.messaging.FirebaseMessaging
 
 class MainActivity : ComponentActivity() {
   private lateinit var auth: FirebaseAuth
@@ -46,6 +48,15 @@ class MainActivity : ComponentActivity() {
 
     // Retrieve the testing flag from the Intent
     val isTesting = intent?.getBooleanExtra("IS_TESTING", false) ?: false
+
+    // Set up the Firebase Cloud Messaging system
+    FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
+      if (task.isSuccessful) {
+        val token = task.result
+        Log.d("FCM Token", "Token: $token")
+        // Save token to backend for user messaging
+      }
+    }
 
     setContent {
       // Provide the `isTesting` flag to the entire composable tree
