@@ -14,7 +14,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
 import com.github.se.icebreakrr.config.LocalIsTesting
-import com.github.se.icebreakrr.model.profile.MockProfileViewModel
+import com.github.se.icebreakrr.model.profile.ProfilesViewModel
 import com.github.se.icebreakrr.model.tags.TagsViewModel
 import com.github.se.icebreakrr.ui.authentication.SignInScreen
 import com.github.se.icebreakrr.ui.navigation.NavigationActions
@@ -72,7 +72,7 @@ class MainActivity : ComponentActivity() {
 fun IcebreakrrApp() {
   val navController = rememberNavController()
   val navigationActions = NavigationActions(navController)
-  val profileViewModel = MockProfileViewModel()
+  val profileViewModel: ProfilesViewModel = viewModel(factory = ProfilesViewModel.Factory)
   val tagsViewModel: TagsViewModel = viewModel(factory = TagsViewModel.Factory)
 
   NavHost(navController = navController, startDestination = Route.AUTH) {
@@ -87,7 +87,9 @@ fun IcebreakrrApp() {
         startDestination = Screen.AROUND_YOU,
         route = Route.AROUND_YOU,
     ) {
-      composable(Screen.AROUND_YOU) { AroundYouScreen(navigationActions) }
+      composable(Screen.AROUND_YOU) {
+        AroundYouScreen(navigationActions, profileViewModel, tagsViewModel)
+      }
     }
 
     navigation(
