@@ -43,6 +43,7 @@ class AroundYouScreenTest {
   fun setUp() {
     navigationActions = mock(NavigationActions::class.java)
     mockProfilesRepository = mock(ProfilesRepository::class.java)
+    mockPPRepository = mock(ProfilePicRepository::class.java)
     profilesViewModel = ProfilesViewModel(mockProfilesRepository, mockPPRepository)
 
     // Mock initial behavior of repository

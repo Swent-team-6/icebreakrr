@@ -41,7 +41,7 @@ class NotificationTest {
   fun setUp() {
     navigationActions = Mockito.mock(NavigationActions::class.java)
     mockProfilesRepository = Mockito.mock(ProfilesRepository::class.java)
-
+    mockPPRepository = Mockito.mock(ProfilePicRepository::class.java)
     profilesViewModel = ProfilesViewModel(mockProfilesRepository, mockPPRepository)
   }
 
