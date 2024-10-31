@@ -20,6 +20,7 @@ import com.github.se.icebreakrr.ui.authentication.SignInScreen
 import com.github.se.icebreakrr.ui.navigation.NavigationActions
 import com.github.se.icebreakrr.ui.navigation.Route
 import com.github.se.icebreakrr.ui.navigation.Screen
+import com.github.se.icebreakrr.ui.profile.AroundYouProfile
 import com.github.se.icebreakrr.ui.profile.ProfileEditingScreen
 import com.github.se.icebreakrr.ui.profile.ProfileView
 import com.github.se.icebreakrr.ui.sections.AroundYouScreen
@@ -75,7 +76,7 @@ fun IcebreakrrApp() {
   val profileViewModel = MockProfileViewModel()
   val tagsViewModel: TagsViewModel = viewModel(factory = TagsViewModel.Factory)
 
-  NavHost(navController = navController, startDestination = Route.AUTH) {
+  NavHost(navController = navController, startDestination = Route.AROUND_YOU) {
     navigation(
         startDestination = Screen.AUTH,
         route = Route.AUTH,
@@ -88,6 +89,7 @@ fun IcebreakrrApp() {
         route = Route.AROUND_YOU,
     ) {
       composable(Screen.AROUND_YOU) { AroundYouScreen(navigationActions) }
+      composable(Screen.AROUND_YOU_PROFILE) { AroundYouProfile(navigationActions) }
     }
 
     navigation(

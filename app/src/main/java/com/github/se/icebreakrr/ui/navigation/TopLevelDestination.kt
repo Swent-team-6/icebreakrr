@@ -32,6 +32,7 @@ object Screen {
   const val PROFILE_EDIT = "Profile Edit Screen"
   const val FILTER = "Filter Screen"
   const val PROFILE = "Profile Screen"
+  const val AROUND_YOU_PROFILE = "Around You Profile Screen"
 }
 
 object TopLevelDestinations {

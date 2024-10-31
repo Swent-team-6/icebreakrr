@@ -20,13 +20,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 @Composable
-fun SendRequest(
+fun SendRequestScreen(
     onValueChange: (String) -> Unit,
     value: String,
     onSendClick: () -> Unit,
@@ -80,13 +81,14 @@ fun SendRequest(
               onValueChange = { onValueChange(it) },
               label = { Text("Your message") },
               trailingIcon = {
-                IconButton(onClick = { onSendClick() }) {
+                IconButton(onClick = { onSendClick() }, modifier = Modifier.testTag("sendButton")) {
                   Icon(
                       imageVector = Icons.AutoMirrored.Default.Send,
                       contentDescription = "send button")
                 }
               },
-              modifier = Modifier.padding(0.dp).width(292.dp).height(56.dp))
+              modifier =
+                  Modifier.padding(0.dp).width(292.dp).height(56.dp).testTag("messageTextField"))
           Row(
               horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End),
               verticalAlignment = Alignment.CenterVertically,
@@ -94,7 +96,8 @@ fun SendRequest(
                 TextButton(
                     onClick = { onCancelClick() },
                     enabled = true,
-                    modifier = Modifier.padding(start = 8.dp, end = 24.dp)) {
+                    modifier =
+                        Modifier.padding(start = 8.dp, end = 24.dp).testTag("cancelButton")) {
                       Text("Cancel")
                     }
               }

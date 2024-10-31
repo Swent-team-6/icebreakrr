@@ -67,7 +67,7 @@ fun AroundYouScreen(
                 items(profiles.value.size) { index ->
                   ProfileCard(
                       profile = profiles.value[index],
-                      onclick = { navigationActions.navigateTo(Screen.PROFILE) })
+                      onclick = { navigationActions.navigateTo(Screen.AROUND_YOU_PROFILE) })
                 }
               }
         } else {
