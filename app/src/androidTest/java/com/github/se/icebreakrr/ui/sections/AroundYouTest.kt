@@ -47,7 +47,7 @@ class AroundYouScreenTest {
 
     composeTestRule.setContent {
       AroundYouScreen(
-        navigationActions, profilesViewModel, viewModel(factory = TagsViewModel.Factory))
+          navigationActions, profilesViewModel, viewModel(factory = TagsViewModel.Factory))
     }
   }
 
@@ -55,7 +55,7 @@ class AroundYouScreenTest {
   fun displayTextWhenEmpty() {
     // Simulate an empty profile list
     profilesViewModel.getFilteredProfilesInRadius(
-      center = GeoPoint(0.0, 0.0), radiusInMeters = 300.0)
+        center = GeoPoint(0.0, 0.0), radiusInMeters = 300.0)
     composeTestRule.onNodeWithTag("emptyProfilePrompt").assertIsDisplayed()
   }
 
@@ -131,21 +131,21 @@ class AroundYouScreenTest {
 
   // Helper function to create a mock profile
   private val birthDate2002 =
-    Timestamp(
-      Calendar.getInstance()
-        .apply {
-          set(2002, Calendar.JANUARY, 1, 0, 0, 0)
-          set(Calendar.MILLISECOND, 0)
-        }
-        .time)
+      Timestamp(
+          Calendar.getInstance()
+              .apply {
+                set(2002, Calendar.JANUARY, 1, 0, 0, 0)
+                set(Calendar.MILLISECOND, 0)
+              }
+              .time)
 
   private fun mockProfile() =
-    Profile(
-      uid = "1",
-      name = "John Doe",
-      gender = Gender.MEN,
-      birthDate = birthDate2002, // 22 years old
-      catchPhrase = "Just a friendly guy",
-      description = "I love meeting new people.",
-      tags = listOf("friendly", "outgoing"))
+      Profile(
+          uid = "1",
+          name = "John Doe",
+          gender = Gender.MEN,
+          birthDate = birthDate2002, // 22 years old
+          catchPhrase = "Just a friendly guy",
+          description = "I love meeting new people.",
+          tags = listOf("friendly", "outgoing"))
 }
