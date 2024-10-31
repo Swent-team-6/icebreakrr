@@ -29,9 +29,9 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 
 class TagViewTest {
-  private lateinit var selectedTag: MutableState<List<Pair<String, Color>>>
-  private lateinit var outputTag: MutableState<List<Pair<String, Color>>>
-  private lateinit var stringQuery: MutableState<String>
+  private lateinit var selectedTag: List<Pair<String, Color>>
+  private lateinit var outputTag: List<Pair<String, Color>>
+  private lateinit var stringQuery: String
   private lateinit var expanded: MutableState<Boolean>
   private lateinit var onClickMock: () -> Unit
   private lateinit var tagSelectorOnClickMock: (String) -> Unit
@@ -48,22 +48,20 @@ class TagViewTest {
   fun setUp() {
 
     selectedTag =
-        mutableStateOf(
-            listOf(
-                Pair("salsa", Color.Red),
-                Pair("pizza", Color.Red),
-                Pair("coca-cola", Color.Red),
-                Pair("pepsi", Color.Red),
-                Pair("fanta", Color.Red)))
+        listOf(
+            Pair("salsa", Color.Red),
+            Pair("pizza", Color.Red),
+            Pair("coca-cola", Color.Red),
+            Pair("pepsi", Color.Red),
+            Pair("fanta", Color.Red))
     outputTag =
-        mutableStateOf(
-            listOf(
-                Pair("pesto", Color.Green),
-                Pair("broccoli", Color.Green),
-                Pair("beans", Color.Green),
-                Pair("peanut", Color.Green),
-                Pair("butter", Color.Green)))
-    stringQuery = mutableStateOf("")
+        listOf(
+            Pair("pesto", Color.Green),
+            Pair("broccoli", Color.Green),
+            Pair("beans", Color.Green),
+            Pair("peanut", Color.Green),
+            Pair("butter", Color.Green))
+    stringQuery = ""
     expanded = mutableStateOf(false)
     onClickMock = mock<() -> Unit>()
     tagSelectorOnClickMock = mock<(String) -> Unit>()
@@ -260,7 +258,7 @@ class TagViewTest {
 
   @Test
   fun testRowOfTags1() {
-    composeTestRule.setContent { RowOfTags(selectedTag.value, TagStyle()) }
+    composeTestRule.setContent { RowOfTags(selectedTag, TagStyle()) }
     composeTestRule.onAllNodesWithTag("testTag").onFirst().assertIsDisplayed()
     composeTestRule.onNodeWithTag("testExtendTag").assertIsDisplayed()
     composeTestRule.onNodeWithTag("testExtendTag").assertTextEquals("...")
@@ -437,7 +435,7 @@ class TagViewTest {
     val textSize = 16.sp
     val userInput = "input"
 
-    val emptyList = mutableStateOf(listOf<Pair<String, Color>>())
+    val emptyList = listOf<Pair<String, Color>>()
 
     composeTestRule.setContent {
       TagSelector(
@@ -468,7 +466,7 @@ class TagViewTest {
     val textColor = Color.White
     val textSize = 16.sp
 
-    val emptyList = mutableStateOf(listOf<Pair<String, Color>>())
+    val emptyList = listOf<Pair<String, Color>>()
 
     composeTestRule.setContent {
       TagSelector(

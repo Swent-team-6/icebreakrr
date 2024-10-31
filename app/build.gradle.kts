@@ -156,6 +156,7 @@ dependencies {
     testImplementation(libs.junit)
     globalTestImplementation(libs.androidx.junit)
     globalTestImplementation(libs.androidx.espresso.core)
+    testImplementation(libs.mockito.inline)
 
     // Firebase
     implementation(libs.firebase.database.ktx)

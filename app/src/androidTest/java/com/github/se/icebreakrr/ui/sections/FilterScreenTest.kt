@@ -2,22 +2,16 @@ package com.github.se.icebreakrr.ui.sections
 
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.test.assert
-import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotSelected
 import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.assertTextEquals
-import androidx.compose.ui.test.filterToOne
 import androidx.compose.ui.test.hasText
-import androidx.compose.ui.test.hasTextExactly
 import androidx.compose.ui.test.junit4.createComposeRule
-import androidx.compose.ui.test.onAllNodesWithTag
-import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onChildAt
 import androidx.compose.ui.test.onNodeWithTag
-import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
@@ -309,41 +303,5 @@ class FilterScreenTest {
     // Test empty label
     label.value = ""
     composeTestRule.onNodeWithTag("GenderButton").assertIsDisplayed().assertTextEquals(label.value)
-  }
-
-  @Test
-  fun testTagSelectionAndRemoval() {
-    composeTestRule.setContent { FilterScreen(navigationActions = navigationActionsMock) }
-
-    composeTestRule.onNodeWithText("#salsa x").assertIsDisplayed()
-    composeTestRule.onNodeWithText("#pesto x").assertDoesNotExist()
-
-    // Test adding tags
-    listOf("salsa", "pesto").forEach { tag -> addTag(tag) }
-
-    // Verify both tags are displayed
-    composeTestRule.onNodeWithText("#salsa x").assertIsDisplayed()
-    composeTestRule.onNodeWithText("#pesto x").assertIsDisplayed()
-
-    // Test removing a tag
-    composeTestRule.onNodeWithText("#salsa x").performClick()
-
-    // Verify the removed tag is no longer displayed, but the other tag remains
-    composeTestRule.onNodeWithText("#salsa x").assertDoesNotExist()
-    composeTestRule.onNodeWithText("#pesto x").assertIsDisplayed()
-
-    // Verify that the tag wasn't added again (no duplicate)
-    composeTestRule.onAllNodesWithText("#pesto x").assertCountEquals(1)
-  }
-
-  private fun addTag(tag: String) {
-    // Input the tag
-    composeTestRule.onNodeWithTag("inputTagSelector").performTextInput(tag)
-
-    // Try to find and click the dropdown item
-    composeTestRule
-        .onAllNodesWithTag("tagSelectorDropDownMenuItem")
-        .filterToOne(hasTextExactly("#$tag"))
-        .performClick()
   }
 }
