@@ -34,7 +34,6 @@ class LoginTest : TestCase() {
 
   @Test
   fun titleAndButtonAreCorrectlyDisplayed() {
-
     composeTestRule.setContent { SignInScreen(navigationActions) }
 
     composeTestRule.onNodeWithTag("loginScreen").assertIsDisplayed()

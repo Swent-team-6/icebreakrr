@@ -25,7 +25,12 @@ import com.github.se.icebreakrr.model.profile.Profile
 import com.github.se.icebreakrr.model.profile.getMockedProfiles
 
 @Composable
-fun ProfileCard(profile: Profile, onclick: () -> Unit) {
+fun ProfileCard(
+    profile: Profile,
+    isSettings: Boolean = false,
+    greyedOut: Boolean = false,
+    onclick: () -> Unit
+) {
   Card(
       onClick = onclick,
       shape = RoundedCornerShape(14.dp),
@@ -45,15 +50,24 @@ fun ProfileCard(profile: Profile, onclick: () -> Unit) {
               verticalArrangement = Arrangement.Center,
               horizontalAlignment = Alignment.Start,
           ) {
-            Text(text = profile.name, fontSize = 24.sp, fontWeight = FontWeight.Bold)
+            val textColor = if (greyedOut) Color(0x88888888) else Color.Unspecified
+            Text(
+                text = profile.name,
+                color = textColor,
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Bold)
 
-            Text(text = "\"${profile.catchPhrase}\"", fontSize = 16.sp)
+            Text(text = "\"${profile.catchPhrase}\"", color = textColor, fontSize = 16.sp)
 
             Spacer(modifier = Modifier.padding(6.dp))
 
-            // put the 5 first tags in a string
-            val tags = profile.tags.take(5).joinToString(" ") { "#$it" }
-            Text(text = tags, fontSize = 16.sp)
+            if (!isSettings) {
+              // put the 5 first tags in a string
+              val tags = profile.tags.take(5).joinToString(" ") { "#$it" }
+              Text(text = tags, fontSize = 16.sp, color = textColor)
+            } else {
+              Text(text = "Tap to preview profile")
+            }
           }
         }
   }

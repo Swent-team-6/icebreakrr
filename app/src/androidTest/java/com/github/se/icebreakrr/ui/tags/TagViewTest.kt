@@ -8,6 +8,7 @@ import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertHeightIsEqualTo
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsNotDisplayed
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.assertWidthIsEqualTo
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -28,9 +29,9 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 
 class TagViewTest {
-  private lateinit var selectedTag: MutableState<List<Pair<String, Color>>>
-  private lateinit var outputTag: MutableState<List<Pair<String, Color>>>
-  private lateinit var stringQuery: MutableState<String>
+  private lateinit var selectedTag: List<Pair<String, Color>>
+  private lateinit var outputTag: List<Pair<String, Color>>
+  private lateinit var stringQuery: String
   private lateinit var expanded: MutableState<Boolean>
   private lateinit var onClickMock: () -> Unit
   private lateinit var tagSelectorOnClickMock: (String) -> Unit
@@ -47,22 +48,20 @@ class TagViewTest {
   fun setUp() {
 
     selectedTag =
-        mutableStateOf(
-            listOf(
-                Pair("salsa", Color.Red),
-                Pair("pizza", Color.Red),
-                Pair("coca-cola", Color.Red),
-                Pair("pepsi", Color.Red),
-                Pair("fanta", Color.Red)))
+        listOf(
+            Pair("salsa", Color.Red),
+            Pair("pizza", Color.Red),
+            Pair("coca-cola", Color.Red),
+            Pair("pepsi", Color.Red),
+            Pair("fanta", Color.Red))
     outputTag =
-        mutableStateOf(
-            listOf(
-                Pair("pesto", Color.Green),
-                Pair("broccoli", Color.Green),
-                Pair("beans", Color.Green),
-                Pair("peanut", Color.Green),
-                Pair("butter", Color.Green)))
-    stringQuery = mutableStateOf("")
+        listOf(
+            Pair("pesto", Color.Green),
+            Pair("broccoli", Color.Green),
+            Pair("beans", Color.Green),
+            Pair("peanut", Color.Green),
+            Pair("butter", Color.Green))
+    stringQuery = ""
     expanded = mutableStateOf(false)
     onClickMock = mock<() -> Unit>()
     tagSelectorOnClickMock = mock<(String) -> Unit>()
@@ -76,6 +75,22 @@ class TagViewTest {
   @Test
   fun displayTag() {
     composeTestRule.setContent { Tag("AndroidTest", TagStyle()) }
+    val node = composeTestRule.onNodeWithTag("testTag")
+    node.assertIsDisplayed()
+    node.assertTextEquals("#AndroidTest")
+  }
+
+  @Test
+  fun displayTagTextColor() {
+    composeTestRule.setContent { Tag("AndroidTest", TagStyle(textColor = Color.White)) }
+    val node = composeTestRule.onNodeWithTag("testTag")
+    node.assertIsDisplayed()
+    node.assertTextEquals("#AndroidTest")
+  }
+
+  @Test
+  fun displayTagBackgroundColor() {
+    composeTestRule.setContent { Tag("AndroidTest", TagStyle(backGroundColor = Color.White)) }
     val node = composeTestRule.onNodeWithTag("testTag")
     node.assertIsDisplayed()
     node.assertTextEquals("#AndroidTest")
@@ -109,9 +124,9 @@ class TagViewTest {
     composeTestRule.setContent {
       Column {
         Tag("NormalText", tagStyle)
-        Tag("", tagStyle) // Test with empty text
-        Tag("1234", tagStyle) // Test with numeric text
-        Tag("Special_Char$", tagStyle) // Test with special characters
+        Tag("", tagStyle)
+        Tag("1234", tagStyle)
+        Tag("Special_Char$", tagStyle)
       }
     }
 
@@ -243,13 +258,20 @@ class TagViewTest {
 
   @Test
   fun testRowOfTags1() {
-    composeTestRule.setContent { RowOfTags(selectedTag.value, TagStyle()) }
+    composeTestRule.setContent { RowOfTags(selectedTag, TagStyle()) }
     composeTestRule.onAllNodesWithTag("testTag").onFirst().assertIsDisplayed()
     composeTestRule.onNodeWithTag("testExtendTag").assertIsDisplayed()
     composeTestRule.onNodeWithTag("testExtendTag").assertTextEquals("...")
     composeTestRule.onAllNodesWithTag("testTag").assertCountEquals(3)
     composeTestRule.onNodeWithTag("testExtendTag").performClick()
     composeTestRule.onAllNodesWithTag("testTag").assertCountEquals(5)
+  }
+
+  @Test
+  fun testRowOfTagsEmpty() {
+    val emptyList = mutableStateOf(listOf<Pair<String, Color>>())
+    composeTestRule.setContent { RowOfTags(emptyList.value, TagStyle()) }
+    composeTestRule.onAllNodesWithTag("testTag").assertCountEquals(0)
   }
 
   @Test
@@ -350,6 +372,15 @@ class TagViewTest {
   }
 
   @Test
+  fun testRowOfClickTagsEmpty() {
+    val emptyList = mutableStateOf(listOf<Pair<String, Color>>())
+    composeTestRule.setContent {
+      RowOfClickTags(emptyList.value, TagStyle(), tagSelectorOnClickMock)
+    }
+    composeTestRule.onAllNodesWithTag("testTag").assertCountEquals(0)
+  }
+
+  @Test
   fun testTagSelector() {
     val textColor = Color.White
     val textSize = 16.sp
@@ -396,5 +427,62 @@ class TagViewTest {
         .onNodeWithTag("sizeTagSelector")
         .assertWidthIsEqualTo(300.dp)
         .assertHeightIsEqualTo(300.dp)
+  }
+
+  @Test
+  fun testTagSelectorEmptyList() {
+    val textColor = Color.White
+    val textSize = 16.sp
+    val userInput = "input"
+
+    val emptyList = listOf<Pair<String, Color>>()
+
+    composeTestRule.setContent {
+      TagSelector(
+          emptyList,
+          emptyList,
+          stringQuery,
+          expanded,
+          tagSelectorOnClickMock,
+          tagSelectorOnClickDropDownMenu,
+          tagSelectorOnStringChanged,
+          textColor,
+          textSize,
+          300.dp,
+          300.dp)
+    }
+    composeTestRule.onAllNodesWithText("Tags").onFirst().assertIsDisplayed()
+    composeTestRule.onAllNodesWithTag("clickTestTag").assertCountEquals(0)
+    composeTestRule.onNodeWithTag("inputTagSelector").performTextClearance()
+    composeTestRule.onNodeWithTag("inputTagSelector").performTextInput(userInput)
+    verify(tagSelectorOnStringChanged).invoke(userInput)
+    composeTestRule.waitForIdle()
+
+    composeTestRule.onAllNodesWithTag("tagSelectorDropDownMenuItem").assertCountEquals(0)
+  }
+
+  @Test
+  fun testTagSelectorTooSmall() {
+    val textColor = Color.White
+    val textSize = 16.sp
+
+    val emptyList = listOf<Pair<String, Color>>()
+
+    composeTestRule.setContent {
+      TagSelector(
+          emptyList,
+          emptyList,
+          stringQuery,
+          expanded,
+          tagSelectorOnClickMock,
+          tagSelectorOnClickDropDownMenu,
+          tagSelectorOnStringChanged,
+          textColor,
+          textSize,
+          0.dp,
+          0.dp)
+    }
+    composeTestRule.onAllNodesWithText("Tags").onFirst().assertIsNotDisplayed()
+    composeTestRule.onAllNodesWithTag("clickTestTag").assertCountEquals(0)
   }
 }

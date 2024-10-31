@@ -1,7 +1,6 @@
 package com.github.se.icebreakrr.ui.sections
 
 import android.annotation.SuppressLint
-import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -9,8 +8,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -20,16 +17,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.github.se.icebreakrr.R
 import com.github.se.icebreakrr.model.profile.MockProfileViewModel
+import com.github.se.icebreakrr.model.tags.TagsViewModel
 import com.github.se.icebreakrr.ui.navigation.BottomNavigationMenu
 import com.github.se.icebreakrr.ui.navigation.LIST_TOP_LEVEL_DESTINATIONS
 import com.github.se.icebreakrr.ui.navigation.NavigationActions
+import com.github.se.icebreakrr.ui.navigation.Screen
+import com.github.se.icebreakrr.ui.sections.shared.FilterFloatingActionButton
 import com.github.se.icebreakrr.ui.sections.shared.ProfileCard
 import com.github.se.icebreakrr.ui.sections.shared.TopBar
 
@@ -44,7 +42,8 @@ import com.github.se.icebreakrr.ui.sections.shared.TopBar
 @Composable
 fun AroundYouScreen(
     navigationActions: NavigationActions,
-    mockProfileViewModel: MockProfileViewModel = viewModel(factory = MockProfileViewModel.Factory)
+    mockProfileViewModel: MockProfileViewModel = viewModel(factory = MockProfileViewModel.Factory),
+    tagsViewModel: TagsViewModel = viewModel(factory = TagsViewModel.Factory)
 ) {
 
   val profiles = mockProfileViewModel.profiles.collectAsState()
@@ -57,7 +56,7 @@ fun AroundYouScreen(
             tabList = LIST_TOP_LEVEL_DESTINATIONS,
             selectedItem = navigationActions.currentRoute())
       },
-      topBar = { TopBar() },
+      topBar = { TopBar("Around You") },
       content = { innerPadding ->
         val context = LocalContext.current
         if (profiles.value.isNotEmpty()) {
@@ -68,7 +67,7 @@ fun AroundYouScreen(
                 items(profiles.value.size) { index ->
                   ProfileCard(
                       profile = profiles.value[index],
-                      onclick = { navigationActions.navigateTo("Settings Screen") })
+                      onclick = { navigationActions.navigateTo(Screen.PROFILE) })
                 }
               }
         } else {
@@ -84,16 +83,5 @@ fun AroundYouScreen(
               }
         }
       },
-      floatingActionButton = {
-        val context = LocalContext.current
-        FloatingActionButton(
-            onClick = {
-              Toast.makeText(context, "Filter button clicked", Toast.LENGTH_SHORT).show()
-            },
-            containerColor = Color(0xFF1FAEF0), // fixme: use icebreakrr blue
-            contentColor = Color.White,
-            modifier = Modifier.testTag("filterButton")) {
-              Icon(painter = painterResource(R.drawable.filter_24), contentDescription = "Add")
-            }
-      })
+      floatingActionButton = { FilterFloatingActionButton(navigationActions) })
 }

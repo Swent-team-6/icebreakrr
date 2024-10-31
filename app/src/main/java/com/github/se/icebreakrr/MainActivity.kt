@@ -15,11 +15,14 @@ import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
 import com.github.se.icebreakrr.config.LocalIsTesting
 import com.github.se.icebreakrr.model.profile.ProfilesViewModel
+import com.github.se.icebreakrr.model.profile.MockProfileViewModel
+import com.github.se.icebreakrr.model.tags.TagsViewModel
 import com.github.se.icebreakrr.ui.authentication.SignInScreen
 import com.github.se.icebreakrr.ui.navigation.NavigationActions
 import com.github.se.icebreakrr.ui.navigation.Route
 import com.github.se.icebreakrr.ui.navigation.Screen
 import com.github.se.icebreakrr.ui.profile.ProfileEditingScreen
+import com.github.se.icebreakrr.ui.profile.ProfileView
 import com.github.se.icebreakrr.ui.sections.AroundYouScreen
 import com.github.se.icebreakrr.ui.sections.FilterScreen
 import com.github.se.icebreakrr.ui.sections.NotificationScreen
@@ -29,12 +32,11 @@ import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.FirebaseAuth
 
 class MainActivity : ComponentActivity() {
-
   private lateinit var auth: FirebaseAuth
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
-
+    auth = FirebaseAuth.getInstance()
     // Initialize Firebase Auth
     FirebaseApp.initializeApp(this)
     auth = FirebaseAuth.getInstance()
@@ -43,6 +45,7 @@ class MainActivity : ComponentActivity() {
       // This is useful for testing purposes
       auth.signOut()
     }
+    FirebaseAuth.getInstance()
 
     // Retrieve the testing flag from the Intent
     val isTesting = intent?.getBooleanExtra("IS_TESTING", false) ?: false
@@ -70,6 +73,8 @@ class MainActivity : ComponentActivity() {
 fun IcebreakrrApp() {
   val navController = rememberNavController()
   val navigationActions = NavigationActions(navController)
+  val profileViewModel = MockProfileViewModel()
+  val tagsViewModel: TagsViewModel = viewModel(factory = TagsViewModel.Factory)
 
   val profilesViewModel: ProfilesViewModel = viewModel(factory = ProfilesViewModel.Factory)
 
@@ -86,7 +91,6 @@ fun IcebreakrrApp() {
         route = Route.AROUND_YOU,
     ) {
       composable(Screen.AROUND_YOU) { AroundYouScreen(navigationActions) }
-      composable(Screen.FILTER) { FilterScreen(navigationActions) }
     }
 
     navigation(
@@ -94,20 +98,28 @@ fun IcebreakrrApp() {
         route = Route.SETTINGS,
     ) {
       composable(Screen.SETTINGS) { SettingsScreen(navigationActions) }
+      composable(Screen.PROFILE) { ProfileView(navigationActions) }
     }
 
     navigation(
         startDestination = Screen.NOTIFICATIONS,
         route = Route.NOTIFICATIONS,
     ) {
-      composable(Screen.NOTIFICATIONS) { NotificationScreen(navigationActions) }
+      composable(Screen.NOTIFICATIONS) { NotificationScreen(navigationActions, profileViewModel) }
     }
 
     navigation(
         startDestination = Screen.PROFILE_EDIT,
         route = Route.PROFILE_EDIT,
     ) {
-      composable(Screen.PROFILE_EDIT) { ProfileEditingScreen(navigationActions) }
+      composable(Screen.PROFILE_EDIT) { ProfileEditingScreen(navigationActions, tagsViewModel) }
+    }
+
+    navigation(
+        startDestination = Screen.FILTER,
+        route = Route.FILTER,
+    ) {
+      composable(Screen.FILTER) { FilterScreen(navigationActions, tagsViewModel) }
     }
   }
 }

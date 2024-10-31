@@ -28,6 +28,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -46,6 +47,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.github.se.icebreakrr.model.tags.TagsViewModel
 import com.github.se.icebreakrr.ui.navigation.NavigationActions
 import com.github.se.icebreakrr.ui.tags.TagSelector
 
@@ -63,7 +66,10 @@ const val titleFontSizeFactor = 0.03f
 // This file was written with the help of Cursor, Claude, ChatGPT
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun FilterScreen(navigationActions: NavigationActions) {
+fun FilterScreen(
+    navigationActions: NavigationActions,
+    tagsViewModel: TagsViewModel = viewModel(factory = TagsViewModel.Factory)
+) {
   val context = LocalContext.current
 
   val configuration = LocalConfiguration.current
@@ -79,21 +85,10 @@ fun FilterScreen(navigationActions: NavigationActions) {
   var ageFrom by remember { mutableStateOf<Int?>(null) }
   var ageTo by remember { mutableStateOf<Int?>(null) }
 
-  // test values
-  var selectedTags = remember {
-    mutableStateOf<List<Pair<String, Color>>>(listOf(Pair("salsa", Color.Red)))
-  }
-  val availableTags = remember {
-    mutableStateOf<List<Pair<String, Color>>>(
-        listOf(
-            Pair("salsa", Color.Red),
-            Pair("pesto", Color.Green),
-            Pair("psto", Color.Green),
-            Pair("pest", Color.Green),
-            Pair("peest", Color.Green)))
-  }
+  val filteringTags = tagsViewModel.filteringTags.collectAsState()
+  val tagsSuggestions = tagsViewModel.tagsSuggestions.collectAsState()
+  val stringQuery = tagsViewModel.query.collectAsState()
 
-  val stringQuery = remember { mutableStateOf("") }
   val expanded = remember { mutableStateOf(false) }
 
   var ageFromInput by remember { mutableStateOf("") }
@@ -165,7 +160,10 @@ fun FilterScreen(navigationActions: NavigationActions) {
             modifier = Modifier.testTag("FilterTopBar"),
             navigationIcon = {
               IconButton(
-                  onClick = { navigationActions.goBack() },
+                  onClick = {
+                    tagsViewModel.leaveUI()
+                    navigationActions.goBack()
+                  },
                   modifier = Modifier.testTag("Back Button")) {
                     Icon(
                         Icons.AutoMirrored.Filled.ArrowBack,
@@ -252,30 +250,26 @@ fun FilterScreen(navigationActions: NavigationActions) {
               fontSize = (screenHeight.value * titleFontSizeFactor).sp,
               modifier = Modifier.padding(vertical = 8.dp).testTag("TagsTitle"))
           TagSelector(
-              selectedTag = selectedTags,
-              outputTag = availableTags,
-              stringQuery = stringQuery,
+              selectedTag =
+                  filteringTags.value.map { tag -> Pair(tag, tagsViewModel.tagToColor(tag)) },
+              outputTag =
+                  tagsSuggestions.value.map { tag -> Pair(tag, tagsViewModel.tagToColor(tag)) },
+              stringQuery = stringQuery.value,
               expanded = expanded,
-              onTagClick = { t ->
-                if (selectedTags.value.any { it.first == t }) {
-                  selectedTags.value = selectedTags.value.filter { it.first != t }
-                }
-              },
-              onStringChanged = {},
+              onTagClick = { tag -> tagsViewModel.removeFilter(tag) },
+              onStringChanged = { tagsViewModel.setQuery(it, filteringTags.value) },
               textColor = MaterialTheme.colorScheme.onSurface,
-              onDropDownItemClicked = { tag ->
-                if (selectedTags.value.none { it.first == tag }) {
-                  availableTags.value
-                      .firstOrNull { it.first == tag }
-                      ?.let { newTag -> selectedTags.value += newTag }
-                }
-              },
+              onDropDownItemClicked = { tag -> tagsViewModel.addFilter(tag) },
               height = tagSelectorHeight,
               width = tagSelectorWidth,
               textSize = (tagSelectorHeight.value * tagSelectorTextSizeFactor).sp)
           Box(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
             Button(
-                onClick = { navigationActions.goBack() },
+                onClick = {
+                  tagsViewModel.applyFilters()
+                  tagsViewModel.leaveUI()
+                  navigationActions.goBack()
+                },
                 modifier =
                     Modifier.width(buttonWidth)
                         .height(buttonHeight)

@@ -1,12 +1,22 @@
 package com.github.se.icebreakrr.model.tags
 
 import android.util.Log
+import com.google.firebase.Firebase
+import com.google.firebase.auth.auth
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.QuerySnapshot
 
-class TagsRepository(private val db: FirebaseFirestore) {
+open class TagsRepository(private val db: FirebaseFirestore) {
   private val collectionPath = "Tags"
+
+  fun init(onSuccess: () -> Unit) {
+    Firebase.auth.addAuthStateListener {
+      if (it.currentUser != null) {
+        onSuccess()
+      }
+    }
+  }
 
   /**
    * Function that get all the tags present in the firestore database
@@ -20,10 +30,7 @@ class TagsRepository(private val db: FirebaseFirestore) {
     val categories: MutableList<TagsCategory> = mutableListOf()
     db.collection(collectionPath)
         .get()
-        .addOnFailureListener { e: Exception ->
-          Log.e("TagsRepository", "[getAllTags] Could not get the tags : $e")
-          onFailure(e)
-        }
+        .addOnFailureListener { e: Exception -> onFailure(e) }
         .addOnSuccessListener { docs: QuerySnapshot ->
           for (doc in docs.documents) {
             if (doc.exists()) {
