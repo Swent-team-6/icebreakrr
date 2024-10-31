@@ -13,6 +13,9 @@ open class ProfilesViewModel(private val repository: ProfilesRepository) : ViewM
   private val _profiles = MutableStateFlow<List<Profile>>(emptyList())
   val profiles: StateFlow<List<Profile>> = _profiles
 
+  private val _filteredProfiles = MutableStateFlow<List<Profile>>(emptyList())
+  val filteredProfiles: StateFlow<List<Profile>> = _filteredProfiles
+
   private val _selectedProfile = MutableStateFlow<Profile?>(null)
   val selectedProfile: StateFlow<Profile?> = _selectedProfile
 
@@ -22,11 +25,6 @@ open class ProfilesViewModel(private val repository: ProfilesRepository) : ViewM
   private val _error = MutableStateFlow<Exception?>(null)
   val error: StateFlow<Exception?> = _error
 
-  init {
-    repository.init { // TODO getProfilesInRadius}
-    }
-  }
-
   companion object {
     val Factory: ViewModelProvider.Factory =
         object : ViewModelProvider.Factory {
@@ -35,6 +33,23 @@ open class ProfilesViewModel(private val repository: ProfilesRepository) : ViewM
             return ProfilesViewModel(ProfilesRepositoryFirestore(Firebase.firestore)) as T
           }
         }
+  }
+
+  /**
+   * Returns a new unique profile ID
+   *
+   * @return A unique profile ID as a String.
+   */
+  fun getNewProfileId(): String {
+    return repository.getNewProfileId()
+  }
+
+  /** Initializes the repository, fetch profiles */
+  init {
+    repository.init {
+      // Fetch profiles on initialization
+      getFilteredProfilesInRadius(GeoPoint(0.0, 0.0), 300.0)
+    }
   }
 
   /**
@@ -70,7 +85,8 @@ open class ProfilesViewModel(private val repository: ProfilesRepository) : ViewM
                     // Filter by tags if specified
                     (tags == null || profile.tags.containsAll(tags))
               }
-          _profiles.value = filteredProfiles
+          _profiles.value = profileList
+          _filteredProfiles.value = filteredProfiles
           _loading.value = false
         },
         onFailure = { e -> handleError(e) })
