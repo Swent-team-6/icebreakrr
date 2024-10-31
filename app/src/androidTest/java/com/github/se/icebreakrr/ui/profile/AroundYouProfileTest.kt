@@ -29,7 +29,7 @@ class AroundYouProfileTest {
 
   @Test
   fun AroundYouProfileDisplayTagTest() {
-    composeTestRule.setContent { AroundYouProfile(navigationActions) }
+    composeTestRule.setContent { OtherProfileView(navigationActions) }
     composeTestRule.onNodeWithTag("aroundYouProfileScreen").assertIsDisplayed()
     composeTestRule.onNodeWithTag("profilePicture").assertIsDisplayed()
     composeTestRule.onNodeWithTag("requestButton").assertIsDisplayed()
@@ -44,14 +44,14 @@ class AroundYouProfileTest {
 
   @Test
   fun AroundYouProfileGoBackButtonMessage() {
-    composeTestRule.setContent { AroundYouProfile(navigationActions) }
+    composeTestRule.setContent { OtherProfileView(navigationActions) }
     composeTestRule.onNodeWithTag("goBackButton").performClick()
     verify(navigationActions).goBack()
   }
 
   @Test
   fun AroundYouProfileMessageTest() {
-    composeTestRule.setContent { AroundYouProfile(navigationActions) }
+    composeTestRule.setContent { OtherProfileView(navigationActions) }
     composeTestRule.onNodeWithTag("requestButton").performClick()
 
     composeTestRule.onNodeWithTag("bluredBackground").assertIsDisplayed()
