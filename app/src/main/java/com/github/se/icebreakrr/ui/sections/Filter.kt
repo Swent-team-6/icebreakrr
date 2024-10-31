@@ -48,6 +48,8 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.github.se.icebreakrr.model.filter.FilterViewModel
+import com.github.se.icebreakrr.model.profile.Gender
 import com.github.se.icebreakrr.model.tags.TagsViewModel
 import com.github.se.icebreakrr.ui.navigation.NavigationActions
 import com.github.se.icebreakrr.ui.tags.TagSelector
@@ -68,7 +70,8 @@ const val titleFontSizeFactor = 0.03f
 @Composable
 fun FilterScreen(
     navigationActions: NavigationActions,
-    tagsViewModel: TagsViewModel = viewModel(factory = TagsViewModel.Factory)
+    tagsViewModel: TagsViewModel = viewModel(factory = TagsViewModel.Factory),
+    filterViewModel: FilterViewModel = viewModel(factory = FilterViewModel.Factory)
 ) {
   val context = LocalContext.current
 
@@ -79,20 +82,37 @@ fun FilterScreen(
   val buttonHeight = screenHeight * buttonHeightFactor
   val buttonTextSize = (buttonHeight.value * textSizeFactor).sp
 
-  var manSelected by remember { mutableStateOf(false) }
-  var womanSelected by remember { mutableStateOf(false) }
-  var otherSelected by remember { mutableStateOf(false) }
+  // Read the selected genders from the ViewModel
+  val selectedGenders by filterViewModel.selectedGenders.collectAsState()
+
+  // Gender selection logic
+  var manSelected by remember { mutableStateOf(selectedGenders.contains(Gender.MEN)) }
+  var womanSelected by remember { mutableStateOf(selectedGenders.contains(Gender.WOMEN)) }
+  var otherSelected by remember { mutableStateOf(selectedGenders.contains(Gender.OTHER)) }
+
+  val ageRange = filterViewModel.ageRange.collectAsState()
+
+  var ageFromInput by remember { mutableStateOf("") }
   var ageFrom by remember { mutableStateOf<Int?>(null) }
+  if (ageRange.value != null && (ageRange.value?.start) != 0) {
+    ageFromInput = ageRange.value?.start.toString()
+    ageFrom = ageRange.value?.start
+  }
+
+  var ageToInput by remember { mutableStateOf("") }
   var ageTo by remember { mutableStateOf<Int?>(null) }
+  if (ageRange.value != null && (ageRange.value?.endInclusive) != Int.MAX_VALUE) {
+    ageTo = ageRange.value?.endInclusive
+    ageToInput = ageRange.value?.endInclusive.toString()
+  }
 
   val filteringTags = tagsViewModel.filteringTags.collectAsState()
   val tagsSuggestions = tagsViewModel.tagsSuggestions.collectAsState()
   val stringQuery = tagsViewModel.query.collectAsState()
-
+  val savedFilteredTags = filterViewModel.filteredTags.collectAsState()
+  savedFilteredTags.value.forEach { tag -> tagsViewModel.addFilter(tag) }
   val expanded = remember { mutableStateOf(false) }
 
-  var ageFromInput by remember { mutableStateOf("") }
-  var ageToInput by remember { mutableStateOf("") }
   var ageRangeError by remember { mutableStateOf(false) }
 
   fun validateAndUpdateAgeFrom(input: String) {
@@ -266,8 +286,34 @@ fun FilterScreen(
           Box(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
             Button(
                 onClick = {
+                  filterViewModel.setFilteredTags(tagsViewModel.filteringTags.value)
                   tagsViewModel.applyFilters()
                   tagsViewModel.leaveUI()
+
+                  val selectedGenders = mutableListOf<Gender>()
+                  if (manSelected) selectedGenders.add(Gender.MEN)
+                  if (womanSelected) selectedGenders.add(Gender.WOMEN)
+                  if (otherSelected) selectedGenders.add(Gender.OTHER)
+                  filterViewModel.setGenders(selectedGenders)
+
+                  when {
+                    ageFrom != null && ageTo != null && !ageRangeError -> {
+                      filterViewModel.setAgeRange(ageFrom!!..ageTo!!)
+                    }
+                    ageFrom == null && ageTo == null -> {
+                      filterViewModel.setAgeRange(null)
+                    }
+                    ageFrom != null && ageTo == null -> {
+                      filterViewModel.setAgeRange(ageFrom!!..Int.MAX_VALUE)
+                    }
+                    ageFrom == null && ageTo != null -> {
+                      filterViewModel.setAgeRange(0..ageTo!!)
+                    }
+                    else -> {
+                      filterViewModel.setAgeRange(null)
+                    }
+                  }
+
                   navigationActions.goBack()
                 },
                 modifier =
