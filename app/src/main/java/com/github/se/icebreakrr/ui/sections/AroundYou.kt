@@ -24,7 +24,6 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.github.se.icebreakrr.model.profile.Gender
 import com.github.se.icebreakrr.model.profile.ProfilesViewModel
 import com.github.se.icebreakrr.model.tags.TagsViewModel
@@ -49,8 +48,8 @@ import com.google.firebase.firestore.GeoPoint
 @Composable
 fun AroundYouScreen(
     navigationActions: NavigationActions,
-    profilesViewModel: ProfilesViewModel = viewModel(factory = ProfilesViewModel.Factory),
-    tagsViewModel: TagsViewModel = viewModel(factory = TagsViewModel.Factory)
+    profilesViewModel: ProfilesViewModel,
+    tagsViewModel: TagsViewModel
 ) {
 
   val filteredProfiles = profilesViewModel.filteredProfiles.collectAsState()
@@ -73,8 +72,7 @@ fun AroundYouScreen(
               LazyColumn(
                   contentPadding = PaddingValues(vertical = 16.dp),
                   verticalArrangement = Arrangement.spacedBy(16.dp),
-                  modifier =
-                      Modifier.fillMaxSize().padding(horizontal = 8.dp).padding(innerPadding)) {
+                  modifier = Modifier.fillMaxSize().padding(horizontal = 8.dp)) {
                     if (filteredProfiles.value.isNotEmpty()) {
                       items(filteredProfiles.value.size) { index ->
                         ProfileCard(
