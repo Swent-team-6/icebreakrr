@@ -120,7 +120,9 @@ fun IcebreakrrApp() {
         startDestination = Screen.FILTER,
         route = Route.FILTER,
     ) {
-      composable(Screen.FILTER) { FilterScreen(navigationActions, tagsViewModel, filterViewModel) }
+      composable(Screen.FILTER) {
+        FilterScreen(navigationActions, tagsViewModel, filterViewModel, profileViewModel)
+      }
     }
   }
 }

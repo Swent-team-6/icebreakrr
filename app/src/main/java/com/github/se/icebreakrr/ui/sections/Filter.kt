@@ -50,9 +50,11 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.github.se.icebreakrr.model.filter.FilterViewModel
 import com.github.se.icebreakrr.model.profile.Gender
+import com.github.se.icebreakrr.model.profile.ProfilesViewModel
 import com.github.se.icebreakrr.model.tags.TagsViewModel
 import com.github.se.icebreakrr.ui.navigation.NavigationActions
 import com.github.se.icebreakrr.ui.tags.TagSelector
+import com.google.firebase.firestore.GeoPoint
 
 const val textSizeFactor = 0.3f
 val IcebreakrrBlue: Color = Color(0xFF1FAEF0)
@@ -71,7 +73,8 @@ const val titleFontSizeFactor = 0.03f
 fun FilterScreen(
     navigationActions: NavigationActions,
     tagsViewModel: TagsViewModel = viewModel(factory = TagsViewModel.Factory),
-    filterViewModel: FilterViewModel = viewModel(factory = FilterViewModel.Factory)
+    filterViewModel: FilterViewModel = viewModel(factory = FilterViewModel.Factory),
+    profilesViewModel: ProfilesViewModel = viewModel(factory = ProfilesViewModel.Factory)
 ) {
   val context = LocalContext.current
 
@@ -313,6 +316,13 @@ fun FilterScreen(
                       filterViewModel.setAgeRange(null)
                     }
                   }
+
+                  profilesViewModel.getFilteredProfilesInRadius(
+                      GeoPoint(0.0, 0.0),
+                      300.0,
+                      filterViewModel.selectedGenders.value,
+                      filterViewModel.ageRange.value,
+                      tagsViewModel.filteredTags.value)
 
                   navigationActions.goBack()
                 },
