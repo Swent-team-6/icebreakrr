@@ -1,6 +1,5 @@
 package com.github.se.icebreakrr.model.profile
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.google.firebase.Firebase
@@ -51,7 +50,6 @@ open class ProfilesViewModel(private val repository: ProfilesRepository) : ViewM
       // Fetch profiles on initialization
       getFilteredProfilesInRadius(GeoPoint(0.0, 0.0), 300.0)
     }
-    Log.e("TEST TEST", filteredProfiles.value.size.toString())
   }
 
   /**

@@ -77,7 +77,7 @@ fun AroundYouScreen(
                       items(filteredProfiles.value.size) { index ->
                         ProfileCard(
                             profile = filteredProfiles.value[index],
-                            onclick = { navigationActions.navigateTo(Screen.AROUND_YOU_PROFILE) })
+                            onclick = { navigationActions.navigateTo(Screen.OTHER_PROFILE_VIEW) })
                       }
                     } else {
                       item {

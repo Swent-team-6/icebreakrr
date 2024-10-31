@@ -28,7 +28,7 @@ import com.github.se.icebreakrr.ui.sections.shared.ProfileHeader
  * @param navigationActions Actions to navigate between screens.
  */
 @Composable
-fun AroundYouProfile(navigationActions: NavigationActions) {
+fun OtherProfileView(navigationActions: NavigationActions) {
   var sendRequest by remember { mutableStateOf(false) }
   var writtenMessage by remember { mutableStateOf("") }
 
