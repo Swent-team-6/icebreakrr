@@ -24,6 +24,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -36,10 +38,16 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
 import com.github.se.icebreakrr.R
+import com.github.se.icebreakrr.model.profile.Profile
+import com.github.se.icebreakrr.model.profile.ProfilesViewModel
+import com.github.se.icebreakrr.model.tags.TagsViewModel
 import com.github.se.icebreakrr.ui.navigation.NavigationActions
 import com.github.se.icebreakrr.ui.tags.RowOfTags
 import com.github.se.icebreakrr.ui.tags.TagStyle
+import com.google.firebase.Firebase
+import com.google.firebase.auth.auth
 
 /**
  * Displays the main profile view with the profile header and information section. The profile
@@ -50,53 +58,43 @@ import com.github.se.icebreakrr.ui.tags.TagStyle
  * @param isUser boolean stating if the profile corresponds to the app user.
  */
 @Composable
-fun ProfileView(navigationActions: NavigationActions) {
+fun ProfileView(profilesViewModel: ProfilesViewModel, tagsViewModel: TagsViewModel, navigationActions: NavigationActions) {
 
-  // Predefined user for UI testing
-  var name = "John Do"
-  var catchphrase = "This is my catchphrase, there are many like it but this one is mine!"
-  var description =
-      """
-                Hey there! I'm John Do, a bit of a tech geek who loves exploring all things digital. 
-                When I'm not deep into coding or working on new apps, I'm usually out cycling, discovering new trails, 
-                or whipping up something fun in the kitchen. I'm also a huge sci-fi fan—if you love talking about future 
-                worlds or cool ideas, we'll get along great. I'm always up for a good laugh, sharing ideas, and meeting new people. 
-                Let's connect, hang out, or chat about anything cool!
-            """
-          .trimIndent()
-  val userTags = remember {
-    listOf(
-        Pair("salsa", Color.Red),
-        Pair("pesto", Color.Green),
-        Pair("psto", Color.Blue),
-        Pair("pest", Color.Green),
-        Pair("peest", Color.Green))
-  }
+    // Launch a coroutine to fetch the profile when this composable is first displayed
+    LaunchedEffect(Unit) {
+        Firebase.auth.currentUser?.let { profilesViewModel.getProfileByUid(it.uid) }
+    }
 
-  Scaffold(
-      modifier = Modifier.testTag("profileScreen"),
-      content = { paddingValues ->
-        Column(
-            modifier = Modifier.fillMaxWidth().padding(paddingValues),
-            horizontalAlignment = Alignment.CenterHorizontally) {
+    val isLoading = profilesViewModel.loading.collectAsState(initial = true).value
+    val profile = profilesViewModel.selectedProfile.collectAsState().value
 
-              // 2 sections one for the profile image with overlay and
-              // one for the information section
-              ProfileHeader(navigationActions)
-              InfoSection(
-                  catchPhrase = catchphrase,
-                  listOfTags = userTags,
-                  description =
-                      """
-                Hey there! I'm John Do, a bit of a tech geek who loves exploring all things digital. 
-                When I'm not deep into coding or working on new apps, I'm usually out cycling, discovering new trails, 
-                or whipping up something fun in the kitchen. I'm also a huge sci-fi fan—if you love talking about future 
-                worlds or cool ideas, we'll get along great. I'm always up for a good laugh, sharing ideas, and meeting new people. 
-                Let's connect, hang out, or chat about anything cool!
-                """
-                          .trimIndent())
-            }
-      })
+    if (isLoading) {
+        // Show a loading indicator or message while the profile is being fetched
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.LightGray),
+            contentAlignment = Alignment.Center
+        ) {
+            Text("Loading profile...", textAlign = TextAlign.Center)
+        }
+    }else if (profile != null){
+
+        Scaffold(
+            modifier = Modifier.testTag("profileScreen"),
+            content = { paddingValues ->
+                Column(
+                    modifier = Modifier.fillMaxWidth().padding(paddingValues),
+                    horizontalAlignment = Alignment.CenterHorizontally) {
+
+                    // 2 sections one for the profile image with overlay and
+                    // one for the information section
+                    ProfileHeader(profile, navigationActions)
+                    InfoSection(profile, tagsViewModel)
+
+                }
+            })
+    }
 }
 
 /**
@@ -108,9 +106,12 @@ fun ProfileView(navigationActions: NavigationActions) {
  * @param description The user's detailed description.
  */
 @Composable
-fun InfoSection(catchPhrase: String, listOfTags: List<Pair<String, Color>>, description: String) {
+fun InfoSection(profile: Profile, tagsViewModel: TagsViewModel) {
 
   val scrollState = rememberScrollState()
+    val userTags = profile.tags.map { tagString ->
+        Pair(tagString, tagsViewModel.tagToColor(tagString))
+    }
 
   Column(
       modifier =
@@ -120,15 +121,15 @@ fun InfoSection(catchPhrase: String, listOfTags: List<Pair<String, Color>>, desc
               .testTag("infoSection")) {
         // Catchphrase Section
         Spacer(modifier = Modifier.height(12.dp))
-        ProfileCatchPhrase(catchPhrase)
+        ProfileCatchPhrase(profile.catchPhrase)
 
         // Tags Section
         Spacer(modifier = Modifier.height(8.dp))
-        TagsSection(listOfTags)
+        TagsSection(userTags)
 
         // Description Section
         Spacer(modifier = Modifier.height(16.dp))
-        ProfileDescription(description)
+        ProfileDescription(profile.description)
       }
 }
 
@@ -139,19 +140,26 @@ fun InfoSection(catchPhrase: String, listOfTags: List<Pair<String, Color>>, desc
  * @param navigationActions Actions to navigate between screens.
  */
 @Composable
-fun ProfileHeader(navigationActions: NavigationActions) {
+fun ProfileHeader(profile: Profile, navigationActions: NavigationActions) {
   Box(
       modifier =
           Modifier.fillMaxWidth() // Make the image take full width
               .aspectRatio(1f) // Keep the aspect ratio 1:1 (height == width) => a square
               .background(Color.LightGray)
               .testTag("profileHeader")) {
-        // Profile image
-        Image(
-            painter = painterResource(id = R.drawable.turtle),
-            contentDescription = "Profile Image",
-            contentScale = ContentScale.Crop,
-            modifier = Modifier.fillMaxSize().testTag("profilePicture"))
+
+            // Profile image
+          AsyncImage(
+              model = profile.profilePictureUrl,
+              contentDescription = "Profile Image",
+              contentScale = ContentScale.Crop,
+              modifier = Modifier
+                  .fillMaxSize()
+                  .background(Color.LightGray, CircleShape)
+                  .testTag("profilePicture"),
+              placeholder = painterResource(id = R.drawable.nopp), // Default image during loading
+              error = painterResource(id = R.drawable.nopp)        // Fallback image if URL fails
+          )
 
         // Back button
         IconButton(
@@ -177,7 +185,7 @@ fun ProfileHeader(navigationActions: NavigationActions) {
 
               // Username
               Text(
-                  text = "John Do",
+                  text = profile.name,
                   fontSize = 24.sp,
                   fontWeight = FontWeight.Bold,
                   color = Color.White,
@@ -224,6 +232,7 @@ fun ProfileCatchPhrase(catchPhrase: String) {
  */
 @Composable
 fun TagsSection(listOfTags: List<Pair<String, Color>>) {
+
   Box(modifier = Modifier.fillMaxWidth().height(80.dp).testTag("tagSection")) {
     RowOfTags(listOfTags, TagStyle())
   }

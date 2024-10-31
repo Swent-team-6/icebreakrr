@@ -74,8 +74,8 @@ fun IcebreakrrApp() {
   val navController = rememberNavController()
   val navigationActions = NavigationActions(navController)
   val profileViewModel = MockProfileViewModel()
-  val tagsViewModel: TagsViewModel = viewModel(factory = TagsViewModel.Factory)
 
+  val tagsViewModel: TagsViewModel = viewModel(factory = TagsViewModel.Factory)
   val profilesViewModel: ProfilesViewModel = viewModel(factory = ProfilesViewModel.Factory)
 
   NavHost(navController = navController, startDestination = Route.AUTH) {
@@ -98,7 +98,7 @@ fun IcebreakrrApp() {
         route = Route.SETTINGS,
     ) {
       composable(Screen.SETTINGS) { SettingsScreen(navigationActions) }
-      composable(Screen.PROFILE) { ProfileView(navigationActions) }
+      composable(Screen.PROFILE) { ProfileView(profilesViewModel, tagsViewModel, navigationActions) }
     }
 
     navigation(
