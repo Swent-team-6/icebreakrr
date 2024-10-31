@@ -20,6 +20,7 @@ import com.github.se.icebreakrr.ui.authentication.SignInScreen
 import com.github.se.icebreakrr.ui.navigation.NavigationActions
 import com.github.se.icebreakrr.ui.navigation.Route
 import com.github.se.icebreakrr.ui.navigation.Screen
+import com.github.se.icebreakrr.ui.profile.OtherProfileView
 import com.github.se.icebreakrr.ui.profile.ProfileEditingScreen
 import com.github.se.icebreakrr.ui.profile.ProfileView
 import com.github.se.icebreakrr.ui.sections.AroundYouScreen
@@ -90,6 +91,7 @@ fun IcebreakrrApp() {
       composable(Screen.AROUND_YOU) {
         AroundYouScreen(navigationActions, profileViewModel, tagsViewModel)
       }
+      composable(Screen.OTHER_PROFILE_VIEW) { OtherProfileView(navigationActions) }
     }
 
     navigation(

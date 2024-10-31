@@ -131,7 +131,7 @@ class M1_Test {
     // composeTestRule.onNodeWithTag("profileHeader").assertIsDisplayed()
     // composeTestRule.onNodeWithTag("profilePicture").assertIsDisplayed()
     // composeTestRule.onNodeWithTag("goBackButton").assertIsDisplayed()
-    // composeTestRule.onNodeWithTag("editButton").assertIsDisplayed()
+    // composeTestRule.onNodeWithTag("requestButton").assertIsDisplayed()
     // composeTestRule.onNodeWithTag("username").assertTextEquals("John Do")
     // composeTestRule.onNodeWithTag("goBackButton").performClick()
 
@@ -141,7 +141,7 @@ class M1_Test {
 
     // Screen 8 : Setting Screen
     composeTestRule.onNodeWithTag("topBar").assertIsDisplayed()
-    // composeTestRule.onNodeWithTag("profileCard").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("profileCard").assertIsDisplayed()
     composeTestRule.onNodeWithTag("Toggle Location").assertIsDisplayed()
     composeTestRule.onNodeWithTag("Toggle Location").performClick()
     composeTestRule.onNodeWithTag("Option 1").assertIsDisplayed()
