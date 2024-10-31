@@ -1,11 +1,15 @@
 package com.github.se.icebreakrr.model.profile
 
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.GeoPoint
 import java.util.Calendar
 import kotlinx.coroutines.runBlocking
+import org.hamcrest.CoreMatchers.instanceOf
 import org.hamcrest.CoreMatchers.`is`
+import org.hamcrest.CoreMatchers.nullValue
 import org.hamcrest.MatcherAssert.assertThat
+import org.junit.Assert.assertThrows
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mockito.mock
@@ -16,6 +20,7 @@ import org.mockito.kotlin.whenever
 
 class ProfilesViewModelTest {
   private lateinit var profilesRepository: ProfilesRepository
+    private lateinit var ppRepository: ProfilePicRepository
   private lateinit var profilesViewModel: ProfilesViewModel
 
   private val birthDate2002 =
@@ -35,7 +40,8 @@ class ProfilesViewModelTest {
           birthDate = birthDate2002, // 22 years old
           catchPhrase = "Just a friendly guy",
           description = "I love meeting new people.",
-          tags = listOf("friendly", "outgoing"))
+          tags = listOf("friendly", "outgoing"),
+          profilePictureUrl = "http://example.com/profile.jpg")
 
   private val profile2 =
       Profile(
@@ -45,12 +51,14 @@ class ProfilesViewModelTest {
           birthDate = birthDate2002,
           catchPhrase = "Adventure awaits!",
           description = "Always looking for new experiences.",
-          tags = listOf("adventurous", "outgoing"))
+          tags = listOf("adventurous", "outgoing"),
+          profilePictureUrl = null)
 
   @Before
   fun setUp() {
     profilesRepository = mock(ProfilesRepository::class.java)
-    profilesViewModel = ProfilesViewModel(profilesRepository)
+      ppRepository = mock(ProfilePicRepository::class.java)
+    profilesViewModel = ProfilesViewModel(profilesRepository, ppRepository)
   }
 
   @Test
@@ -202,4 +210,98 @@ class ProfilesViewModelTest {
 
     assertThat(profilesViewModel.error.value, `is`(exception))
   }
+
+    @Test
+    fun uploadCurrentUserProfilePictureSucceeds() = runBlocking {
+        val imageData = ByteArray(4) { 0xFF.toByte() }
+
+        whenever(profilesRepository.getProfileByUid(eq("1"), any(), any())).thenAnswer {
+            val onSuccess = it.getArgument<(Profile) -> Unit>(1)
+            onSuccess(profile1)
+        }
+
+        whenever(ppRepository.uploadProfilePicture(any(), any(), any(), any())).thenAnswer {
+            val onSuccess = it.getArgument<(String?) -> Unit>(2)
+            onSuccess("http://example.com/profile.jpg")
+        }
+
+        profilesViewModel.getProfileByUid("1")
+        profilesViewModel.uploadCurrentUserProfilePicture(imageData)
+
+        verify(ppRepository).uploadProfilePicture(eq("1"), eq(imageData), any(), any())
+        assertThat(profilesViewModel.selectedProfile.value?.profilePictureUrl, `is`("http://example.com/profile.jpg"))
+    }
+
+    @Test
+    fun uploadCurrentUserProfilePictureFails() = runBlocking {
+        val imageData = ByteArray(4) { 0xFF.toByte() }
+        val exception = Exception("Failed to upload profile picture")
+
+        whenever(profilesRepository.getProfileByUid(eq("1"), any(), any())).thenAnswer {
+            val onSuccess = it.getArgument<(Profile) -> Unit>(1)
+            onSuccess(profile1)
+        }
+
+        whenever(ppRepository.uploadProfilePicture(any(), any(), any(), any())).thenAnswer {
+            val onFailure = it.getArgument<(Exception) -> Unit>(3)
+            onFailure(exception)
+        }
+
+        profilesViewModel.getProfileByUid("1")
+        profilesViewModel.uploadCurrentUserProfilePicture(imageData)
+
+        verify(ppRepository).uploadProfilePicture(eq("1"), eq(imageData), any(), any())
+        assertThat(profilesViewModel.error.value, `is`(exception))
+    }
+
+    @Test
+    fun uploadCurrentUserProfilePictureThrowsExceptionIfUserNotLoggedIn() {
+        val imageData = ByteArray(4) { 0xFF.toByte() }
+
+        val exception = assertThrows(IllegalStateException::class.java) {
+            profilesViewModel.uploadCurrentUserProfilePicture(imageData)
+        }
+
+        assertThat(exception.message, `is`("User not logged in"))
+    }
+
+    @Test
+    fun deleteCurrentUserProfilePictureSucceeds() = runBlocking {
+        whenever(profilesRepository.getProfileByUid(eq("1"), any(), any())).thenAnswer {
+            val onSuccess = it.getArgument<(Profile) -> Unit>(1)
+            onSuccess(profile1)
+        }
+
+        whenever(ppRepository.deleteProfilePicture(any(), any(), any())).thenAnswer {
+            val onSuccess = it.getArgument<() -> Unit>(1)
+            onSuccess()
+        }
+
+        profilesViewModel.getProfileByUid("1")
+        profilesViewModel.deleteCurrentUserProfilePicture()
+
+        verify(ppRepository).deleteProfilePicture(eq("1"), any(), any())
+        assertThat(profilesViewModel.selectedProfile.value?.profilePictureUrl, `is`(nullValue()))
+    }
+
+    @Test
+    fun deleteCurrentUserProfilePictureFails() = runBlocking {
+        val exception = Exception("Failed to delete profile picture")
+
+        whenever(profilesRepository.getProfileByUid(eq("1"), any(), any())).thenAnswer {
+            val onSuccess = it.getArgument<(Profile) -> Unit>(1)
+            onSuccess(profile1)
+        }
+
+        whenever(ppRepository.deleteProfilePicture(any(), any(), any())).thenAnswer {
+            val onFailure = it.getArgument<(Exception) -> Unit>(2)
+            onFailure(exception)
+        }
+
+        profilesViewModel.getProfileByUid("1")
+        profilesViewModel.deleteCurrentUserProfilePicture()
+
+        verify(ppRepository).deleteProfilePicture(eq("1"), any(), any())
+        assertThat(profilesViewModel.error.value, `is`(exception))
+    }
 }
