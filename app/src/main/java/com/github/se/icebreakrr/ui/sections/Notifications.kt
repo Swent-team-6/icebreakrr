@@ -15,7 +15,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.github.se.icebreakrr.model.profile.MockProfileViewModel
+import com.github.se.icebreakrr.model.profile.ProfilesViewModel
 import com.github.se.icebreakrr.ui.navigation.BottomNavigationMenu
 import com.github.se.icebreakrr.ui.navigation.LIST_TOP_LEVEL_DESTINATIONS
 import com.github.se.icebreakrr.ui.navigation.NavigationActions
@@ -32,10 +32,7 @@ import com.github.se.icebreakrr.ui.sections.shared.TopBar
  */
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun NotificationScreen(
-    navigationActions: NavigationActions,
-    profileViewModel: MockProfileViewModel
-) {
+fun NotificationScreen(navigationActions: NavigationActions, profileViewModel: ProfilesViewModel) {
   val context = LocalContext.current
   val cardList = profileViewModel.profiles.collectAsState()
   val navFunction = {
