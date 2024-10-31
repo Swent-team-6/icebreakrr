@@ -37,7 +37,7 @@ class M1_Test {
 
   private lateinit var navigationActions: NavigationActions
   private lateinit var mockProfilesRepository: ProfilesRepository
-    private lateinit var mockPPRepository: ProfilePicRepository
+  private lateinit var mockPPRepository: ProfilePicRepository
   private lateinit var profilesViewModel: ProfilesViewModel
 
   @get:Rule val composeTestRule = createAndroidComposeRule<MainActivity>()
