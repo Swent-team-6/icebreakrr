@@ -72,7 +72,7 @@ class MainActivity : ComponentActivity() {
 fun IcebreakrrApp() {
   val navController = rememberNavController()
   val navigationActions = NavigationActions(navController)
-  val profileViewModel: ProfilesViewModel = viewModel(factory = ProfilesViewModel.Factory)
+  val profilesViewModel: ProfilesViewModel = viewModel(factory = ProfilesViewModel.Factory)
   val tagsViewModel: TagsViewModel = viewModel(factory = TagsViewModel.Factory)
 
   NavHost(navController = navController, startDestination = Route.AUTH) {
@@ -104,14 +104,18 @@ fun IcebreakrrApp() {
         startDestination = Screen.NOTIFICATIONS,
         route = Route.NOTIFICATIONS,
     ) {
-      composable(Screen.NOTIFICATIONS) { NotificationScreen(navigationActions, profileViewModel) }
+      composable(Screen.NOTIFICATIONS) {
+        NotificationScreen(navigationActions, MockProfileViewModel())
+      }
     }
 
     navigation(
         startDestination = Screen.PROFILE_EDIT,
         route = Route.PROFILE_EDIT,
     ) {
-      composable(Screen.PROFILE_EDIT) { ProfileEditingScreen(navigationActions, tagsViewModel) }
+      composable(Screen.PROFILE_EDIT) {
+        ProfileEditingScreen(navigationActions, tagsViewModel, profilesViewModel)
+      }
     }
 
     navigation(

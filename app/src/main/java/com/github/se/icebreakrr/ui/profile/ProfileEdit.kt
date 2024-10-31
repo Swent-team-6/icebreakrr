@@ -1,5 +1,7 @@
 package com.github.se.icebreakrr.ui.profile
 
+import android.annotation.SuppressLint
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -21,17 +23,24 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.github.se.icebreakrr.model.profile.Gender
 import com.github.se.icebreakrr.model.profile.Profile
+import com.github.se.icebreakrr.model.profile.ProfilesViewModel
 import com.github.se.icebreakrr.model.tags.TagsViewModel
 import com.github.se.icebreakrr.ui.navigation.NavigationActions
 import com.github.se.icebreakrr.ui.sections.tagSelectorTextSizeFactor
 import com.github.se.icebreakrr.ui.tags.TagSelector
+import com.google.firebase.Firebase
 import com.google.firebase.Timestamp
+import com.google.firebase.auth.auth
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.withTimeoutOrNull
 
+@SuppressLint("UnrememberedMutableState", "CoroutineCreationDuringComposition")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileEditingScreen(
     navigationActions: NavigationActions,
-    tagsViewModel: TagsViewModel = viewModel(factory = TagsViewModel.Factory)
+    tagsViewModel: TagsViewModel = viewModel(factory = TagsViewModel.Factory),
+    profilesViewModel: ProfilesViewModel = viewModel(factory = ProfilesViewModel.Factory)
 ) {
 
   val configuration = LocalConfiguration.current
@@ -40,27 +49,56 @@ fun ProfileEditingScreen(
 
   // Define dynamic padding and text size based on screen size
   val padding = screenWidth * 0.02f // 2% of screen width
-  val textSize = screenWidth * 0.06f // 6% of screen width
+  val textSize = screenWidth * 0.08f // 6% of screen width
+
+  // Define dynamic sizes for other UI elements
+  val profilePictureSize = screenWidth * 0.25f // 25% of screen width
+  val catchphraseHeight = screenHeight * 0.12f // 12% of screen height
+  val descriptionHeight = screenHeight * 0.20f // 20% of screen height
 
   // TODO : make the padding and text size dynamic based on screen size
 
-  val user =
-      Profile(
-          uid = "",
-          name = "",
-          gender = Gender.OTHER,
-          birthDate = Timestamp.now(),
-          catchPhrase = "",
-          description = "",
-          tags = listOf(),
-          profilePictureUrl = "")
+  var user by remember {
+    mutableStateOf(
+        Profile(
+            uid = "",
+            name = "",
+            gender = Gender.OTHER,
+            birthDate = Timestamp.now(),
+            catchPhrase = "",
+            description = "",
+            tags = listOf(),
+            profilePictureUrl = ""))
+  }
 
-  val profilePicture by remember { mutableStateOf(user.profilePictureUrl) }
+  var profilePicture by remember { mutableStateOf(user.profilePictureUrl) }
   var catchphrase by remember { mutableStateOf(TextFieldValue(user.catchPhrase)) }
   var description by remember { mutableStateOf(TextFieldValue(user.description)) }
-  var showDialog by remember { mutableStateOf(false) }
+  var tags by remember { mutableStateOf(user.tags) }
 
-  // to POST the new profile, I will use Arthur's viewModel
+  LaunchedEffect(Unit) {
+    withTimeoutOrNull(10000) {
+      profilesViewModel.getProfileByUid(Firebase.auth.currentUser!!.uid)
+      profilesViewModel.loading.first { !it }
+    } ?: Log.w("ProfileEdit", "Error while loading user profile")
+    user = profilesViewModel.selectedProfile.value?.copy() ?: user
+    catchphrase = TextFieldValue(user.catchPhrase)
+    description = TextFieldValue(user.description)
+    profilePicture = user.profilePictureUrl
+    Log.i("ProfileEdit", "User loaded: ${user.tags}")
+    tags = user.tags
+  }
+
+  var showDialogBack by remember { mutableStateOf(false) }
+  var showDialogConfirm by remember { mutableStateOf(false) }
+
+  fun updateProfile() {
+    profilesViewModel.updateProfile(
+        user.copy(
+            catchPhrase = catchphrase.text,
+            description = description.text,
+            tags = tagsViewModel.filteringTags.value))
+  }
 
   // for tags display, I will use Samuel's tags viewProfile to load the tags
   val selectedTags = tagsViewModel.filteringTags.collectAsState()
@@ -80,7 +118,7 @@ fun ProfileEditingScreen(
                   modifier = Modifier.testTag("goBackButton"),
                   onClick = {
                     // TODO : verify that the profile has been modified before showing the modal
-                    showDialog = true
+                    showDialogBack = true
                     tagsViewModel.leaveUI()
                   }) {
                     Icon(Icons.Default.ArrowBack, contentDescription = "Back")
@@ -89,10 +127,7 @@ fun ProfileEditingScreen(
             actions = {
               IconButton(
                   modifier = Modifier.testTag("checkButton"),
-                  onClick = {
-                    // TODO : handle save action
-                    tagsViewModel.leaveUI()
-                  }) {
+                  onClick = { showDialogConfirm = true }) {
                     Icon(Icons.Default.Check, contentDescription = "Save")
                   }
             })
@@ -104,7 +139,7 @@ fun ProfileEditingScreen(
                   model = profilePicture,
                   contentDescription = "Profile Picture",
                   modifier =
-                      Modifier.size(100.dp)
+                      Modifier.size(profilePictureSize)
                           .clip(CircleShape)
                           .background(MaterialTheme.colorScheme.primary)
                           .testTag("profilePicture")) // Added test tag
@@ -126,7 +161,9 @@ fun ProfileEditingScreen(
                   value = catchphrase,
                   onValueChange = { catchphrase = it },
                   label = { Text("Catchphrase", modifier = Modifier.testTag("catchphraseLabel")) },
-                  modifier = Modifier.fillMaxWidth().height(60.dp).testTag("catchphrase"))
+                  textStyle = TextStyle(fontSize = textSize.value.sp * 0.6),
+                  modifier =
+                      Modifier.fillMaxWidth().height(catchphraseHeight).testTag("catchphrase"))
 
               Spacer(modifier = Modifier.height(padding))
 
@@ -135,15 +172,13 @@ fun ProfileEditingScreen(
                   value = description,
                   onValueChange = { description = it },
                   label = { Text("Description") },
-                  modifier = Modifier.fillMaxWidth().height(100.dp).testTag("description"))
+                  textStyle = TextStyle(fontSize = textSize.value.sp * 0.6),
+                  modifier =
+                      Modifier.fillMaxWidth().height(descriptionHeight).testTag("description"))
               Spacer(modifier = Modifier.height(padding))
 
-              // TODO: This is temporary for tests and will be replaced with the actual tag selector
-              // of Maximo
               val tagSelectorHeight =
                   screenHeight * com.github.se.icebreakrr.ui.sections.tagSelectorHeightFactor
-              val tagSelectorWidth =
-                  screenWidth * com.github.se.icebreakrr.ui.sections.tagSelectorWidthFactor
               TagSelector(
                   selectedTag =
                       selectedTags.value.map { tag -> Pair(tag, tagsViewModel.tagToColor(tag)) },
@@ -156,39 +191,51 @@ fun ProfileEditingScreen(
                   textColor = MaterialTheme.colorScheme.onSurface,
                   onDropDownItemClicked = { tag -> tagsViewModel.addFilter(tag) },
                   height = tagSelectorHeight,
-                  width = tagSelectorWidth,
+                  width = screenWidth,
                   textSize = (tagSelectorHeight.value * tagSelectorTextSizeFactor).sp)
               Spacer(modifier = Modifier.height(padding))
-
-              // TODO : This will be replaced by the actual tags
-              Text(
-                  "Tags",
-                  style = MaterialTheme.typography.titleMedium,
-                  modifier = Modifier.align(Alignment.Start).testTag("userTags"))
 
               // TODO: implement tags query and display with Maximo's tags UI and Samuel's
               // viewProfile
 
               // Modal for unsaved changes on leave page with back button
-              if (showDialog) {
+              if (showDialogBack) {
                 AlertDialog(
-                    onDismissRequest = { showDialog = false },
+                    onDismissRequest = { showDialogBack = false },
                     title = { Text("You are about to leave this page") },
-                    text = { Text("Do you want to save your changes?") },
+                    text = { Text("Your changes will not be saved.") },
                     confirmButton = {
                       TextButton(
                           onClick = {
                             tagsViewModel.leaveUI()
                             navigationActions.goBack()
-                          },
-                          modifier = Modifier.testTag("discardChangesOption")) {
+                          }) {
                             Text("Discard changes")
                           }
                     },
                     dismissButton = {
-                      TextButton(onClick = { showDialog = false }) { Text("Cancel") }
+                      TextButton(onClick = { showDialogBack = false }) { Text("Cancel") }
                     },
                     modifier = Modifier.testTag("alertDialog"))
+              } else if (showDialogConfirm) {
+                AlertDialog(
+                    onDismissRequest = { showDialogConfirm = false },
+                    title = { Text("You are about to leave this page") },
+                    text = { Text("Are you sure you want to save your changes?") },
+                    confirmButton = {
+                      TextButton(
+                          onClick = {
+                            updateProfile()
+                            tagsViewModel.leaveUI()
+                            navigationActions.goBack()
+                          }) {
+                            Text("Save")
+                          }
+                    },
+                    dismissButton = {
+                      TextButton(onClick = { showDialogConfirm = false }) { Text("Cancel") }
+                    },
+                    modifier = Modifier.testTag("alertDialogConfirm"))
               }
             }
       }
