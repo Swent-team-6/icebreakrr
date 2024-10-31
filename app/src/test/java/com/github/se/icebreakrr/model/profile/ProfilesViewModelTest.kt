@@ -70,8 +70,8 @@ class ProfilesViewModelTest {
         center, radiusInMeters, listOf(Gender.MEN), 20..30, listOf("friendly"))
 
     verify(profilesRepository).getProfilesInRadius(eq(center), eq(radiusInMeters), any(), any())
-    assertThat(profilesViewModel.profiles.value.size, `is`(1)) // Should return only profile1
-    assertThat(profilesViewModel.profiles.value[0].uid, `is`("1")) // profile1 should be returned
+    assertThat(profilesViewModel.filteredProfiles.value.size, `is`(1)) // Should return only profile1
+    assertThat(profilesViewModel.filteredProfiles.value[0].uid, `is`("1")) // profile1 should be returned
   }
 
   @Test
