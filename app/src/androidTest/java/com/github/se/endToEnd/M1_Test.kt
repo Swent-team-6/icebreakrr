@@ -102,7 +102,7 @@ class M1_Test {
     composeTestRule.onNodeWithTag("profileHeader").assertIsDisplayed()
     composeTestRule.onNodeWithTag("profilePicture").assertIsDisplayed()
     composeTestRule.onNodeWithTag("goBackButton").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("editButton").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("requestButton").assertIsDisplayed()
     composeTestRule.onNodeWithTag("username").assertTextEquals("John Do")
     composeTestRule.onNodeWithTag("goBackButton").performClick()
 
