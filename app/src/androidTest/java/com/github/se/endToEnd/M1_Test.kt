@@ -17,6 +17,7 @@ import com.github.se.icebreakrr.MainActivity
 import com.github.se.icebreakrr.R
 import com.github.se.icebreakrr.model.profile.Gender
 import com.github.se.icebreakrr.model.profile.Profile
+import com.github.se.icebreakrr.model.profile.ProfilePicRepository
 import com.github.se.icebreakrr.model.profile.ProfilesRepository
 import com.github.se.icebreakrr.model.profile.ProfilesViewModel
 import com.github.se.icebreakrr.ui.navigation.NavigationActions
@@ -36,6 +37,7 @@ class M1_Test {
 
   private lateinit var navigationActions: NavigationActions
   private lateinit var mockProfilesRepository: ProfilesRepository
+    private lateinit var mockPPRepository: ProfilePicRepository
   private lateinit var profilesViewModel: ProfilesViewModel
 
   @get:Rule val composeTestRule = createAndroidComposeRule<MainActivity>()
@@ -44,7 +46,8 @@ class M1_Test {
   fun setup() {
     navigationActions = mock(NavigationActions::class.java)
     mockProfilesRepository = mock(ProfilesRepository::class.java)
-    profilesViewModel = ProfilesViewModel(mockProfilesRepository)
+    mockPPRepository = mock(ProfilePicRepository::class.java)
+    profilesViewModel = ProfilesViewModel(mockProfilesRepository, mockPPRepository)
 
     // Creating a custom flag to disable the sign in to correctly test navigation
     val intent =

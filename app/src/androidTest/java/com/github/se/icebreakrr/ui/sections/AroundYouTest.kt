@@ -12,6 +12,7 @@ import androidx.test.espresso.action.ViewActions.swipeDown
 import com.github.se.icebreakrr.model.filter.FilterViewModel
 import com.github.se.icebreakrr.model.profile.Gender
 import com.github.se.icebreakrr.model.profile.Profile
+import com.github.se.icebreakrr.model.profile.ProfilePicRepository
 import com.github.se.icebreakrr.model.profile.ProfilesRepository
 import com.github.se.icebreakrr.model.profile.ProfilesViewModel
 import com.github.se.icebreakrr.model.tags.TagsViewModel
@@ -33,6 +34,7 @@ class AroundYouScreenTest {
 
   private lateinit var navigationActions: NavigationActions
   private lateinit var mockProfilesRepository: ProfilesRepository
+  private lateinit var mockPPRepository: ProfilePicRepository
   private lateinit var profilesViewModel: ProfilesViewModel
 
   @get:Rule val composeTestRule = createComposeRule()
@@ -41,7 +43,7 @@ class AroundYouScreenTest {
   fun setUp() {
     navigationActions = mock(NavigationActions::class.java)
     mockProfilesRepository = mock(ProfilesRepository::class.java)
-    profilesViewModel = ProfilesViewModel(mockProfilesRepository)
+    profilesViewModel = ProfilesViewModel(mockProfilesRepository, mockPPRepository)
 
     // Mock initial behavior of repository
     `when`(navigationActions.currentRoute()).thenReturn(Route.AROUND_YOU)
