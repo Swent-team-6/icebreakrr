@@ -16,10 +16,11 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
 import com.github.se.icebreakrr.model.filter.FilterViewModel
-import com.github.se.icebreakrr.model.profile.Gender
 import com.github.se.icebreakrr.model.profile.ProfilesRepository
 import com.github.se.icebreakrr.model.profile.ProfilesViewModel
 import com.github.se.icebreakrr.ui.navigation.NavigationActions
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -293,19 +294,55 @@ class FilterScreenTest {
           filterViewModel = filterViewModel)
     }
 
+    // Test case 1: Select genders and set valid age range
     composeTestRule.onNodeWithTag("GenderButtonMen").performClick()
     composeTestRule.onNodeWithTag("GenderButtonWomen").performClick()
-    composeTestRule.onNodeWithTag("GenderButtonOther").performClick()
+
+    // Set valid age range
+    composeTestRule.onNodeWithTag("AgeFromTextField").performTextInput("25")
+    composeTestRule.onNodeWithTag("AgeToTextField").performTextInput("30")
+
+    // Click the filter button
+    composeTestRule.onNodeWithTag("FilterButton").performClick()
+
+    // Assert that the correct age range is set
+    assertEquals(25..30, filterViewModel.ageRange.value)
+
+    // Test case 2: No age range (both fields empty)
+    composeTestRule.onNodeWithTag("AgeFromTextField").performTextClearance()
+    composeTestRule.onNodeWithTag("AgeToTextField").performTextClearance()
 
     composeTestRule.onNodeWithTag("FilterButton").performClick()
 
-    assert(filterViewModel.selectedGenders.value == listOf(Gender.MEN, Gender.WOMEN, Gender.OTHER))
+    // Assert that the age range is set to null
+    assertNull(filterViewModel.ageRange.value)
 
-    composeTestRule.onNodeWithTag("GenderButtonWomen").performClick()
+    // Test case 3: Only "From" age set
+    composeTestRule.onNodeWithTag("AgeFromTextField").performTextInput("25")
+    composeTestRule.onNodeWithTag("AgeToTextField").performTextClearance()
 
     composeTestRule.onNodeWithTag("FilterButton").performClick()
 
-    assert(filterViewModel.selectedGenders.value == listOf(Gender.MEN, Gender.OTHER))
+    // Assert that the age range is set to (25..Int.MAX_VALUE)
+    assertEquals(25..Int.MAX_VALUE, filterViewModel.ageRange.value)
+
+    // Test case 4: Only "To" age set
+    composeTestRule.onNodeWithTag("AgeFromTextField").performTextClearance()
+    composeTestRule.onNodeWithTag("AgeToTextField").performTextInput("30")
+
+    composeTestRule.onNodeWithTag("FilterButton").performClick()
+
+    // Assert that the age range is set to (0..30)
+    assertEquals(0..30, filterViewModel.ageRange.value)
+
+    // Test case 5: Invalid age range (ageFrom > ageTo)
+    composeTestRule.onNodeWithTag("AgeFromTextField").performTextInput("35")
+    composeTestRule.onNodeWithTag("AgeToTextField").performTextInput("30")
+
+    composeTestRule.onNodeWithTag("FilterButton").performClick()
+
+    // Assert that the age range is set to null due to error
+    assertNull(filterViewModel.ageRange.value)
   }
 
   @Test
