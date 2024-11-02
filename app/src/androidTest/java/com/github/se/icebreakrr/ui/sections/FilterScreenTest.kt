@@ -15,6 +15,8 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
+import com.github.se.icebreakrr.model.profile.ProfilesRepository
+import com.github.se.icebreakrr.model.profile.ProfilesViewModel
 import com.github.se.icebreakrr.ui.navigation.NavigationActions
 import org.junit.Before
 import org.junit.Rule
@@ -26,12 +28,16 @@ import org.mockito.kotlin.verify
 class FilterScreenTest {
 
   private lateinit var navigationActionsMock: NavigationActions
+  private lateinit var profilesRepositoryMock: ProfilesRepository
+  private lateinit var profilesViewModelMock: ProfilesViewModel
 
   @get:Rule val composeTestRule = createComposeRule()
 
   @Before
   fun setUp() {
     navigationActionsMock = mock()
+    profilesRepositoryMock = mock()
+    profilesViewModelMock = ProfilesViewModel(profilesRepositoryMock)
   }
 
   @Test
@@ -261,16 +267,18 @@ class FilterScreenTest {
     toTextField.assert(hasText(""))
   }
 
-  // This Test now fails for no reason whatsoever, we'll have to investigate
-  // @Test
-  // fun testFilterButtonNavigation() {
-  //  composeTestRule.setContent { FilterScreen(navigationActions = navigationActionsMock) }
+  @Test
+  fun testFilterButtonNavigation() {
+    composeTestRule.setContent {
+      FilterScreen(
+          navigationActions = navigationActionsMock, profilesViewModel = profilesViewModelMock)
+    }
 
-  // Click the filter button
-  //  composeTestRule.onNodeWithTag("FilterButton").performClick()
-  // Verify that the navigation action is called
-  //  verify(navigationActionsMock).goBack()
-  // }
+    // Click the filter button
+    composeTestRule.onNodeWithTag("FilterButton").performClick()
+    // Verify that the navigation action is called
+    verify(navigationActionsMock).goBack()
+  }
 
   @Test
   fun testGenderButtonAppearance() {
