@@ -46,11 +46,17 @@ fun OtherProfileView(navigationActions: NavigationActions) {
           .trimIndent()
   val userTags = remember {
     listOf(
-        Pair("salsa", Color.Red),
-        Pair("pesto", Color.Green),
-        Pair("psto", Color.Blue),
-        Pair("pest", Color.Green),
-        Pair("peest", Color.Green))
+        Pair("Climate Change", Color(0xfffd877c)),
+        Pair("Photography", Color(0xffe69de8)),
+        Pair("Documentary", Color(0xffd4b4eb)),
+        Pair("BBQ Ribs", Color(0xfff2c479)),
+        Pair("Gaming", Color(0xffbbf1f6)),
+        Pair("Reggae", Color(0xff8077e4)),
+        Pair("Bartender", Color(0xffccd0cc)),
+        Pair("Platonism", Color(0xffde7f97)),
+        Pair("WaterPolo", Color(0xfffb939b)),
+        Pair("Kotlin", Color(0xffedf4a5)),
+        Pair("Wildlife", Color(0xffccf4b4)))
   }
 
   Box(modifier = Modifier.fillMaxSize().testTag("aroundYouProfileScreen")) {
