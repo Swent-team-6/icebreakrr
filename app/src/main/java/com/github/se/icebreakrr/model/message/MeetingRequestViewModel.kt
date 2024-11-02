@@ -1,5 +1,6 @@
 package com.github.se.icebreakrr.model.message
 
+import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -49,21 +50,20 @@ class MeetingRequestViewModel(
           .build()
           .create()
 
-    init {
-        viewModelScope.launch {
-            Firebase.messaging.subscribeToTopic("allUsers").await()
-        }
-    }
+  init {
+    viewModelScope.launch { Firebase.messaging.subscribeToTopic("allUsers").await() }
+  }
 
   fun onRemoteTokenChange(newToken: String) {
-    if (ourUserId != null) {
-      profilesViewModel.getProfileByUid(ourUserId)
-      val currentProfile = profilesViewModel.selectedProfile.value
-      if (currentProfile != null) {
-        val updatedProfile = currentProfile.copy(fcmToken = newToken)
-        profilesViewModel.updateProfile(updatedProfile)
-      }
-    }
+//    if (ourUserId != null) {
+//      profilesViewModel.getProfileByUid(ourUserId)
+//      val currentProfile = profilesViewModel.selectedProfile.value
+//      if (currentProfile != null) {
+//        val updatedProfile = currentProfile.copy(fcmToken = newToken)
+//        profilesViewModel.updateProfile(updatedProfile)
+//      }
+//    }
+      meetingRequestState = meetingRequestState.copy(targetToken = newToken)
   }
 
   fun onMeetingRequestChange(newMessage: String) {
@@ -72,44 +72,49 @@ class MeetingRequestViewModel(
             message = newMessage,
         )
   }
-    fun onSubmitMeetingRequest() {
-        meetingRequestState = meetingRequestState.copy(isEnteringMessage = false)
-    }
 
+  fun onSubmitMeetingRequest() {
+    meetingRequestState = meetingRequestState.copy(isEnteringMessage = false)
+    Log.d("PRINT SEND TOKEN", meetingRequestState.targetToken)
+  }
 
   fun onMeetingResponseChange(newMessage: String, newAnswer: Boolean) {
     meetingResponseState = meetingResponseState.copy(message = newMessage, accept = newAnswer)
   }
-    fun onSubmitMeetingResponse() {
-        meetingResponseState = meetingResponseState.copy(isEnteringMessage = false)
-    }
 
-
+  fun onSubmitMeetingResponse() {
+    meetingResponseState = meetingResponseState.copy(isEnteringMessage = false)
+  }
 
   fun sendMessage(isBroadcast: Boolean) {
-    if (ourUserId != null) {
-      profilesViewModel.getProfileByUid(ourUserId)
-      val userName = profilesViewModel.selectedProfile.value?.name
+    Log.d("SENDING MESSAGE", meetingRequestState.targetToken)
+//      profilesViewModel.getProfileByUid(ourUserId)
+//      val userName = profilesViewModel.selectedProfile.value?.name
       viewModelScope.launch {
         val messageDto =
             SendMessageDto(
-                to = if (isBroadcast) null else meetingRequestState.senderUID,
+                to = if (isBroadcast) null else meetingRequestState.targetToken,
                 notification =
                     NotificationBody(
-                        title = "$userName wants to meet you", body = meetingRequestState.message))
+                        title = "Jan", body = "bien jouée mon sucre sucre en gimauve ! Reste plus que 53h de debug ;) "))
         try {
           if (isBroadcast) {
+              Log.d("MESSAGE", "BROADCAST SENT")
             api.broadcast(messageDto)
+              Log.d("MESSAGE", "BROADCAST RETURNED")
           } else {
+              Log.d("MESSAGE", "NOTIFICATION SENT")
             api.sendMessage(messageDto)
+              Log.d("MESSAGE", "NOTIFICATION RETURNED")
           }
           meetingRequestState = meetingRequestState.copy(message = "", picture = null)
         } catch (e: HttpException) {
-          e.printStackTrace()
+            Log.e("API ERROR", "HTTP exception: ${e.code()}", e)
         } catch (e: IOException) {
-          e.printStackTrace()
+            Log.e("API ERROR", "Network error", e)
+        } catch (e: Exception) {
+            Log.e("API ERROR", "Unexpected error", e)
         }
       }
-    }
   }
 }

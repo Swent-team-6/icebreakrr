@@ -1,6 +1,4 @@
-@file:OptIn(ExperimentalMaterial3Api::class)
-
-package com.plcoding.fcmpushnotificationshttpv1
+package com.github.se.icebreakrr.model.message
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -14,7 +12,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.material.icons.filled.Share
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
@@ -25,7 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun ChatScreen(             //Todo : class for testing and debugging purposes, ll be removed later on
+fun ChatScreen( // Todo : class for testing and debugging purposes, ll be removed later on
     messageText: String,
     onMessageChange: (String) -> Unit,
     onMessageSend: () -> Unit,

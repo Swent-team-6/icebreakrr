@@ -20,6 +20,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
 import com.github.se.icebreakrr.config.LocalIsTesting
+import com.github.se.icebreakrr.model.message.ChatScreen
 import com.github.se.icebreakrr.model.message.EnterTokenDialog
 import com.github.se.icebreakrr.model.message.MeetingRequestViewModel
 import com.github.se.icebreakrr.model.profile.ProfilesViewModel
@@ -39,7 +40,6 @@ import com.github.se.icebreakrr.ui.theme.SampleAppTheme
 import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.messaging.FirebaseMessaging
-import com.plcoding.fcmpushnotificationshttpv1.ChatScreen
 
 class MainActivity : ComponentActivity() {
   private lateinit var auth: FirebaseAuth
@@ -107,11 +107,11 @@ fun IcebreakrrApp() {
     if (task.isSuccessful) {
       val token = task.result
       // Save token to backend for user messaging
-      meetingRequestViewModel.onRemoteTokenChange(token)
+      // meetingRequestViewModel.onRemoteTokenChange(token)
       Log.d(
           "FCM Token",
           "Token: $token") // todo : est se que on doit nous meme créer un profile si il existe pas
-                           // encore pour le user courant ?
+      // encore pour le user courant ?
     }
   }
 
@@ -145,20 +145,20 @@ fun IcebreakrrApp() {
         startDestination = Screen.NOTIFICATIONS,
         route = Route.NOTIFICATIONS,
     ) {
-      composable(Screen.NOTIFICATIONS) {
+      composable(Screen.NOTIFICATIONS) { // Todo : this part is temporary, it ll be used for debugging
         //         NotificationScreen(navigationActions, profileViewModel)
-        val state = meetingRequestViewModel.meetingRequestState         //Todo : this part is temporary, it ll be used for debugging purposes
+        val state =
+            meetingRequestViewModel
+                .meetingRequestState
+        // purposes
         if (state.isEnteringMessage) {
           EnterTokenDialog(
               token = state.targetToken,
               onTokenChange = meetingRequestViewModel::onRemoteTokenChange,
               onSubmit = meetingRequestViewModel::onSubmitMeetingRequest)
         } else {
-          ChatScreen(
-              messageText = state.message,
-              onMessageSend = { meetingRequestViewModel.sendMessage(isBroadcast = false) },
-              onMessageBroadcast = { meetingRequestViewModel.sendMessage(isBroadcast = true) },
-              onMessageChange = meetingRequestViewModel::onMeetingRequestChange)
+          meetingRequestViewModel.sendMessage(false)
+          NotificationScreen(navigationActions, profileViewModel)
         }
       }
     }
