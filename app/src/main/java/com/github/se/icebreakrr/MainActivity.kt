@@ -15,12 +15,12 @@ import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
 import com.github.se.icebreakrr.config.LocalIsTesting
 import com.github.se.icebreakrr.model.profile.ProfilesViewModel
-import com.github.se.icebreakrr.model.profile.MockProfileViewModel
 import com.github.se.icebreakrr.model.tags.TagsViewModel
 import com.github.se.icebreakrr.ui.authentication.SignInScreen
 import com.github.se.icebreakrr.ui.navigation.NavigationActions
 import com.github.se.icebreakrr.ui.navigation.Route
 import com.github.se.icebreakrr.ui.navigation.Screen
+import com.github.se.icebreakrr.ui.profile.OtherProfileView
 import com.github.se.icebreakrr.ui.profile.ProfileEditingScreen
 import com.github.se.icebreakrr.ui.profile.ProfileView
 import com.github.se.icebreakrr.ui.sections.AroundYouScreen
@@ -73,8 +73,7 @@ class MainActivity : ComponentActivity() {
 fun IcebreakrrApp() {
   val navController = rememberNavController()
   val navigationActions = NavigationActions(navController)
-  val profileViewModel = MockProfileViewModel()
-
+  val profileViewModel: ProfilesViewModel = viewModel(factory = ProfilesViewModel.Factory)
   val tagsViewModel: TagsViewModel = viewModel(factory = TagsViewModel.Factory)
   val profilesViewModel: ProfilesViewModel = viewModel(factory = ProfilesViewModel.Factory)
 
@@ -90,7 +89,10 @@ fun IcebreakrrApp() {
         startDestination = Screen.AROUND_YOU,
         route = Route.AROUND_YOU,
     ) {
-      composable(Screen.AROUND_YOU) { AroundYouScreen(navigationActions) }
+      composable(Screen.AROUND_YOU) {
+        AroundYouScreen(navigationActions, profileViewModel, tagsViewModel)
+      }
+      composable(Screen.OTHER_PROFILE_VIEW+"?userId={userId}") { navBackStackEntry -> OtherProfileView(profileViewModel, tagsViewModel, navigationActions, navBackStackEntry) }
     }
 
     navigation(
