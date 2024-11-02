@@ -15,6 +15,8 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
+import com.github.se.icebreakrr.model.filter.FilterViewModel
+import com.github.se.icebreakrr.model.profile.Gender
 import com.github.se.icebreakrr.model.profile.ProfilesRepository
 import com.github.se.icebreakrr.model.profile.ProfilesViewModel
 import com.github.se.icebreakrr.ui.navigation.NavigationActions
@@ -30,6 +32,7 @@ class FilterScreenTest {
   private lateinit var navigationActionsMock: NavigationActions
   private lateinit var profilesRepositoryMock: ProfilesRepository
   private lateinit var profilesViewModelMock: ProfilesViewModel
+  private lateinit var filterViewModel: FilterViewModel
 
   @get:Rule val composeTestRule = createComposeRule()
 
@@ -38,6 +41,7 @@ class FilterScreenTest {
     navigationActionsMock = mock()
     profilesRepositoryMock = mock()
     profilesViewModelMock = ProfilesViewModel(profilesRepositoryMock)
+    filterViewModel = FilterViewModel()
   }
 
   @Test
@@ -278,6 +282,30 @@ class FilterScreenTest {
     composeTestRule.onNodeWithTag("FilterButton").performClick()
     // Verify that the navigation action is called
     verify(navigationActionsMock).goBack()
+  }
+
+  @Test
+  fun testFilterButtonActions() {
+    composeTestRule.setContent {
+      FilterScreen(
+          navigationActionsMock,
+          profilesViewModel = profilesViewModelMock,
+          filterViewModel = filterViewModel)
+    }
+
+    composeTestRule.onNodeWithTag("GenderButtonMen").performClick()
+    composeTestRule.onNodeWithTag("GenderButtonWomen").performClick()
+    composeTestRule.onNodeWithTag("GenderButtonOther").performClick()
+
+    composeTestRule.onNodeWithTag("FilterButton").performClick()
+
+    assert(filterViewModel.selectedGenders.value == listOf(Gender.MEN, Gender.WOMEN, Gender.OTHER))
+
+    composeTestRule.onNodeWithTag("GenderButtonWomen").performClick()
+
+    composeTestRule.onNodeWithTag("FilterButton").performClick()
+
+    assert(filterViewModel.selectedGenders.value == listOf(Gender.MEN, Gender.OTHER))
   }
 
   @Test

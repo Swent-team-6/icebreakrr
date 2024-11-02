@@ -88,6 +88,9 @@ fun FilterScreen(
   // Read the selected genders from the ViewModel
   val selectedGenders by filterViewModel.selectedGenders.collectAsState()
 
+  // Store the new inputs
+  val currentSelectedGenders = mutableListOf<Gender>()
+
   // Gender selection logic
   var manSelected by remember { mutableStateOf(selectedGenders.contains(Gender.MEN)) }
   var womanSelected by remember { mutableStateOf(selectedGenders.contains(Gender.WOMEN)) }
@@ -293,11 +296,10 @@ fun FilterScreen(
                   tagsViewModel.applyFilters()
                   tagsViewModel.leaveUI()
 
-                  val selectedGenders = mutableListOf<Gender>()
-                  if (manSelected) selectedGenders.add(Gender.MEN)
-                  if (womanSelected) selectedGenders.add(Gender.WOMEN)
-                  if (otherSelected) selectedGenders.add(Gender.OTHER)
-                  filterViewModel.setGenders(selectedGenders)
+                  if (manSelected) currentSelectedGenders.add(Gender.MEN)
+                  if (womanSelected) currentSelectedGenders.add(Gender.WOMEN)
+                  if (otherSelected) currentSelectedGenders.add(Gender.OTHER)
+                  filterViewModel.setGenders(currentSelectedGenders)
 
                   when {
                     ageFrom != null && ageTo != null && !ageRangeError -> {
