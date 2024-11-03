@@ -133,7 +133,9 @@ data class TagsViewModel(private val repository: TagsRepository) : ViewModel() {
    * @param tag : tag to add
    */
   fun addFilter(tag: String) {
-    filteringTags_.value += tag
+    if (!filteringTags.value.contains(tag)) {
+      filteringTags_.value += tag
+    }
   }
 
   /**

@@ -77,13 +77,15 @@ open class ProfilesViewModel(private val repository: ProfilesRepository) : ViewM
               profileList.filter { profile ->
 
                 // Filter by genders if specified
-                (genders == null || profile.gender in genders) &&
+                (genders == null || profile.gender in genders || genders.isEmpty()) &&
 
                     // Filter by age range if specified
                     (ageRange == null || profile.calculateAge() in ageRange) &&
 
                     // Filter by tags if specified
-                    (tags == null || profile.tags.containsAll(tags))
+                    (tags == null ||
+                        profile.tags.any { it.lowercase() in tags.map { it.lowercase() } } ||
+                        tags.isEmpty())
               }
           _profiles.value = profileList
           _filteredProfiles.value = filteredProfiles
