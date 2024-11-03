@@ -92,7 +92,9 @@ fun IcebreakrrApp() {
       composable(Screen.AROUND_YOU) {
         AroundYouScreen(navigationActions, profileViewModel, tagsViewModel)
       }
-      composable(Screen.OTHER_PROFILE_VIEW+"?userId={userId}") { navBackStackEntry -> OtherProfileView(profileViewModel, tagsViewModel, navigationActions, navBackStackEntry) }
+      composable(Screen.OTHER_PROFILE_VIEW + "?userId={userId}") { navBackStackEntry ->
+        OtherProfileView(profileViewModel, tagsViewModel, navigationActions, navBackStackEntry)
+      }
     }
 
     navigation(
@@ -100,7 +102,9 @@ fun IcebreakrrApp() {
         route = Route.SETTINGS,
     ) {
       composable(Screen.SETTINGS) { SettingsScreen(profileViewModel, navigationActions) }
-      composable(Screen.PROFILE) { ProfileView(profilesViewModel, tagsViewModel, navigationActions) }
+      composable(Screen.PROFILE) {
+        ProfileView(profilesViewModel, tagsViewModel, navigationActions)
+      }
     }
 
     navigation(
