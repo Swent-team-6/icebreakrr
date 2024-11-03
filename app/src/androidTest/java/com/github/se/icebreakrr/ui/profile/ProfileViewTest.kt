@@ -16,7 +16,6 @@ import com.github.se.icebreakrr.model.profile.getMockedProfiles
 import com.github.se.icebreakrr.model.tags.TagsRepository
 import com.github.se.icebreakrr.model.tags.TagsViewModel
 import com.github.se.icebreakrr.ui.navigation.NavigationActions
-import com.github.se.icebreakrr.ui.profile.ProfileView
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
