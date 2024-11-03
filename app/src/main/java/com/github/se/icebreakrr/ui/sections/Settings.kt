@@ -48,12 +48,12 @@ fun SettingsScreen(profilesViewModel: ProfilesViewModel, navigationActions: Navi
   val context = LocalContext.current
   val scrollState = rememberScrollState()
 
-    LaunchedEffect(Unit) {
-        Firebase.auth.currentUser?.let { profilesViewModel.getProfileByUid(it.uid) }
-    }
+  LaunchedEffect(Unit) {
+    Firebase.auth.currentUser?.let { profilesViewModel.getProfileByUid(it.uid) }
+  }
 
-    val isLoading = profilesViewModel.loading.collectAsState(initial = true).value
-    val profile = profilesViewModel.selectedProfile.collectAsState().value
+  val isLoading = profilesViewModel.loading.collectAsState(initial = true).value
+  val profile = profilesViewModel.selectedProfile.collectAsState().value
 
   Scaffold(
       topBar = { TopBar("Settings") },
@@ -71,13 +71,13 @@ fun SettingsScreen(profilesViewModel: ProfilesViewModel, navigationActions: Navi
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.Start) {
           if (profile != null) {
-              ProfileCard(profile = profile, isSettings = true) {
-                  navigationActions.navigateTo(Screen.PROFILE)
-              }
-          }else {
-              ProfileCard(profile = Profile.getMockedProfiles()[0], isSettings = true) {
-                  navigationActions.navigateTo(Screen.PROFILE)
-              }
+            ProfileCard(profile = profile, isSettings = true) {
+              navigationActions.navigateTo(Screen.PROFILE)
+            }
+          } else {
+            ProfileCard(profile = Profile.getMockedProfiles()[0], isSettings = true) {
+              navigationActions.navigateTo(Screen.PROFILE)
+            }
           }
 
           Spacer(modifier = Modifier.padding(vertical = 8.dp))
