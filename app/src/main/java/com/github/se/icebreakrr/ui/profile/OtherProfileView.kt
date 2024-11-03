@@ -1,6 +1,5 @@
 package com.github.se.icebreakrr.ui.profile
 
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -23,7 +22,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextAlign
 import androidx.navigation.NavBackStackEntry
-import androidx.navigation.compose.rememberNavController
 import com.github.se.icebreakrr.model.profile.ProfilesViewModel
 import com.github.se.icebreakrr.model.tags.TagsViewModel
 import com.github.se.icebreakrr.ui.message.SendRequestScreen
@@ -41,72 +39,62 @@ fun OtherProfileView(
     profilesViewModel: ProfilesViewModel,
     tagsViewModel: TagsViewModel,
     navigationActions: NavigationActions,
-    navBackStackEntry: NavBackStackEntry
+    navBackStackEntry: NavBackStackEntry?
 ) {
   var sendRequest by remember { mutableStateOf(false) }
   var writtenMessage by remember { mutableStateOf("") }
 
-    val profileId = navBackStackEntry.arguments?.getString("userId")
+  val profileId = navBackStackEntry?.arguments?.getString("userId")
 
-    // Launch a coroutine to fetch the profile when this composable is first displayed
-    LaunchedEffect(Unit){
-        if (profileId != null) {
-            profilesViewModel.getProfileByUid(profileId)
-        }
+  // Launch a coroutine to fetch the profile when this composable is first displayed
+  LaunchedEffect(Unit) {
+    if (profileId != null) {
+      profilesViewModel.getProfileByUid(profileId)
     }
+  }
 
-    val isLoading = profilesViewModel.loading.collectAsState(initial = true).value
-    val profile = profilesViewModel.selectedProfile.collectAsState().value
+  val isLoading = profilesViewModel.loading.collectAsState(initial = true).value
+  val profile = profilesViewModel.selectedProfile.collectAsState().value
 
+  Scaffold(modifier = Modifier.fillMaxSize().testTag("aroundYouProfileScreen")) { paddingValues ->
     if (isLoading) {
-        // Show a loading indicator or message while the profile is being fetched
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Color.LightGray),
-            contentAlignment = Alignment.Center
-        ) {
+      Box(
+          modifier =
+              Modifier.fillMaxSize()
+                  .background(Color.LightGray)
+                  .padding(paddingValues)
+                  .testTag("loadingBox"),
+          contentAlignment = Alignment.Center) {
             Text("Loading profile...", textAlign = TextAlign.Center)
-        }
-    }else if (profile != null) {
+          }
+    } else if (profile != null) {
 
-        Box(modifier = Modifier
-            .fillMaxSize()
-            .testTag("aroundYouProfileScreen")) {
-            Scaffold(
-                modifier = Modifier.testTag("profileScreen"),
-                content = { paddingValues ->
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(paddingValues),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
+      Column(
+          modifier = Modifier.fillMaxWidth().padding(paddingValues),
+          horizontalAlignment = Alignment.CenterHorizontally) {
 
-                        // 2 sections one for the profile image with overlay and
-                        // one for the information section
-                        ProfileHeader(profile, navigationActions, false){ sendRequest = true }
-                        InfoSection(profile, tagsViewModel)
+            // 2 sections one for the profile image with overlay and
+            // one for the information section
+            ProfileHeader(profile, navigationActions, false) { sendRequest = true }
+            InfoSection(profile, tagsViewModel)
+          }
 
-                    }
-                })
-            // this displays the request messaging system
-            if (sendRequest) {
-                Box(
-                    modifier =
-                    Modifier
-                        .fillMaxSize()
-                        .background(Color.Black.copy(alpha = 0.5f))
-                        .clickable {}
-                        .testTag("bluredBackground"),
-                    contentAlignment = Alignment.Center) {
-                    SendRequestScreen(
-                        onValueChange = { writtenMessage = it },
-                        value = writtenMessage,
-                        onSendClick = { sendRequest = false },
-                        onCancelClick = { sendRequest = false })
-                }
+      // this displays the request messaging system
+      if (sendRequest) {
+        Box(
+            modifier =
+                Modifier.fillMaxSize()
+                    .background(Color.Black.copy(alpha = 0.5f))
+                    .clickable {}
+                    .testTag("bluredBackground"),
+            contentAlignment = Alignment.Center) {
+              SendRequestScreen(
+                  onValueChange = { writtenMessage = it },
+                  value = writtenMessage,
+                  onSendClick = { sendRequest = false },
+                  onCancelClick = { sendRequest = false })
             }
-        }
+      }
     }
+  }
 }
