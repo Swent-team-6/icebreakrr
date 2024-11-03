@@ -99,7 +99,7 @@ fun IcebreakrrApp() {
         startDestination = Screen.SETTINGS,
         route = Route.SETTINGS,
     ) {
-      composable(Screen.SETTINGS) { SettingsScreen(navigationActions) }
+      composable(Screen.SETTINGS) { SettingsScreen(profileViewModel, navigationActions) }
       composable(Screen.PROFILE) { ProfileView(profilesViewModel, tagsViewModel, navigationActions) }
     }
 
