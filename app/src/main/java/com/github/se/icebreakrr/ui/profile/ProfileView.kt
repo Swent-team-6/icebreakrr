@@ -11,7 +11,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -35,43 +34,43 @@ import com.google.firebase.auth.auth
  * @param isUser boolean stating if the profile corresponds to the app user.
  */
 @Composable
-fun ProfileView(profilesViewModel: ProfilesViewModel, tagsViewModel: TagsViewModel, navigationActions: NavigationActions) {
+fun ProfileView(
+    profilesViewModel: ProfilesViewModel,
+    tagsViewModel: TagsViewModel,
+    navigationActions: NavigationActions
+) {
 
-    // Launch a coroutine to fetch the profile when this composable is first displayed
-    LaunchedEffect(Unit) {
-        Firebase.auth.currentUser?.let { profilesViewModel.getProfileByUid(it.uid) }
-    }
+  // Launch a coroutine to fetch the profile when this composable is first displayed
+  LaunchedEffect(Unit) {
+    Firebase.auth.currentUser?.let { profilesViewModel.getProfileByUid(it.uid) }
+  }
 
-    val isLoading = profilesViewModel.loading.collectAsState(initial = true).value
-    val profile = profilesViewModel.selectedProfile.collectAsState().value
+  val isLoading = profilesViewModel.loading.collectAsState(initial = true).value
+  val profile = profilesViewModel.selectedProfile.collectAsState().value
 
-    if (isLoading) {
-        // Show a loading indicator or message while the profile is being fetched
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Color.LightGray),
-            contentAlignment = Alignment.Center
-        ) {
-            Text("Loading profile...", textAlign = TextAlign.Center)
-        }
-    }else if (profile != null){
+  Scaffold(
+      modifier = Modifier.testTag("profileScreen"),
+      content = { paddingValues ->
+        if (isLoading) {
+          // Show a loading indicator or message while the profile is being fetched
+          Box(
+              modifier = Modifier.fillMaxSize().background(Color.LightGray).testTag("loadingBox"),
+              contentAlignment = Alignment.Center) {
+                Text("Loading profile...", textAlign = TextAlign.Center)
+              }
+        } else if (profile != null) {
 
-        Scaffold(
-            modifier = Modifier.testTag("profileScreen"),
-            content = { paddingValues ->
-                Column(
-                    modifier = Modifier.fillMaxWidth().padding(paddingValues),
-                    horizontalAlignment = Alignment.CenterHorizontally) {
+          Column(
+              modifier = Modifier.fillMaxWidth().padding(paddingValues),
+              horizontalAlignment = Alignment.CenterHorizontally) {
 
-                    // 2 sections one for the profile image with overlay and
-                    // one for the information section
-                    ProfileHeader(profile, navigationActions, true) {
-                        navigationActions.navigateTo(Screen.PROFILE_EDIT)
-                    }
-                    InfoSection(profile, tagsViewModel)
-
+                // 2 sections one for the profile image with overlay and
+                // one for the information section
+                ProfileHeader(profile, navigationActions, true) {
+                  navigationActions.navigateTo(Screen.PROFILE_EDIT)
                 }
-            })
-    }
+                InfoSection(profile, tagsViewModel)
+              }
+        }
+      })
 }
