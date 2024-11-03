@@ -11,16 +11,16 @@ import kotlinx.coroutines.flow.StateFlow
 open class ProfilesViewModel(private val repository: ProfilesRepository) : ViewModel() {
 
   private val _profiles = MutableStateFlow<List<Profile>>(emptyList())
-  val profiles: StateFlow<List<Profile>> = _profiles
+  open val profiles: StateFlow<List<Profile>> = _profiles
 
   private val _filteredProfiles = MutableStateFlow<List<Profile>>(emptyList())
   val filteredProfiles: StateFlow<List<Profile>> = _filteredProfiles
 
   private val _selectedProfile = MutableStateFlow<Profile?>(null)
-  val selectedProfile: StateFlow<Profile?> = _selectedProfile
+  open val selectedProfile: StateFlow<Profile?> = _selectedProfile
 
   private val _loading = MutableStateFlow(false)
-  val loading: StateFlow<Boolean> = _loading
+  open val loading: StateFlow<Boolean> = _loading
 
   private val _error = MutableStateFlow<Exception?>(null)
   val error: StateFlow<Exception?> = _error
