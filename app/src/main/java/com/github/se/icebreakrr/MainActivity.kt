@@ -157,8 +157,16 @@ fun IcebreakrrApp() {
               onTokenChange = meetingRequestViewModel::onRemoteTokenChange,
               onSubmit = meetingRequestViewModel::onSubmitMeetingRequest)
         } else {
-          meetingRequestViewModel.sendMessage(false)
-          NotificationScreen(navigationActions, profileViewModel)
+            ChatScreen(
+                messageText = state.message,
+                onMessageSend = {
+                    meetingRequestViewModel.sendMessage(isBroadcast = false)
+                },
+                onMessageBroadcast = {
+                    meetingRequestViewModel.sendMessage(isBroadcast = true)
+                },
+                onMessageChange = meetingRequestViewModel::onMeetingRequestChange
+            )
         }
       }
     }

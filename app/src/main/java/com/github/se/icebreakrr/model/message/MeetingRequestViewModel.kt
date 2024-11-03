@@ -96,7 +96,7 @@ class MeetingRequestViewModel(
                 to = if (isBroadcast) null else meetingRequestState.targetToken,
                 notification =
                     NotificationBody(
-                        title = "Jan", body = "bien jouée mon sucre sucre en gimauve ! Reste plus que 53h de debug ;) "))
+                        title = "Jan", body = meetingRequestState.message))
         try {
           if (isBroadcast) {
               Log.d("MESSAGE", "BROADCAST SENT")
