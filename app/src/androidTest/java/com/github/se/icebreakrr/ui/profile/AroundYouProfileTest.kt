@@ -8,28 +8,49 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.github.se.icebreakrr.model.profile.MockProfileViewModel
+import com.github.se.icebreakrr.model.profile.Profile
+import com.github.se.icebreakrr.model.profile.getMockedProfiles
+import com.github.se.icebreakrr.model.tags.TagsRepository
+import com.github.se.icebreakrr.model.tags.TagsViewModel
 import com.github.se.icebreakrr.ui.navigation.NavigationActions
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.Mockito
 import org.mockito.Mockito.mock
 import org.mockito.kotlin.verify
 
 @RunWith(AndroidJUnit4::class)
 class AroundYouProfileTest {
   private lateinit var navigationActions: NavigationActions
+  private lateinit var fakeProfilesViewModel: MockProfileViewModel
+  private lateinit var tagsViewModel: TagsViewModel
+  private lateinit var mockTagsRepository: TagsRepository
 
   @get:Rule val composeTestRule = createComposeRule()
 
   @Before
   fun setUp() {
-    navigationActions = mock()
+    navigationActions = Mockito.mock(NavigationActions::class.java)
+    mockTagsRepository = Mockito.mock(TagsRepository::class.java)
+    mockTagsRepository = Mockito.mock(TagsRepository::class.java)
+
+    tagsViewModel = TagsViewModel(mockTagsRepository)
+
+    fakeProfilesViewModel = MockProfileViewModel()
   }
 
   @Test
   fun AroundYouProfileDisplayTagTest() {
-    composeTestRule.setContent { OtherProfileView(navigationActions) }
+    fakeProfilesViewModel.setLoading(false)
+    fakeProfilesViewModel.setSelectedProfile(Profile.getMockedProfiles()[0])
+
+    composeTestRule.setContent {
+      OtherProfileView(fakeProfilesViewModel, tagsViewModel, navigationActions, null)
+    }
+
     composeTestRule.onNodeWithTag("aroundYouProfileScreen").assertIsDisplayed()
     composeTestRule.onNodeWithTag("profilePicture").assertIsDisplayed()
     composeTestRule.onNodeWithTag("requestButton").assertIsDisplayed()
@@ -44,14 +65,25 @@ class AroundYouProfileTest {
 
   @Test
   fun AroundYouProfileGoBackButtonMessage() {
-    composeTestRule.setContent { OtherProfileView(navigationActions) }
+    fakeProfilesViewModel.setLoading(false)
+    fakeProfilesViewModel.setSelectedProfile(Profile.getMockedProfiles()[0])
+
+    composeTestRule.setContent {
+      OtherProfileView(fakeProfilesViewModel, tagsViewModel, navigationActions, null)
+    }
+
     composeTestRule.onNodeWithTag("goBackButton").performClick()
     verify(navigationActions).goBack()
   }
 
   @Test
   fun AroundYouProfileMessageTest() {
-    composeTestRule.setContent { OtherProfileView(navigationActions) }
+    fakeProfilesViewModel.setLoading(false)
+    fakeProfilesViewModel.setSelectedProfile(Profile.getMockedProfiles()[0])
+
+    composeTestRule.setContent {
+      OtherProfileView(fakeProfilesViewModel, tagsViewModel, navigationActions, null)
+    }
     composeTestRule.onNodeWithTag("requestButton").performClick()
 
     composeTestRule.onNodeWithTag("bluredBackground").assertIsDisplayed()
