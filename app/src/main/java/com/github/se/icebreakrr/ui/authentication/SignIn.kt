@@ -61,11 +61,9 @@ import com.google.firebase.Timestamp
 import com.google.firebase.auth.AuthResult
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.auth.auth
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
-import okhttp3.internal.wait
 
 /**
  * Composable function that displays the SignIn screen. This screen handles the user authentication
@@ -93,48 +91,46 @@ fun SignInScreen(profilesViewModel: ProfilesViewModel, navigationActions: Naviga
   // Define padding and spacing as percentages of the screen height
   val verticalPadding = (screenHeight * 0.2).dp // 20%
 
-
-    val coroutineScope = rememberCoroutineScope()
+  val coroutineScope = rememberCoroutineScope()
 
   val launcher =
       rememberFirebaseAuthLauncher(
           onAuthComplete = { result ->
-              user = result.user
-              user?.let { firebaseUser ->
-                  coroutineScope.launch {
+            user = result.user
+            user?.let { firebaseUser ->
+              coroutineScope.launch {
 
-                      // Checking if user already exists
-                      profilesViewModel.getProfileByUid(firebaseUser.uid)
+                // Checking if user already exists
+                profilesViewModel.getProfileByUid(firebaseUser.uid)
 
-                      // Wait until loading becomes false which means that we got the user
-                      profilesViewModel.loading.first { !it }
+                // Wait until loading becomes false which means that we got the user
+                profilesViewModel.loading.first { !it }
 
-                      // Check selectedProfile after loading completes
-                      val profile = profilesViewModel.selectedProfile.value
+                // Check selectedProfile after loading completes
+                val profile = profilesViewModel.selectedProfile.value
 
-                      //checking if profile already exists
-                      if (profile == null) { //if doesn't exist create new user
+                // checking if profile already exists
+                if (profile == null) { // if doesn't exist create new user
 
-                          val newProfile = Profile(
-                              uid = firebaseUser.uid,
-                              name = firebaseUser.displayName ?: "Unknown",
-                              gender = Gender.OTHER,
-                              birthDate = Timestamp.now(),
-                              catchPhrase = "",
-                              description = ""
-                          )
+                  val newProfile =
+                      Profile(
+                          uid = firebaseUser.uid,
+                          name = firebaseUser.displayName ?: "Unknown",
+                          gender = Gender.OTHER,
+                          birthDate = Timestamp.now(),
+                          catchPhrase = "",
+                          description = "")
 
-                          Log.i("SignIn", "Creating new user: ${newProfile.name}")
-                          profilesViewModel.addNewProfile(newProfile)
+                  Log.i("SignIn", "Creating new user: ${newProfile.name}")
+                  profilesViewModel.addNewProfile(newProfile)
+                } else { // user already exists
+                  Log.i("SignIn", "Profile exists: ${profile.name}")
+                }
 
-                      } else { // user already exists
-                          Log.i("SignIn", "Profile exists: ${profile.name}")
-                      }
-
-                      // Navigate to sign in screen after completion
-                      navigationActions.navigateTo(TopLevelDestinations.AROUND_YOU)
-                  }
+                // Navigate to sign in screen after completion
+                navigationActions.navigateTo(TopLevelDestinations.AROUND_YOU)
               }
+            }
           },
           onAuthError = { user = null })
 
