@@ -72,22 +72,22 @@ fun AroundYouScreen(
               LazyColumn(
                   contentPadding = PaddingValues(vertical = 16.dp),
                   verticalArrangement = Arrangement.spacedBy(16.dp),
-                  modifier = Modifier
-                      .fillMaxSize()
-                      .padding(horizontal = 8.dp)) {
+                  modifier = Modifier.fillMaxSize().padding(horizontal = 8.dp)) {
                     if (filteredProfiles.value.isNotEmpty()) {
                       items(filteredProfiles.value.size) { index ->
                         ProfileCard(
                             profile = filteredProfiles.value[index],
-                            onclick = { navigationActions.navigateTo(Screen.OTHER_PROFILE_VIEW + "?userId=${filteredProfiles.value[index].uid}") })
+                            onclick = {
+                              navigationActions.navigateTo(
+                                  Screen.OTHER_PROFILE_VIEW +
+                                      "?userId=${filteredProfiles.value[index].uid}")
+                            })
                       }
                     } else {
                       item {
                         Box(
                             contentAlignment = Alignment.Center,
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .testTag("emptyProfilePrompt")) {
+                            modifier = Modifier.fillMaxSize().testTag("emptyProfilePrompt")) {
                               Text(
                                   text = "There is no one around. Try moving!",
                                   fontSize = 20.sp,
@@ -136,9 +136,7 @@ fun PullToRefreshBox(
     contentAlignment: Alignment = Alignment.TopStart,
     indicator: @Composable BoxScope.() -> Unit = {
       Indicator(
-          modifier = Modifier
-              .align(Alignment.TopCenter)
-              .testTag("refreshIndicator"),
+          modifier = Modifier.align(Alignment.TopCenter).testTag("refreshIndicator"),
           isRefreshing = isRefreshing,
           state = state)
     },
