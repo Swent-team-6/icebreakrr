@@ -55,15 +55,15 @@ class MeetingRequestViewModel(
   }
 
   fun onRemoteTokenChange(newToken: String) {
-//    if (ourUserId != null) {
-//      profilesViewModel.getProfileByUid(ourUserId)
-//      val currentProfile = profilesViewModel.selectedProfile.value
-//      if (currentProfile != null) {
-//        val updatedProfile = currentProfile.copy(fcmToken = newToken)
-//        profilesViewModel.updateProfile(updatedProfile)
-//      }
-//    }
-      meetingRequestState = meetingRequestState.copy(targetToken = newToken)
+    //    if (ourUserId != null) {
+    //      profilesViewModel.getProfileByUid(ourUserId)
+    //      val currentProfile = profilesViewModel.selectedProfile.value
+    //      if (currentProfile != null) {
+    //        val updatedProfile = currentProfile.copy(fcmToken = newToken)
+    //        profilesViewModel.updateProfile(updatedProfile)
+    //      }
+    //    }
+    meetingRequestState = meetingRequestState.copy(targetToken = newToken)
   }
 
   fun onMeetingRequestChange(newMessage: String) {
@@ -88,33 +88,31 @@ class MeetingRequestViewModel(
 
   fun sendMessage(isBroadcast: Boolean) {
     Log.d("SENDING MESSAGE", meetingRequestState.targetToken)
-//      profilesViewModel.getProfileByUid(ourUserId)
-//      val userName = profilesViewModel.selectedProfile.value?.name
-      viewModelScope.launch {
-        val messageDto =
-            SendMessageDto(
-                to = if (isBroadcast) null else meetingRequestState.targetToken,
-                notification =
-                    NotificationBody(
-                        title = "Jan", body = meetingRequestState.message))
-        try {
-          if (isBroadcast) {
-              Log.d("MESSAGE", "BROADCAST SENT")
-            api.broadcast(messageDto)
-              Log.d("MESSAGE", "BROADCAST RETURNED")
-          } else {
-              Log.d("MESSAGE", "NOTIFICATION SENT")
-            api.sendMessage(messageDto)
-              Log.d("MESSAGE", "NOTIFICATION RETURNED")
-          }
-          meetingRequestState = meetingRequestState.copy(message = "", picture = null)
-        } catch (e: HttpException) {
-            Log.e("API ERROR", "HTTP exception: ${e.code()}", e)
-        } catch (e: IOException) {
-            Log.e("API ERROR", "Network error", e)
-        } catch (e: Exception) {
-            Log.e("API ERROR", "Unexpected error", e)
+    //      profilesViewModel.getProfileByUid(ourUserId)
+    //      val userName = profilesViewModel.selectedProfile.value?.name
+    viewModelScope.launch {
+      val messageDto =
+          SendMessageDto(
+              to = if (isBroadcast) null else meetingRequestState.targetToken,
+              notification = NotificationBody(title = "Jan", body = meetingRequestState.message))
+      try {
+        if (isBroadcast) {
+          Log.d("MESSAGE", "BROADCAST SENT")
+          api.broadcast(messageDto)
+          Log.d("MESSAGE", "BROADCAST RETURNED")
+        } else {
+          Log.d("MESSAGE", "NOTIFICATION SENT")
+          api.sendMessage(messageDto)
+          Log.d("MESSAGE", "NOTIFICATION RETURNED")
         }
+        meetingRequestState = meetingRequestState.copy(message = "", picture = null)
+      } catch (e: HttpException) {
+        Log.e("API ERROR", "HTTP exception: ${e.code()}", e)
+      } catch (e: IOException) {
+        Log.e("API ERROR", "Network error", e)
+      } catch (e: Exception) {
+        Log.e("API ERROR", "Unexpected error", e)
       }
+    }
   }
 }

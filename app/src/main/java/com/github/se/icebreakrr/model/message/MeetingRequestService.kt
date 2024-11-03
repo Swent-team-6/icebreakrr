@@ -3,7 +3,6 @@ package com.github.se.icebreakrr.model.message
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
-import android.os.Build
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import com.github.se.icebreakrr.R
@@ -36,21 +35,18 @@ class MeetingRequestService : FirebaseMessagingService() {
     val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
     // Create notification channel for Android 8.0 and above
-    val channel = NotificationChannel(
-      channelId,
-      "Channel name",
-      NotificationManager.IMPORTANCE_DEFAULT
-    ).apply {
-      description = "Channel description"
-    }
+    val channel =
+        NotificationChannel(channelId, "Channel name", NotificationManager.IMPORTANCE_DEFAULT)
+            .apply { description = "Channel description" }
     notificationManager.createNotificationChannel(channel)
 
-    val notificationBuilder = NotificationCompat.Builder(this, channelId)
-      .setSmallIcon(R.drawable.ic_launcher_foreground) // Replace with your app's icon
-      .setContentTitle(title)
-      .setContentText(message)
-      .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-      .setAutoCancel(true)
+    val notificationBuilder =
+        NotificationCompat.Builder(this, channelId)
+            .setSmallIcon(R.drawable.ic_launcher_foreground) // Replace with your app's icon
+            .setContentTitle(title)
+            .setContentText(message)
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .setAutoCancel(true)
 
     notificationManager.notify(0, notificationBuilder.build())
   }

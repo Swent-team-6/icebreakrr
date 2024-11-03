@@ -145,30 +145,24 @@ fun IcebreakrrApp() {
         startDestination = Screen.NOTIFICATIONS,
         route = Route.NOTIFICATIONS,
     ) {
-      composable(Screen.NOTIFICATIONS) { // Todo : this part is temporary, it ll be used for debugging
-        //         NotificationScreen(navigationActions, profileViewModel)
-        val state =
-            meetingRequestViewModel
-                .meetingRequestState
-        // purposes
-        if (state.isEnteringMessage) {
-          EnterTokenDialog(
-              token = state.targetToken,
-              onTokenChange = meetingRequestViewModel::onRemoteTokenChange,
-              onSubmit = meetingRequestViewModel::onSubmitMeetingRequest)
-        } else {
-            ChatScreen(
-                messageText = state.message,
-                onMessageSend = {
-                    meetingRequestViewModel.sendMessage(isBroadcast = false)
-                },
-                onMessageBroadcast = {
-                    meetingRequestViewModel.sendMessage(isBroadcast = true)
-                },
-                onMessageChange = meetingRequestViewModel::onMeetingRequestChange
-            )
-        }
-      }
+      composable(
+          Screen.NOTIFICATIONS) { // Todo : this part is temporary, it ll be used for debugging
+            //         NotificationScreen(navigationActions, profileViewModel)
+            val state = meetingRequestViewModel.meetingRequestState
+            // purposes
+            if (state.isEnteringMessage) {
+              EnterTokenDialog(
+                  token = state.targetToken,
+                  onTokenChange = meetingRequestViewModel::onRemoteTokenChange,
+                  onSubmit = meetingRequestViewModel::onSubmitMeetingRequest)
+            } else {
+              ChatScreen(
+                  messageText = state.message,
+                  onMessageSend = { meetingRequestViewModel.sendMessage(isBroadcast = false) },
+                  onMessageBroadcast = { meetingRequestViewModel.sendMessage(isBroadcast = true) },
+                  onMessageChange = meetingRequestViewModel::onMeetingRequestChange)
+            }
+          }
     }
 
     navigation(
