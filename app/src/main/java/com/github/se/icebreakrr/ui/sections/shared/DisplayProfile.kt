@@ -1,6 +1,5 @@
 package com.github.se.icebreakrr.ui.sections.shared
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -54,17 +53,16 @@ import com.github.se.icebreakrr.ui.tags.TagStyle
 @Composable
 fun InfoSection(profile: Profile, tagsViewModel: TagsViewModel) {
 
-    val scrollState = rememberScrollState()
-    val userTags = profile.tags.map { tagString ->
-        Pair(tagString, tagsViewModel.tagToColor(tagString))
-    }
+  val scrollState = rememberScrollState()
+  val userTags =
+      profile.tags.map { tagString -> Pair(tagString, tagsViewModel.tagToColor(tagString)) }
 
-    Column(
-        modifier =
-        Modifier.fillMaxWidth()
-            .padding(16.dp)
-            .verticalScroll(scrollState)
-            .testTag("infoSection")) {
+  Column(
+      modifier =
+          Modifier.fillMaxWidth()
+              .padding(16.dp)
+              .verticalScroll(scrollState)
+              .testTag("infoSection")) {
         // Catchphrase Section
         Spacer(modifier = Modifier.height(12.dp))
         ProfileCatchPhrase(profile.catchPhrase)
@@ -76,7 +74,7 @@ fun InfoSection(profile: Profile, tagsViewModel: TagsViewModel) {
         // Description Section
         Spacer(modifier = Modifier.height(16.dp))
         ProfileDescription(profile.description)
-    }
+      }
 }
 
 /**
@@ -86,84 +84,89 @@ fun InfoSection(profile: Profile, tagsViewModel: TagsViewModel) {
  * @param navigationActions Actions to navigate between screens.
  */
 @Composable
-fun ProfileHeader(profile: Profile, navigationActions: NavigationActions, myProfile: Boolean, onEditClick: () -> Unit) {
-    Box(
-        modifier =
-        Modifier.fillMaxWidth() // Make the image take full width
-            .aspectRatio(1f) // Keep the aspect ratio 1:1 (height == width) => a square
-            .background(Color.LightGray)
-            .testTag("profileHeader")) {
+fun ProfileHeader(
+    profile: Profile,
+    navigationActions: NavigationActions,
+    myProfile: Boolean,
+    onEditClick: () -> Unit
+) {
+  Box(
+      modifier =
+          Modifier.fillMaxWidth() // Make the image take full width
+              .aspectRatio(1f) // Keep the aspect ratio 1:1 (height == width) => a square
+              .background(Color.LightGray)
+              .testTag("profileHeader")) {
 
         // Profile image
         AsyncImage(
             model = profile.profilePictureUrl,
             contentDescription = "Profile Image",
             contentScale = ContentScale.Crop,
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Color.LightGray, CircleShape)
-                .testTag("profilePicture"),
+            modifier =
+                Modifier.fillMaxSize()
+                    .background(Color.LightGray, CircleShape)
+                    .testTag("profilePicture"),
             placeholder = painterResource(id = R.drawable.nopp), // Default image during loading
-            error = painterResource(id = R.drawable.nopp)        // Fallback image if URL fails
-        )
+            error = painterResource(id = R.drawable.nopp) // Fallback image if URL fails
+            )
 
         // Back button
         IconButton(
             onClick = { navigationActions.goBack() },
             modifier =
-            Modifier.align(Alignment.TopStart) // Align to the top start (top-left corner)
-                .padding(16.dp)
-                .testTag("goBackButton")) {
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                contentDescription = "Go Back",
-                tint = Color.White)
-        }
+                Modifier.align(Alignment.TopStart) // Align to the top start (top-left corner)
+                    .padding(16.dp)
+                    .testTag("goBackButton")) {
+              Icon(
+                  imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                  contentDescription = "Go Back",
+                  tint = Color.White)
+            }
 
         // Overlay with username and edit button
         Row(
             modifier =
-            Modifier.align(Alignment.BottomStart) // Aligns this content to the bottom left
-                .fillMaxWidth()
-                .padding(16.dp),
+                Modifier.align(Alignment.BottomStart) // Aligns this content to the bottom left
+                    .fillMaxWidth()
+                    .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween) {
 
-            // Username
-            Text(
-                text = profile.name,
-                fontSize = 24.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color.White,
-                modifier = Modifier.testTag("username"))
+              // Username
+              Text(
+                  text = profile.name,
+                  fontSize = 24.sp,
+                  fontWeight = FontWeight.Bold,
+                  color = Color.White,
+                  modifier = Modifier.testTag("username"))
 
-            if (myProfile) {
+              if (myProfile) {
                 IconButton(
                     onClick = { onEditClick() },
                     modifier =
-                    Modifier.background(Color.White, CircleShape)
-                        .padding(4.dp)
-                        .testTag("editButton")) {
-                    Icon(
-                        imageVector = Icons.Filled.Create,
-                        contentDescription = "Edit Profile",
-                        tint = Color.Gray)
-                }
-            } else {
+                        Modifier.background(Color.White, CircleShape)
+                            .padding(4.dp)
+                            .testTag("editButton")) {
+                      Icon(
+                          imageVector = Icons.Filled.Create,
+                          contentDescription = "Edit Profile",
+                          tint = Color.Gray)
+                    }
+              } else {
                 IconButton(
                     onClick = { onEditClick() },
                     modifier =
-                    Modifier.background(Color.White, CircleShape)
-                        .padding(4.dp)
-                        .testTag("requestButton")) {
-                    Icon(
-                        imageVector = Icons.Filled.MailOutline,
-                        contentDescription = "send request",
-                        tint = Color.Gray)
-                }
+                        Modifier.background(Color.White, CircleShape)
+                            .padding(4.dp)
+                            .testTag("requestButton")) {
+                      Icon(
+                          imageVector = Icons.Filled.MailOutline,
+                          contentDescription = "send request",
+                          tint = Color.Gray)
+                    }
+              }
             }
-        }
-    }
+      }
 }
 
 /**
