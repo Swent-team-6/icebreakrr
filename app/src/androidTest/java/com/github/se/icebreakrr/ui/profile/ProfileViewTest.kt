@@ -1,3 +1,5 @@
+package com.github.se.icebreakrr.ui.profile
+
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.assertTextEquals

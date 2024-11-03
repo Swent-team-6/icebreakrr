@@ -19,11 +19,10 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito
-import org.mockito.Mockito.mock
 import org.mockito.kotlin.verify
 
 @RunWith(AndroidJUnit4::class)
-class AroundYouProfileTest {
+class OtherProfileViewTest {
   private lateinit var navigationActions: NavigationActions
   private lateinit var fakeProfilesViewModel: MockProfileViewModel
   private lateinit var tagsViewModel: TagsViewModel
@@ -43,7 +42,7 @@ class AroundYouProfileTest {
   }
 
   @Test
-  fun AroundYouProfileDisplayTagTest() {
+  fun OtherProfileDisplayTagTest() {
     fakeProfilesViewModel.setLoading(false)
     fakeProfilesViewModel.setSelectedProfile(Profile.getMockedProfiles()[0])
 
@@ -64,7 +63,7 @@ class AroundYouProfileTest {
   }
 
   @Test
-  fun AroundYouProfileGoBackButtonMessage() {
+  fun OtherProfileGoBackButtonMessage() {
     fakeProfilesViewModel.setLoading(false)
     fakeProfilesViewModel.setSelectedProfile(Profile.getMockedProfiles()[0])
 
@@ -77,7 +76,7 @@ class AroundYouProfileTest {
   }
 
   @Test
-  fun AroundYouProfileMessageTest() {
+  fun OtherProfileMessageTest() {
     fakeProfilesViewModel.setLoading(false)
     fakeProfilesViewModel.setSelectedProfile(Profile.getMockedProfiles()[0])
 
