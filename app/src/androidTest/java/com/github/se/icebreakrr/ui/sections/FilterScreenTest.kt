@@ -16,9 +16,12 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
 import com.github.se.icebreakrr.model.filter.FilterViewModel
+import com.github.se.icebreakrr.model.profile.ProfilePicRepositoryStorage
 import com.github.se.icebreakrr.model.profile.ProfilesRepository
 import com.github.se.icebreakrr.model.profile.ProfilesViewModel
 import com.github.se.icebreakrr.ui.navigation.NavigationActions
+import com.google.firebase.Firebase
+import com.google.firebase.storage.storage
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Before
@@ -41,7 +44,8 @@ class FilterScreenTest {
   fun setUp() {
     navigationActionsMock = mock()
     profilesRepositoryMock = mock()
-    profilesViewModelMock = ProfilesViewModel(profilesRepositoryMock)
+    profilesViewModelMock =
+        ProfilesViewModel(profilesRepositoryMock, ProfilePicRepositoryStorage(Firebase.storage))
     filterViewModel = FilterViewModel()
   }
 

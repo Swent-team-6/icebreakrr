@@ -10,10 +10,13 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.github.se.icebreakrr.MainActivity
 import com.github.se.icebreakrr.R
 import com.github.se.icebreakrr.mock.MockProfileViewModel
+import com.github.se.icebreakrr.model.profile.ProfilePicRepositoryStorage
 import com.github.se.icebreakrr.model.profile.ProfilesRepository
 import com.github.se.icebreakrr.model.profile.ProfilesViewModel
 import com.github.se.icebreakrr.model.tags.TagsRepository
 import com.github.se.icebreakrr.model.tags.TagsViewModel
+import com.google.firebase.Firebase
+import com.google.firebase.storage.storage
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -42,7 +45,8 @@ class NavigationTest {
 
     tagsViewModel = TagsViewModel(mockTagsRepository)
 
-    profilesViewModel = ProfilesViewModel(mockProfilesRepository)
+    profilesViewModel =
+        ProfilesViewModel(mockProfilesRepository, ProfilePicRepositoryStorage(Firebase.storage))
 
     // Creating a custom flag to disable the sign in to correctly test navigation
     val intent =

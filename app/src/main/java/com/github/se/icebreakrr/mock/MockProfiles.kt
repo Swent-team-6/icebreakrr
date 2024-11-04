@@ -4,10 +4,13 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.github.se.icebreakrr.model.profile.Gender
 import com.github.se.icebreakrr.model.profile.Profile
+import com.github.se.icebreakrr.model.profile.ProfilePicRepositoryStorage
 import com.github.se.icebreakrr.model.profile.ProfilesRepository
 import com.github.se.icebreakrr.model.profile.ProfilesViewModel
+import com.google.firebase.Firebase
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.GeoPoint
+import com.google.firebase.storage.storage
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -72,7 +75,8 @@ open class MockProfileRepository : ProfilesRepository {
   }
 }
 
-open class MockProfileViewModel : ProfilesViewModel(MockProfileRepository()) {
+open class MockProfileViewModel :
+    ProfilesViewModel(MockProfileRepository(), ProfilePicRepositoryStorage(Firebase.storage)) {
   private val _profiles = MutableStateFlow<List<Profile>>(emptyList())
   override val profiles: StateFlow<List<Profile>> = _profiles.asStateFlow()
 

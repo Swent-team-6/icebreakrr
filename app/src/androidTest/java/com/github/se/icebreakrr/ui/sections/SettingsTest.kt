@@ -6,11 +6,14 @@ import androidx.compose.ui.test.assertIsOn
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
+import com.github.se.icebreakrr.model.profile.ProfilePicRepositoryStorage
 import com.github.se.icebreakrr.model.profile.ProfilesRepository
 import com.github.se.icebreakrr.model.profile.ProfilesViewModel
 import com.github.se.icebreakrr.ui.navigation.NavigationActions
 import com.github.se.icebreakrr.ui.navigation.Route
 import com.github.se.icebreakrr.ui.navigation.Screen
+import com.google.firebase.Firebase
+import com.google.firebase.storage.storage
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -31,7 +34,8 @@ class SettingsTest {
   fun setUp() {
     navigationActionsMock = mock()
     mockProfilesRepository = Mockito.mock(ProfilesRepository::class.java)
-    profilesViewModel = ProfilesViewModel(mockProfilesRepository)
+    profilesViewModel =
+        ProfilesViewModel(mockProfilesRepository, ProfilePicRepositoryStorage(Firebase.storage))
 
     `when`(navigationActionsMock.currentRoute()).thenReturn(Route.SETTINGS)
   }
