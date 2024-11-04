@@ -6,6 +6,7 @@ import com.google.android.gms.tasks.Tasks
 import com.google.firebase.FirebaseApp
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
+import com.google.firebase.storage.UploadTask
 import junit.framework.TestCase.fail
 import org.junit.Before
 import org.junit.Test
@@ -42,22 +43,24 @@ class ProfilePicRepositoryStorageTest {
     `when`(mockStorageReference.child(anyString())).thenReturn(mockStorageReference)
   }
 
-  //      @Test
-  //      fun uploadProfilePicture_shouldUploadImage() {
-  //          `when`(mockStorageReference.putBytes(any())).thenReturn(mock(UploadTask::class.java))
-  //          `when`(mockStorageReference.downloadUrl).thenReturn(Tasks.forResult(mock()))
-  //
-  //          profilePicRepositoryStorage.uploadProfilePicture(
-  //              userId = userId,
-  //              imageData = imageData,
-  //              onSuccess = { url -> assert(url != null) },
-  //              onFailure = { fail("Failure callback should not be called") }
-  //          )
-  //
-  //          shadowOf(Looper.getMainLooper()).idle()
-  //
-  //          verify(mockStorageReference).putBytes(imageData)
-  //      }
+  @Test
+  fun uploadProfilePicture_shouldUploadImage() {
+    val mockUploadTask = mock(UploadTask::class.java)
+    `when`(mockStorageReference.putBytes(any())).thenReturn(mockUploadTask)
+    `when`(mockUploadTask.addOnSuccessListener(any())).thenReturn(mockUploadTask)
+    `when`(mockUploadTask.addOnFailureListener(any())).thenReturn(mockUploadTask)
+    `when`(mockStorageReference.downloadUrl).thenReturn(Tasks.forResult(mock()))
+
+    profilePicRepositoryStorage.uploadProfilePicture(
+        userId = userId,
+        imageData = imageData,
+        onSuccess = { url -> assert(url != null) },
+        onFailure = { fail("Failure callback should not be called") })
+
+    shadowOf(Looper.getMainLooper()).idle()
+
+    verify(mockStorageReference).putBytes(imageData)
+  }
 
   @Test
   fun uploadProfilePicture_shouldCallFailureCallback_onInvalidImage() {
