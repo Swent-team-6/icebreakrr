@@ -9,7 +9,7 @@ import androidx.test.core.app.ActivityScenario
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.github.se.icebreakrr.MainActivity
 import com.github.se.icebreakrr.R
-import com.github.se.icebreakrr.model.profile.MockProfileViewModel
+import com.github.se.icebreakrr.mock.MockProfileViewModel
 import com.github.se.icebreakrr.model.profile.ProfilesRepository
 import com.github.se.icebreakrr.model.profile.ProfilesViewModel
 import com.github.se.icebreakrr.model.tags.TagsRepository

@@ -37,16 +37,16 @@ class MainActivity : ComponentActivity() {
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
+
     auth = FirebaseAuth.getInstance()
+
     // Initialize Firebase Auth
     FirebaseApp.initializeApp(this)
-    auth = FirebaseAuth.getInstance()
     auth.currentUser?.let {
       // Sign out the user if they are already signed in
       // This is useful for testing purposes
       auth.signOut()
     }
-    FirebaseAuth.getInstance()
 
     // Retrieve the testing flag from the Intent
     val isTesting = intent?.getBooleanExtra("IS_TESTING", false) ?: false
@@ -74,7 +74,7 @@ class MainActivity : ComponentActivity() {
 fun IcebreakrrApp() {
   val navController = rememberNavController()
   val navigationActions = NavigationActions(navController)
-  val profilesViewModel: ProfilesViewModel = viewModel(factory = ProfilesViewModel.Factory)
+  val profileViewModel: ProfilesViewModel = viewModel(factory = ProfilesViewModel.Factory)
   val tagsViewModel: TagsViewModel = viewModel(factory = TagsViewModel.Factory)
   val filterViewModel: FilterViewModel = viewModel(factory = FilterViewModel.Factory)
 
@@ -83,7 +83,7 @@ fun IcebreakrrApp() {
         startDestination = Screen.AUTH,
         route = Route.AUTH,
     ) {
-      composable(Screen.AUTH) { SignInScreen(profilesViewModel, navigationActions) }
+      composable(Screen.AUTH) { SignInScreen(profileViewModel, navigationActions) }
     }
 
     navigation(
@@ -91,10 +91,10 @@ fun IcebreakrrApp() {
         route = Route.AROUND_YOU,
     ) {
       composable(Screen.AROUND_YOU) {
-        AroundYouScreen(navigationActions, profilesViewModel, tagsViewModel, filterViewModel)
+        AroundYouScreen(navigationActions, profileViewModel, tagsViewModel, filterViewModel)
       }
       composable(Screen.OTHER_PROFILE_VIEW + "?userId={userId}") { navBackStackEntry ->
-        OtherProfileView(profilesViewModel, tagsViewModel, navigationActions, navBackStackEntry)
+        OtherProfileView(profileViewModel, tagsViewModel, navigationActions, navBackStackEntry)
       }
     }
 
@@ -102,17 +102,15 @@ fun IcebreakrrApp() {
         startDestination = Screen.SETTINGS,
         route = Route.SETTINGS,
     ) {
-      composable(Screen.SETTINGS) { SettingsScreen(profilesViewModel, navigationActions) }
-      composable(Screen.PROFILE) {
-        ProfileView(profilesViewModel, tagsViewModel, navigationActions)
-      }
+      composable(Screen.SETTINGS) { SettingsScreen(profileViewModel, navigationActions) }
+      composable(Screen.PROFILE) { ProfileView(profileViewModel, tagsViewModel, navigationActions) }
     }
 
     navigation(
         startDestination = Screen.NOTIFICATIONS,
         route = Route.NOTIFICATIONS,
     ) {
-      composable(Screen.NOTIFICATIONS) { NotificationScreen(navigationActions, profilesViewModel) }
+      composable(Screen.NOTIFICATIONS) { NotificationScreen(navigationActions, profileViewModel) }
     }
 
     navigation(
@@ -127,7 +125,7 @@ fun IcebreakrrApp() {
         route = Route.FILTER,
     ) {
       composable(Screen.FILTER) {
-        FilterScreen(navigationActions, tagsViewModel, filterViewModel, profilesViewModel)
+        FilterScreen(navigationActions, tagsViewModel, filterViewModel, profileViewModel)
       }
     }
   }

@@ -1,7 +1,11 @@
-package com.github.se.icebreakrr.model.profile
+package com.github.se.icebreakrr.mock
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import com.github.se.icebreakrr.model.profile.Gender
+import com.github.se.icebreakrr.model.profile.Profile
+import com.github.se.icebreakrr.model.profile.ProfilesRepository
+import com.github.se.icebreakrr.model.profile.ProfilesViewModel
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.GeoPoint
 import kotlinx.coroutines.flow.MutableStateFlow

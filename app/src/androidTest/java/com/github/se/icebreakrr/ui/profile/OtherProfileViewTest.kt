@@ -8,9 +8,9 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.github.se.icebreakrr.model.profile.MockProfileViewModel
+import com.github.se.icebreakrr.mock.MockProfileViewModel
+import com.github.se.icebreakrr.mock.getMockedProfiles
 import com.github.se.icebreakrr.model.profile.Profile
-import com.github.se.icebreakrr.model.profile.getMockedProfiles
 import com.github.se.icebreakrr.model.tags.TagsRepository
 import com.github.se.icebreakrr.model.tags.TagsViewModel
 import com.github.se.icebreakrr.ui.navigation.NavigationActions

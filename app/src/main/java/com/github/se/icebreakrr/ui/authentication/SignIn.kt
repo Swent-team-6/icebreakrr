@@ -5,7 +5,6 @@ package com.github.se.icebreakrr.ui.authentication
 // The code has been highly inspired by the bootcamp examples and modified for this project.
 
 import android.content.Intent
-import android.util.Log
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResult
@@ -121,10 +120,7 @@ fun SignInScreen(profilesViewModel: ProfilesViewModel, navigationActions: Naviga
                           catchPhrase = "",
                           description = "")
 
-                  Log.i("SignIn", "Creating new user: ${newProfile.name}")
                   profilesViewModel.addNewProfile(newProfile)
-                } else { // user already exists
-                  Log.i("SignIn", "Profile exists: ${profile.name}")
                 }
 
                 // Navigate to sign in screen after completion
