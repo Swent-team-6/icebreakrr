@@ -37,16 +37,16 @@ class MainActivity : ComponentActivity() {
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
+
     auth = FirebaseAuth.getInstance()
+
     // Initialize Firebase Auth
     FirebaseApp.initializeApp(this)
-    auth = FirebaseAuth.getInstance()
     auth.currentUser?.let {
       // Sign out the user if they are already signed in
       // This is useful for testing purposes
       auth.signOut()
     }
-    FirebaseAuth.getInstance()
 
     // Retrieve the testing flag from the Intent
     val isTesting = intent?.getBooleanExtra("IS_TESTING", false) ?: false
@@ -83,7 +83,7 @@ fun IcebreakrrApp() {
         startDestination = Screen.AUTH,
         route = Route.AUTH,
     ) {
-      composable(Screen.AUTH) { SignInScreen(navigationActions) }
+      composable(Screen.AUTH) { SignInScreen(profileViewModel, navigationActions) }
     }
 
     navigation(
@@ -93,15 +93,17 @@ fun IcebreakrrApp() {
       composable(Screen.AROUND_YOU) {
         AroundYouScreen(navigationActions, profileViewModel, tagsViewModel, filterViewModel)
       }
-      composable(Screen.OTHER_PROFILE_VIEW) { OtherProfileView(navigationActions) }
+      composable(Screen.OTHER_PROFILE_VIEW + "?userId={userId}") { navBackStackEntry ->
+        OtherProfileView(profileViewModel, tagsViewModel, navigationActions, navBackStackEntry)
+      }
     }
 
     navigation(
         startDestination = Screen.SETTINGS,
         route = Route.SETTINGS,
     ) {
-      composable(Screen.SETTINGS) { SettingsScreen(navigationActions) }
-      composable(Screen.PROFILE) { ProfileView(navigationActions) }
+      composable(Screen.SETTINGS) { SettingsScreen(profileViewModel, navigationActions) }
+      composable(Screen.PROFILE) { ProfileView(profileViewModel, tagsViewModel, navigationActions) }
     }
 
     navigation(

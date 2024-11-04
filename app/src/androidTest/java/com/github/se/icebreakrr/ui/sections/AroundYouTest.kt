@@ -89,7 +89,7 @@ class AroundYouScreenTest {
 
     composeTestRule.onAllNodesWithTag("profileCard").onFirst().assertIsDisplayed()
     composeTestRule.onAllNodesWithTag("profileCard").onFirst().performClick()
-    verify(navigationActions).navigateTo(screen = Screen.OTHER_PROFILE_VIEW)
+    verify(navigationActions).navigateTo(screen = Screen.OTHER_PROFILE_VIEW + "?userId=1")
   }
 
   @Test

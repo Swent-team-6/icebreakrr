@@ -47,15 +47,20 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.github.se.icebreakrr.R
 import com.github.se.icebreakrr.config.LocalIsTesting
+import com.github.se.icebreakrr.model.profile.Gender
+import com.github.se.icebreakrr.model.profile.Profile
+import com.github.se.icebreakrr.model.profile.ProfilesViewModel
 import com.github.se.icebreakrr.ui.navigation.NavigationActions
 import com.github.se.icebreakrr.ui.navigation.TopLevelDestinations
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
 import com.google.firebase.Firebase
+import com.google.firebase.Timestamp
 import com.google.firebase.auth.AuthResult
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.auth.auth
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
@@ -66,7 +71,7 @@ import kotlinx.coroutines.tasks.await
  * @param navigationActions A class that handles the navigation between screens.
  */
 @Composable
-fun SignInScreen(navigationActions: NavigationActions) {
+fun SignInScreen(profilesViewModel: ProfilesViewModel, navigationActions: NavigationActions) {
 
   // State to hold the current Firebase user
   var user by remember { mutableStateOf(Firebase.auth.currentUser) }
@@ -85,11 +90,43 @@ fun SignInScreen(navigationActions: NavigationActions) {
   // Define padding and spacing as percentages of the screen height
   val verticalPadding = (screenHeight * 0.2).dp // 20%
 
+  val coroutineScope = rememberCoroutineScope()
+
   val launcher =
       rememberFirebaseAuthLauncher(
           onAuthComplete = { result ->
             user = result.user
-            navigationActions.navigateTo(TopLevelDestinations.AROUND_YOU)
+            user?.let { firebaseUser ->
+              coroutineScope.launch {
+
+                // Checking if user already exists
+                profilesViewModel.getProfileByUid(firebaseUser.uid)
+
+                // Wait until loading becomes false which means that we got the user
+                profilesViewModel.loading.first { !it }
+
+                // Check selectedProfile after loading completes
+                val profile = profilesViewModel.selectedProfile.value
+
+                // checking if profile already exists
+                if (profile == null) { // if doesn't exist create new user
+
+                  val newProfile =
+                      Profile(
+                          uid = firebaseUser.uid,
+                          name = firebaseUser.displayName ?: "Unknown",
+                          gender = Gender.OTHER,
+                          birthDate = Timestamp.now(),
+                          catchPhrase = "",
+                          description = "")
+
+                  profilesViewModel.addNewProfile(newProfile)
+                }
+
+                // Navigate to sign in screen after completion
+                navigationActions.navigateTo(TopLevelDestinations.AROUND_YOU)
+              }
+            }
           },
           onAuthError = { user = null })
 

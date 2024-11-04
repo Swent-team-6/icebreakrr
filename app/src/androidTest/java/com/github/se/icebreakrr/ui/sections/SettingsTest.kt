@@ -6,12 +6,15 @@ import androidx.compose.ui.test.assertIsOn
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
+import com.github.se.icebreakrr.model.profile.ProfilesRepository
+import com.github.se.icebreakrr.model.profile.ProfilesViewModel
 import com.github.se.icebreakrr.ui.navigation.NavigationActions
 import com.github.se.icebreakrr.ui.navigation.Route
 import com.github.se.icebreakrr.ui.navigation.Screen
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import org.mockito.Mockito
 import org.mockito.Mockito.`when`
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
@@ -19,12 +22,16 @@ import org.mockito.kotlin.verify
 // This File was written with the help of Cursor
 class SettingsTest {
   private lateinit var navigationActionsMock: NavigationActions
+  private lateinit var profilesViewModel: ProfilesViewModel
+  private lateinit var mockProfilesRepository: ProfilesRepository
 
   @get:Rule val composeTestRule = createComposeRule()
 
   @Before
   fun setUp() {
     navigationActionsMock = mock()
+    mockProfilesRepository = Mockito.mock(ProfilesRepository::class.java)
+    profilesViewModel = ProfilesViewModel(mockProfilesRepository)
 
     `when`(navigationActionsMock.currentRoute()).thenReturn(Route.SETTINGS)
   }
@@ -33,7 +40,7 @@ class SettingsTest {
   fun testProfileSettingsScreenDisplaysCorrectly() {
 
     // Set the content to the ProfileSettingsScreen
-    composeTestRule.setContent { SettingsScreen(navigationActionsMock) }
+    composeTestRule.setContent { SettingsScreen(profilesViewModel, navigationActionsMock) }
 
     // Assert that the top bar is displayed
     composeTestRule.onNodeWithTag("topBar").assertIsDisplayed()
@@ -56,7 +63,7 @@ class SettingsTest {
 
   @Test
   fun testNavigationActionsOnProfileCardClick() {
-    composeTestRule.setContent { SettingsScreen(navigationActionsMock) }
+    composeTestRule.setContent { SettingsScreen(profilesViewModel, navigationActionsMock) }
 
     // Click the profile card
     composeTestRule.onNodeWithTag("profileCard").performClick()
@@ -67,7 +74,7 @@ class SettingsTest {
 
   @Test
   fun testToggleSwitchStateChange() {
-    composeTestRule.setContent { SettingsScreen(navigationActionsMock) }
+    composeTestRule.setContent { SettingsScreen(profilesViewModel, navigationActionsMock) }
 
     // Initial state: Verify that the switch is initially off (unchecked)
     composeTestRule.onNodeWithTag("switchToggle Location").assertIsOff()
