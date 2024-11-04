@@ -1,6 +1,5 @@
 package com.github.se.icebreakrr.ui.sections.shared
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -35,7 +34,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
 import com.github.se.icebreakrr.R
+import com.github.se.icebreakrr.model.profile.Profile
+import com.github.se.icebreakrr.model.tags.TagsViewModel
 import com.github.se.icebreakrr.ui.navigation.NavigationActions
 import com.github.se.icebreakrr.ui.tags.RowOfTags
 import com.github.se.icebreakrr.ui.tags.TagStyle
@@ -49,9 +51,11 @@ import com.github.se.icebreakrr.ui.tags.TagStyle
  * @param description The user's detailed description.
  */
 @Composable
-fun InfoSection(catchPhrase: String, listOfTags: List<Pair<String, Color>>, description: String) {
+fun InfoSection(profile: Profile, tagsViewModel: TagsViewModel) {
 
   val scrollState = rememberScrollState()
+  val userTags =
+      profile.tags.map { tagString -> Pair(tagString, tagsViewModel.tagToColor(tagString)) }
 
   Column(
       modifier =
@@ -61,15 +65,15 @@ fun InfoSection(catchPhrase: String, listOfTags: List<Pair<String, Color>>, desc
               .testTag("infoSection")) {
         // Catchphrase Section
         Spacer(modifier = Modifier.height(12.dp))
-        ProfileCatchPhrase(catchPhrase)
+        ProfileCatchPhrase(profile.catchPhrase)
 
         // Tags Section
         Spacer(modifier = Modifier.height(8.dp))
-        TagsSection(listOfTags)
+        TagsSection(userTags)
 
         // Description Section
         Spacer(modifier = Modifier.height(16.dp))
-        ProfileDescription(description)
+        ProfileDescription(profile.description)
       }
 }
 
@@ -78,13 +82,10 @@ fun InfoSection(catchPhrase: String, listOfTags: List<Pair<String, Color>>, desc
  * also shows the username in an overlay at the bottom of the profile image.
  *
  * @param navigationActions Actions to navigate between screens.
- * @param myProfile : set to true if it is used to see our profile and false if it is used to see
- *   someone else's profile
- * @param onEditClick : function called when you click on the edit button (if you are on your
- *   profile) or on the message button (if you are on someone else's profile)
  */
 @Composable
 fun ProfileHeader(
+    profile: Profile,
     navigationActions: NavigationActions,
     myProfile: Boolean,
     onEditClick: () -> Unit
@@ -95,12 +96,19 @@ fun ProfileHeader(
               .aspectRatio(1f) // Keep the aspect ratio 1:1 (height == width) => a square
               .background(Color.LightGray)
               .testTag("profileHeader")) {
+
         // Profile image
-        Image(
-            painter = painterResource(id = R.drawable.turtle),
+        AsyncImage(
+            model = profile.profilePictureUrl,
             contentDescription = "Profile Image",
             contentScale = ContentScale.Crop,
-            modifier = Modifier.fillMaxSize().testTag("profilePicture"))
+            modifier =
+                Modifier.fillMaxSize()
+                    .background(Color.LightGray, CircleShape)
+                    .testTag("profilePicture"),
+            placeholder = painterResource(id = R.drawable.nopp), // Default image during loading
+            error = painterResource(id = R.drawable.nopp) // Fallback image if URL fails
+            )
 
         // Back button
         IconButton(
@@ -126,13 +134,12 @@ fun ProfileHeader(
 
               // Username
               Text(
-                  text = "John Do",
+                  text = profile.name,
                   fontSize = 24.sp,
                   fontWeight = FontWeight.Bold,
                   color = Color.White,
                   modifier = Modifier.testTag("username"))
 
-              // Edit Button or message button
               if (myProfile) {
                 IconButton(
                     onClick = { onEditClick() },

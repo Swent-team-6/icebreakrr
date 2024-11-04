@@ -1,18 +1,90 @@
-package com.github.se.icebreakrr.model.profile
+package com.github.se.icebreakrr.mock
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import com.github.se.icebreakrr.model.profile.Gender
+import com.github.se.icebreakrr.model.profile.Profile
+import com.github.se.icebreakrr.model.profile.ProfilePicRepositoryStorage
+import com.github.se.icebreakrr.model.profile.ProfilesRepository
+import com.github.se.icebreakrr.model.profile.ProfilesViewModel
+import com.google.firebase.Firebase
 import com.google.firebase.Timestamp
+import com.google.firebase.firestore.GeoPoint
+import com.google.firebase.storage.storage
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
-open class MockProfileViewModel : ViewModel() {
+open class MockProfileRepository : ProfilesRepository {
+  // Returns a hardcoded fake profile ID
+  override fun getNewProfileId(): String {
+    return "fake-profile-id"
+  }
+
+  // Calls onSuccess immediately for initialization
+  override fun init(onSuccess: () -> Unit) {
+    onSuccess()
+  }
+
+  // Returns a predefined list of profiles for getProfilesInRadius
+  override fun getProfilesInRadius(
+      center: GeoPoint,
+      radiusInMeters: Double,
+      onSuccess: (List<Profile>) -> Unit,
+      onFailure: (Exception) -> Unit
+  ) {
+    // Return a predefined list of profiles
+    onSuccess(Profile.getMockedProfiles())
+  }
+
+  // Simulates successful profile addition by calling onSuccess
+  override fun addNewProfile(
+      profile: Profile,
+      onSuccess: () -> Unit,
+      onFailure: (Exception) -> Unit
+  ) {
+    onSuccess()
+  }
+
+  // Simulates successful profile update by calling onSuccess
+  override fun updateProfile(
+      profile: Profile,
+      onSuccess: () -> Unit,
+      onFailure: (Exception) -> Unit
+  ) {
+    onSuccess()
+  }
+
+  // Returns a specific profile by UID from mocked profiles or null if not found
+  override fun getProfileByUid(
+      uid: String,
+      onSuccess: (Profile?) -> Unit,
+      onFailure: (Exception) -> Unit
+  ) {
+    val profile = Profile.getMockedProfiles().find { it.uid == uid }
+    onSuccess(profile)
+  }
+
+  // Simulates successful profile deletion by calling onSuccess
+  override fun deleteProfileByUid(
+      uid: String,
+      onSuccess: () -> Unit,
+      onFailure: (Exception) -> Unit
+  ) {
+    onSuccess()
+  }
+}
+
+open class MockProfileViewModel :
+    ProfilesViewModel(MockProfileRepository(), ProfilePicRepositoryStorage(Firebase.storage)) {
   private val _profiles = MutableStateFlow<List<Profile>>(emptyList())
-  val profiles: StateFlow<List<Profile>> = _profiles.asStateFlow()
+  override val profiles: StateFlow<List<Profile>> = _profiles.asStateFlow()
 
   private val _selectedProfile = MutableStateFlow<Profile?>(null)
-  val selectedProfile: StateFlow<Profile?> = _selectedProfile.asStateFlow()
+  override val selectedProfile: StateFlow<Profile?> = _selectedProfile.asStateFlow()
+
+  private val _loading = MutableStateFlow(false)
+  override val loading: StateFlow<Boolean> = _loading.asStateFlow()
 
   init {
     getProfiles()
@@ -24,6 +96,15 @@ open class MockProfileViewModel : ViewModel() {
 
   fun clearProfiles() {
     _profiles.value = emptyList()
+  }
+
+  fun setSelectedProfile(profile: Profile?) {
+    _selectedProfile.value = profile
+  }
+
+  /** Sets the loading state directly for testing purposes */
+  fun setLoading(isLoading: Boolean) {
+    _loading.value = isLoading
   }
 
   // create factory

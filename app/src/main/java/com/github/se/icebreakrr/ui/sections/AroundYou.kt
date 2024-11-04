@@ -81,7 +81,11 @@ fun AroundYouScreen(
                       items(filteredProfiles.value.size) { index ->
                         ProfileCard(
                             profile = filteredProfiles.value[index],
-                            onclick = { navigationActions.navigateTo(Screen.OTHER_PROFILE_VIEW) })
+                            onclick = {
+                              navigationActions.navigateTo(
+                                  Screen.OTHER_PROFILE_VIEW +
+                                      "?userId=${filteredProfiles.value[index].uid}")
+                            })
                       }
                     } else {
                       item {

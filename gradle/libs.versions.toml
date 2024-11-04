@@ -48,6 +48,7 @@ robolectric = "4.11.1"
 sonar = "4.4.1.3373"
 ktfmt = "0.17.0"
 firebaseFunctionsKtx = "21.0.0"
+firebaseStorageKtx = "21.0.1"
 
 [libraries]
 #Google
@@ -101,6 +102,7 @@ mockito-core = { group = "org.mockito", name = "mockito-core", version.ref = "mo
 mockito-kotlin = { group = "org.mockito.kotlin", name = "mockito-kotlin", version.ref = "mockitoKotlin" }
 androidx-navigation-testing = { group = "androidx.navigation", name = "navigation-testing", version.ref = "navigationTesting" }
 firebase-functions-ktx = { group = "com.google.firebase", name = "firebase-functions-ktx", version.ref = "firebaseFunctionsKtx" }
+firebase-storage-ktx = { group = "com.google.firebase", name = "firebase-storage-ktx", version.ref = "firebaseStorageKtx" }
 
 
 [plugins]

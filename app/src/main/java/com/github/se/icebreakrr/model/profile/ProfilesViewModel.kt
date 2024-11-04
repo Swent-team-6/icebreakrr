@@ -5,22 +5,27 @@ import androidx.lifecycle.ViewModelProvider
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.GeoPoint
 import com.google.firebase.firestore.firestore
+import com.google.firebase.storage.storage
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.update
 
-open class ProfilesViewModel(private val repository: ProfilesRepository) : ViewModel() {
+open class ProfilesViewModel(
+    private val repository: ProfilesRepository,
+    private val ppRepository: ProfilePicRepository
+) : ViewModel() {
 
   private val _profiles = MutableStateFlow<List<Profile>>(emptyList())
-  val profiles: StateFlow<List<Profile>> = _profiles
+  open val profiles: StateFlow<List<Profile>> = _profiles
 
   private val _filteredProfiles = MutableStateFlow<List<Profile>>(emptyList())
   val filteredProfiles: StateFlow<List<Profile>> = _filteredProfiles
 
   private val _selectedProfile = MutableStateFlow<Profile?>(null)
-  val selectedProfile: StateFlow<Profile?> = _selectedProfile
+  open val selectedProfile: StateFlow<Profile?> = _selectedProfile
 
   private val _loading = MutableStateFlow(false)
-  val loading: StateFlow<Boolean> = _loading
+  open val loading: StateFlow<Boolean> = _loading
 
   private val _error = MutableStateFlow<Exception?>(null)
   val error: StateFlow<Exception?> = _error
@@ -30,7 +35,10 @@ open class ProfilesViewModel(private val repository: ProfilesRepository) : ViewM
         object : ViewModelProvider.Factory {
           @Suppress("UNCHECKED_CAST")
           override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            return ProfilesViewModel(ProfilesRepositoryFirestore(Firebase.firestore)) as T
+            return ProfilesViewModel(
+                ProfilesRepositoryFirestore(Firebase.firestore),
+                ProfilePicRepositoryStorage(Firebase.storage))
+                as T
           }
         }
   }
@@ -141,6 +149,41 @@ open class ProfilesViewModel(private val repository: ProfilesRepository) : ViewM
     _loading.value = true
     repository.deleteProfileByUid(
         uid, onSuccess = { _loading.value = false }, onFailure = { e -> handleError(e) })
+    ppRepository.deleteProfilePicture(
+        userId = uid, onSuccess = {}, onFailure = { e -> handleError(e) })
+  }
+
+  /**
+   * Uploads the current user's profile picture to the remote storage system.
+   *
+   * @param imageData The byte array of the image file to be uploaded.
+   * @throws IllegalStateException if the user is not logged in.
+   */
+  fun uploadCurrentUserProfilePicture(imageData: ByteArray) {
+    val userId = selectedProfile.value?.uid ?: throw IllegalStateException("User not logged in")
+    ppRepository.uploadProfilePicture(
+        userId = userId,
+        imageData = imageData,
+        onSuccess = { url ->
+          _selectedProfile.update { selected -> selected?.copy(profilePictureUrl = url) }
+        },
+        onFailure = { e -> handleError(e) })
+  }
+
+  /**
+   * Deletes the current user's profile picture from the remote storage system.
+   *
+   * @throws IllegalStateException if the user is not logged in.
+   */
+  fun deleteCurrentUserProfilePicture() {
+    ppRepository.deleteProfilePicture(
+        userId = selectedProfile.value?.uid ?: throw IllegalStateException("User not logged in"),
+        onSuccess = {
+          _selectedProfile.update { currentProfile ->
+            currentProfile?.copy(profilePictureUrl = null)
+          }
+        },
+        onFailure = { e -> handleError(e) })
   }
 
   /**
