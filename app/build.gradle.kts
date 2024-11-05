@@ -189,14 +189,14 @@ dependencies {
     implementation("com.google.accompanist:accompanist-flowlayout:0.32.0")
 
     // Add Firebase Cloud Messaging System
-//    implementation("com.google.firebase:firebase-bom:32.0.0")
     implementation("com.google.firebase:firebase-messaging-ktx")
-//    implementation("com.google.firebase:firebase-database-ktx")
-//    implementation("com.google.firebase:firebase-admin:9.0.0")
 
     // Retrofit
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-moshi:2.9.0")
+
+    // Arch Core Testing library for InstantTaskExecutorRule
+    testImplementation("androidx.arch.core:core-testing:2.2.0")
 
 
 
@@ -217,6 +217,11 @@ dependencies {
     // ------------       Mockito     --------------
     testImplementation(libs.mockito.core)
     testImplementation(libs.mockito.kotlin)
+
+    testImplementation(libs.mockito.mockito.core.v520)
+    testImplementation(libs.mockito.inline.v520) // For mocking static methods if needed
+
+
     androidTestImplementation(libs.mockito.kotlin)
     androidTestImplementation(libs.mockito.android)
 

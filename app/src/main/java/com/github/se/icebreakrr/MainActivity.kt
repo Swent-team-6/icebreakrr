@@ -4,7 +4,6 @@ import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
@@ -38,6 +37,7 @@ import com.github.se.icebreakrr.ui.sections.SettingsScreen
 import com.github.se.icebreakrr.ui.theme.SampleAppTheme
 import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.functions.FirebaseFunctions
 
 class MainActivity : ComponentActivity() {
   private lateinit var auth: FirebaseAuth
@@ -53,17 +53,6 @@ class MainActivity : ComponentActivity() {
       // Sign out the user if they are already signed in
       // This is useful for testing purposes
       // auth.signOut()
-    }
-
-    auth.addAuthStateListener { firebaseAuth ->
-      val user = firebaseAuth.currentUser
-      if (user != null) {
-        Log.d("AUTH", "User is signed in with UID: ${user.uid}")
-        // Proceed with UID-dependent logic here
-      } else {
-        Log.d("AUTH", "No user signed in")
-        // Redirect to sign-in screen or handle appropriately
-      }
     }
 
     // Retrieve the testing flag from the Intent
@@ -108,9 +97,11 @@ fun IcebreakrrApp() {
   val tagsViewModel: TagsViewModel = viewModel(factory = TagsViewModel.Factory)
   val filterViewModel: FilterViewModel = viewModel(factory = FilterViewModel.Factory)
   val ourUserUid = FirebaseAuth.getInstance().currentUser?.uid
-  Log.d("OUR USER ID : ", ourUserUid ?: "NULL")
+  val functions = FirebaseFunctions.getInstance()
   val meetingRequestViewModel: MeetingRequestViewModel =
-      viewModel(factory = MeetingRequestViewModel.Companion.Factory(profileViewModel, ourUserUid))
+      viewModel(
+          factory =
+              MeetingRequestViewModel.Companion.Factory(profileViewModel, functions, ourUserUid))
 
   NavHost(navController = navController, startDestination = Route.AUTH) {
     navigation(

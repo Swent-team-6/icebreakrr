@@ -2,6 +2,8 @@
 #Google
 googleServices = "4.4.2"
 mockitoInline = "4.0.0"
+mockitoInlineVersion = "5.2.0"
+mockitoMockitoCore = "5.2.0"
 playServicesAuth = "21.2.0"
 playServicesLocation = "21.3.0"
 
@@ -53,6 +55,8 @@ firebaseStorageKtx = "21.0.1"
 [libraries]
 #Google
 mockito-inline = { module = "org.mockito:mockito-inline", version.ref = "mockitoInline" }
+mockito-inline-v520 = { module = "org.mockito:mockito-inline", version.ref = "mockitoInlineVersion" }
+mockito-mockito-core-v520 = { module = "org.mockito:mockito-core", version.ref = "mockitoMockitoCore" }
 play-services-auth = { module = "com.google.android.gms:play-services-auth", version.ref = "playServicesAuth" }
 play-services-location = { module = "com.google.android.gms:play-services-location", version.ref = "playServicesLocation" }
 google-services = { module = "com.google.gms:google-services", version.ref = "googleServices" }

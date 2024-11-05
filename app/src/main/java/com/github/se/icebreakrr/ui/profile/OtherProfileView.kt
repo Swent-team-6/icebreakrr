@@ -28,6 +28,7 @@ import com.github.se.icebreakrr.model.profile.ProfilesViewModel
 import com.github.se.icebreakrr.model.tags.TagsViewModel
 import com.github.se.icebreakrr.ui.message.SendRequestScreen
 import com.github.se.icebreakrr.ui.navigation.NavigationActions
+import com.github.se.icebreakrr.ui.navigation.Screen
 import com.github.se.icebreakrr.ui.sections.shared.InfoSection
 import com.github.se.icebreakrr.ui.sections.shared.ProfileHeader
 
@@ -96,15 +97,12 @@ fun OtherProfileView(
                   onValueChange = { writtenMessage = it },
                   value = writtenMessage,
                   onSendClick = {
-                    Log.d("CLICKED ON SEND TOKEN !", "sending message")
                     meetingRequestViewModel.onMeetingRequestChange(writtenMessage)
-                    Log.d("MESSAGE CHANGE", writtenMessage)
                     meetingRequestViewModel.onRemoteTokenChange(profile.fcmToken ?: "null")
-                    Log.d("FCM TOKEN CHANGE", profile.fcmToken ?: "null")
-                    Log.d("UID OF THE TARGET ", profile.uid)
                     meetingRequestViewModel.onSubmitMeetingRequest()
-                    meetingRequestViewModel.sendMessage(false)
+                    meetingRequestViewModel.sendMessage()
                     writtenMessage = ""
+                    navigationActions.goBack()
                   },
                   onCancelClick = { sendRequest = false })
             }

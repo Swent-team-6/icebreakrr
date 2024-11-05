@@ -8,11 +8,3 @@ data class MeetingRequest(
     val location: Location? = null,
     val isEnteringMessage: Boolean = true
 )
-
-data class MeetingResponse(
-    val targetToken: String = "",
-    val senderUID: String = "",
-    val accept: Boolean? = null,
-    val message: String = "",
-    val isEnteringMessage: Boolean = true
-)

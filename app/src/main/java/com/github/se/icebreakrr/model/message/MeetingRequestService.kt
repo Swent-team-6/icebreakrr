@@ -28,7 +28,7 @@ class MeetingRequestService : FirebaseMessagingService() {
     super.onNewToken(token)
   }
 
-  private fun showNotification(title: String, message: String) {
+  fun showNotification(title: String, message: String) {
     val channelId = "your_channel_id"
     val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
