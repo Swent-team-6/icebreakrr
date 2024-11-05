@@ -3,80 +3,137 @@ package com.github.se.icebreakrr.ui.profile
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.github.se.icebreakrr.mock.MockProfileViewModel
+import com.github.se.icebreakrr.mock.getMockedProfiles
+import com.github.se.icebreakrr.model.profile.Profile
+import com.github.se.icebreakrr.model.profile.ProfilePicRepositoryStorage
+import com.github.se.icebreakrr.model.profile.ProfilesRepository
+import com.github.se.icebreakrr.model.profile.ProfilesViewModel
+import com.github.se.icebreakrr.model.tags.TagsRepository
+import com.github.se.icebreakrr.model.tags.TagsViewModel
 import com.github.se.icebreakrr.ui.navigation.NavigationActions
+import com.google.firebase.Firebase
+import com.google.firebase.storage.storage
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.Mockito.mock
+import org.mockito.Mockito
+import org.mockito.kotlin.verify
 
 @RunWith(AndroidJUnit4::class)
 class ProfileEditingScreenTest {
 
-  private lateinit var navigationActions: NavigationActions
-
   @get:Rule val composeTestRule = createComposeRule()
+
+  private lateinit var navigationActions: NavigationActions
+  private lateinit var profilesViewModel: ProfilesViewModel
+  private lateinit var fakeProfilesViewModel: MockProfileViewModel
+  private lateinit var tagsViewModel: TagsViewModel
+  private lateinit var mockProfilesRepository: ProfilesRepository
+  private lateinit var mockTagsRepository: TagsRepository
 
   @Before
   fun setUp() {
-    navigationActions = mock()
+    navigationActions = Mockito.mock(NavigationActions::class.java)
+    mockProfilesRepository = Mockito.mock(ProfilesRepository::class.java)
+    mockTagsRepository = Mockito.mock(TagsRepository::class.java)
+
+    tagsViewModel = TagsViewModel(mockTagsRepository)
+    profilesViewModel =
+        ProfilesViewModel(mockProfilesRepository, ProfilePicRepositoryStorage(Firebase.storage))
+    fakeProfilesViewModel = MockProfileViewModel()
+
+    var mockProfile = Profile.getMockedProfiles()[0]
+    fakeProfilesViewModel.setSelectedProfile(mockProfile)
+    fakeProfilesViewModel.setLoading(false)
+  }
+
+  @Test
+  fun testLoadingState() {
+    fakeProfilesViewModel.setLoading(true)
+
+    composeTestRule.setContent {
+      ProfileEditingScreen(navigationActions, tagsViewModel, fakeProfilesViewModel)
+    }
+
+    composeTestRule.onNodeWithTag("loadingBox").assertIsDisplayed()
+    composeTestRule.onNodeWithText("Loading profile...").assertIsDisplayed()
+  }
+
+  @Test
+  fun testTopBarElements() {
+    composeTestRule.setContent {
+      ProfileEditingScreen(navigationActions, tagsViewModel, fakeProfilesViewModel)
+    }
+
+    composeTestRule.onNodeWithTag("topAppBar").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("goBackButton").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("checkButton").assertIsDisplayed()
   }
 
   @Test
   fun testProfileEditingScreenUI() {
 
-    composeTestRule.setContent { ProfileEditingScreen(navigationActions) }
-
-    // Check if topAppBar is displayed
+    composeTestRule.setContent {
+      ProfileEditingScreen(navigationActions, tagsViewModel, fakeProfilesViewModel)
+    }
     composeTestRule.onNodeWithTag("topAppBar").assertIsDisplayed()
-
-    // Check if profileEditScreenContent is displayed
     composeTestRule.onNodeWithTag("profileEditScreenContent").assertIsDisplayed()
-
-    // Check if profile picture is displayed
     composeTestRule.onNodeWithTag("profilePicture").assertIsDisplayed()
-
-    // Check if name and age are displayed correctly
     composeTestRule.onNodeWithTag("nameAndAge").assertIsDisplayed()
-
-    // Test catchphrase input
+    composeTestRule.onNodeWithTag("catchphrase").performTextClearance()
     composeTestRule.onNodeWithTag("catchphrase").performTextInput("New Catchphrase")
     composeTestRule.onNodeWithTag("catchphrase").assertTextContains("New Catchphrase")
-
-    // Test description input
+    composeTestRule.onNodeWithTag("description").performTextClearance()
     composeTestRule.onNodeWithTag("description").performTextInput("New Description")
     composeTestRule.onNodeWithTag("description").assertTextContains("New Description")
-
-    // Test back button functionality
     composeTestRule.onNodeWithTag("goBackButton").performClick()
-    composeTestRule.onNodeWithTag("alertDialog").assertIsDisplayed()
-
-    // Test dialog buttons
+    composeTestRule.onNodeWithTag("alertDialogBack").assertIsDisplayed()
     composeTestRule.onNodeWithText("Cancel").performClick()
-    composeTestRule.onNodeWithTag("alertDialog").assertIsNotDisplayed()
+    composeTestRule.onNodeWithTag("alertDialogBack").assertIsNotDisplayed()
+    composeTestRule.onNodeWithTag("checkButton").performClick()
+    composeTestRule.onNodeWithTag("alertDialogConfirm").assertIsDisplayed()
+    composeTestRule.onNodeWithText("Save").performClick()
+    verify(navigationActions).goBack()
+  }
 
-    // Test check button
-    composeTestRule.onNodeWithTag("checkButton").assertIsDisplayed()
+  @Test
+  fun testProfileEditingScreenContent() {
+
+    composeTestRule.setContent {
+      ProfileEditingScreen(navigationActions, tagsViewModel, fakeProfilesViewModel)
+    }
+    val profile = Profile.getMockedProfiles()[0]
+
+    composeTestRule.onNodeWithTag("nameAndAge").assertTextEquals("${profile.name}, ${profile.calculateAge()}")
+    composeTestRule.onNodeWithTag("catchphrase").assertTextContains(profile.catchPhrase)
+    composeTestRule.onNodeWithTag("description").assertTextContains(profile.description)
   }
 
   @Test
   fun testEdgeCases() {
 
-    composeTestRule.setContent { ProfileEditingScreen(navigationActions) }
+    composeTestRule.setContent {
+      ProfileEditingScreen(navigationActions, tagsViewModel, fakeProfilesViewModel)
+    }
 
-    // Test empty catchphrase
     composeTestRule.onNodeWithTag("description").performTextInput("New catchphrase")
     composeTestRule.onNodeWithTag("catchphrase").performTextClearance()
     composeTestRule.onNodeWithTag("catchphrase").assertTextContains("")
 
-    // Test empty description
     composeTestRule.onNodeWithTag("description").performTextInput("New Description")
     composeTestRule.onNodeWithTag("description").performTextClearance()
     composeTestRule.onNodeWithTag("description").assertTextContains("")
 
-    // Test long text input
     val longText = "A".repeat(1000)
     composeTestRule.onNodeWithTag("description").performTextInput(longText)
     composeTestRule.onNodeWithTag("description").assertTextContains(longText.take(1000))
+    composeTestRule.onNodeWithTag("catchphrase").performTextInput(longText)
+    composeTestRule.onNodeWithTag("catchphrase").assertTextContains(longText.take(1000))
+    composeTestRule.onNodeWithTag("checkButton").performClick()
+    composeTestRule.onNodeWithTag("alertDialogConfirm").assertIsDisplayed()
+    composeTestRule.onNodeWithText("Save").performClick()
+    verify(navigationActions).goBack()
   }
 }
