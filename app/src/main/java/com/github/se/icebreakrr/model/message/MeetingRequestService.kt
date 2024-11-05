@@ -3,7 +3,6 @@ package com.github.se.icebreakrr.model.message
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
-import android.util.Log
 import androidx.core.app.NotificationCompat
 import com.github.se.icebreakrr.R
 import com.google.firebase.messaging.FirebaseMessagingService
@@ -12,7 +11,6 @@ import com.google.firebase.messaging.RemoteMessage
 class MeetingRequestService : FirebaseMessagingService() {
 
   override fun onMessageReceived(remoteMessage: RemoteMessage) {
-    Log.d("MESSAGE", "MESSAGE RETURNED TO THE PHONE")
     super.onMessageReceived(remoteMessage)
 
     // Check if the message contains a notification payload

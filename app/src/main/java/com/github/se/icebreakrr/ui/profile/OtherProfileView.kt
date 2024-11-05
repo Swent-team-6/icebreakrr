@@ -1,5 +1,6 @@
 package com.github.se.icebreakrr.ui.profile
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -22,6 +23,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextAlign
 import androidx.navigation.NavBackStackEntry
+import com.github.se.icebreakrr.model.message.MeetingRequestViewModel
 import com.github.se.icebreakrr.model.profile.ProfilesViewModel
 import com.github.se.icebreakrr.model.tags.TagsViewModel
 import com.github.se.icebreakrr.ui.message.SendRequestScreen
@@ -38,6 +40,7 @@ import com.github.se.icebreakrr.ui.sections.shared.ProfileHeader
 fun OtherProfileView(
     profilesViewModel: ProfilesViewModel,
     tagsViewModel: TagsViewModel,
+    meetingRequestViewModel: MeetingRequestViewModel,
     navigationActions: NavigationActions,
     navBackStackEntry: NavBackStackEntry?
 ) {
@@ -92,7 +95,17 @@ fun OtherProfileView(
               SendRequestScreen(
                   onValueChange = { writtenMessage = it },
                   value = writtenMessage,
-                  onSendClick = { sendRequest = false },
+                  onSendClick = {
+                    Log.d("CLICKED ON SEND TOKEN !", "sending message")
+                    meetingRequestViewModel.onMeetingRequestChange(writtenMessage)
+                    Log.d("MESSAGE CHANGE", writtenMessage)
+                    meetingRequestViewModel.onRemoteTokenChange(profile.fcmToken ?: "null")
+                    Log.d("FCM TOKEN CHANGE", profile.fcmToken ?: "null")
+                    Log.d("UID OF THE TARGET ", profile.uid)
+                    meetingRequestViewModel.onSubmitMeetingRequest()
+                    meetingRequestViewModel.sendMessage(false)
+                    writtenMessage = ""
+                  },
                   onCancelClick = { sendRequest = false })
             }
       }

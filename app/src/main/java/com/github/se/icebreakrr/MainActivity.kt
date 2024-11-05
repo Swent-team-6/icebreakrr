@@ -21,8 +21,6 @@ import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
 import com.github.se.icebreakrr.config.LocalIsTesting
 import com.github.se.icebreakrr.model.filter.FilterViewModel
-import com.github.se.icebreakrr.model.message.ChatScreen
-import com.github.se.icebreakrr.model.message.EnterTokenDialog
 import com.github.se.icebreakrr.model.message.MeetingRequestViewModel
 import com.github.se.icebreakrr.model.profile.ProfilesViewModel
 import com.github.se.icebreakrr.model.tags.TagsViewModel
@@ -40,23 +38,32 @@ import com.github.se.icebreakrr.ui.sections.SettingsScreen
 import com.github.se.icebreakrr.ui.theme.SampleAppTheme
 import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.messaging.FirebaseMessaging
 
 class MainActivity : ComponentActivity() {
   private lateinit var auth: FirebaseAuth
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
+    FirebaseApp.initializeApp(this)
     requestNotificationPermission()
 
     auth = FirebaseAuth.getInstance()
 
-    // Initialize Firebase Auth
-    FirebaseApp.initializeApp(this)
     auth.currentUser?.let {
       // Sign out the user if they are already signed in
       // This is useful for testing purposes
-      auth.signOut()
+      // auth.signOut()
+    }
+
+    auth.addAuthStateListener { firebaseAuth ->
+      val user = firebaseAuth.currentUser
+      if (user != null) {
+        Log.d("AUTH", "User is signed in with UID: ${user.uid}")
+        // Proceed with UID-dependent logic here
+      } else {
+        Log.d("AUTH", "No user signed in")
+        // Redirect to sign-in screen or handle appropriately
+      }
     }
 
     // Retrieve the testing flag from the Intent
@@ -101,28 +108,18 @@ fun IcebreakrrApp() {
   val tagsViewModel: TagsViewModel = viewModel(factory = TagsViewModel.Factory)
   val filterViewModel: FilterViewModel = viewModel(factory = FilterViewModel.Factory)
   val ourUserUid = FirebaseAuth.getInstance().currentUser?.uid
+  Log.d("OUR USER ID : ", ourUserUid ?: "NULL")
   val meetingRequestViewModel: MeetingRequestViewModel =
       viewModel(factory = MeetingRequestViewModel.Companion.Factory(profileViewModel, ourUserUid))
-
-  // Set up the Firebase Cloud Messaging system
-  FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
-    if (task.isSuccessful) {
-      val token = task.result
-      // Save token to backend for user messaging
-      // meetingRequestViewModel.onRemoteTokenChange(token)
-      Log.d(
-          "FCM Token",
-          "Token: $token") // todo : est se que on doit nous meme créer un profile si il existe pas
-      // encore pour le user courant ?
-    }
-  }
 
   NavHost(navController = navController, startDestination = Route.AUTH) {
     navigation(
         startDestination = Screen.AUTH,
         route = Route.AUTH,
     ) {
-      composable(Screen.AUTH) { SignInScreen(profileViewModel, navigationActions) }
+      composable(Screen.AUTH) {
+        SignInScreen(profileViewModel, meetingRequestViewModel, navigationActions)
+      }
     }
 
     navigation(
@@ -133,7 +130,12 @@ fun IcebreakrrApp() {
         AroundYouScreen(navigationActions, profileViewModel, tagsViewModel, filterViewModel)
       }
       composable(Screen.OTHER_PROFILE_VIEW + "?userId={userId}") { navBackStackEntry ->
-        OtherProfileView(profileViewModel, tagsViewModel, navigationActions, navBackStackEntry)
+        OtherProfileView(
+            profileViewModel,
+            tagsViewModel,
+            meetingRequestViewModel,
+            navigationActions,
+            navBackStackEntry)
       }
     }
 
@@ -149,24 +151,7 @@ fun IcebreakrrApp() {
         startDestination = Screen.NOTIFICATIONS,
         route = Route.NOTIFICATIONS,
     ) {
-      composable(
-          Screen.NOTIFICATIONS) { // Todo : this part is temporary, it ll be used for debugging
-            //         NotificationScreen(navigationActions, profileViewModel)
-            val state = meetingRequestViewModel.meetingRequestState
-            // purposes
-            if (state.isEnteringMessage) {
-              EnterTokenDialog(
-                  token = state.targetToken,
-                  onTokenChange = meetingRequestViewModel::onRemoteTokenChange,
-                  onSubmit = meetingRequestViewModel::onSubmitMeetingRequest)
-            } else {
-              ChatScreen(
-                  messageText = state.message,
-                  onMessageSend = { meetingRequestViewModel.sendMessage(isBroadcast = false) },
-                  onMessageBroadcast = { meetingRequestViewModel.sendMessage(isBroadcast = true) },
-                  onMessageChange = meetingRequestViewModel::onMeetingRequestChange)
-            }
-          }
+      composable(Screen.NOTIFICATIONS) { NotificationScreen(navigationActions, profileViewModel) }
     }
 
     navigation(
