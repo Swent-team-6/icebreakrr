@@ -226,7 +226,13 @@ fun ProfileHeader(
 fun ProfileCatchPhrase(catchPhrase: String) {
   Text(
       text = catchPhrase,
-      style = MaterialTheme.typography.bodyMedium,
+      style =
+          TextStyle(
+              fontSize = catchPhraseSize,
+              lineHeight = catchPhraseLineHeight,
+              fontWeight = FontWeight(catchPhraseWeight),
+              color = IceBreakrrBlue,
+          ),
       color = Color.Black.copy(alpha = 0.8f),
       fontWeight = FontWeight.Medium,
       fontSize = 16.sp,
@@ -257,7 +263,13 @@ fun TagsSection(listOfTags: List<Pair<String, Color>>) {
 fun ProfileDescription(description: String) {
   Text(
       text = description,
-      style = MaterialTheme.typography.bodyMedium,
+      style =
+          TextStyle(
+              fontSize = descriptionFontSize,
+              lineHeight = descriptionLineHeight,
+              fontWeight = FontWeight(descriptionFontWeight),
+              color = IceBreakrrBlue,
+              letterSpacing = descriptionLetterSpacing),
       color = Color.Black.copy(alpha = 0.9f),
       fontSize = 14.sp,
       textAlign = TextAlign.Start,
