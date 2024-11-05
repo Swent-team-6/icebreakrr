@@ -110,9 +110,7 @@ fun IcebreakrrApp() {
         startDestination = Screen.NOTIFICATIONS,
         route = Route.NOTIFICATIONS,
     ) {
-      composable(Screen.NOTIFICATIONS) {
-        NotificationScreen(navigationActions, profileViewModel)
-      }
+      composable(Screen.NOTIFICATIONS) { NotificationScreen(navigationActions, profileViewModel) }
     }
 
     navigation(
