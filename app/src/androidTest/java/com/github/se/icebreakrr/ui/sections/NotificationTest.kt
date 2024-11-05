@@ -13,6 +13,7 @@ import androidx.compose.ui.test.performScrollTo
 import com.github.se.icebreakrr.R
 import com.github.se.icebreakrr.model.profile.Gender
 import com.github.se.icebreakrr.model.profile.Profile
+import com.github.se.icebreakrr.model.profile.ProfilePicRepository
 import com.github.se.icebreakrr.model.profile.ProfilesRepository
 import com.github.se.icebreakrr.model.profile.ProfilesViewModel
 import com.github.se.icebreakrr.ui.navigation.NavigationActions
@@ -31,6 +32,7 @@ import org.mockito.kotlin.verify
 class NotificationTest {
   private lateinit var navigationActions: NavigationActions
   private lateinit var mockProfilesRepository: ProfilesRepository
+  private lateinit var mockPPRepository: ProfilePicRepository
   private lateinit var profilesViewModel: ProfilesViewModel
 
   @get:Rule val composeTestRule = createComposeRule()
@@ -39,7 +41,8 @@ class NotificationTest {
   fun setUp() {
     navigationActions = Mockito.mock(NavigationActions::class.java)
     mockProfilesRepository = Mockito.mock(ProfilesRepository::class.java)
-    profilesViewModel = ProfilesViewModel(mockProfilesRepository)
+    mockPPRepository = Mockito.mock(ProfilePicRepository::class.java)
+    profilesViewModel = ProfilesViewModel(mockProfilesRepository, mockPPRepository)
   }
 
   @Test

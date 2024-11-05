@@ -1,7 +1,14 @@
 package com.github.se.icebreakrr.ui.sections
 
 import android.widget.Toast
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -13,6 +20,8 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -21,20 +30,31 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
+import com.github.se.icebreakrr.mock.getMockedProfiles
 import com.github.se.icebreakrr.model.profile.Profile
-import com.github.se.icebreakrr.model.profile.getMockedProfiles
+import com.github.se.icebreakrr.model.profile.ProfilesViewModel
 import com.github.se.icebreakrr.ui.navigation.BottomNavigationMenu
 import com.github.se.icebreakrr.ui.navigation.LIST_TOP_LEVEL_DESTINATIONS
 import com.github.se.icebreakrr.ui.navigation.NavigationActions
 import com.github.se.icebreakrr.ui.navigation.Screen
 import com.github.se.icebreakrr.ui.sections.shared.ProfileCard
 import com.github.se.icebreakrr.ui.sections.shared.TopBar
+import com.google.firebase.Firebase
+import com.google.firebase.auth.auth
 
 // This File was written with the help of Cursor
 @Composable
-fun SettingsScreen(navigationActions: NavigationActions) {
+fun SettingsScreen(profilesViewModel: ProfilesViewModel, navigationActions: NavigationActions) {
   val context = LocalContext.current
   val scrollState = rememberScrollState()
+
+  LaunchedEffect(Unit) {
+    Firebase.auth.currentUser?.let { profilesViewModel.getProfileByUid(it.uid) }
+  }
+
+  val isLoading = profilesViewModel.loading.collectAsState(initial = true).value
+  val profile = profilesViewModel.selectedProfile.collectAsState().value
+
   Scaffold(
       topBar = { TopBar("Settings") },
       modifier = Modifier.testTag("settingsScreen").fillMaxSize(),
@@ -50,8 +70,14 @@ fun SettingsScreen(navigationActions: NavigationActions) {
             Modifier.fillMaxSize().padding(innerPadding).padding(16.dp).verticalScroll(scrollState),
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.Start) {
-          ProfileCard(profile = Profile.getMockedProfiles()[0], isSettings = true) {
-            navigationActions.navigateTo(Screen.PROFILE)
+          if (profile != null) {
+            ProfileCard(profile = profile, isSettings = true) {
+              navigationActions.navigateTo(Screen.PROFILE)
+            }
+          } else {
+            ProfileCard(profile = Profile.getMockedProfiles()[0], isSettings = true) {
+              navigationActions.navigateTo(Screen.PROFILE)
+            }
           }
 
           Spacer(modifier = Modifier.padding(vertical = 8.dp))

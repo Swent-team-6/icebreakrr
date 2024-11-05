@@ -15,7 +15,15 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
+import com.github.se.icebreakrr.model.filter.FilterViewModel
+import com.github.se.icebreakrr.model.profile.ProfilePicRepositoryStorage
+import com.github.se.icebreakrr.model.profile.ProfilesRepository
+import com.github.se.icebreakrr.model.profile.ProfilesViewModel
 import com.github.se.icebreakrr.ui.navigation.NavigationActions
+import com.google.firebase.Firebase
+import com.google.firebase.storage.storage
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -26,12 +34,19 @@ import org.mockito.kotlin.verify
 class FilterScreenTest {
 
   private lateinit var navigationActionsMock: NavigationActions
+  private lateinit var profilesRepositoryMock: ProfilesRepository
+  private lateinit var profilesViewModelMock: ProfilesViewModel
+  private lateinit var filterViewModel: FilterViewModel
 
   @get:Rule val composeTestRule = createComposeRule()
 
   @Before
   fun setUp() {
     navigationActionsMock = mock()
+    profilesRepositoryMock = mock()
+    profilesViewModelMock =
+        ProfilesViewModel(profilesRepositoryMock, ProfilePicRepositoryStorage(Firebase.storage))
+    filterViewModel = FilterViewModel()
   }
 
   @Test
@@ -263,12 +278,75 @@ class FilterScreenTest {
 
   @Test
   fun testFilterButtonNavigation() {
-    composeTestRule.setContent { FilterScreen(navigationActions = navigationActionsMock) }
+    composeTestRule.setContent {
+      FilterScreen(
+          navigationActions = navigationActionsMock, profilesViewModel = profilesViewModelMock)
+    }
 
     // Click the filter button
     composeTestRule.onNodeWithTag("FilterButton").performClick()
     // Verify that the navigation action is called
     verify(navigationActionsMock).goBack()
+  }
+
+  @Test
+  fun testFilterButtonActions() {
+    composeTestRule.setContent {
+      FilterScreen(
+          navigationActionsMock,
+          profilesViewModel = profilesViewModelMock,
+          filterViewModel = filterViewModel)
+    }
+
+    // Test case 1: Select genders and set valid age range
+    composeTestRule.onNodeWithTag("GenderButtonMen").performClick()
+    composeTestRule.onNodeWithTag("GenderButtonWomen").performClick()
+
+    // Set valid age range
+    composeTestRule.onNodeWithTag("AgeFromTextField").performTextInput("25")
+    composeTestRule.onNodeWithTag("AgeToTextField").performTextInput("30")
+
+    // Click the filter button
+    composeTestRule.onNodeWithTag("FilterButton").performClick()
+
+    // Assert that the correct age range is set
+    assertEquals(25..30, filterViewModel.ageRange.value)
+
+    // Test case 2: No age range (both fields empty)
+    composeTestRule.onNodeWithTag("AgeFromTextField").performTextClearance()
+    composeTestRule.onNodeWithTag("AgeToTextField").performTextClearance()
+
+    composeTestRule.onNodeWithTag("FilterButton").performClick()
+
+    // Assert that the age range is set to null
+    assertNull(filterViewModel.ageRange.value)
+
+    // Test case 3: Only "From" age set
+    composeTestRule.onNodeWithTag("AgeFromTextField").performTextInput("25")
+    composeTestRule.onNodeWithTag("AgeToTextField").performTextClearance()
+
+    composeTestRule.onNodeWithTag("FilterButton").performClick()
+
+    // Assert that the age range is set to (25..Int.MAX_VALUE)
+    assertEquals(25..Int.MAX_VALUE, filterViewModel.ageRange.value)
+
+    // Test case 4: Only "To" age set
+    composeTestRule.onNodeWithTag("AgeFromTextField").performTextClearance()
+    composeTestRule.onNodeWithTag("AgeToTextField").performTextInput("30")
+
+    composeTestRule.onNodeWithTag("FilterButton").performClick()
+
+    // Assert that the age range is set to (0..30)
+    assertEquals(0..30, filterViewModel.ageRange.value)
+
+    // Test case 5: Invalid age range (ageFrom > ageTo)
+    composeTestRule.onNodeWithTag("AgeFromTextField").performTextInput("35")
+    composeTestRule.onNodeWithTag("AgeToTextField").performTextInput("30")
+
+    composeTestRule.onNodeWithTag("FilterButton").performClick()
+
+    // Assert that the age range is set to null due to error
+    assertNull(filterViewModel.ageRange.value)
   }
 
   @Test

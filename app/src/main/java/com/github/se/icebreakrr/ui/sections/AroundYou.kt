@@ -24,6 +24,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.github.se.icebreakrr.model.filter.FilterViewModel
 import com.github.se.icebreakrr.model.profile.Gender
 import com.github.se.icebreakrr.model.profile.ProfilesViewModel
 import com.github.se.icebreakrr.model.tags.TagsViewModel
@@ -49,7 +50,8 @@ import com.google.firebase.firestore.GeoPoint
 fun AroundYouScreen(
     navigationActions: NavigationActions,
     profilesViewModel: ProfilesViewModel,
-    tagsViewModel: TagsViewModel
+    tagsViewModel: TagsViewModel,
+    filterViewModel: FilterViewModel
 ) {
 
   val filteredProfiles = profilesViewModel.filteredProfiles.collectAsState()
@@ -66,6 +68,8 @@ fun AroundYouScreen(
       topBar = { TopBar("Around You") },
       content = { innerPadding ->
         PullToRefreshBox(
+            filterViewModel = filterViewModel,
+            tagsViewModel = tagsViewModel,
             isRefreshing = isLoading.value,
             onRefresh = profilesViewModel::getFilteredProfilesInRadius,
             modifier = Modifier.padding(innerPadding)) {
@@ -77,7 +81,11 @@ fun AroundYouScreen(
                       items(filteredProfiles.value.size) { index ->
                         ProfileCard(
                             profile = filteredProfiles.value[index],
-                            onclick = { navigationActions.navigateTo(Screen.PROFILE) })
+                            onclick = {
+                              navigationActions.navigateTo(
+                                  Screen.OTHER_PROFILE_VIEW +
+                                      "?userId=${filteredProfiles.value[index].uid}")
+                            })
                       }
                     } else {
                       item {
@@ -119,14 +127,16 @@ fun AroundYouScreen(
 @Composable
 @ExperimentalMaterial3Api
 fun PullToRefreshBox(
+    filterViewModel: FilterViewModel,
+    tagsViewModel: TagsViewModel,
     isRefreshing: Boolean,
     onRefresh:
         (
             center: GeoPoint,
             radiusInMeters: Double,
-            genders: List<Gender>,
-            ageRange: IntRange,
-            tags: List<String>) -> Unit,
+            genders: List<Gender>?,
+            ageRange: IntRange?,
+            tags: List<String>?) -> Unit,
     modifier: Modifier = Modifier,
     state: PullToRefreshState = rememberPullToRefreshState(),
     contentAlignment: Alignment = Alignment.TopStart,
@@ -143,7 +153,11 @@ fun PullToRefreshBox(
       modifier.pullToRefresh(state = state, isRefreshing = isRefreshing) {
         // TODO Mocked values, to change with the saved filter values and current location
         onRefresh(
-            GeoPoint(0.0, 0.0), 300.0, listOf(Gender.MEN, Gender.WOMEN), 2..99, listOf("travel"))
+            GeoPoint(0.0, 0.0),
+            300.0,
+            filterViewModel.selectedGenders.value,
+            filterViewModel.ageRange.value,
+            tagsViewModel.filteredTags.value)
       },
       contentAlignment = contentAlignment) {
         content()
