@@ -10,6 +10,7 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.navigation.NavHostController
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.github.se.icebreakrr.model.profile.ProfilesViewModel
 import com.github.se.icebreakrr.ui.navigation.NavigationActions
 import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
 import org.junit.Before
@@ -23,6 +24,7 @@ class LoginTest : TestCase() {
 
   private lateinit var navHostController: NavHostController
   private lateinit var navigationActions: NavigationActions
+  private lateinit var profileViewModel: ProfilesViewModel
 
   @get:Rule val composeTestRule = createComposeRule()
 
@@ -30,11 +32,12 @@ class LoginTest : TestCase() {
   fun setUp() {
     navHostController = mock(NavHostController::class.java)
     navigationActions = NavigationActions(navHostController)
+    profileViewModel = mock(ProfilesViewModel::class.java)
   }
 
   @Test
   fun titleAndButtonAreCorrectlyDisplayed() {
-    composeTestRule.setContent { SignInScreen(navigationActions) }
+    composeTestRule.setContent { SignInScreen(profileViewModel, navigationActions) }
 
     composeTestRule.onNodeWithTag("loginScreen").assertIsDisplayed()
 

@@ -1,6 +1,5 @@
 package com.github.se.icebreakrr.ui.sections.shared
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -37,7 +36,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
 import com.github.se.icebreakrr.R
+import com.github.se.icebreakrr.model.profile.Profile
+import com.github.se.icebreakrr.model.tags.TagsViewModel
 import com.github.se.icebreakrr.ui.navigation.NavigationActions
 import com.github.se.icebreakrr.ui.tags.RowOfTags
 import com.github.se.icebreakrr.ui.tags.TagStyle
@@ -67,9 +69,11 @@ val requestButtonSize = 55.dp
 val requestButtonElevation = 8.dp
 
 @Composable
-fun InfoSection(catchPhrase: String, listOfTags: List<Pair<String, Color>>, description: String) {
+fun InfoSection(profile: Profile, tagsViewModel: TagsViewModel) {
 
   val scrollState = rememberScrollState()
+  val userTags =
+      profile.tags.map { tagString -> Pair(tagString, tagsViewModel.tagToColor(tagString)) }
 
   Column(
       modifier =
@@ -77,7 +81,7 @@ fun InfoSection(catchPhrase: String, listOfTags: List<Pair<String, Color>>, desc
       verticalArrangement = Arrangement.spacedBy(11.dp, Alignment.Top),
       horizontalAlignment = Alignment.Start) {
         // Catchphrase Section
-        ProfileCatchPhrase(catchPhrase)
+        ProfileCatchPhrase(profile.catchPhrase)
 
         // Description Section
         Text(
@@ -90,7 +94,7 @@ fun InfoSection(catchPhrase: String, listOfTags: List<Pair<String, Color>>, desc
                     color = IceBreakrrBlue,
                     letterSpacing = informationTitleLetterSpacing,
                 ))
-        ProfileDescription(description)
+        ProfileDescription(profile.description)
 
         // Tags Section
         Text(
@@ -103,7 +107,7 @@ fun InfoSection(catchPhrase: String, listOfTags: List<Pair<String, Color>>, desc
                     color = IceBreakrrBlue,
                     letterSpacing = informationTitleLetterSpacing,
                 ))
-        TagsSection(listOfTags)
+        TagsSection(userTags)
       }
 }
 
@@ -119,6 +123,7 @@ fun InfoSection(catchPhrase: String, listOfTags: List<Pair<String, Color>>, desc
  */
 @Composable
 fun ProfileHeader(
+    profile: Profile,
     navigationActions: NavigationActions,
     myProfile: Boolean,
     onEditClick: () -> Unit
@@ -129,12 +134,19 @@ fun ProfileHeader(
               .aspectRatio(1f) // Keep the aspect ratio 1:1 (height == width) => a square
               .background(Color.LightGray)
               .testTag("profileHeader")) {
+
         // Profile image
-        Image(
-            painter = painterResource(id = R.drawable.turtle),
+        AsyncImage(
+            model = profile.profilePictureUrl,
             contentDescription = "Profile Image",
             contentScale = ContentScale.Crop,
-            modifier = Modifier.fillMaxSize().testTag("profilePicture"))
+            modifier =
+                Modifier.fillMaxSize()
+                    .background(Color.LightGray, CircleShape)
+                    .testTag("profilePicture"),
+            placeholder = painterResource(id = R.drawable.nopp), // Default image during loading
+            error = painterResource(id = R.drawable.nopp) // Fallback image if URL fails
+            )
 
         // Back button
         IconButton(
@@ -160,7 +172,7 @@ fun ProfileHeader(
 
               // Username
               Text(
-                  text = "John Do",
+                  text = profile.name,
                   fontSize = 24.sp,
                   fontWeight = FontWeight.Bold,
                   color = Color.White,
@@ -214,13 +226,10 @@ fun ProfileHeader(
 fun ProfileCatchPhrase(catchPhrase: String) {
   Text(
       text = catchPhrase,
-      style =
-          TextStyle(
-              fontSize = catchPhraseSize,
-              lineHeight = catchPhraseLineHeight,
-              fontWeight = FontWeight(catchPhraseWeight),
-              color = Color.Black,
-          ),
+      style = MaterialTheme.typography.bodyMedium,
+      color = Color.Black.copy(alpha = 0.8f),
+      fontWeight = FontWeight.Medium,
+      fontSize = 16.sp,
       textAlign = TextAlign.Left,
       maxLines = 2,
       overflow = TextOverflow.Ellipsis,
@@ -234,15 +243,9 @@ fun ProfileCatchPhrase(catchPhrase: String) {
  */
 @Composable
 fun TagsSection(listOfTags: List<Pair<String, Color>>) {
-  // I set the height so that if there is 2 tags per row, there is enough space to show all the
-  // RowOfTags
-  Box(
-      modifier =
-          Modifier.fillMaxWidth()
-              .height((listOfTags.size * tagHeight / 2).dp)
-              .testTag("tagSection")) {
-        RowOfTags(listOfTags, TagStyle())
-      }
+  Box(modifier = Modifier.fillMaxWidth().height(80.dp).testTag("tagSection")) {
+    RowOfTags(listOfTags, TagStyle())
+  }
 }
 
 /**
@@ -254,13 +257,9 @@ fun TagsSection(listOfTags: List<Pair<String, Color>>) {
 fun ProfileDescription(description: String) {
   Text(
       text = description,
-      style =
-          TextStyle(
-              fontSize = descriptionFontSize,
-              lineHeight = descriptionLineHeight,
-              fontWeight = FontWeight(descriptionFontWeight),
-              color = Color.Black,
-              letterSpacing = descriptionLetterSpacing,
-          ),
-      textAlign = TextAlign.Left)
+      style = MaterialTheme.typography.bodyMedium,
+      color = Color.Black.copy(alpha = 0.9f),
+      fontSize = 14.sp,
+      textAlign = TextAlign.Start,
+      modifier = Modifier.padding(8.dp).testTag("profileDescription"))
 }

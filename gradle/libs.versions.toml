@@ -47,6 +47,7 @@ robolectric = "4.11.1"
 #CI
 sonar = "4.4.1.3373"
 ktfmt = "0.17.0"
+firebaseStorageKtx = "21.0.1"
 
 [libraries]
 #Google
@@ -99,6 +100,7 @@ robolectric = { module = "org.robolectric:robolectric", version.ref = "robolectr
 mockito-core = { group = "org.mockito", name = "mockito-core", version.ref = "mockitoCore" }
 mockito-kotlin = { group = "org.mockito.kotlin", name = "mockito-kotlin", version.ref = "mockitoKotlin" }
 androidx-navigation-testing = { group = "androidx.navigation", name = "navigation-testing", version.ref = "navigationTesting" }
+firebase-storage-ktx = { group = "com.google.firebase", name = "firebase-storage-ktx", version.ref = "firebaseStorageKtx" }
 
 
 [plugins]
