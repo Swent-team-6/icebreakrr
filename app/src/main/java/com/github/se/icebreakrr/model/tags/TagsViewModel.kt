@@ -6,7 +6,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.firestore
-import java.util.Locale
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
@@ -91,7 +90,7 @@ data class TagsViewModel(private val repository: TagsRepository) : ViewModel() {
     val tempTagSuggestion: MutableList<String> = mutableListOf()
     allTags.forEach { tagCategory: TagsCategory ->
       tagCategory.subtags.forEach { tag: String ->
-        if (tag.lowercase(Locale.ROOT).contains(query_.value.lowercase(Locale.ROOT))) {
+        if (tag.lowercase().contains(query_.value.lowercase())) {
           tempTagSuggestion.add(tag)
         }
       }

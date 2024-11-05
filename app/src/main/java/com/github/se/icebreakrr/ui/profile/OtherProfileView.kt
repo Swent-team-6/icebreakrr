@@ -43,7 +43,6 @@ fun OtherProfileView(
 ) {
   var sendRequest by remember { mutableStateOf(false) }
   var writtenMessage by remember { mutableStateOf("") }
-
   // retrieving user id from navigation params
   val profileId = navBackStackEntry?.arguments?.getString("userId")
 
