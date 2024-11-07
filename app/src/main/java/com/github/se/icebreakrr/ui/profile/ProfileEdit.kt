@@ -63,7 +63,7 @@ fun ProfileEditingScreen(
   var description by remember { mutableStateOf(TextFieldValue(user!!.description)) }
   val expanded = remember { mutableStateOf(false) }
 
-  var showDialogBack by remember { mutableStateOf(false) }
+  var showDialog by remember { mutableStateOf(false) }
   var isMofidied by remember { mutableStateOf(false) }
 
   val selectedTags = tagsViewModel.filteringTags.collectAsState().value
@@ -102,7 +102,7 @@ fun ProfileEditingScreen(
                     modifier = Modifier.testTag("goBackButton"),
                     onClick = {
                       if (isMofidied) {
-                        showDialogBack = true
+                        showDialog = true
                       } else {
                         tagsViewModel.leaveUI()
                         navigationActions.goBack()
@@ -206,15 +206,15 @@ fun ProfileEditingScreen(
                 Spacer(modifier = Modifier.height(padding))
 
                 // Modal for unsaved changes on leave page with back button
-                if (showDialogBack && isMofidied) {
+                if (showDialog && isMofidied) {
                   AlertDialog(
-                      onDismissRequest = { showDialogBack = false },
+                      onDismissRequest = { showDialog = false },
                       title = { Text("You are about to leave this page") },
                       text = { Text("Your changes will not be saved.") },
                       confirmButton = {
                         TextButton(
                             onClick = {
-                              showDialogBack = false
+                              showDialog = false
                               tagsViewModel.leaveUI()
                               navigationActions.goBack()
                             }) {
@@ -222,9 +222,9 @@ fun ProfileEditingScreen(
                             }
                       },
                       dismissButton = {
-                        TextButton(onClick = { showDialogBack = false }) { Text("Cancel") }
+                        TextButton(onClick = { showDialog = false }) { Text("Cancel") }
                       },
-                      modifier = Modifier.testTag("alertDialogBack"))
+                      modifier = Modifier.testTag("alertDialog"))
                 }
               }
         }

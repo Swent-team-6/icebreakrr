@@ -82,6 +82,7 @@ class ProfileEditingScreenTest {
     composeTestRule.onNodeWithTag("profileEditScreenContent").assertIsDisplayed()
     composeTestRule.onNodeWithTag("profilePicture").assertIsDisplayed()
     composeTestRule.onNodeWithTag("nameAndAge").assertIsDisplayed()
+
     composeTestRule.onNodeWithTag("catchphrase").performTextClearance()
     composeTestRule.onNodeWithTag("catchphrase").performTextInput("New Catchphrase")
     composeTestRule.onNodeWithTag("catchphrase").assertTextContains("New Catchphrase")
@@ -89,12 +90,28 @@ class ProfileEditingScreenTest {
     composeTestRule.onNodeWithTag("description").performTextInput("New Description")
     composeTestRule.onNodeWithTag("description").assertTextContains("New Description")
     composeTestRule.onNodeWithTag("goBackButton").performClick()
-    composeTestRule.onNodeWithTag("alertDialogBack").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("alertDialog").assertIsDisplayed()
     composeTestRule.onNodeWithText("Cancel").performClick()
-    composeTestRule.onNodeWithTag("alertDialogBack").assertIsNotDisplayed()
+    composeTestRule.onNodeWithTag("alertDialog").assertIsNotDisplayed()
+  }
+
+  @Test
+  fun testNoSaveOfChangesWithoutChanges() {
+    composeTestRule.setContent {
+      ProfileEditingScreen(navigationActions, tagsViewModel, fakeProfilesViewModel)
+    }
+
+    composeTestRule.onNodeWithTag("goBackButton").performClick()
+    verify(navigationActions).goBack()
+  }
+
+  @Test
+  fun testSaveOfChanges() {
+    composeTestRule.setContent {
+      ProfileEditingScreen(navigationActions, tagsViewModel, fakeProfilesViewModel)
+    }
+
     composeTestRule.onNodeWithTag("checkButton").performClick()
-    composeTestRule.onNodeWithTag("alertDialogConfirm").assertIsDisplayed()
-    composeTestRule.onNodeWithText("Save").performClick()
     verify(navigationActions).goBack()
   }
 
@@ -134,8 +151,6 @@ class ProfileEditingScreenTest {
     composeTestRule.onNodeWithTag("catchphrase").performTextInput(longText)
     composeTestRule.onNodeWithTag("catchphrase").assertTextContains(longText.take(1000))
     composeTestRule.onNodeWithTag("checkButton").performClick()
-    composeTestRule.onNodeWithTag("alertDialogConfirm").assertIsDisplayed()
-    composeTestRule.onNodeWithText("Save").performClick()
     verify(navigationActions).goBack()
   }
 }
