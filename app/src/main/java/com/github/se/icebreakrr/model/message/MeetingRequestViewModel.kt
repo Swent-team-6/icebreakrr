@@ -12,6 +12,9 @@ import com.google.firebase.functions.FirebaseFunctions
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
+/*
+   Class that manages the interaction between messages, the Profile backend and the user of the app
+*/
 class MeetingRequestViewModel(
     private val profilesViewModel: ProfilesViewModel,
     private val functions: FirebaseFunctions,
@@ -42,12 +45,15 @@ class MeetingRequestViewModel(
 
   init {
     viewModelScope.launch {
-      // Subscribe to a topic, or retrieve FCM token if needed
-      // Firebase.messaging.subscribeToTopic("allUsers").await()
       meetingRequestState = meetingRequestState.copy(senderUID = ourUserId ?: "null")
     }
   }
 
+  /**
+   * Sets the good token for our message
+   *
+   * @param newToken the current token of the user to which we want to send the message
+   */
   fun onRemoteTokenChange(newToken: String) {
     meetingRequestState = meetingRequestState.copy(targetToken = newToken)
     profilesViewModel.getProfileByUid(ourUserId ?: "null")
@@ -57,16 +63,20 @@ class MeetingRequestViewModel(
       profilesViewModel.updateProfile(updatedProfile)
     }
   }
-
+  /**
+   * Sets the message of the meeting request
+   *
+   * @param newMessage the message we want to send
+   */
   fun onMeetingRequestChange(newMessage: String) {
     meetingRequestState = meetingRequestState.copy(message = newMessage)
   }
-
+  /** Sets the status of the message, shows that it is ready to be sent */
   fun onSubmitMeetingRequest() {
     meetingRequestState = meetingRequestState.copy(isEnteringMessage = false)
   }
 
-  // Send a message by calling the Firebase Function to send FCM message
+  /** Sends the message from our user to the target user */
   fun sendMessage() {
     viewModelScope.launch {
       val data =
