@@ -19,7 +19,6 @@ import com.github.se.icebreakrr.model.tags.TagsViewModel
 import com.github.se.icebreakrr.ui.navigation.NavigationActions
 import com.github.se.icebreakrr.ui.navigation.Route
 import com.github.se.icebreakrr.ui.navigation.Screen
-import com.github.se.icebreakrr.utils.NetworkUtils
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.GeoPoint
 import java.util.Calendar
@@ -37,7 +36,6 @@ class AroundYouScreenTest {
   private lateinit var mockProfilesRepository: ProfilesRepository
   private lateinit var mockPPRepository: ProfilePicRepository
   private lateinit var profilesViewModel: ProfilesViewModel
-  private lateinit var mockNetworkUtils: NetworkUtils
 
   @get:Rule val composeTestRule = createComposeRule()
 
@@ -47,7 +45,6 @@ class AroundYouScreenTest {
     mockProfilesRepository = mock(ProfilesRepository::class.java)
     mockPPRepository = mock(ProfilePicRepository::class.java)
     profilesViewModel = ProfilesViewModel(mockProfilesRepository, mockPPRepository)
-    mockNetworkUtils = mock(NetworkUtils::class.java)
 
     // Mock initial behavior of repository
     `when`(navigationActions.currentRoute()).thenReturn(Route.AROUND_YOU)
