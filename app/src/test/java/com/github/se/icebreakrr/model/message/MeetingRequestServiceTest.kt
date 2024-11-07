@@ -24,10 +24,6 @@ class MeetingRequestServiceTest {
     // Initialize MeetingRequestService with mocked NotificationManager
     meetingRequestService = MeetingRequestService()
     meetingRequestService = spy(meetingRequestService)
-
-    //
-    // `when`(mockContext.getSystemService(Context.NOTIFICATION_SERVICE)).thenReturn(mockNotificationManager)
-    //    doReturn(mockContext).`when`(meetingRequestService).getApplicationContext()
   }
 
   @Test

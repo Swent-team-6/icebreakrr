@@ -10,6 +10,10 @@ import com.google.firebase.messaging.RemoteMessage
 
 class MeetingRequestService : FirebaseMessagingService() {
 
+  private val MSG_CHANNEL_ID = "message_channel_id"
+  private val MSG_CHANNEL_NAME = "channel_message"
+  private val NOTIFICATION_ID = 0
+
   override fun onMessageReceived(remoteMessage: RemoteMessage) {
     super.onMessageReceived(remoteMessage)
 
@@ -29,23 +33,23 @@ class MeetingRequestService : FirebaseMessagingService() {
   }
 
   fun showNotification(title: String, message: String) {
-    val channelId = "your_channel_id"
     val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
     // Create notification channel for Android 8.0 and above
     val channel =
-        NotificationChannel(channelId, "Channel name", NotificationManager.IMPORTANCE_DEFAULT)
-            .apply { description = "Channel description" }
+        NotificationChannel(
+                MSG_CHANNEL_ID, MSG_CHANNEL_NAME, NotificationManager.IMPORTANCE_DEFAULT)
+            .apply { description = "Channel for messaging notifications" }
     notificationManager.createNotificationChannel(channel)
 
     val notificationBuilder =
-        NotificationCompat.Builder(this, channelId)
+        NotificationCompat.Builder(this, MSG_CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_launcher_foreground) // Replace with your app's icon
             .setContentTitle(title)
             .setContentText(message)
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .setAutoCancel(true)
 
-    notificationManager.notify(0, notificationBuilder.build())
+    notificationManager.notify(NOTIFICATION_ID, notificationBuilder.build())
   }
 }

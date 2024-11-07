@@ -115,7 +115,6 @@ class ProfilesRepositoryFirestore(private val db: FirebaseFirestore) : ProfilesR
     Log.d("ProfilesRepositoryFirestore", "getProfileByUid")
     db.collection("profiles").document(uid).get().addOnCompleteListener { task ->
       if (task.isSuccessful) {
-        Log.d("TASK", "RETURN GOOD PROFILE")
         val profile = task.result?.let { document -> documentToProfile(document) }
         onSuccess(profile)
       } else {

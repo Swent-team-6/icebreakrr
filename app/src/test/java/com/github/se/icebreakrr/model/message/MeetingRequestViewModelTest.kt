@@ -163,10 +163,6 @@ class MeetingRequestViewModelTest {
     assert(capturedData["body"] == "John Doe : " + meetingRequestState.message)
     assert(capturedData["picture"] == meetingRequestState.picture)
     assert(capturedData["location"] == meetingRequestState.location)
-
-    // Assert: Check that the meetingRequestState message was cleared
-    // assert(meetingRequestViewModel.meetingRequestState.message == "")
-    // assert(meetingRequestViewModel.meetingRequestState.picture == null)
   }
 
   @Test

@@ -186,17 +186,13 @@ dependencies {
     // Android Studio Preview support
     implementation(libs.compose.preview)
     // Accompanist Flow Layout dependency
-    implementation("com.google.accompanist:accompanist-flowlayout:0.32.0")
+    implementation(libs.accompanist.flowlayout)
 
     // Add Firebase Cloud Messaging System
-    implementation("com.google.firebase:firebase-messaging-ktx")
-
-    // Retrofit
-    implementation("com.squareup.retrofit2:retrofit:2.9.0")
-    implementation("com.squareup.retrofit2:converter-moshi:2.9.0")
+    implementation(libs.firebase.messaging.ktx)
 
     // Arch Core Testing library for InstantTaskExecutorRule
-    testImplementation("androidx.arch.core:core-testing:2.2.0")
+    testImplementation(libs.androidx.core.testing)
 
 
 

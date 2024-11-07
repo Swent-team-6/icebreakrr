@@ -20,6 +20,7 @@ class MeetingRequestViewModel(
 ) : ViewModel() {
 
   var meetingRequestState by mutableStateOf(MeetingRequest())
+  private val SEND_MESSAGE_FUNCTION_NAME = "sendMessage"
 
   companion object {
     class Factory(
@@ -76,10 +77,9 @@ class MeetingRequestViewModel(
               "picture" to meetingRequestState.picture,
               "location" to meetingRequestState.location)
       try {
-        Log.d("CURRENT MESSAGE : ", ourName + " : " + meetingRequestState.message)
         val result =
             functions
-                .getHttpsCallable("sendMessage") // Cloud Function name
+                .getHttpsCallable(SEND_MESSAGE_FUNCTION_NAME) // Cloud Function name
                 .call(data)
                 .await()
 
