@@ -64,7 +64,7 @@ fun ProfileEditingScreen(
   val expanded = remember { mutableStateOf(false) }
 
   var showDialogBack by remember { mutableStateOf(false) }
-  var showDialogConfirm by remember { mutableStateOf(false) }
+  var isMofidied by remember { mutableStateOf(false) }
 
   val selectedTags = tagsViewModel.filteringTags.collectAsState().value
   val tagsSuggestions = tagsViewModel.tagsSuggestions.collectAsState()
@@ -101,8 +101,12 @@ fun ProfileEditingScreen(
                 IconButton(
                     modifier = Modifier.testTag("goBackButton"),
                     onClick = {
-                      showDialogBack = true
-                      tagsViewModel.leaveUI()
+                      if (isMofidied) {
+                        showDialogBack = true
+                      } else {
+                        tagsViewModel.leaveUI()
+                        navigationActions.goBack()
+                      }
                     }) {
                       Icon(Icons.Default.ArrowBack, contentDescription = "Back")
                     }
@@ -110,7 +114,11 @@ fun ProfileEditingScreen(
               actions = {
                 IconButton(
                     modifier = Modifier.testTag("checkButton"),
-                    onClick = { showDialogConfirm = true }) {
+                    onClick = {
+                      updateProfile()
+                      tagsViewModel.leaveUI()
+                      navigationActions.goBack()
+                    }) {
                       Icon(Icons.Default.Check, contentDescription = "Save")
                     }
               })
@@ -118,14 +126,14 @@ fun ProfileEditingScreen(
           Column(
               modifier = Modifier.padding(it).padding(padding).testTag("profileEditScreenContent"),
               horizontalAlignment = Alignment.CenterHorizontally) {
-                AsyncImage( // TODO : implement image uploading
+                AsyncImage(
                     model = profilePictureUrl,
                     contentDescription = "Profile Picture",
                     modifier =
                         Modifier.size(profilePictureSize)
                             .clip(CircleShape)
                             .background(MaterialTheme.colorScheme.primary)
-                            .testTag("profilePicture")) // Added test tag
+                            .testTag("profilePicture"))
 
                 Spacer(modifier = Modifier.height(padding))
 
@@ -142,7 +150,10 @@ fun ProfileEditingScreen(
                 // Catchphrase Input
                 OutlinedTextField(
                     value = catchphrase,
-                    onValueChange = { catchphrase = it },
+                    onValueChange = {
+                      catchphrase = it
+                      isMofidied = true
+                    },
                     label = {
                       Text("Catchphrase", modifier = Modifier.testTag("catchphraseLabel"))
                     },
@@ -155,7 +166,10 @@ fun ProfileEditingScreen(
                 // Description Input
                 OutlinedTextField(
                     value = description,
-                    onValueChange = { description = it },
+                    onValueChange = {
+                      description = it
+                      isMofidied = true
+                    },
                     label = { Text("Description") },
                     textStyle = TextStyle(fontSize = textSize.value.sp * 0.6),
                     modifier =
@@ -171,10 +185,19 @@ fun ProfileEditingScreen(
                         },
                     stringQuery = stringQuery.value,
                     expanded = expanded,
-                    onTagClick = { tag -> tagsViewModel.removeFilter(tag) },
-                    onStringChanged = { tagsViewModel.setQuery(it, selectedTags) },
+                    onTagClick = { tag ->
+                      tagsViewModel.removeFilter(tag)
+                      isMofidied = true
+                    },
+                    onStringChanged = {
+                      tagsViewModel.setQuery(it, selectedTags)
+                      isMofidied = true
+                    },
                     textColor = MaterialTheme.colorScheme.onSurface,
-                    onDropDownItemClicked = { tag -> tagsViewModel.addFilter(tag) },
+                    onDropDownItemClicked = { tag ->
+                      tagsViewModel.addFilter(tag)
+                      isMofidied = true
+                    },
                     height = screenHeight,
                     width = screenWidth,
                     textSize = (screenHeight.value * 0.03).sp,
@@ -183,7 +206,7 @@ fun ProfileEditingScreen(
                 Spacer(modifier = Modifier.height(padding))
 
                 // Modal for unsaved changes on leave page with back button
-                if (showDialogBack) {
+                if (showDialogBack && isMofidied) {
                   AlertDialog(
                       onDismissRequest = { showDialogBack = false },
                       title = { Text("You are about to leave this page") },
@@ -202,26 +225,6 @@ fun ProfileEditingScreen(
                         TextButton(onClick = { showDialogBack = false }) { Text("Cancel") }
                       },
                       modifier = Modifier.testTag("alertDialogBack"))
-                } else if (showDialogConfirm) {
-                  AlertDialog(
-                      onDismissRequest = { showDialogConfirm = false },
-                      title = { Text("You are about to leave this page") },
-                      text = { Text("Are you sure you want to save your changes?") },
-                      confirmButton = {
-                        TextButton(
-                            onClick = {
-                              showDialogConfirm = false
-                              updateProfile()
-                              tagsViewModel.leaveUI()
-                              navigationActions.goBack()
-                            }) {
-                              Text("Save")
-                            }
-                      },
-                      dismissButton = {
-                        TextButton(onClick = { showDialogConfirm = false }) { Text("Cancel") }
-                      },
-                      modifier = Modifier.testTag("alertDialogConfirm"))
                 }
               }
         }
