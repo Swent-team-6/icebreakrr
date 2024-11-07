@@ -94,7 +94,8 @@ class ProfilesRepositoryFirestoreTest {
 
   @Test
   fun getProfilesInRadius_shouldFetchAllProfiles() {
-    `when`(mockCollectionReference.get(any<com.google.firebase.firestore.Source>())).thenReturn(Tasks.forResult(mockProfileQuerySnapshot))
+    `when`(mockCollectionReference.get(any<com.google.firebase.firestore.Source>()))
+        .thenReturn(Tasks.forResult(mockProfileQuerySnapshot))
 
     // Simulate that the QuerySnapshot contains an empty list of documents
     `when`(mockProfileQuerySnapshot.documents).thenReturn(listOf())
@@ -206,7 +207,7 @@ class ProfilesRepositoryFirestoreTest {
 
   @Test
   fun getProfileByUid_shouldCallFailureCallback_onError() {
-      `when`(mockDocumentReference.get()).thenReturn(Tasks.forException(Exception("Test exception")))
+    `when`(mockDocumentReference.get()).thenReturn(Tasks.forException(Exception("Test exception")))
 
     profilesRepositoryFirestore.getProfileByUid(
         uid = "1",
@@ -281,7 +282,8 @@ class ProfilesRepositoryFirestoreTest {
     // Mock the QuerySnapshot
     `when`(mockProfileQuerySnapshot.documents)
         .thenReturn(listOf(validDocument1, validDocument2, invalidDocument))
-    `when`(mockCollectionReference.get(any<com.google.firebase.firestore.Source>())).thenReturn(Tasks.forResult(mockProfileQuerySnapshot))
+    `when`(mockCollectionReference.get(any<com.google.firebase.firestore.Source>()))
+        .thenReturn(Tasks.forResult(mockProfileQuerySnapshot))
 
     profilesRepositoryFirestore.getProfilesInRadius(
         center = GeoPoint(0.0, 0.0),
