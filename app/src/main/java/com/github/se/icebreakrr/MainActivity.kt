@@ -97,11 +97,13 @@ fun IcebreakrrApp() {
   val tagsViewModel: TagsViewModel = viewModel(factory = TagsViewModel.Factory)
   val filterViewModel: FilterViewModel = viewModel(factory = FilterViewModel.Factory)
   val ourUserUid = FirebaseAuth.getInstance().currentUser?.uid
+  val ourName = FirebaseAuth.getInstance().currentUser?.displayName
   val functions = FirebaseFunctions.getInstance()
   val meetingRequestViewModel: MeetingRequestViewModel =
       viewModel(
           factory =
-              MeetingRequestViewModel.Companion.Factory(profileViewModel, functions, ourUserUid))
+              MeetingRequestViewModel.Companion.Factory(
+                  profileViewModel, functions, ourUserUid, ourName))
 
   NavHost(navController = navController, startDestination = Route.AUTH) {
     navigation(

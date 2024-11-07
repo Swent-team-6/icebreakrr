@@ -15,7 +15,8 @@ import kotlinx.coroutines.tasks.await
 class MeetingRequestViewModel(
     private val profilesViewModel: ProfilesViewModel,
     private val functions: FirebaseFunctions,
-    private val ourUserId: String?
+    private val ourUserId: String?,
+    private val ourName: String?
 ) : ViewModel() {
 
   var meetingRequestState by mutableStateOf(MeetingRequest())
@@ -24,13 +25,14 @@ class MeetingRequestViewModel(
     class Factory(
         private val profilesViewModel: ProfilesViewModel,
         private val functions: FirebaseFunctions,
-        private val ourUserId: String?
+        private val ourUserId: String?,
+        private val ourName: String?
     ) : ViewModelProvider.Factory {
 
       @Suppress("UNCHECKED_CAST")
       override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(MeetingRequestViewModel::class.java)) {
-          return MeetingRequestViewModel(profilesViewModel, functions, ourUserId) as T
+          return MeetingRequestViewModel(profilesViewModel, functions, ourUserId, ourName) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
       }
@@ -70,10 +72,11 @@ class MeetingRequestViewModel(
           hashMapOf(
               "targetToken" to meetingRequestState.targetToken,
               "senderUID" to meetingRequestState.senderUID,
-              "body" to meetingRequestState.message,
+              "body" to ourName + " : " + meetingRequestState.message,
               "picture" to meetingRequestState.picture,
               "location" to meetingRequestState.location)
       try {
+        Log.d("CURRENT MESSAGE : ", ourName + " : " + meetingRequestState.message)
         val result =
             functions
                 .getHttpsCallable("sendMessage") // Cloud Function name

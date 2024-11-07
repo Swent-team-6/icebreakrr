@@ -93,7 +93,7 @@ class MeetingRequestViewModelTest {
     functions = mock(FirebaseFunctions::class.java)
 
     // Initialize the ViewModel with mocks
-    meetingRequestViewModel = MeetingRequestViewModel(profilesViewModel, functions, "1")
+    meetingRequestViewModel = MeetingRequestViewModel(profilesViewModel, functions, "1", "John Doe")
     `when`(functions.getHttpsCallable("sendMessage")).thenReturn(callableReference)
   }
 
@@ -160,7 +160,7 @@ class MeetingRequestViewModelTest {
     val capturedData = argumentCaptor.value as Map<String, Any>
     assert(capturedData["targetToken"] == meetingRequestState.targetToken)
     assert(capturedData["senderUID"] == meetingRequestState.senderUID)
-    assert(capturedData["body"] == meetingRequestState.message)
+    assert(capturedData["body"] == "John Doe : " + meetingRequestState.message)
     assert(capturedData["picture"] == meetingRequestState.picture)
     assert(capturedData["location"] == meetingRequestState.location)
 

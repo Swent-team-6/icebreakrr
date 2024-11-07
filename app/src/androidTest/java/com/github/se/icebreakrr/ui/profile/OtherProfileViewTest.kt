@@ -53,7 +53,7 @@ class OtherProfileViewTest {
     profilesViewModel = ProfilesViewModel(profilesRepository, ppRepository)
 
     functions = mock(FirebaseFunctions::class.java)
-    meetingRequestViewModel = MeetingRequestViewModel(profilesViewModel, functions, ourUserId)
+    meetingRequestViewModel = MeetingRequestViewModel(profilesViewModel, functions, ourUserId, "My Name")
 
     tagsViewModel = TagsViewModel(mockTagsRepository)
 
