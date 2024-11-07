@@ -76,10 +76,8 @@ open class ProfilesViewModel(
    */
   private fun checkConnectionWithDelay() {
     viewModelScope.launch {
-      Log.e("ConnectionCheck", "Starting 15s timer")
       delay(15000) // 15 seconds delay
       waitingDone.value = true
-      Log.e("ConnectionCheck", "Timer done, waitingDone = true")
     }
   }
 
@@ -104,7 +102,6 @@ open class ProfilesViewModel(
         center = center,
         radiusInMeters = radiusInMeters,
         onSuccess = { profileList ->
-          Log.e("ConnectionCheck", "Request SUCCESS")
           val filteredProfiles =
               profileList.filter { profile ->
 
