@@ -45,7 +45,7 @@ class MainActivity : ComponentActivity() {
     auth.currentUser?.let {
       // Sign out the user if they are already signed in
       // This is useful for testing purposes
-      auth.signOut()
+      //auth.signOut()
     }
 
     // Retrieve the testing flag from the Intent

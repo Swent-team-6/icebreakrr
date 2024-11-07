@@ -52,6 +52,7 @@ import com.github.se.icebreakrr.model.profile.Profile
 import com.github.se.icebreakrr.model.profile.ProfilesViewModel
 import com.github.se.icebreakrr.ui.navigation.NavigationActions
 import com.github.se.icebreakrr.ui.navigation.TopLevelDestinations
+import com.github.se.icebreakrr.utils.NetworkUtils
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
@@ -73,117 +74,120 @@ import kotlinx.coroutines.tasks.await
 @Composable
 fun SignInScreen(profilesViewModel: ProfilesViewModel, navigationActions: NavigationActions) {
 
-  // State to hold the current Firebase user
-  var user by remember { mutableStateOf(Firebase.auth.currentUser) }
-  // Retrieve the token from resources (needed for Google Sign-In)
-  val token = stringResource(R.string.default_web_client_id)
-  // Get the context to use within the composable
-  val context = LocalContext.current
+    // State to hold the current Firebase user
+    var user by remember { mutableStateOf(Firebase.auth.currentUser) }
+    // Retrieve the token from resources (needed for Google Sign-In)
+    val token = stringResource(R.string.default_web_client_id)
+    // Get the context to use within the composable
+    val context = LocalContext.current
 
-  // Check if the app is running in test mode
-  val isTesting = LocalIsTesting.current
+    // Check if the app is running in test mode
+    val isTesting = LocalIsTesting.current
 
-  // Get screen configuration to dynamically adjust layout
-  val configuration = LocalConfiguration.current
-  val screenHeight = configuration.screenHeightDp
+    // Get screen configuration to dynamically adjust layout
+    val configuration = LocalConfiguration.current
+    val screenHeight = configuration.screenHeightDp
 
-  // Define padding and spacing as percentages of the screen height
-  val verticalPadding = (screenHeight * 0.2).dp // 20%
+    // Define padding and spacing as percentages of the screen height
+    val verticalPadding = (screenHeight * 0.2).dp // 20%
 
-  val coroutineScope = rememberCoroutineScope()
+    val coroutineScope = rememberCoroutineScope()
 
-  val launcher =
-      rememberFirebaseAuthLauncher(
-          onAuthComplete = { result ->
-            user = result.user
-            user?.let { firebaseUser ->
-              coroutineScope.launch {
+    val launcher =
+        rememberFirebaseAuthLauncher(
+            onAuthComplete = { result ->
+                user = result.user
+                user?.let { firebaseUser ->
+                    coroutineScope.launch {
 
-                // Checking if user already exists
-                profilesViewModel.getProfileByUid(firebaseUser.uid)
+                        // Checking if user already exists
+                        profilesViewModel.getProfileByUid(firebaseUser.uid)
 
-                // Wait until loading becomes false which means that we got the user
-                profilesViewModel.loading.first { !it }
+                        // Wait until loading becomes false which means that we got the user
+                        profilesViewModel.loading.first { !it }
 
-                // Check selectedProfile after loading completes
-                val profile = profilesViewModel.selectedProfile.value
+                        // Check selectedProfile after loading completes
+                        val profile = profilesViewModel.selectedProfile.value
 
-                // checking if profile already exists
-                if (profile == null) { // if doesn't exist create new user
+                        // checking if profile already exists
+                        if (profile == null) { // if doesn't exist create new user
 
-                  val newProfile =
-                      Profile(
-                          uid = firebaseUser.uid,
-                          name = firebaseUser.displayName ?: "Unknown",
-                          gender = Gender.OTHER,
-                          birthDate = Timestamp.now(),
-                          catchPhrase = "",
-                          description = "")
+                            val newProfile =
+                                Profile(
+                                    uid = firebaseUser.uid,
+                                    name = firebaseUser.displayName ?: "Unknown",
+                                    gender = Gender.OTHER,
+                                    birthDate = Timestamp.now(),
+                                    catchPhrase = "",
+                                    description = "")
 
-                  profilesViewModel.addNewProfile(newProfile)
+                            profilesViewModel.addNewProfile(newProfile)
+                        }
+
+                        // Navigate to sign in screen after completion
+                        navigationActions.navigateTo(TopLevelDestinations.AROUND_YOU)
+                    }
                 }
+            },
+            onAuthError = { user = null })
 
-                // Navigate to sign in screen after completion
-                navigationActions.navigateTo(TopLevelDestinations.AROUND_YOU)
-              }
-            }
-          },
-          onAuthError = { user = null })
+    // Define a linear gradient with the provided colors
+    val gradientBrush =
+        Brush.linearGradient(
+            colors =
+            listOf(
+                Color(0xFF1FAEF0), // Light blue
+                Color(0xFF1C9EDA), // Mid blue
+                Color(0xFF12648A) // Dark blue
+            ))
 
-  // Define a linear gradient with the provided colors
-  val gradientBrush =
-      Brush.linearGradient(
-          colors =
-              listOf(
-                  Color(0xFF1FAEF0), // Light blue
-                  Color(0xFF1C9EDA), // Mid blue
-                  Color(0xFF12648A) // Dark blue
-                  ))
-
-  Scaffold(
-      modifier = Modifier.fillMaxSize().testTag("loginScreen"),
-      content = { paddingValues ->
-        Column(
-            modifier =
+    Scaffold(
+        modifier = Modifier.fillMaxSize().testTag("loginScreen"),
+        content = { paddingValues ->
+            Column(
+                modifier =
                 Modifier.background(brush = gradientBrush)
                     .fillMaxSize()
                     .padding(vertical = verticalPadding)
                     .padding(paddingValues),
-            verticalArrangement = Arrangement.SpaceBetween,
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-          Text(
-              modifier = Modifier.testTag("loginTitle"),
-              text = "IceBreakrr",
-              style =
-                  TextStyle(
-                      fontSize = 64.sp,
-                      lineHeight = 25.07.sp,
-                      fontWeight = FontWeight(500),
-                      color = Color(0xFFFFFFFF),
-                      textAlign = TextAlign.Center,
-                      letterSpacing = 0.37.sp,
-                  ))
+                verticalArrangement = Arrangement.SpaceBetween,
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                Text(
+                    modifier = Modifier.testTag("loginTitle"),
+                    text = "IceBreakrr",
+                    style =
+                    TextStyle(
+                        fontSize = 64.sp,
+                        lineHeight = 25.07.sp,
+                        fontWeight = FontWeight(500),
+                        color = Color(0xFFFFFFFF),
+                        textAlign = TextAlign.Center,
+                        letterSpacing = 0.37.sp,
+                    ))
 
-          // Authenticate With Google Button
-          GoogleSignInButton(
-              onClick = {
+                // Authenticate With Google Button
+                GoogleSignInButton(
+                    onClick = {
+                        if (isTesting) {
+                            navigationActions.navigateTo(TopLevelDestinations.AROUND_YOU)
+                        } else {
+                            if (!NetworkUtils.isNetworkAvailable(context)) {
+                                NetworkUtils.showNoInternetToast(context)
+                            } else {
+                                val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                                    .requestIdToken(token)
+                                    .requestEmail()
+                                    .build()
+                                val googleSignInClient = GoogleSignIn.getClient(context, gso)
+                                launcher.launch(googleSignInClient.signInIntent)
+                            }
 
-                // If in test mode, simulate a logged-in user
-                if (isTesting) {
-                  navigationActions.navigateTo(TopLevelDestinations.AROUND_YOU)
-                } else {
-                  val gso =
-                      GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                          .requestIdToken(token)
-                          .requestEmail()
-                          .build()
-                  val googleSignInClient = GoogleSignIn.getClient(context, gso)
-                  launcher.launch(googleSignInClient.signInIntent)
-                }
-              })
-        }
-      })
+
+                        }
+                    })
+            }
+        })
 }
 
 /**
@@ -194,36 +198,36 @@ fun SignInScreen(profilesViewModel: ProfilesViewModel, navigationActions: Naviga
  */
 @Composable
 fun GoogleSignInButton(onClick: () -> Unit) {
-  Button(
-      onClick = onClick,
-      colors = ButtonDefaults.buttonColors(containerColor = Color.White), // Button color
-      shape = RoundedCornerShape(50), // Circular edges for the button
-      border = BorderStroke(1.dp, Color.LightGray),
-      modifier =
-          Modifier.padding(8.dp)
-              .height(48.dp) // Adjust height as needed
-              .testTag("loginButton")) {
+    Button(
+        onClick = onClick,
+        colors = ButtonDefaults.buttonColors(containerColor = Color.White), // Button color
+        shape = RoundedCornerShape(50), // Circular edges for the button
+        border = BorderStroke(1.dp, Color.LightGray),
+        modifier =
+        Modifier.padding(8.dp)
+            .height(48.dp) // Adjust height as needed
+            .testTag("loginButton")) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center,
             modifier = Modifier.fillMaxWidth()) {
-              // Load the Google logo from resources
-              Image(
-                  painter =
-                      painterResource(id = R.drawable.google_logo), // Ensure this drawable exists
-                  contentDescription = "Google Logo",
-                  modifier =
-                      Modifier.size(30.dp) // Size of the Google logo
-                          .padding(end = 8.dp))
+            // Load the Google logo from resources
+            Image(
+                painter =
+                painterResource(id = R.drawable.google_logo), // Ensure this drawable exists
+                contentDescription = "Google Logo",
+                modifier =
+                Modifier.size(30.dp) // Size of the Google logo
+                    .padding(end = 8.dp))
 
-              // Text for the button
-              Text(
-                  text = "Sign in with Google",
-                  color = Color.Gray, // Text color
-                  fontSize = 16.sp, // Font size
-                  fontWeight = FontWeight.Medium)
-            }
-      }
+            // Text for the button
+            Text(
+                text = "Sign in with Google",
+                color = Color.Gray, // Text color
+                fontSize = 16.sp, // Font size
+                fontWeight = FontWeight.Medium)
+        }
+    }
 }
 
 /**
@@ -239,21 +243,21 @@ fun rememberFirebaseAuthLauncher(
     onAuthComplete: (AuthResult) -> Unit,
     onAuthError: (ApiException) -> Unit
 ): ManagedActivityResultLauncher<Intent, ActivityResult> {
-  // Coroutine scope for handling asynchronous tasks
-  val scope = rememberCoroutineScope()
+    // Coroutine scope for handling asynchronous tasks
+    val scope = rememberCoroutineScope()
 
-  return rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-      result ->
-    val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
-    try {
-      val account = task.getResult(ApiException::class.java)!!
-      val credential = GoogleAuthProvider.getCredential(account.idToken!!, null)
-      scope.launch {
-        val authResult = Firebase.auth.signInWithCredential(credential).await()
-        onAuthComplete(authResult)
-      }
-    } catch (e: ApiException) {
-      onAuthError(e)
+    return rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+            result ->
+        val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
+        try {
+            val account = task.getResult(ApiException::class.java)!!
+            val credential = GoogleAuthProvider.getCredential(account.idToken!!, null)
+            scope.launch {
+                val authResult = Firebase.auth.signInWithCredential(credential).await()
+                onAuthComplete(authResult)
+            }
+        } catch (e: ApiException) {
+            onAuthError(e)
+        }
     }
-  }
 }
