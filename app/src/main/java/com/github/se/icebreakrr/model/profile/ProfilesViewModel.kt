@@ -165,13 +165,13 @@ open class ProfilesViewModel(
    * @param imageData The byte array of the image file to be uploaded.
    * @throws IllegalStateException if the user is not logged in.
    */
-  fun uploadCurrentUserProfilePicture(imageData: ByteArray) {
+  fun uploadCurrentUserProfilePicture(imageData: ByteArray, onSuccess: (url: String?) -> Unit) {
     val userId = selectedProfile.value?.uid ?: throw IllegalStateException("User not logged in")
     ppRepository.uploadProfilePicture(
         userId = userId,
         imageData = imageData,
         onSuccess = { url ->
-          _selectedProfile.update { selected -> selected?.copy(profilePictureUrl = url) }
+          onSuccess(url)
         },
         onFailure = { e -> handleError(e) })
   }
