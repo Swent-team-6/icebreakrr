@@ -181,7 +181,7 @@ fun PullToRefreshBox(
 
     Box(
         modifier.pullToRefresh(state = state, isRefreshing = isRefreshing) {
-            // TODO Mocked values, to change with the saved filter values and current location
+            // TODO Mocked values, to change with  current location
             onRefresh(
                 GeoPoint(0.0, 0.0),
                 300.0,
