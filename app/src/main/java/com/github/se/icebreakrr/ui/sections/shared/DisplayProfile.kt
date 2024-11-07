@@ -18,7 +18,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.Create
-import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
@@ -28,6 +27,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
@@ -44,6 +44,8 @@ import com.github.se.icebreakrr.ui.navigation.NavigationActions
 import com.github.se.icebreakrr.ui.tags.RowOfTags
 import com.github.se.icebreakrr.ui.tags.TagStyle
 import com.github.se.icebreakrr.ui.theme.IceBreakrrBlue
+import com.github.se.icebreakrr.utils.NetworkUtils.isNetworkAvailable
+import com.github.se.icebreakrr.utils.NetworkUtils.showNoInternetToast
 
 /**
  * Displays the user's information section with a catchphrase, tags, and description. The content is
@@ -178,6 +180,7 @@ fun ProfileHeader(
                   color = Color.White,
                   modifier = Modifier.testTag("username"))
 
+              val context = LocalContext.current
               // Edit Button or message button
               if (myProfile) {
                 Box(
@@ -187,7 +190,14 @@ fun ProfileHeader(
                             .background(IceBreakrrBlue, CircleShape),
                     contentAlignment = Alignment.Center) {
                       IconButton(
-                          onClick = { onEditClick() }, modifier = Modifier.testTag("editButton")) {
+                          onClick = {
+                            if (isNetworkAvailable(context = context)) {
+                              onEditClick()
+                            } else {
+                              showNoInternetToast(context = context)
+                            }
+                          },
+                          modifier = Modifier.testTag("editButton")) {
                             Icon(
                                 imageVector = Icons.Filled.Create,
                                 contentDescription = "Edit Profile",
@@ -203,7 +213,13 @@ fun ProfileHeader(
                             .background(IceBreakrrBlue, CircleShape),
                     contentAlignment = Alignment.Center) {
                       IconButton(
-                          onClick = { onEditClick() },
+                          onClick = {
+                            if (isNetworkAvailable(context = context)) {
+                              onEditClick()
+                            } else {
+                              showNoInternetToast(context = context)
+                            }
+                          },
                           modifier = Modifier.testTag("requestButton")) {
                             Icon(
                                 imageVector = Icons.AutoMirrored.Filled.Send,
