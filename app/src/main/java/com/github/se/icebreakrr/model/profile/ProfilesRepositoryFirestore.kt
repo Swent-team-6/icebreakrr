@@ -49,7 +49,8 @@ class ProfilesRepositoryFirestore(private val db: FirebaseFirestore) : ProfilesR
       onFailure: (Exception) -> Unit
   ) {
     // TODO Add GeoFirestore functionality
-    val task = db.collection(collectionPath).get()
+    val task = db.collection(collectionPath)
+        .get(com.google.firebase.firestore.Source.SERVER)
 
     task.addOnCompleteListener { result ->
       if (result.isSuccessful) {
