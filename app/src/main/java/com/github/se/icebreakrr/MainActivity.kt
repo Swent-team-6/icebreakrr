@@ -117,7 +117,9 @@ fun IcebreakrrApp() {
         startDestination = Screen.PROFILE_EDIT,
         route = Route.PROFILE_EDIT,
     ) {
-      composable(Screen.PROFILE_EDIT) { ProfileEditingScreen(navigationActions, tagsViewModel) }
+      composable(Screen.PROFILE_EDIT) {
+        ProfileEditingScreen(navigationActions, tagsViewModel, profileViewModel)
+      }
     }
 
     navigation(
