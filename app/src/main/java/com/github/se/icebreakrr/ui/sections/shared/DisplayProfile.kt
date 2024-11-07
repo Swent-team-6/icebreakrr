@@ -249,9 +249,13 @@ fun ProfileCatchPhrase(catchPhrase: String) {
  */
 @Composable
 fun TagsSection(listOfTags: List<Pair<String, Color>>) {
-  Box(modifier = Modifier.fillMaxWidth().height(80.dp).testTag("tagSection")) {
-    RowOfTags(listOfTags, TagStyle())
-  }
+  Box(
+      modifier =
+          Modifier.fillMaxWidth()
+              .height((((listOfTags.size / 2) * tagHeight).dp))
+              .testTag("tagSection")) {
+        RowOfTags(listOfTags, TagStyle())
+      }
 }
 
 /**
