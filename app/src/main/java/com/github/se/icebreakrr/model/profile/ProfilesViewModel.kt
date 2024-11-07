@@ -203,23 +203,32 @@ open class ProfilesViewModel(
   }
 
     fun imageUriToJpgByteArray(context: Context, imageUri: Uri, quality: Int = 100): ByteArray? {
-        return try {
-            // open an InputStream from the URI
-            val inputStream: InputStream? = context.contentResolver.openInputStream(imageUri)
+    return try {
+        // open an InputStream from the URI
+        val inputStream: InputStream? = context.contentResolver.openInputStream(imageUri)
 
-            // decode InputStream to Bitmap
-            val bitmap = BitmapFactory.decodeStream(inputStream)
-            inputStream?.close() // close the InputStream after decoding
+        // decode InputStream to Bitmap
+        val bitmap = BitmapFactory.decodeStream(inputStream)
+        inputStream?.close() // close the InputStream after decoding
 
-            //compress Bitmap to JPEG format and store in ByteArrayOutputStream
-            val byteArrayOutputStream = ByteArrayOutputStream()
-            bitmap?.compress(Bitmap.CompressFormat.JPEG, quality, byteArrayOutputStream)
+        // todo: delegate image cropping to another function
+        // calculate the dimensions for the square crop
+        val dimension = minOf(bitmap.width, bitmap.height)
+        val xOffset = (bitmap.width - dimension) / 2
+        val yOffset = (bitmap.height - dimension) / 2
 
-            // return ByteArray of compressed JPEG image (representing .jpg)
-            byteArrayOutputStream.toByteArray()
-        } catch (e: Exception) {
-            e.printStackTrace()
-            null
-        }
+        // crop the Bitmap to a square at the center
+        val croppedBitmap = Bitmap.createBitmap(bitmap, xOffset, yOffset, dimension, dimension)
+
+        // compress Bitmap to JPEG format and store in ByteArrayOutputStream
+        val byteArrayOutputStream = ByteArrayOutputStream()
+        croppedBitmap.compress(Bitmap.CompressFormat.JPEG, quality, byteArrayOutputStream)
+
+        // return ByteArray of compressed JPEG image (representing .jpg)
+        byteArrayOutputStream.toByteArray()
+    } catch (e: Exception) {
+        e.printStackTrace()
+        null
     }
+}
 }
