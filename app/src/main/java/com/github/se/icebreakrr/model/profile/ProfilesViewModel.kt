@@ -10,11 +10,11 @@ import com.google.firebase.Firebase
 import com.google.firebase.firestore.GeoPoint
 import com.google.firebase.firestore.firestore
 import com.google.firebase.storage.storage
+import java.io.ByteArrayOutputStream
+import java.io.InputStream
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
-import java.io.ByteArrayOutputStream
-import java.io.InputStream
 
 open class ProfilesViewModel(
     private val repository: ProfilesRepository,
@@ -170,9 +170,7 @@ open class ProfilesViewModel(
     ppRepository.uploadProfilePicture(
         userId = userId,
         imageData = imageData,
-        onSuccess = { url ->
-          onSuccess(url)
-        },
+        onSuccess = { url -> onSuccess(url) },
         onFailure = { e -> handleError(e) })
   }
 
@@ -202,33 +200,33 @@ open class ProfilesViewModel(
     _loading.value = false
   }
 
-    fun imageUriToJpgByteArray(context: Context, imageUri: Uri, quality: Int = 100): ByteArray? {
+  fun imageUriToJpgByteArray(context: Context, imageUri: Uri, quality: Int = 100): ByteArray? {
     return try {
-        // open an InputStream from the URI
-        val inputStream: InputStream? = context.contentResolver.openInputStream(imageUri)
+      // open an InputStream from the URI
+      val inputStream: InputStream? = context.contentResolver.openInputStream(imageUri)
 
-        // decode InputStream to Bitmap
-        val bitmap = BitmapFactory.decodeStream(inputStream)
-        inputStream?.close() // close the InputStream after decoding
+      // decode InputStream to Bitmap
+      val bitmap = BitmapFactory.decodeStream(inputStream)
+      inputStream?.close() // close the InputStream after decoding
 
-        // todo: delegate image cropping to another function
-        // calculate the dimensions for the square crop
-        val dimension = minOf(bitmap.width, bitmap.height)
-        val xOffset = (bitmap.width - dimension) / 2
-        val yOffset = (bitmap.height - dimension) / 2
+      // todo: delegate image cropping to another function
+      // calculate the dimensions for the square crop
+      val dimension = minOf(bitmap.width, bitmap.height)
+      val xOffset = (bitmap.width - dimension) / 2
+      val yOffset = (bitmap.height - dimension) / 2
 
-        // crop the Bitmap to a square at the center
-        val croppedBitmap = Bitmap.createBitmap(bitmap, xOffset, yOffset, dimension, dimension)
+      // crop the Bitmap to a square at the center
+      val croppedBitmap = Bitmap.createBitmap(bitmap, xOffset, yOffset, dimension, dimension)
 
-        // compress Bitmap to JPEG format and store in ByteArrayOutputStream
-        val byteArrayOutputStream = ByteArrayOutputStream()
-        croppedBitmap.compress(Bitmap.CompressFormat.JPEG, quality, byteArrayOutputStream)
+      // compress Bitmap to JPEG format and store in ByteArrayOutputStream
+      val byteArrayOutputStream = ByteArrayOutputStream()
+      croppedBitmap.compress(Bitmap.CompressFormat.JPEG, quality, byteArrayOutputStream)
 
-        // return ByteArray of compressed JPEG image (representing .jpg)
-        byteArrayOutputStream.toByteArray()
+      // return ByteArray of compressed JPEG image (representing .jpg)
+      byteArrayOutputStream.toByteArray()
     } catch (e: Exception) {
-        e.printStackTrace()
-        null
+      e.printStackTrace()
+      null
     }
-}
+  }
 }

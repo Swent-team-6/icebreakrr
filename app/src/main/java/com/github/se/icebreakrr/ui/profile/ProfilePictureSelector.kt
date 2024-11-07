@@ -30,11 +30,7 @@ import com.github.se.icebreakrr.ui.theme.IceBreakrrBlue
 @Preview(showBackground = true)
 @Composable
 fun ProfilePicturePreview() {
-    ProfilePicture(
-        url = null,
-        size = 100.dp,
-        onSelectionSuccess = {},
-        onSelectionFailure = {})
+  ProfilePicture(url = null, size = 100.dp, onSelectionSuccess = {}, onSelectionFailure = {})
 }
 
 @Composable
@@ -42,53 +38,46 @@ fun ProfilePicture(
     url: String?,
     size: Dp,
     onSelectionSuccess: (Uri) -> Unit,
-    onSelectionFailure: () -> Unit ) {
-    val imagePicker = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.PickVisualMedia(),
-        onResult = { uri ->
+    onSelectionFailure: () -> Unit
+) {
+  val imagePicker =
+      rememberLauncherForActivityResult(
+          contract = ActivityResultContracts.PickVisualMedia(),
+          onResult = { uri ->
             if (uri != null) {
-                onSelectionSuccess(uri)
+              onSelectionSuccess(uri)
             } else {
-                onSelectionFailure()
+              onSelectionFailure()
             }
-        }
-    )
+          })
 
-    Box(
-        modifier = Modifier
-            .clickable(onClick = {
-                imagePicker.launch(
-                    PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
-                )
-            })
-            .size(size)
-            .background(MaterialTheme.colorScheme.background)
-            .testTag("profilePicture")
-    ) {
+  Box(
+      modifier =
+          Modifier.clickable(
+                  onClick = {
+                    imagePicker.launch(
+                        PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+                  })
+              .size(size)
+              .background(MaterialTheme.colorScheme.background)
+              .testTag("profilePicture")) {
         AsyncImage(
             model = url,
             contentDescription = "your profile picture",
             placeholder = painterResource(id = R.drawable.nopp), // Default image during loading
             error = painterResource(id = R.drawable.nopp), // Fallback image if URL fails
-            modifier = Modifier
-                .size(size)
-                .clip(CircleShape)
-        )
+            modifier = Modifier.size(size).clip(CircleShape))
 
         Icon(
             Icons.Filled.Create,
             contentDescription = "Add a photo",
             tint = MaterialTheme.colorScheme.onPrimary,
-            modifier = Modifier
-                .size(size / 3)
-                .clip(CircleShape)
-                .background(IceBreakrrBlue)
-                .padding(5.dp)
-                .align(Alignment.BottomEnd)
-                .testTag("addPhotoIcon")
-        )
-    }
+            modifier =
+                Modifier.size(size / 3)
+                    .clip(CircleShape)
+                    .background(IceBreakrrBlue)
+                    .padding(5.dp)
+                    .align(Alignment.BottomEnd)
+                    .testTag("addPhotoIcon"))
+      }
 }
-
-
-
