@@ -2,6 +2,7 @@ package com.github.se.icebreakrr.model.profile
 
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.GeoPoint
+import java.util.Calendar
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
@@ -23,7 +24,6 @@ import org.mockito.Mockito.verify
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.whenever
-import java.util.Calendar
 
 class ProfilesViewModelTest {
   private lateinit var profilesRepository: ProfilesRepository
@@ -33,35 +33,35 @@ class ProfilesViewModelTest {
   private val testDispatcher: TestDispatcher = UnconfinedTestDispatcher()
 
   private val birthDate2002 =
-    Timestamp(
-      Calendar.getInstance()
-        .apply {
-          set(2002, Calendar.JANUARY, 1, 0, 0, 0)
-          set(Calendar.MILLISECOND, 0)
-        }
-        .time)
+      Timestamp(
+          Calendar.getInstance()
+              .apply {
+                set(2002, Calendar.JANUARY, 1, 0, 0, 0)
+                set(Calendar.MILLISECOND, 0)
+              }
+              .time)
 
   private val profile1 =
-    Profile(
-      uid = "1",
-      name = "John Doe",
-      gender = Gender.MEN,
-      birthDate = birthDate2002, // 22 years old
-      catchPhrase = "Just a friendly guy",
-      description = "I love meeting new people.",
-      tags = listOf("friendly", "outgoing"),
-      profilePictureUrl = "http://example.com/profile.jpg")
+      Profile(
+          uid = "1",
+          name = "John Doe",
+          gender = Gender.MEN,
+          birthDate = birthDate2002, // 22 years old
+          catchPhrase = "Just a friendly guy",
+          description = "I love meeting new people.",
+          tags = listOf("friendly", "outgoing"),
+          profilePictureUrl = "http://example.com/profile.jpg")
 
   private val profile2 =
-    Profile(
-      uid = "2",
-      name = "Jane Smith",
-      gender = Gender.WOMEN,
-      birthDate = birthDate2002,
-      catchPhrase = "Adventure awaits!",
-      description = "Always looking for new experiences.",
-      tags = listOf("adventurous", "outgoing"),
-      profilePictureUrl = null)
+      Profile(
+          uid = "2",
+          name = "Jane Smith",
+          gender = Gender.WOMEN,
+          birthDate = birthDate2002,
+          catchPhrase = "Adventure awaits!",
+          description = "Always looking for new experiences.",
+          tags = listOf("adventurous", "outgoing"),
+          profilePictureUrl = null)
 
   @OptIn(ExperimentalCoroutinesApi::class)
   @Before
@@ -70,7 +70,6 @@ class ProfilesViewModelTest {
     ppRepository = mock(ProfilePicRepository::class.java)
     profilesViewModel = ProfilesViewModel(profilesRepository, ppRepository)
     Dispatchers.setMain(testDispatcher) // Set main dispatcher first
-
   }
 
   @OptIn(ExperimentalCoroutinesApi::class)
@@ -86,20 +85,20 @@ class ProfilesViewModelTest {
 
     val profilesList = listOf(profile1, profile2)
     whenever(profilesRepository.getProfilesInRadius(eq(center), eq(radiusInMeters), any(), any()))
-      .thenAnswer {
-        val onSuccess = it.getArgument<(List<Profile>) -> Unit>(2)
-        onSuccess(profilesList)
-      }
+        .thenAnswer {
+          val onSuccess = it.getArgument<(List<Profile>) -> Unit>(2)
+          onSuccess(profilesList)
+        }
 
     // Test filtering by a list of genders and tags
     profilesViewModel.getFilteredProfilesInRadius(
-      center, radiusInMeters, listOf(Gender.MEN), 20..30, listOf("friendly"))
+        center, radiusInMeters, listOf(Gender.MEN), 20..30, listOf("friendly"))
 
     verify(profilesRepository).getProfilesInRadius(eq(center), eq(radiusInMeters), any(), any())
     assertThat(
-      profilesViewModel.filteredProfiles.value.size, `is`(1)) // Should return only profile1
+        profilesViewModel.filteredProfiles.value.size, `is`(1)) // Should return only profile1
     assertThat(
-      profilesViewModel.filteredProfiles.value[0].uid, `is`("1")) // profile1 should be returned
+        profilesViewModel.filteredProfiles.value[0].uid, `is`("1")) // profile1 should be returned
   }
 
   @Test
@@ -109,14 +108,14 @@ class ProfilesViewModelTest {
 
     val profilesList = listOf(profile1, profile2)
     whenever(profilesRepository.getProfilesInRadius(eq(center), eq(radiusInMeters), any(), any()))
-      .thenAnswer {
-        val onSuccess = it.getArgument<(List<Profile>) -> Unit>(2)
-        onSuccess(profilesList)
-      }
+        .thenAnswer {
+          val onSuccess = it.getArgument<(List<Profile>) -> Unit>(2)
+          onSuccess(profilesList)
+        }
 
     // Test filtering by a list of genders (both MEN and WOMEN)
     profilesViewModel.getFilteredProfilesInRadius(
-      center, radiusInMeters, listOf(Gender.MEN, Gender.WOMEN), 20..30, null)
+        center, radiusInMeters, listOf(Gender.MEN, Gender.WOMEN), 20..30, null)
 
     verify(profilesRepository).getProfilesInRadius(eq(center), eq(radiusInMeters), any(), any())
     assertThat(profilesViewModel.profiles.value.size, `is`(2)) // Should return both profiles
@@ -129,10 +128,10 @@ class ProfilesViewModelTest {
     val exception = Exception("Test exception")
 
     whenever(profilesRepository.getProfilesInRadius(eq(center), eq(radiusInMeters), any(), any()))
-      .thenAnswer {
-        val onFailure = it.getArgument<(Exception) -> Unit>(3)
-        onFailure(exception)
-      }
+        .thenAnswer {
+          val onFailure = it.getArgument<(Exception) -> Unit>(3)
+          onFailure(exception)
+        }
 
     profilesViewModel.getFilteredProfilesInRadius(center, radiusInMeters)
 
@@ -248,8 +247,8 @@ class ProfilesViewModelTest {
 
     verify(ppRepository).uploadProfilePicture(eq("1"), eq(imageData), any(), any())
     assertThat(
-      profilesViewModel.selectedProfile.value?.profilePictureUrl,
-      `is`("http://example.com/profile.jpg"))
+        profilesViewModel.selectedProfile.value?.profilePictureUrl,
+        `is`("http://example.com/profile.jpg"))
   }
 
   @Test
@@ -279,9 +278,9 @@ class ProfilesViewModelTest {
     val imageData = ByteArray(4) { 0xFF.toByte() }
 
     val exception =
-      assertThrows(IllegalStateException::class.java) {
-        profilesViewModel.uploadCurrentUserProfilePicture(imageData)
-      }
+        assertThrows(IllegalStateException::class.java) {
+          profilesViewModel.uploadCurrentUserProfilePicture(imageData)
+        }
 
     assertThat(exception.message, `is`("User not logged in"))
   }
@@ -326,8 +325,6 @@ class ProfilesViewModelTest {
     assertThat(profilesViewModel.error.value, `is`(exception))
   }
 
-
-
   @OptIn(ExperimentalCoroutinesApi::class)
   @Test
   fun showsOfflineWhenTimerCompletesAndStillFailing() = runTest {
@@ -339,16 +336,16 @@ class ProfilesViewModelTest {
     // Simulate a failed request that starts the timer
     val center = GeoPoint(0.0, 0.0)
     val radiusInMeters = 1000.0
-    val exception = (com.google.firebase.firestore.FirebaseFirestoreException(
-      "Permission denied",
-      com.google.firebase.firestore.FirebaseFirestoreException.Code.PERMISSION_DENIED
-    ))
+    val exception =
+        (com.google.firebase.firestore.FirebaseFirestoreException(
+            "Permission denied",
+            com.google.firebase.firestore.FirebaseFirestoreException.Code.PERMISSION_DENIED))
 
     whenever(profilesRepository.getProfilesInRadius(eq(center), eq(radiusInMeters), any(), any()))
-      .thenAnswer {
-        val onFailure = it.getArgument<(Exception) -> Unit>(3)
-        onFailure(exception)
-      }
+        .thenAnswer {
+          val onFailure = it.getArgument<(Exception) -> Unit>(3)
+          onFailure(exception)
+        }
 
     // First failed request starts the timer
     profilesViewModel.getFilteredProfilesInRadius(center, radiusInMeters)
@@ -379,10 +376,10 @@ class ProfilesViewModelTest {
     val exception = Exception("Test exception")
 
     whenever(profilesRepository.getProfilesInRadius(eq(center), eq(radiusInMeters), any(), any()))
-      .thenAnswer {
-        val onFailure = it.getArgument<(Exception) -> Unit>(3)
-        onFailure(exception)
-      }
+        .thenAnswer {
+          val onFailure = it.getArgument<(Exception) -> Unit>(3)
+          onFailure(exception)
+        }
 
     // First failed request doesn't start the timer
     profilesViewModel.getFilteredProfilesInRadius(center, radiusInMeters)
