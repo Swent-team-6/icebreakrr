@@ -325,6 +325,7 @@ class ProfilesViewModelTest {
     assertThat(profilesViewModel.error.value, `is`(exception))
   }
 
+  // Generated with the help of CursorAI
   @OptIn(ExperimentalCoroutinesApi::class)
   @Test
   fun showsOfflineWhenTimerCompletesAndStillFailing() = runTest {
@@ -362,6 +363,7 @@ class ProfilesViewModelTest {
     assertThat(profilesViewModel.isConnected.value, `is`(false))
   }
 
+  // Generated with the help of CursorAI
   @OptIn(ExperimentalCoroutinesApi::class)
   @Test
   fun showsOnlineWhenDifferentError() = runTest {
