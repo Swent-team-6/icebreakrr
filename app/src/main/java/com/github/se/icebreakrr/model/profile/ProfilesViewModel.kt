@@ -1,5 +1,9 @@
 package com.github.se.icebreakrr.model.profile
 
+import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.google.firebase.Firebase
@@ -9,6 +13,8 @@ import com.google.firebase.storage.storage
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
+import java.io.ByteArrayOutputStream
+import java.io.InputStream
 
 open class ProfilesViewModel(
     private val repository: ProfilesRepository,
@@ -195,4 +201,25 @@ open class ProfilesViewModel(
     _error.value = exception
     _loading.value = false
   }
+
+    fun imageUriToJpgByteArray(context: Context, imageUri: Uri, quality: Int = 100): ByteArray? {
+        return try {
+            // open an InputStream from the URI
+            val inputStream: InputStream? = context.contentResolver.openInputStream(imageUri)
+
+            // decode InputStream to Bitmap
+            val bitmap = BitmapFactory.decodeStream(inputStream)
+            inputStream?.close() // close the InputStream after decoding
+
+            //compress Bitmap to JPEG format and store in ByteArrayOutputStream
+            val byteArrayOutputStream = ByteArrayOutputStream()
+            bitmap?.compress(Bitmap.CompressFormat.JPEG, quality, byteArrayOutputStream)
+
+            // return ByteArray of compressed JPEG image (representing .jpg)
+            byteArrayOutputStream.toByteArray()
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
+        }
+    }
 }
