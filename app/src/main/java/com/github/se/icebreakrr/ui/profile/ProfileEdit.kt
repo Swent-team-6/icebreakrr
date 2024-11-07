@@ -59,7 +59,7 @@ fun ProfileEditingScreen(
     profilesViewModel: ProfilesViewModel
 ) {
 
-    val context = LocalContext.current
+  val context = LocalContext.current
   val configuration = LocalConfiguration.current
   val screenWidth = configuration.screenWidthDp.dp
   val screenHeight = configuration.screenHeightDp.dp
@@ -107,10 +107,7 @@ fun ProfileEditingScreen(
 
   if (isLoading) {
     Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.LightGray)
-            .testTag("loadingBox"),
+        modifier = Modifier.fillMaxSize().background(Color.LightGray).testTag("loadingBox"),
         contentAlignment = Alignment.Center) {
           Text("Loading profile...", textAlign = TextAlign.Center)
         }
@@ -149,31 +146,32 @@ fun ProfileEditingScreen(
               })
         }) {
           Column(
-              modifier = Modifier
-                  .padding(it)
-                  .padding(padding)
-                  .testTag("profileEditScreenContent"),
+              modifier = Modifier.padding(it).padding(padding).testTag("profileEditScreenContent"),
               horizontalAlignment = Alignment.CenterHorizontally) {
-
-              ProfilePicture(
+                ProfilePicture(
                     url = profilePictureUrl,
                     size = profilePictureSize,
                     onSelectionSuccess = { uri ->
-                        val image: ByteArray? = profilesViewModel.imageUriToJpgByteArray(context, uri, quality = 100) //todo: check last one
-                        if (image != null) {
-                          profilesViewModel.uploadCurrentUserProfilePicture(
-                              imageData = image,
-                              onSuccess = { url ->
-                                  profilePictureUrl = url
-                                  isModified = true
-                              })
-                            profilePictureUrl = uri.toString()
-                        } else {
-                          Toast.makeText(context, "Failed to select image", Toast.LENGTH_SHORT).show() //todo: change later
-                        }
+                      val image: ByteArray? =
+                          profilesViewModel.imageUriToJpgByteArray(
+                              context, uri, quality = 100) // todo: check last one
+                      if (image != null) {
+                        profilesViewModel.uploadCurrentUserProfilePicture(
+                            imageData = image,
+                            onSuccess = { url ->
+                              profilePictureUrl = url
+                              isModified = true
+                            })
+                        profilePictureUrl = uri.toString()
+                      } else {
+                        Toast.makeText(context, "Failed to select image", Toast.LENGTH_SHORT)
+                            .show() // todo: change later
+                      }
                     },
-                    onSelectionFailure = {Toast.makeText(context, "Failed to select image", Toast.LENGTH_SHORT).show()} //todo: change later
-              )
+                    onSelectionFailure = {
+                      Toast.makeText(context, "Failed to select image", Toast.LENGTH_SHORT).show()
+                    } // todo: change later
+                    )
 
                 Spacer(modifier = Modifier.height(padding))
 
@@ -182,10 +180,9 @@ fun ProfileEditingScreen(
                     text = "${user.name}, ${user.calculateAge()}",
                     style = TextStyle(fontSize = textSize.value.sp),
                     modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .wrapContentWidth(Alignment.CenterHorizontally)
-                        .testTag("nameAndAge"))
+                        Modifier.fillMaxWidth()
+                            .wrapContentWidth(Alignment.CenterHorizontally)
+                            .testTag("nameAndAge"))
                 Spacer(modifier = Modifier.height(padding))
 
                 // Catchphrase Input
@@ -200,10 +197,7 @@ fun ProfileEditingScreen(
                     },
                     textStyle = TextStyle(fontSize = textSize.value.sp * 0.6),
                     modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .height(catchphraseHeight)
-                        .testTag("catchphrase"))
+                        Modifier.fillMaxWidth().height(catchphraseHeight).testTag("catchphrase"))
 
                 Spacer(modifier = Modifier.height(padding))
 
@@ -217,10 +211,7 @@ fun ProfileEditingScreen(
                     label = { Text("Description") },
                     textStyle = TextStyle(fontSize = textSize.value.sp * 0.6),
                     modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .height(descriptionHeight)
-                        .testTag("description"))
+                        Modifier.fillMaxWidth().height(descriptionHeight).testTag("description"))
                 Spacer(modifier = Modifier.height(padding))
 
                 TagSelector(
@@ -263,7 +254,7 @@ fun ProfileEditingScreen(
                             onClick = {
                               showDialog = false
                               tagsViewModel.leaveUI()
-                                profilesViewModel.deleteCurrentUserProfilePicture()
+                              profilesViewModel.deleteCurrentUserProfilePicture()
                               navigationActions.goBack()
                             }) {
                               Text("Discard changes")
