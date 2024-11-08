@@ -180,21 +180,21 @@ open class ProfilesViewModel(
         onFailure = { e -> handleError(e) })
   }
 
-/**
- * Processes an image from a given URI into the required format (square JPEG) and uploads it as the
- * current user's profile picture.
- *
- * @param context The context used to access the content resolver and show a toast message.
- * @param imageUri The URI of the image to be processed and uploaded.
- */
-fun processAndUploadImage(context: Context, imageUri: Uri) {
+  /**
+   * Processes an image from a given URI into the required format (square JPEG) and uploads it as
+   * the current user's profile picture.
+   *
+   * @param context The context used to access the content resolver and show a toast message.
+   * @param imageUri The URI of the image to be processed and uploaded.
+   */
+  fun processAndUploadImage(context: Context, imageUri: Uri) {
     val image: ByteArray? = imageUriToJpgByteArray(context, imageUri)
     if (image != null) {
-        uploadCurrentUserProfilePicture(image)
+      uploadCurrentUserProfilePicture(image)
     } else {
-        Toast.makeText(context, "Failed to process image", Toast.LENGTH_SHORT).show()
+      Toast.makeText(context, "Failed to process image", Toast.LENGTH_SHORT).show()
     }
-}
+  }
 
   /**
    * Deletes the current user's profile picture from the remote storage system.
@@ -220,7 +220,11 @@ fun processAndUploadImage(context: Context, imageUri: Uri) {
    * @param quality The quality of the JPEG compression (0-100). Default is 100.
    * @return A byte array representing the JPEG image, or null if an error occurs.
    */
-  private fun imageUriToJpgByteArray(context: Context, imageUri: Uri, quality: Int = 100): ByteArray? {
+  private fun imageUriToJpgByteArray(
+      context: Context,
+      imageUri: Uri,
+      quality: Int = 100
+  ): ByteArray? {
     return try {
       // Open an InputStream from the URI
       val inputStream: InputStream? = context.contentResolver.openInputStream(imageUri)
