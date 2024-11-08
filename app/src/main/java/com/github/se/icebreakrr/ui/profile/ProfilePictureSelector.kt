@@ -20,19 +20,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.github.se.icebreakrr.R
 import com.github.se.icebreakrr.ui.theme.IceBreakrrBlue
-
-@Preview(showBackground = true)
-@Composable
-fun ProfilePicturePreview() {
-  ProfilePictureSelector(
-      url = null, size = 100.dp, onSelectionSuccess = {}, onSelectionFailure = {})
-}
 
 /**
  * A composable function that displays a profile picture with an option to select a new image from

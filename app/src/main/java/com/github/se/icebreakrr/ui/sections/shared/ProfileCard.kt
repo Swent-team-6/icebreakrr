@@ -20,12 +20,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.github.se.icebreakrr.R
-import com.github.se.icebreakrr.mock.getMockedProfiles
 import com.github.se.icebreakrr.model.profile.Profile
 
 @Composable
@@ -77,10 +75,4 @@ fun ProfileCard(
           }
         }
   }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun ProfileCardPreview() {
-  ProfileCard(Profile.getMockedProfiles()[0], onclick = { TODO() })
 }
