@@ -162,14 +162,12 @@ fun ProfileEditingScreen(
                               isModified = true
                             })
                       } else {
-                        Toast.makeText(context, "Failed to select image", Toast.LENGTH_SHORT)
-                            .show() // todo: change later
+                        Toast.makeText(context, "Failed to select image", Toast.LENGTH_SHORT).show()
                       }
                     },
                     onSelectionFailure = {
                       Toast.makeText(context, "Failed to select image", Toast.LENGTH_SHORT).show()
-                    } // todo: change later
-                    )
+                    })
 
                 Spacer(modifier = Modifier.height(padding))
 
