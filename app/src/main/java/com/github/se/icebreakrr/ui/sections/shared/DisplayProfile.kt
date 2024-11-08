@@ -5,30 +5,32 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.Create
-import androidx.compose.material.icons.filled.MailOutline
+import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -41,6 +43,7 @@ import com.github.se.icebreakrr.model.tags.TagsViewModel
 import com.github.se.icebreakrr.ui.navigation.NavigationActions
 import com.github.se.icebreakrr.ui.tags.RowOfTags
 import com.github.se.icebreakrr.ui.tags.TagStyle
+import com.github.se.icebreakrr.ui.theme.IceBreakrrBlue
 
 /**
  * Displays the user's information section with a catchphrase, tags, and description. The content is
@@ -50,6 +53,21 @@ import com.github.se.icebreakrr.ui.tags.TagStyle
  * @param listOfTags A list of tags related to the user, paired with colors.
  * @param description The user's detailed description.
  */
+val informationTitleSize = 14.sp
+val informationTitleLineHeight = 20.sp
+val informationTitleFontWeight = 500
+val informationTitleLetterSpacing = 0.1.sp
+val catchPhraseSize = 22.sp
+val catchPhraseLineHeight = 28.sp
+val catchPhraseWeight = 400
+val descriptionFontSize = 16.sp
+val descriptionLineHeight = 24.sp
+val descriptionFontWeight = 500
+val descriptionLetterSpacing = 0.15.sp
+val tagHeight = 40
+val requestButtonSize = 55.dp
+val requestButtonElevation = 8.dp
+
 @Composable
 fun InfoSection(profile: Profile, tagsViewModel: TagsViewModel) {
 
@@ -59,21 +77,37 @@ fun InfoSection(profile: Profile, tagsViewModel: TagsViewModel) {
 
   Column(
       modifier =
-          Modifier.fillMaxWidth()
-              .padding(16.dp)
-              .verticalScroll(scrollState)
-              .testTag("infoSection")) {
+          Modifier.fillMaxWidth().padding(16.dp).verticalScroll(scrollState).testTag("infoSection"),
+      verticalArrangement = Arrangement.spacedBy(11.dp, Alignment.Top),
+      horizontalAlignment = Alignment.Start) {
         // Catchphrase Section
-        Spacer(modifier = Modifier.height(12.dp))
         ProfileCatchPhrase(profile.catchPhrase)
 
-        // Tags Section
-        Spacer(modifier = Modifier.height(8.dp))
-        TagsSection(userTags)
-
         // Description Section
-        Spacer(modifier = Modifier.height(16.dp))
+        Text(
+            text = "Description",
+            style =
+                TextStyle(
+                    fontSize = informationTitleSize,
+                    lineHeight = informationTitleLineHeight,
+                    fontWeight = FontWeight(informationTitleFontWeight),
+                    color = IceBreakrrBlue,
+                    letterSpacing = informationTitleLetterSpacing,
+                ))
         ProfileDescription(profile.description)
+
+        // Tags Section
+        Text(
+            text = "Tags",
+            style =
+                TextStyle(
+                    fontSize = informationTitleSize,
+                    lineHeight = informationTitleLineHeight,
+                    fontWeight = FontWeight(informationTitleFontWeight),
+                    color = IceBreakrrBlue,
+                    letterSpacing = informationTitleLetterSpacing,
+                ))
+        TagsSection(userTags)
       }
 }
 
@@ -82,6 +116,10 @@ fun InfoSection(profile: Profile, tagsViewModel: TagsViewModel) {
  * also shows the username in an overlay at the bottom of the profile image.
  *
  * @param navigationActions Actions to navigate between screens.
+ * @param myProfile : set to true if it is used to see our profile and false if it is used to see
+ *   someone else's profile
+ * @param onEditClick : function called when you click on the edit button (if you are on your
+ *   profile) or on the message button (if you are on someone else's profile)
  */
 @Composable
 fun ProfileHeader(
@@ -140,29 +178,39 @@ fun ProfileHeader(
                   color = Color.White,
                   modifier = Modifier.testTag("username"))
 
+              // Edit Button or message button
               if (myProfile) {
-                IconButton(
-                    onClick = { onEditClick() },
+                Box(
                     modifier =
-                        Modifier.background(Color.White, CircleShape)
-                            .padding(4.dp)
-                            .testTag("editButton")) {
-                      Icon(
-                          imageVector = Icons.Filled.Create,
-                          contentDescription = "Edit Profile",
-                          tint = Color.Gray)
+                        Modifier.size(requestButtonSize)
+                            .shadow(requestButtonElevation, shape = CircleShape)
+                            .background(IceBreakrrBlue, CircleShape),
+                    contentAlignment = Alignment.Center) {
+                      IconButton(
+                          onClick = { onEditClick() }, modifier = Modifier.testTag("editButton")) {
+                            Icon(
+                                imageVector = Icons.Filled.Create,
+                                contentDescription = "Edit Profile",
+                                tint = Color.White,
+                                modifier = Modifier.fillMaxSize(0.7f))
+                          }
                     }
               } else {
-                IconButton(
-                    onClick = { onEditClick() },
+                Box(
                     modifier =
-                        Modifier.background(Color.White, CircleShape)
-                            .padding(4.dp)
-                            .testTag("requestButton")) {
-                      Icon(
-                          imageVector = Icons.Filled.MailOutline,
-                          contentDescription = "send request",
-                          tint = Color.Gray)
+                        Modifier.size(requestButtonSize)
+                            .shadow(requestButtonElevation, shape = CircleShape)
+                            .background(IceBreakrrBlue, CircleShape),
+                    contentAlignment = Alignment.Center) {
+                      IconButton(
+                          onClick = { onEditClick() },
+                          modifier = Modifier.testTag("requestButton")) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.Send,
+                                contentDescription = "send request",
+                                tint = Color.White,
+                                modifier = Modifier.fillMaxSize(0.7f))
+                          }
                     }
               }
             }
@@ -178,7 +226,13 @@ fun ProfileHeader(
 fun ProfileCatchPhrase(catchPhrase: String) {
   Text(
       text = catchPhrase,
-      style = MaterialTheme.typography.bodyMedium,
+      style =
+          TextStyle(
+              fontSize = catchPhraseSize,
+              lineHeight = catchPhraseLineHeight,
+              fontWeight = FontWeight(catchPhraseWeight),
+              color = IceBreakrrBlue,
+          ),
       color = Color.Black.copy(alpha = 0.8f),
       fontWeight = FontWeight.Medium,
       fontSize = 16.sp,
@@ -195,9 +249,13 @@ fun ProfileCatchPhrase(catchPhrase: String) {
  */
 @Composable
 fun TagsSection(listOfTags: List<Pair<String, Color>>) {
-  Box(modifier = Modifier.fillMaxWidth().height(80.dp).testTag("tagSection")) {
-    RowOfTags(listOfTags, TagStyle())
-  }
+  Box(
+      modifier =
+          Modifier.fillMaxWidth()
+              .height((((listOfTags.size / 2) * tagHeight).dp))
+              .testTag("tagSection")) {
+        RowOfTags(listOfTags, TagStyle())
+      }
 }
 
 /**
@@ -209,7 +267,13 @@ fun TagsSection(listOfTags: List<Pair<String, Color>>) {
 fun ProfileDescription(description: String) {
   Text(
       text = description,
-      style = MaterialTheme.typography.bodyMedium,
+      style =
+          TextStyle(
+              fontSize = descriptionFontSize,
+              lineHeight = descriptionLineHeight,
+              fontWeight = FontWeight(descriptionFontWeight),
+              color = IceBreakrrBlue,
+              letterSpacing = descriptionLetterSpacing),
       color = Color.Black.copy(alpha = 0.9f),
       fontSize = 14.sp,
       textAlign = TextAlign.Start,

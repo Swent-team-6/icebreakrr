@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
@@ -34,6 +35,9 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.PopupProperties
+
+val dropDownMenuTagHeight = 60
+val dropDownMenuMaxNumberTag = 5
 
 data class TagStyle(
     val textColor: Color = Color.Black,
@@ -213,27 +217,20 @@ fun TagSelector(
     width: Dp,
     height: Dp
 ) {
-
+  // make the height of the dropdown menu adaptable to the number of elements
+  // capped to a max size
+  val dropdownMenuHeight =
+      if (outputTag.size >= dropDownMenuMaxNumberTag)
+          dropDownMenuMaxNumberTag * dropDownMenuTagHeight
+      else outputTag.size * dropDownMenuTagHeight
   Box(modifier = Modifier.size(width, height).testTag("sizeTagSelector")) {
     Column(modifier = Modifier.fillMaxWidth().wrapContentHeight()) {
-      OutlinedTextField(
-          value = stringQuery,
-          onValueChange = {
-            onStringChanged(it)
-            expanded.value = true
-          },
-          label = { Text("Tags", modifier = Modifier.testTag("labelTagSelector")) },
-          placeholder = {
-            Text("Search for tags", modifier = Modifier.testTag("placeholderTagSelector"))
-          },
-          modifier = Modifier.testTag("inputTagSelector"))
-
       Box(modifier = Modifier.fillMaxWidth().wrapContentHeight()) {
         DropdownMenu(
-            expanded = expanded.value,
+            expanded = expanded.value && dropdownMenuHeight != 0,
             onDismissRequest = { expanded.value = false },
             properties = PopupProperties(focusable = false),
-            modifier = Modifier.align(Alignment.TopStart)) {
+            modifier = Modifier.align(Alignment.TopStart).height(dropdownMenuHeight.dp)) {
               outputTag.forEach { tag ->
                 DropdownMenuItem(
                     onClick = {
@@ -244,6 +241,17 @@ fun TagSelector(
                     modifier = Modifier.testTag("tagSelectorDropDownMenuItem"))
               }
             }
+        OutlinedTextField(
+            value = stringQuery,
+            onValueChange = {
+              onStringChanged(it)
+              expanded.value = true
+            },
+            label = { Text("Tags", modifier = Modifier.testTag("labelTagSelector")) },
+            placeholder = {
+              Text("Search for tags", modifier = Modifier.testTag("placeholderTagSelector"))
+            },
+            modifier = Modifier.testTag("inputTagSelector"))
       }
       RowOfClickTags(selectedTag, TagStyle(textColor, Color.Red, textSize)) { s -> onTagClick(s) }
     }

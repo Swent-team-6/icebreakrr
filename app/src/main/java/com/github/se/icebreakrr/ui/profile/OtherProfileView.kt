@@ -22,6 +22,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextAlign
 import androidx.navigation.NavBackStackEntry
+import com.github.se.icebreakrr.model.message.MeetingRequestViewModel
 import com.github.se.icebreakrr.model.profile.ProfilesViewModel
 import com.github.se.icebreakrr.model.tags.TagsViewModel
 import com.github.se.icebreakrr.ui.message.SendRequestScreen
@@ -38,12 +39,12 @@ import com.github.se.icebreakrr.ui.sections.shared.ProfileHeader
 fun OtherProfileView(
     profilesViewModel: ProfilesViewModel,
     tagsViewModel: TagsViewModel,
+    meetingRequestViewModel: MeetingRequestViewModel,
     navigationActions: NavigationActions,
     navBackStackEntry: NavBackStackEntry?
 ) {
   var sendRequest by remember { mutableStateOf(false) }
   var writtenMessage by remember { mutableStateOf("") }
-
   // retrieving user id from navigation params
   val profileId = navBackStackEntry?.arguments?.getString("userId")
 
@@ -92,7 +93,14 @@ fun OtherProfileView(
               SendRequestScreen(
                   onValueChange = { writtenMessage = it },
                   value = writtenMessage,
-                  onSendClick = { sendRequest = false },
+                  onSendClick = {
+                    meetingRequestViewModel.onMeetingRequestChange(writtenMessage)
+                    meetingRequestViewModel.onRemoteTokenChange(profile.fcmToken ?: "null")
+                    meetingRequestViewModel.onSubmitMeetingRequest()
+                    meetingRequestViewModel.sendMessage()
+                    writtenMessage = ""
+                    navigationActions.goBack()
+                  },
                   onCancelClick = { sendRequest = false })
             }
       }
