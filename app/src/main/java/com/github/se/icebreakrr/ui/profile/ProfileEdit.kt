@@ -148,7 +148,7 @@ fun ProfileEditingScreen(
           Column(
               modifier = Modifier.padding(it).padding(padding).testTag("profileEditScreenContent"),
               horizontalAlignment = Alignment.CenterHorizontally) {
-                ProfilePicture(
+                ProfilePictureSelector(
                     url = profilePictureUrl,
                     size = profilePictureSize,
                     onSelectionSuccess = { uri ->
