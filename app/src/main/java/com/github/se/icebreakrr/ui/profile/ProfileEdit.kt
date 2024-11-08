@@ -152,7 +152,9 @@ fun ProfileEditingScreen(
                 ProfilePictureSelector(
                     url = profilePictureUrl,
                     size = profilePictureSize,
-                    onSelectionSuccess = { uri -> profilesViewModel.processAndUploadImage(context, uri)},
+                    onSelectionSuccess = { uri ->
+                      profilesViewModel.processAndUploadImage(context, uri)
+                    },
                     onSelectionFailure = {
                       Toast.makeText(context, "Failed to select image", Toast.LENGTH_SHORT).show()
                     })
