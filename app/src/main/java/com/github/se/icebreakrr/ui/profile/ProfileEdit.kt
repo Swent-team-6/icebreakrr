@@ -162,7 +162,6 @@ fun ProfileEditingScreen(
                               profilePictureUrl = url
                               isModified = true
                             })
-                        profilePictureUrl = uri.toString()
                       } else {
                         Toast.makeText(context, "Failed to select image", Toast.LENGTH_SHORT)
                             .show() // todo: change later
