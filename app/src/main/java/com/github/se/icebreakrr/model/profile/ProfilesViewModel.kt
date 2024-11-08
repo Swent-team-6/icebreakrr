@@ -159,20 +159,21 @@ open class ProfilesViewModel(
         userId = uid, onSuccess = {}, onFailure = { e -> handleError(e) })
   }
 
-  /**
-   * Uploads the current user's profile picture to the remote storage system.
-   *
-   * @param imageData The byte array of the image file to be uploaded.
-   * @throws IllegalStateException if the user is not logged in.
-   */
-  fun uploadCurrentUserProfilePicture(imageData: ByteArray, onSuccess: (url: String?) -> Unit) {
-    val userId = selectedProfile.value?.uid ?: throw IllegalStateException("User not logged in")
-    ppRepository.uploadProfilePicture(
-        userId = userId,
-        imageData = imageData,
-        onSuccess = { url -> onSuccess(url) },
-        onFailure = { e -> handleError(e) })
-  }
+/**
+ * Uploads the current user's profile picture to the remote storage system.
+ *
+ * @param imageData The byte array representing the image data to be uploaded.
+ * @param onSuccess A callback function that is invoked with the URL of the uploaded image upon successful upload.
+ * @throws IllegalStateException if the user is not logged in.
+ */
+fun uploadCurrentUserProfilePicture(imageData: ByteArray, onSuccess: (url: String?) -> Unit) {
+  val userId = selectedProfile.value?.uid ?: throw IllegalStateException("User not logged in")
+  ppRepository.uploadProfilePicture(
+      userId = userId,
+      imageData = imageData,
+      onSuccess = { url -> onSuccess(url) },
+      onFailure = { e -> handleError(e) })
+}
 
   /**
    * Deletes the current user's profile picture from the remote storage system.
@@ -191,6 +192,43 @@ open class ProfilesViewModel(
   }
 
   /**
+   * Converts an image URI to a JPEG byte array, cropping the image to a square at the center.
+   *
+   * @param context The context used to access the content resolver.
+   * @param imageUri The URI of the image to be converted.
+   * @param quality The quality of the JPEG compression (0-100). Default is 100.
+   * @return A byte array representing the JPEG image, or null if an error occurs.
+   */
+  fun imageUriToJpgByteArray(context: Context, imageUri: Uri, quality: Int = 100): ByteArray? {
+    return try {
+      // Open an InputStream from the URI
+      val inputStream: InputStream? = context.contentResolver.openInputStream(imageUri)
+
+      // Decode InputStream to Bitmap
+      val bitmap = BitmapFactory.decodeStream(inputStream)
+      inputStream?.close() // Close the InputStream after decoding
+
+      // Calculate the dimensions for the square crop
+      val dimension = minOf(bitmap.width, bitmap.height)
+      val xOffset = (bitmap.width - dimension) / 2
+      val yOffset = (bitmap.height - dimension) / 2
+
+      // Crop the Bitmap to a square at the center
+      val croppedBitmap = Bitmap.createBitmap(bitmap, xOffset, yOffset, dimension, dimension)
+
+      // Compress Bitmap to JPEG format and store in ByteArrayOutputStream
+      val byteArrayOutputStream = ByteArrayOutputStream()
+      croppedBitmap.compress(Bitmap.CompressFormat.JPEG, quality, byteArrayOutputStream)
+
+      // Return ByteArray of compressed JPEG image (representing .jpg)
+      byteArrayOutputStream.toByteArray()
+    } catch (e: Exception) {
+      e.printStackTrace()
+      null
+    }
+  }
+
+  /**
    * Handles errors by updating the error and loading states.
    *
    * @param exception The exception to log and indicate the error state.
@@ -198,35 +236,5 @@ open class ProfilesViewModel(
   private fun handleError(exception: Exception) {
     _error.value = exception
     _loading.value = false
-  }
-
-  fun imageUriToJpgByteArray(context: Context, imageUri: Uri, quality: Int = 100): ByteArray? {
-    return try {
-      // open an InputStream from the URI
-      val inputStream: InputStream? = context.contentResolver.openInputStream(imageUri)
-
-      // decode InputStream to Bitmap
-      val bitmap = BitmapFactory.decodeStream(inputStream)
-      inputStream?.close() // close the InputStream after decoding
-
-      // todo: delegate image cropping to another function
-      // calculate the dimensions for the square crop
-      val dimension = minOf(bitmap.width, bitmap.height)
-      val xOffset = (bitmap.width - dimension) / 2
-      val yOffset = (bitmap.height - dimension) / 2
-
-      // crop the Bitmap to a square at the center
-      val croppedBitmap = Bitmap.createBitmap(bitmap, xOffset, yOffset, dimension, dimension)
-
-      // compress Bitmap to JPEG format and store in ByteArrayOutputStream
-      val byteArrayOutputStream = ByteArrayOutputStream()
-      croppedBitmap.compress(Bitmap.CompressFormat.JPEG, quality, byteArrayOutputStream)
-
-      // return ByteArray of compressed JPEG image (representing .jpg)
-      byteArrayOutputStream.toByteArray()
-    } catch (e: Exception) {
-      e.printStackTrace()
-      null
-    }
   }
 }
