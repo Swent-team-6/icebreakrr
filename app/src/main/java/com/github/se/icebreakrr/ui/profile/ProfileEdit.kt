@@ -148,13 +148,12 @@ fun ProfileEditingScreen(
           Column(
               modifier = Modifier.padding(it).padding(padding).testTag("profileEditScreenContent"),
               horizontalAlignment = Alignment.CenterHorizontally) {
+                // A composable that allows the user to preview and edit a profile picture
                 ProfilePictureSelector(
                     url = profilePictureUrl,
                     size = profilePictureSize,
                     onSelectionSuccess = { uri ->
-                      val image: ByteArray? =
-                          profilesViewModel.imageUriToJpgByteArray(
-                              context, uri, quality = 100) // todo: check last one
+                      val image: ByteArray? = profilesViewModel.imageUriToJpgByteArray(context, uri)
                       if (image != null) {
                         profilesViewModel.uploadCurrentUserProfilePicture(
                             imageData = image,
