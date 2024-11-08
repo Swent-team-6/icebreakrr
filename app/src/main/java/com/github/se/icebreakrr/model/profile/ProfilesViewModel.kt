@@ -159,21 +159,22 @@ open class ProfilesViewModel(
         userId = uid, onSuccess = {}, onFailure = { e -> handleError(e) })
   }
 
-/**
- * Uploads the current user's profile picture to the remote storage system.
- *
- * @param imageData The byte array representing the image data to be uploaded.
- * @param onSuccess A callback function that is invoked with the URL of the uploaded image upon successful upload.
- * @throws IllegalStateException if the user is not logged in.
- */
-fun uploadCurrentUserProfilePicture(imageData: ByteArray, onSuccess: (url: String?) -> Unit) {
-  val userId = selectedProfile.value?.uid ?: throw IllegalStateException("User not logged in")
-  ppRepository.uploadProfilePicture(
-      userId = userId,
-      imageData = imageData,
-      onSuccess = { url -> onSuccess(url) },
-      onFailure = { e -> handleError(e) })
-}
+  /**
+   * Uploads the current user's profile picture to the remote storage system.
+   *
+   * @param imageData The byte array representing the image data to be uploaded.
+   * @param onSuccess A callback function that is invoked with the URL of the uploaded image upon
+   *   successful upload.
+   * @throws IllegalStateException if the user is not logged in.
+   */
+  fun uploadCurrentUserProfilePicture(imageData: ByteArray, onSuccess: (url: String?) -> Unit) {
+    val userId = selectedProfile.value?.uid ?: throw IllegalStateException("User not logged in")
+    ppRepository.uploadProfilePicture(
+        userId = userId,
+        imageData = imageData,
+        onSuccess = { url -> onSuccess(url) },
+        onFailure = { e -> handleError(e) })
+  }
 
   /**
    * Deletes the current user's profile picture from the remote storage system.
