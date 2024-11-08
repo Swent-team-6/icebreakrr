@@ -30,16 +30,28 @@ import com.github.se.icebreakrr.ui.theme.IceBreakrrBlue
 @Preview(showBackground = true)
 @Composable
 fun ProfilePicturePreview() {
-  ProfilePicture(url = null, size = 100.dp, onSelectionSuccess = {}, onSelectionFailure = {})
+  ProfilePictureSelector(
+      url = null, size = 100.dp, onSelectionSuccess = {}, onSelectionFailure = {})
 }
 
+/**
+ * A composable function that displays a profile picture with an option to select a new image from
+ * gallery.
+ *
+ * @param url The URL of the profile picture to display. If null, a placeholder image is shown.
+ * @param size The size of the profile picture.
+ * @param onSelectionSuccess A callback function that is invoked when an image is successfully
+ *   selected.
+ * @param onSelectionFailure A callback function that is invoked when image selection fails.
+ */
 @Composable
-fun ProfilePicture(
+fun ProfilePictureSelector(
     url: String?,
     size: Dp,
     onSelectionSuccess: (Uri) -> Unit,
     onSelectionFailure: () -> Unit
 ) {
+  // Create an image picker launcher for selecting an image from the gallery
   val imagePicker =
       rememberLauncherForActivityResult(
           contract = ActivityResultContracts.PickVisualMedia(),
@@ -51,6 +63,7 @@ fun ProfilePicture(
             }
           })
 
+  // Create a Box composable to contain the profile picture and the add photo icon
   Box(
       modifier =
           Modifier.clickable(
@@ -61,13 +74,15 @@ fun ProfilePicture(
               .size(size)
               .background(MaterialTheme.colorScheme.background)
               .testTag("profilePicture")) {
+        // Display the profile picture if the URL is not null
         AsyncImage(
             model = url,
             contentDescription = "your profile picture",
-            placeholder = painterResource(id = R.drawable.nopp), // Default image during loading
-            error = painterResource(id = R.drawable.nopp), // Fallback image if URL fails
+            placeholder = painterResource(id = R.drawable.nopp),
+            error = painterResource(id = R.drawable.nopp),
             modifier = Modifier.size(size).clip(CircleShape))
 
+        // Display an edit icon to show that the user can change the profile picture
         Icon(
             Icons.Filled.Create,
             contentDescription = "Add a photo",
