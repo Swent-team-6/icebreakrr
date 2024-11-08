@@ -152,19 +152,7 @@ fun ProfileEditingScreen(
                 ProfilePictureSelector(
                     url = profilePictureUrl,
                     size = profilePictureSize,
-                    onSelectionSuccess = { uri ->
-                      val image: ByteArray? = profilesViewModel.imageUriToJpgByteArray(context, uri)
-                      if (image != null) {
-                        profilesViewModel.uploadCurrentUserProfilePicture(
-                            imageData = image,
-                            onSuccess = { url ->
-                              profilePictureUrl = url
-                              isModified = true
-                            })
-                      } else {
-                        Toast.makeText(context, "Failed to select image", Toast.LENGTH_SHORT).show()
-                      }
-                    },
+                    onSelectionSuccess = { uri -> profilesViewModel.processAndUploadImage(context, uri)},
                     onSelectionFailure = {
                       Toast.makeText(context, "Failed to select image", Toast.LENGTH_SHORT).show()
                     })
