@@ -42,7 +42,6 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.github.se.icebreakrr.model.profile.Profile
 import com.github.se.icebreakrr.model.profile.ProfilesViewModel
 import com.github.se.icebreakrr.model.tags.TagsViewModel
 import com.github.se.icebreakrr.ui.navigation.NavigationActions
@@ -80,7 +79,6 @@ fun ProfileEditingScreen(
 
   LaunchedEffect(user?.tags) { user?.tags?.forEach { tag -> tagsViewModel.addFilter(tag) } }
 
-  var profilePictureUrl by remember { mutableStateOf(user!!.profilePictureUrl) }
   var catchphrase by remember { mutableStateOf(TextFieldValue(user!!.catchPhrase)) }
   var description by remember { mutableStateOf(TextFieldValue(user!!.description)) }
   val expanded = remember { mutableStateOf(false) }
@@ -94,15 +92,8 @@ fun ProfileEditingScreen(
 
   fun updateProfile() {
     profilesViewModel.updateProfile(
-        Profile(
-            uid = user!!.uid,
-            name = user.name,
-            gender = user.gender,
-            birthDate = user.birthDate,
-            catchPhrase = catchphrase.text,
-            description = description.text,
-            tags = selectedTags,
-            profilePictureUrl = profilePictureUrl))
+        user!!.copy(
+            catchPhrase = catchphrase.text, description = description.text, tags = selectedTags))
   }
 
   if (isLoading) {
@@ -150,7 +141,7 @@ fun ProfileEditingScreen(
               horizontalAlignment = Alignment.CenterHorizontally) {
                 // A composable that allows the user to preview and edit a profile picture
                 ProfilePictureSelector(
-                    url = profilePictureUrl,
+                    url = user.profilePictureUrl,
                     size = profilePictureSize,
                     onSelectionSuccess = { uri ->
                       profilesViewModel.processAndUploadImage(context, uri)
