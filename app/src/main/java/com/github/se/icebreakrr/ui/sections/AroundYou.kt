@@ -60,6 +60,7 @@ fun AroundYouScreen(
   val filteredProfiles = profilesViewModel.filteredProfiles.collectAsState()
   val isLoading = profilesViewModel.loading.collectAsState()
   val context = LocalContext.current
+  val isConnected = profilesViewModel.isConnected.collectAsState()
 
   Scaffold(
       modifier = Modifier.testTag("aroundYouScreen"),
@@ -81,7 +82,7 @@ fun AroundYouScreen(
                   contentPadding = PaddingValues(vertical = 16.dp),
                   verticalArrangement = Arrangement.spacedBy(16.dp),
                   modifier = Modifier.fillMaxSize().padding(horizontal = 8.dp)) {
-                    if (!profilesViewModel.isConnected.value) {
+                    if (!isConnected.value) {
                       item {
                         Box(
                             contentAlignment = Alignment.Center,
