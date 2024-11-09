@@ -76,7 +76,7 @@ class ProfilesViewModelTest {
     ppRepository = mock(ProfilePicRepository::class.java)
     profilesViewModel = ProfilesViewModel(profilesRepository, ppRepository)
     mockProfileViewModel = mock(ProfilesViewModel::class.java)
-    
+
     // Initialize static mocks
     bitmapFactoryMock = mockStatic(BitmapFactory::class.java)
     bitmapMock = mockStatic(Bitmap::class.java)
@@ -357,7 +357,8 @@ class ProfilesViewModelTest {
     bitmapFactoryMock.`when`<Bitmap> { BitmapFactory.decodeStream(any()) }.thenReturn(mockBitmap)
 
     // Mock Bitmap.createBitmap to return the same mock bitmap
-    bitmapMock.`when`<Bitmap> { Bitmap.createBitmap(any<Bitmap>(), any(), any(), any(), any()) }
+    bitmapMock
+        .`when`<Bitmap> { Bitmap.createBitmap(any<Bitmap>(), any(), any(), any(), any()) }
         .thenReturn(mockBitmap)
 
     profilesViewModel.generateTempProfilePictureBitmap(context, uri)
@@ -386,12 +387,14 @@ class ProfilesViewModelTest {
     bitmapFactoryMock.`when`<Bitmap> { BitmapFactory.decodeStream(any()) }.thenReturn(mockBitmap)
 
     // Mock Bitmap.createBitmap to return the same mock bitmap
-    bitmapMock.`when`<Bitmap> { Bitmap.createBitmap(any<Bitmap>(), any(), any(), any(), any()) }
+    bitmapMock
+        .`when`<Bitmap> { Bitmap.createBitmap(any<Bitmap>(), any(), any(), any(), any()) }
         .thenReturn(mockBitmap)
 
     // Mock Bitmap.createScaledBitmap to return a scaled bitmap
     val scaledBitmap = mock(Bitmap::class.java)
-    bitmapMock.`when`<Bitmap> { Bitmap.createScaledBitmap(any(), eq(600), eq(600), eq(true)) }
+    bitmapMock
+        .`when`<Bitmap> { Bitmap.createScaledBitmap(any(), eq(600), eq(600), eq(true)) }
         .thenReturn(scaledBitmap)
 
     profilesViewModel.generateTempProfilePictureBitmap(context, uri)
