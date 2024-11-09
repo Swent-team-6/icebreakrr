@@ -79,5 +79,13 @@ class NavigationTest {
     // Test navigation to the Notifications screen
     composeTestRule.onNodeWithTag("navItem_${R.string.around_you}").performClick()
     composeTestRule.onNodeWithTag("aroundYouScreen").assertIsDisplayed()
+
+    // Test navigation to the Settings screen
+    composeTestRule.onNodeWithTag("navItem_${R.string.settings}").performClick()
+    composeTestRule.onNodeWithTag("settingsScreen").assertIsDisplayed()
+
+    // Test navigation to the Notifications screen
+    composeTestRule.onNodeWithTag("logOutButton").performClick()
+    composeTestRule.onNodeWithTag("loginScreen").assertIsDisplayed()
   }
 }

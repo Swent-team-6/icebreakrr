@@ -151,7 +151,7 @@ class M1_Test {
     composeTestRule.onNodeWithTag("Option 1").performClick()
     composeTestRule.onNodeWithTag("logOutButton").assertIsDisplayed()
     composeTestRule.onNodeWithTag("logOutButton").performClick()
-    composeTestRule.onNodeWithTag("bottomNavigationMenu").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("loginScreen").assertIsDisplayed()
   }
 
   // Helper function to create a mock profile
