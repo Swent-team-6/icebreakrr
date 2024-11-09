@@ -24,9 +24,17 @@ class ProfilesRepositoryFirestore(private val db: FirebaseFirestore) : ProfilesR
   override val connectionTimeOutMs: Long = 15000
   override val periodicTimeCheckWaitTime: Long = 5000
 
+  // Generated with the help of CursorAI
   /**
-   * Checks internet connection after a delay If still no connection after 15 seconds, updates
-   * waitingDone state
+   * Periodically checks the connection status by attempting to fetch profiles. If the connection
+   * fails, it will retry every [periodicTimeCheckWaitTime] milliseconds (5 seconds by default).
+   *
+   * The check is performed by attempting to fetch profiles from Firestore. If successful, it means
+   * the connection is restored and the waiting states are reset. If unsuccessful, it schedules
+   * another check after the specified delay.
+   *
+   * @param onFailure Callback function that is invoked when a connection attempt fails. Takes an
+   *   Exception as parameter.
    */
   override fun checkConnectionPeriodically(onFailure: (Exception) -> Unit) {
     val handler = Handler(Looper.getMainLooper())
@@ -52,7 +60,19 @@ class ProfilesRepositoryFirestore(private val db: FirebaseFirestore) : ProfilesR
         0)
   }
 
-  override public fun handleConnectionFailure(onFailure: (Exception) -> Unit) {
+  // Generated with the help of CursorAI
+  /**
+   * Handles a connection failure by attempting one final connection retry after
+   * [connectionTimeOutMs] milliseconds (15 seconds by default).
+   *
+   * The retry is performed by attempting to fetch profiles from Firestore:
+   * - If successful: Resets the waiting states (_waitingDone and _isWaiting to false)
+   * - If unsuccessful: Sets _waitingDone to true and calls the onFailure callback
+   *
+   * @param onFailure Callback function that is invoked if the final retry attempt fails. Takes an
+   *   Exception as parameter.
+   */
+  public override fun handleConnectionFailure(onFailure: (Exception) -> Unit) {
     val handler = Handler(Looper.getMainLooper())
     handler.postDelayed(
         {
