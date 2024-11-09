@@ -4,6 +4,7 @@ import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.widget.Toast
+import com.github.se.icebreakrr.R
 
 // Written with the help of CursorAI and Claude
 
@@ -23,8 +24,8 @@ object NetworkUtils {
    */
   fun isNetworkAvailable(context: Context): Boolean {
     val connectivityManager = context.getSystemService(ConnectivityManager::class.java)
-    val currentNetwork = connectivityManager.activeNetwork
-    val caps = connectivityManager.getNetworkCapabilities(currentNetwork)
+    val currentNetwork = connectivityManager?.activeNetwork
+    val caps = connectivityManager?.getNetworkCapabilities(currentNetwork)
     return caps?.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED) ?: false
   }
 
@@ -34,6 +35,6 @@ object NetworkUtils {
    * @param context The context used to display the toast message.
    */
   fun showNoInternetToast(context: Context) {
-    Toast.makeText(context, "No internet connection available", Toast.LENGTH_LONG).show()
+    Toast.makeText(context, context.getString(R.string.No_Internet_Toast), Toast.LENGTH_LONG).show()
   }
 }
