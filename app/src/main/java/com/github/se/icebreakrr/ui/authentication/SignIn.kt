@@ -47,9 +47,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.github.se.icebreakrr.R
 import com.github.se.icebreakrr.config.LocalIsTesting
+import com.github.se.icebreakrr.model.filter.FilterViewModel
 import com.github.se.icebreakrr.model.profile.Gender
 import com.github.se.icebreakrr.model.profile.Profile
 import com.github.se.icebreakrr.model.profile.ProfilesViewModel
+import com.github.se.icebreakrr.model.tags.TagsViewModel
 import com.github.se.icebreakrr.ui.navigation.NavigationActions
 import com.github.se.icebreakrr.ui.navigation.TopLevelDestinations
 import com.github.se.icebreakrr.utils.NetworkUtils
@@ -61,6 +63,7 @@ import com.google.firebase.Timestamp
 import com.google.firebase.auth.AuthResult
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.auth.auth
+import com.google.firebase.firestore.GeoPoint
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
@@ -72,7 +75,12 @@ import kotlinx.coroutines.tasks.await
  * @param navigationActions A class that handles the navigation between screens.
  */
 @Composable
-fun SignInScreen(profilesViewModel: ProfilesViewModel, navigationActions: NavigationActions) {
+fun SignInScreen(
+    profilesViewModel: ProfilesViewModel,
+    navigationActions: NavigationActions,
+    filterViewModel: FilterViewModel,
+    tagsViewModel: TagsViewModel
+) {
 
   // State to hold the current Firebase user
   var user by remember { mutableStateOf(Firebase.auth.currentUser) }
@@ -182,6 +190,13 @@ fun SignInScreen(profilesViewModel: ProfilesViewModel, navigationActions: Naviga
                             .build()
                     val googleSignInClient = GoogleSignIn.getClient(context, gso)
                     launcher.launch(googleSignInClient.signInIntent)
+
+                    profilesViewModel.getFilteredProfilesInRadius(
+                        GeoPoint(0.0, 0.0),
+                        300.0,
+                        filterViewModel.selectedGenders.value,
+                        filterViewModel.ageRange.value,
+                        tagsViewModel.filteredTags.value)
                   }
                 }
               })
