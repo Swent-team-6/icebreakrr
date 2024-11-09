@@ -37,6 +37,9 @@ open class ProfilesViewModel(
   private val _error = MutableStateFlow<Exception?>(null)
   val error: StateFlow<Exception?> = _error
 
+  private val _tempProfilePictureBitmap = MutableStateFlow<Bitmap?>(null)
+  val tempProfilePictureBitmap: StateFlow<Bitmap?> = _tempProfilePictureBitmap
+
   companion object {
     val Factory: ViewModelProvider.Factory =
         object : ViewModelProvider.Factory {
@@ -51,7 +54,7 @@ open class ProfilesViewModel(
   }
 
   /**
-   * Returns a new unique profile ID
+   * Returns a new unique profile ID.
    *
    * @return A unique profile ID as a String.
    */
@@ -59,7 +62,7 @@ open class ProfilesViewModel(
     return repository.getNewProfileId()
   }
 
-  /** Initializes the repository, fetch profiles */
+  /** Initializes the repository and fetches profiles. */
   init {
     repository.init {
       // Fetch profiles on initialization
@@ -181,18 +184,36 @@ open class ProfilesViewModel(
   }
 
   /**
-   * Processes an image from a given URI into the required format (square JPEG) and uploads it as
-   * the current user's profile picture.
+   * Generates a temporary profile picture Bitmap from an image URI.
    *
-   * @param context The context used to access the content resolver and show a toast message.
-   * @param imageUri The URI of the image to be processed and uploaded.
+   * @param context The context used to access the content resolver.
+   * @param imageUri The URI of the image to be converted.
    */
-  fun processAndUploadImage(context: Context, imageUri: Uri) {
-    val image: ByteArray? = imageUriToJpgByteArray(context, imageUri)
-    if (image != null) {
-      uploadCurrentUserProfilePicture(image)
+  fun generateTempProfilePictureBitmap(context: Context, imageUri: Uri) {
+    val bitmap = imageUriToBitmap(context, imageUri)
+    _tempProfilePictureBitmap.value = bitmap
+  }
+
+  /** Clears the temporary profile picture Bitmap. */
+  fun clearTempProfilePictureBitmap() {
+    _tempProfilePictureBitmap.value = null
+  }
+
+  /**
+   * Validates and uploads the profile picture if a temporary profile picture Bitmap exists.
+   *
+   * @param context The context used to show a Toast message in case of failure.
+   */
+  fun validateAndUploadProfilePicture(context: Context) {
+    val imageData =
+        bitmapToJpgByteArray(
+            tempProfilePictureBitmap.value ?: return) // do nothing if null (no selected image)
+    if (imageData != null) {
+      uploadCurrentUserProfilePicture(imageData)
+      clearTempProfilePictureBitmap()
     } else {
-      Toast.makeText(context, "Failed to process image", Toast.LENGTH_SHORT).show()
+      Toast.makeText(context, "Failed to upload profile picture", Toast.LENGTH_SHORT).show()
+      clearTempProfilePictureBitmap()
     }
   }
 
@@ -208,25 +229,20 @@ open class ProfilesViewModel(
           _selectedProfile.update { currentProfile ->
             currentProfile?.copy(profilePictureUrl = null)
           }
+          updateProfile(selectedProfile.value!!)
         },
         onFailure = { e -> handleError(e) })
   }
 
   /**
-   * Converts an image URI to a JPEG byte array, cropping the image to a square at the center.
+   * Converts an image URI to a processed Bitmap, cropping the image to a square at the center.
    *
    * @param context The context used to access the content resolver.
    * @param imageUri The URI of the image to be converted.
-   * @param quality The quality of the JPEG compression (0-100). Default is 100.
-   * @return A byte array representing the JPEG image, or null if an error occurs.
+   * @param maxResolution The maximum resolution for the output Bitmap. Default is 600.
+   * @return A Bitmap representing the processed image, or null if an error occurs.
    */
-  private fun imageUriToJpgByteArray(
-      context: Context,
-      imageUri: Uri,
-      quality: Int = 100,
-      maxResolution: Int = 600
-  ): ByteArray? {
-
+  private fun imageUriToBitmap(context: Context, imageUri: Uri, maxResolution: Int = 600): Bitmap? {
     return try {
       // Open an InputStream from the URI
       val inputStream: InputStream? = context.contentResolver.openInputStream(imageUri)
@@ -244,20 +260,34 @@ open class ProfilesViewModel(
       val croppedBitmap = Bitmap.createBitmap(bitmap, xOffset, yOffset, dimension, dimension)
 
       // Resize the cropped bitmap if it exceeds the maximum resolution
-      val resizedBitmap =
-          if (dimension > maxResolution) {
-            val scale = maxResolution.toFloat() / dimension
-            Bitmap.createScaledBitmap(
-                croppedBitmap,
-                (croppedBitmap.width * scale).toInt(),
-                (croppedBitmap.height * scale).toInt(),
-                true)
-          } else {
-            croppedBitmap
-          }
+      if (dimension > maxResolution) {
+        val scale = maxResolution.toFloat() / dimension
+        Bitmap.createScaledBitmap(
+            croppedBitmap,
+            (croppedBitmap.width * scale).toInt(),
+            (croppedBitmap.height * scale).toInt(),
+            true)
+      } else {
+        croppedBitmap
+      }
+    } catch (e: Exception) {
+      e.printStackTrace()
+      null
+    }
+  }
+
+  /**
+   * Converts a Bitmap to a JPEG byte array.
+   *
+   * @param bitmap The Bitmap to be converted.
+   * @param quality The quality of the JPEG compression (0-100). Default is 100.
+   * @return A byte array representing the JPEG image, or null if an error occurs.
+   */
+  private fun bitmapToJpgByteArray(bitmap: Bitmap, quality: Int = 100): ByteArray? {
+    return try {
       // Compress Bitmap to JPEG format and store in ByteArrayOutputStream
       val byteArrayOutputStream = ByteArrayOutputStream()
-      resizedBitmap.compress(Bitmap.CompressFormat.JPEG, quality, byteArrayOutputStream)
+      bitmap.compress(Bitmap.CompressFormat.JPEG, quality, byteArrayOutputStream)
 
       // Return ByteArray of compressed JPEG image (representing .jpg)
       byteArrayOutputStream.toByteArray()

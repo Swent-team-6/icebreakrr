@@ -76,6 +76,7 @@ fun ProfileEditingScreen(
 
   val isLoading = profilesViewModel.loading.collectAsState(initial = true).value
   val user = profilesViewModel.selectedProfile.collectAsState().value
+  val tempBitmap = profilesViewModel.tempProfilePictureBitmap.collectAsState().value
 
   LaunchedEffect(user?.tags) { user?.tags?.forEach { tag -> tagsViewModel.addFilter(tag) } }
 
@@ -129,6 +130,7 @@ fun ProfileEditingScreen(
                     modifier = Modifier.testTag("checkButton"),
                     onClick = {
                       updateProfile()
+                      profilesViewModel.validateAndUploadProfilePicture(context)
                       tagsViewModel.leaveUI()
                       navigationActions.goBack()
                     }) {
@@ -142,9 +144,11 @@ fun ProfileEditingScreen(
                 // A composable that allows the user to preview and edit a profile picture
                 ProfilePictureSelector(
                     url = user.profilePictureUrl,
+                    localBitmap = tempBitmap,
                     size = profilePictureSize,
                     onSelectionSuccess = { uri ->
-                      profilesViewModel.processAndUploadImage(context, uri)
+                      profilesViewModel.generateTempProfilePictureBitmap(context, uri)
+                      isModified = true
                     },
                     onSelectionFailure = {
                       Toast.makeText(context, "Failed to select image", Toast.LENGTH_SHORT).show()
@@ -231,7 +235,7 @@ fun ProfileEditingScreen(
                             onClick = {
                               showDialog = false
                               tagsViewModel.leaveUI()
-                              profilesViewModel.deleteCurrentUserProfilePicture()
+                              profilesViewModel.clearTempProfilePictureBitmap()
                               navigationActions.goBack()
                             }) {
                               Text("Discard changes")

@@ -1,5 +1,6 @@
 package com.github.se.icebreakrr.ui.profile
 
+import android.graphics.Bitmap
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
@@ -39,6 +40,7 @@ import com.github.se.icebreakrr.ui.theme.IceBreakrrBlue
 @Composable
 fun ProfilePictureSelector(
     url: String?,
+    localBitmap: Bitmap?,
     size: Dp,
     onSelectionSuccess: (Uri) -> Unit,
     onSelectionFailure: () -> Unit
@@ -68,7 +70,7 @@ fun ProfilePictureSelector(
               .testTag("profilePicture")) {
         // Display the profile picture if the URL is not null
         AsyncImage(
-            model = url,
+            model = localBitmap ?: url, // Use the temporary bitmap if available
             contentDescription = "your profile picture",
             placeholder = painterResource(id = R.drawable.nopp),
             error = painterResource(id = R.drawable.nopp),
