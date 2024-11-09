@@ -24,30 +24,30 @@ import com.google.firebase.auth.FirebaseAuth
  */
 fun logout(context: Context, navigationActions: NavigationActions) {
 
-    //Initialize FirebaseAuth
-    val auth = FirebaseAuth.getInstance()
+  // Initialize FirebaseAuth
+  val auth = FirebaseAuth.getInstance()
 
-    //Configure GoogleSignIn
-    val gso =
-        GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-            .requestIdToken(
-                context.getString(R.string.default_web_client_id)) // Use Web client ID as a string
-            .requestEmail()
-            .build()
+  // Configure GoogleSignIn
+  val gso =
+      GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+          .requestIdToken(
+              context.getString(R.string.default_web_client_id)) // Use Web client ID as a string
+          .requestEmail()
+          .build()
 
-    val googleSignInClient: GoogleSignInClient = GoogleSignIn.getClient(context, gso)
+  val googleSignInClient: GoogleSignInClient = GoogleSignIn.getClient(context, gso)
 
-    //Sign out from Firebase
-    auth.signOut()
+  // Sign out from Firebase
+  auth.signOut()
 
-    //Sign out from Google and reset the google account choice
-    googleSignInClient.signOut().addOnCompleteListener { signOutTask ->
-        if (signOutTask.isSuccessful) {
-            googleSignInClient.revokeAccess().addOnCompleteListener { revokeTask ->
-                navigationActions.navigateTo(Screen.AUTH)
-            }
-        } else {
-            Log.e("GoogleSignIn", "Failed to sign out from Google.")
-        }
+  // Sign out from Google and reset the google account choice
+  googleSignInClient.signOut().addOnCompleteListener { signOutTask ->
+    if (signOutTask.isSuccessful) {
+      googleSignInClient.revokeAccess().addOnCompleteListener { revokeTask ->
+        navigationActions.navigateTo(Screen.AUTH)
+      }
+    } else {
+      Log.e("GoogleSignIn", "Failed to sign out from Google.")
     }
+  }
 }
