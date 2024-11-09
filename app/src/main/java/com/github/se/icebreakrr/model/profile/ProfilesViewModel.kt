@@ -223,8 +223,10 @@ open class ProfilesViewModel(
   private fun imageUriToJpgByteArray(
       context: Context,
       imageUri: Uri,
-      quality: Int = 100
+      quality: Int = 100,
+      maxResolution: Int = 600
   ): ByteArray? {
+
     return try {
       // Open an InputStream from the URI
       val inputStream: InputStream? = context.contentResolver.openInputStream(imageUri)
@@ -241,9 +243,21 @@ open class ProfilesViewModel(
       // Crop the Bitmap to a square at the center
       val croppedBitmap = Bitmap.createBitmap(bitmap, xOffset, yOffset, dimension, dimension)
 
+      // Resize the cropped bitmap if it exceeds the maximum resolution
+      val resizedBitmap =
+          if (dimension > maxResolution) {
+            val scale = maxResolution.toFloat() / dimension
+            Bitmap.createScaledBitmap(
+                croppedBitmap,
+                (croppedBitmap.width * scale).toInt(),
+                (croppedBitmap.height * scale).toInt(),
+                true)
+          } else {
+            croppedBitmap
+          }
       // Compress Bitmap to JPEG format and store in ByteArrayOutputStream
       val byteArrayOutputStream = ByteArrayOutputStream()
-      croppedBitmap.compress(Bitmap.CompressFormat.JPEG, quality, byteArrayOutputStream)
+      resizedBitmap.compress(Bitmap.CompressFormat.JPEG, quality, byteArrayOutputStream)
 
       // Return ByteArray of compressed JPEG image (representing .jpg)
       byteArrayOutputStream.toByteArray()
