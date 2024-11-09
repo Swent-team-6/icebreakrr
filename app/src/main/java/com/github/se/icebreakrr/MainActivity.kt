@@ -83,7 +83,13 @@ fun IcebreakrrApp() {
         startDestination = Screen.AUTH,
         route = Route.AUTH,
     ) {
-      composable(Screen.AUTH) { SignInScreen(profileViewModel, navigationActions) }
+      composable(Screen.AUTH) {
+        SignInScreen(
+            profileViewModel,
+            navigationActions,
+            filterViewModel = filterViewModel,
+            tagsViewModel = tagsViewModel)
+      }
     }
 
     navigation(

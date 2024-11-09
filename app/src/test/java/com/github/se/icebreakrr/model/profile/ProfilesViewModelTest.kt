@@ -5,6 +5,7 @@ import com.google.firebase.firestore.GeoPoint
 import java.util.Calendar
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.TestDispatcher
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -16,7 +17,9 @@ import org.hamcrest.CoreMatchers.`is`
 import org.hamcrest.CoreMatchers.nullValue
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.After
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertThrows
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mockito.mock
@@ -70,6 +73,9 @@ class ProfilesViewModelTest {
     ppRepository = mock(ProfilePicRepository::class.java)
     profilesViewModel = ProfilesViewModel(profilesRepository, ppRepository)
     Dispatchers.setMain(testDispatcher) // Set main dispatcher first
+
+    whenever(profilesRepository.isWaiting).thenReturn(MutableStateFlow(false))
+    whenever(profilesRepository.waitingDone).thenReturn(MutableStateFlow(false))
   }
 
   @OptIn(ExperimentalCoroutinesApi::class)
@@ -329,18 +335,23 @@ class ProfilesViewModelTest {
   @OptIn(ExperimentalCoroutinesApi::class)
   @Test
   fun showsOfflineWhenTimerCompletesAndStillFailing() = runTest {
+
+    // Mock repository states
+    whenever(profilesRepository.isWaiting).thenReturn(MutableStateFlow(false))
+    whenever(profilesRepository.waitingDone).thenReturn(MutableStateFlow(false))
+
     // Initial state
-    assertThat(profilesViewModel.isConnected.value, `is`(true))
-    assertThat(profilesViewModel.waitingDone.value, `is`(false))
-    assertThat(profilesViewModel.isWaiting.value, `is`(false))
+    assertTrue(profilesViewModel.isConnected.value)
+    assertFalse(profilesRepository.waitingDone.value)
+    assertFalse(profilesRepository.isWaiting.value)
 
     // Simulate a failed request that starts the timer
     val center = GeoPoint(0.0, 0.0)
-    val radiusInMeters = 1000.0
+    val radiusInMeters = 300.0
     val exception =
-        (com.google.firebase.firestore.FirebaseFirestoreException(
-            "Permission denied",
-            com.google.firebase.firestore.FirebaseFirestoreException.Code.PERMISSION_DENIED))
+        com.google.firebase.firestore.FirebaseFirestoreException(
+            "Unavailable",
+            com.google.firebase.firestore.FirebaseFirestoreException.Code.UNAVAILABLE)
 
     whenever(profilesRepository.getProfilesInRadius(eq(center), eq(radiusInMeters), any(), any()))
         .thenAnswer {
@@ -350,32 +361,39 @@ class ProfilesViewModelTest {
 
     // First failed request starts the timer
     profilesViewModel.getFilteredProfilesInRadius(center, radiusInMeters)
-    assertThat(profilesViewModel.isWaiting.value, `is`(true))
 
     // Advance time to complete the timer
-    advanceTimeBy(16_000)
-    assertThat(profilesViewModel.waitingDone.value, `is`(true))
+    advanceTimeBy(15_001)
+
+    // Mock repository states
+    whenever(profilesRepository.isWaiting).thenReturn(MutableStateFlow(true))
+    whenever(profilesRepository.waitingDone).thenReturn(MutableStateFlow(true))
 
     // Another failed request after timer completes
     profilesViewModel.getFilteredProfilesInRadius(center, radiusInMeters)
 
     // Should now be offline
-    assertThat(profilesViewModel.isConnected.value, `is`(false))
+    assertFalse(profilesViewModel.isConnected.value)
   }
 
-  // Generated with the help of CursorAI
   @OptIn(ExperimentalCoroutinesApi::class)
   @Test
   fun showsOnlineWhenDifferentError() = runTest {
+    whenever(profilesRepository.isWaiting).thenReturn(MutableStateFlow(false))
+    whenever(profilesRepository.waitingDone).thenReturn(MutableStateFlow(false))
     // Initial state
-    assertThat(profilesViewModel.isConnected.value, `is`(true))
-    assertThat(profilesViewModel.waitingDone.value, `is`(false))
-    assertThat(profilesViewModel.isWaiting.value, `is`(false))
+    assertTrue(profilesViewModel.isConnected.value)
+    assertFalse(profilesRepository.waitingDone.value)
+    assertFalse(profilesRepository.isWaiting.value)
 
     // Simulate a failed request that doesn't start the timer
     val center = GeoPoint(0.0, 0.0)
     val radiusInMeters = 1000.0
     val exception = Exception("Test exception")
+
+    // Mock repository states
+    whenever(profilesRepository.isWaiting).thenReturn(MutableStateFlow(false))
+    whenever(profilesRepository.waitingDone).thenReturn(MutableStateFlow(false))
 
     whenever(profilesRepository.getProfilesInRadius(eq(center), eq(radiusInMeters), any(), any()))
         .thenAnswer {
@@ -385,16 +403,14 @@ class ProfilesViewModelTest {
 
     // First failed request doesn't start the timer
     profilesViewModel.getFilteredProfilesInRadius(center, radiusInMeters)
-    assertThat(profilesViewModel.isWaiting.value, `is`(false))
 
-    // Advance time to complete the timer
+    // Advance time
     advanceTimeBy(16_000)
-    assertThat(profilesViewModel.waitingDone.value, `is`(false))
 
     // Another failed request after timer completes
     profilesViewModel.getFilteredProfilesInRadius(center, radiusInMeters)
 
     // Should still be online because it wasn't the correct error
-    assertThat(profilesViewModel.isConnected.value, `is`(true))
+    assertTrue(profilesViewModel.isConnected.value)
   }
 }

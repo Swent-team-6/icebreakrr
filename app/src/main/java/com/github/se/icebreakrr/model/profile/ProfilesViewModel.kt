@@ -3,16 +3,13 @@ package com.github.se.icebreakrr.model.profile
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.viewModelScope
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.GeoPoint
 import com.google.firebase.firestore.firestore
 import com.google.firebase.storage.storage
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 
 open class ProfilesViewModel(
     private val repository: ProfilesRepository,
@@ -34,11 +31,8 @@ open class ProfilesViewModel(
   private val _error = MutableStateFlow<Exception?>(null)
   val error: StateFlow<Exception?> = _error
 
-  private val _isConnected = MutableStateFlow(true)
-  open val isConnected: StateFlow<Boolean> = _isConnected
-
-  var waitingDone = MutableStateFlow(false)
-  var isWaiting = MutableStateFlow(false)
+  private var _isConnected = MutableStateFlow(true)
+  var isConnected: StateFlow<Boolean> = _isConnected
 
   companion object {
     val Factory: ViewModelProvider.Factory =
@@ -67,17 +61,6 @@ open class ProfilesViewModel(
     repository.init {
       // Fetch profiles on initialization
       getFilteredProfilesInRadius(GeoPoint(0.0, 0.0), 300.0)
-    }
-  }
-
-  /**
-   * Checks internet connection after a delay If still no connection after 15 seconds, updates
-   * waitingDone state
-   */
-  private fun checkConnectionWithDelay() {
-    viewModelScope.launch {
-      delay(15000) // 15 seconds delay
-      waitingDone.value = true
     }
   }
 
@@ -120,29 +103,16 @@ open class ProfilesViewModel(
           _filteredProfiles.value = filteredProfiles
           _loading.value = false
           _isConnected.value = true
-          waitingDone.value = false
-          isWaiting.value = false
-          Log.e(
-              "ConnectionCheck",
-              "Reset flags: waiting=${isWaiting.value}, done=${waitingDone.value}")
         },
         onFailure = { e ->
-          Log.e("ConnectionCheck", "Request FAILED")
+          Log.e("ConnectionCheck", "Firebase Request FAILED")
           Log.e(
               "ConnectionCheck",
-              "Current state: waiting=${isWaiting.value}, done=${waitingDone.value}")
+              "Current state: waiting=${repository.isWaiting.value}, done=${repository.waitingDone.value}")
           handleError(e)
-          if (e is com.google.firebase.firestore.FirebaseFirestoreException) {
-            if (!waitingDone.value && !isWaiting.value) {
-              Log.e("ConnectionCheck", "First failure, starting timer")
-              checkConnectionWithDelay()
-              isWaiting.value = true
-            }
-
-            if (waitingDone.value && isWaiting.value) {
-              Log.e("ConnectionCheck", "Timer completed and still failing, showing offline")
-              _isConnected.value = false
-            }
+          if (_isConnected.value && repository.waitingDone.value) {
+            _isConnected.value = false
+            repository.checkConnectionPeriodically({})
           }
         })
   }
