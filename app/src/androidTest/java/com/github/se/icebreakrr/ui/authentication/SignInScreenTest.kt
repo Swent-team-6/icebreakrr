@@ -11,10 +11,12 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.navigation.NavHostController
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.github.se.icebreakrr.model.filter.FilterViewModel
+import com.github.se.icebreakrr.model.message.MeetingRequestViewModel
 import com.github.se.icebreakrr.model.profile.ProfilesViewModel
 import com.github.se.icebreakrr.model.tags.TagsRepository
 import com.github.se.icebreakrr.model.tags.TagsViewModel
 import com.github.se.icebreakrr.ui.navigation.NavigationActions
+import com.google.firebase.functions.FirebaseFunctions
 import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
 import org.junit.Before
 import org.junit.Rule
@@ -31,6 +33,9 @@ class LoginTest : TestCase() {
   private lateinit var filterViewModel: FilterViewModel
   private lateinit var mockTagsRepository: TagsRepository
   private lateinit var tagsViewModel: TagsViewModel
+  private lateinit var meetingRequestViewModel: MeetingRequestViewModel
+  private lateinit var functions: FirebaseFunctions
+  private lateinit var ourUid: String
 
   @get:Rule val composeTestRule = createComposeRule()
 
@@ -42,6 +47,10 @@ class LoginTest : TestCase() {
     filterViewModel = FilterViewModel()
     mockTagsRepository = mock(TagsRepository::class.java)
     tagsViewModel = TagsViewModel(mockTagsRepository)
+    functions = mock(FirebaseFunctions::class.java)
+    ourUid = "UserId1"
+    meetingRequestViewModel =
+        MeetingRequestViewModel(profileViewModel, functions, ourUid, "My name")
   }
 
   @Test
@@ -49,6 +58,7 @@ class LoginTest : TestCase() {
     composeTestRule.setContent {
       SignInScreen(
           profileViewModel,
+          meetingRequestViewModel,
           navigationActions,
           filterViewModel = filterViewModel,
           tagsViewModel = tagsViewModel)

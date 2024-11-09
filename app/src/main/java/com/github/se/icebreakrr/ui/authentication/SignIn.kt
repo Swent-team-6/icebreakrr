@@ -48,6 +48,7 @@ import androidx.compose.ui.unit.sp
 import com.github.se.icebreakrr.R
 import com.github.se.icebreakrr.config.LocalIsTesting
 import com.github.se.icebreakrr.model.filter.FilterViewModel
+import com.github.se.icebreakrr.model.message.MeetingRequestViewModel
 import com.github.se.icebreakrr.model.profile.Gender
 import com.github.se.icebreakrr.model.profile.Profile
 import com.github.se.icebreakrr.model.profile.ProfilesViewModel
@@ -64,6 +65,7 @@ import com.google.firebase.auth.AuthResult
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.auth.auth
 import com.google.firebase.firestore.GeoPoint
+import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
@@ -77,6 +79,7 @@ import kotlinx.coroutines.tasks.await
 @Composable
 fun SignInScreen(
     profilesViewModel: ProfilesViewModel,
+    meetingRequestViewModel: MeetingRequestViewModel,
     navigationActions: NavigationActions,
     filterViewModel: FilterViewModel,
     tagsViewModel: TagsViewModel
@@ -117,19 +120,29 @@ fun SignInScreen(
                 // Check selectedProfile after loading completes
                 val profile = profilesViewModel.selectedProfile.value
 
-                // checking if profile already exists
-                if (profile == null) { // if doesn't exist create new user
+                // checking if profile already exists and add it its fcmToken
+                FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
+                  if (task.isSuccessful) {
+                    val fcmToken = task.result
+                    meetingRequestViewModel.onRemoteTokenChange(token)
+                    if (profile == null) { // if doesn't exist create new user
 
-                  val newProfile =
-                      Profile(
-                          uid = firebaseUser.uid,
-                          name = firebaseUser.displayName ?: "Unknown",
-                          gender = Gender.OTHER,
-                          birthDate = Timestamp.now(),
-                          catchPhrase = "",
-                          description = "")
+                      val newProfile =
+                          Profile(
+                              uid = firebaseUser.uid,
+                              name = firebaseUser.displayName ?: "Unknown",
+                              gender = Gender.OTHER,
+                              birthDate = Timestamp.now(),
+                              catchPhrase = "",
+                              description = "",
+                              fcmToken = fcmToken)
 
-                  profilesViewModel.addNewProfile(newProfile)
+                      profilesViewModel.addNewProfile(newProfile)
+                    } else {
+                      val updatedProfile = profile.copy(fcmToken = fcmToken)
+                      profilesViewModel.updateProfile(updatedProfile)
+                    }
+                  }
                 }
 
                 // Navigate to sign in screen after completion
