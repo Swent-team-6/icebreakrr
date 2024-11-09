@@ -18,6 +18,7 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.TestDispatcher
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.setMain
+import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -180,5 +181,19 @@ class MeetingRequestViewModelTest {
     // Verify: Ensure no unhandled exceptions and log output if needed
     verify(functions).getHttpsCallable("sendMessage")
     verify(callableReference).call(any())
+  }
+
+  @Test
+  fun constructWrongMeetingRequestVM(): Unit = runBlocking {
+    val meetingRequestViewModelFactory =
+        MeetingRequestViewModel.Companion.Factory(profilesViewModel, functions, "1", "John Doe")
+    var exception: IllegalArgumentException = IllegalArgumentException("No message")
+    try {
+      meetingRequestViewModelFactory.create(ProfilesViewModel::class.java)
+    } catch (e: IllegalArgumentException) {
+      exception = e
+    }
+
+    assertEquals("Unknown ViewModel class", exception.message)
   }
 }

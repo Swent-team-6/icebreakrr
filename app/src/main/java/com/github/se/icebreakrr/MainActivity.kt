@@ -45,18 +45,15 @@ class MainActivity : ComponentActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     FirebaseApp.initializeApp(this)
-    requestNotificationPermission()
 
     auth = FirebaseAuth.getInstance()
 
-    auth.currentUser?.let {
-      // Sign out the user if they are already signed in
-      // This is useful for testing purposes
-      // auth.signOut()
-    }
-
     // Retrieve the testing flag from the Intent
     val isTesting = intent?.getBooleanExtra("IS_TESTING", false) ?: false
+
+    if (!isTesting) {
+      requestNotificationPermission()
+    }
 
     setContent {
       // Provide the `isTesting` flag to the entire composable tree
