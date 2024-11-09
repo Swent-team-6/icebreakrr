@@ -52,7 +52,7 @@ class ProfilesRepositoryFirestore(private val db: FirebaseFirestore) : ProfilesR
         0)
   }
 
-  private fun handleConnectionFailure(onFailure: (Exception) -> Unit) {
+  override public fun handleConnectionFailure(onFailure: (Exception) -> Unit) {
     val handler = Handler(Looper.getMainLooper())
     handler.postDelayed(
         {
@@ -72,14 +72,6 @@ class ProfilesRepositoryFirestore(private val db: FirebaseFirestore) : ProfilesR
               })
         },
         connectionTimeOutMs) // 15 secondes de délai avant de retenter la connexion
-  }
-
-  override fun updateIsWaiting(waiting: Boolean) {
-    isWaiting.value = waiting
-  }
-
-  override fun updateWaitingDone(waiting: Boolean) {
-    waitingDone.value = waiting
   }
 
   /**
@@ -128,8 +120,8 @@ class ProfilesRepositoryFirestore(private val db: FirebaseFirestore) : ProfilesR
                 ?: emptyList()
 
         onSuccess(profiles)
-        updateWaitingDone(false)
-        updateIsWaiting(false)
+        waitingDone.value = false
+        isWaiting.value = false
       } else {
         result.exception?.let { e ->
           Log.e("ProfilesRepositoryFirestore", "Error getting profiles", e)

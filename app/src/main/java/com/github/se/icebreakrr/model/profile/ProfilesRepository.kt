@@ -12,11 +12,9 @@ interface ProfilesRepository {
 
   fun checkConnectionPeriodically(onFailure: (Exception) -> Unit)
 
+  fun handleConnectionFailure(onFailure: (Exception) -> Unit)
+
   fun getNewProfileId(): String
-
-  fun updateIsWaiting(waiting: Boolean)
-
-  fun updateWaitingDone(waiting: Boolean)
 
   fun init(onSuccess: () -> Unit)
 
