@@ -136,6 +136,16 @@ class MeetingRequestViewModelTest {
   }
 
   @Test
+  fun testOnLocalTokenChange() = runBlocking {
+    val newToken = "TokenUser3"
+
+    meetingRequestViewModel.onLocalTokenChange(newToken)
+
+    // Assert: Verify that meetingRequestState was updated
+    assert(meetingRequestViewModel.meetingRequestState.targetToken == newToken)
+  }
+
+  @Test
   fun testSendMessageCorrectData() = runBlocking {
     // Mock the callable function
     val callableMock: HttpsCallableResult = mock(HttpsCallableResult::class.java)

@@ -3,6 +3,7 @@ package com.github.se.icebreakrr.model.message
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
+import android.util.Log
 import androidx.core.app.NotificationCompat
 import com.github.se.icebreakrr.R
 import com.google.firebase.messaging.FirebaseMessagingService
@@ -38,6 +39,8 @@ class MeetingRequestService : FirebaseMessagingService() {
    */
   override fun onNewToken(token: String) {
     super.onNewToken(token)
+    MeetingRequestManager.updateRemoteToken(token)
+    Log.d("FIRESTORE KEY", "key changed by Firestore")
   }
 
   /**

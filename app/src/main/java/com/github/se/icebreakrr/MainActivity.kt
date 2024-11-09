@@ -20,6 +20,8 @@ import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
 import com.github.se.icebreakrr.config.LocalIsTesting
 import com.github.se.icebreakrr.model.filter.FilterViewModel
+import com.github.se.icebreakrr.model.message.MeetingRequestManager
+import com.github.se.icebreakrr.model.message.MeetingRequestManager.meetingRequestViewModel
 import com.github.se.icebreakrr.model.message.MeetingRequestViewModel
 import com.github.se.icebreakrr.model.profile.ProfilesViewModel
 import com.github.se.icebreakrr.model.tags.TagsViewModel
@@ -41,6 +43,7 @@ import com.google.firebase.functions.FirebaseFunctions
 
 class MainActivity : ComponentActivity() {
   private lateinit var auth: FirebaseAuth
+  private lateinit var meetingRequestViewModel: MeetingRequestViewModel
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
@@ -96,11 +99,13 @@ fun IcebreakrrApp() {
   val ourUserUid = FirebaseAuth.getInstance().currentUser?.uid
   val ourName = FirebaseAuth.getInstance().currentUser?.displayName
   val functions = FirebaseFunctions.getInstance()
-  val meetingRequestViewModel: MeetingRequestViewModel =
+
+  MeetingRequestManager.meetingRequestViewModel =
       viewModel(
           factory =
               MeetingRequestViewModel.Companion.Factory(
                   profileViewModel, functions, ourUserUid, ourName))
+  val meetingRequestViewModel = MeetingRequestManager.meetingRequestViewModel
 
   NavHost(navController = navController, startDestination = Route.AUTH) {
     navigation(
@@ -108,7 +113,9 @@ fun IcebreakrrApp() {
         route = Route.AUTH,
     ) {
       composable(Screen.AUTH) {
-        SignInScreen(profileViewModel, meetingRequestViewModel, navigationActions)
+        if (meetingRequestViewModel != null) {
+          SignInScreen(profileViewModel, meetingRequestViewModel, navigationActions)
+        }
       }
     }
 
@@ -120,12 +127,14 @@ fun IcebreakrrApp() {
         AroundYouScreen(navigationActions, profileViewModel, tagsViewModel, filterViewModel)
       }
       composable(Screen.OTHER_PROFILE_VIEW + "?userId={userId}") { navBackStackEntry ->
-        OtherProfileView(
-            profileViewModel,
-            tagsViewModel,
-            meetingRequestViewModel,
-            navigationActions,
-            navBackStackEntry)
+        if (meetingRequestViewModel != null) {
+          OtherProfileView(
+              profileViewModel,
+              tagsViewModel,
+              meetingRequestViewModel,
+              navigationActions,
+              navBackStackEntry)
+        }
       }
     }
 
