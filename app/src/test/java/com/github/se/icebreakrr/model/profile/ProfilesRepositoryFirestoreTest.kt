@@ -12,8 +12,13 @@ import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.GeoPoint
 import com.google.firebase.firestore.QuerySnapshot
+import java.time.Duration
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.fail
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.runTest
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -297,5 +302,120 @@ class ProfilesRepositoryFirestoreTest {
         onFailure = { fail("Failure callback should not be called") })
 
     shadowOf(Looper.getMainLooper()).idle()
+  }
+
+  @OptIn(ExperimentalCoroutinesApi::class)
+  @Test
+  fun showsOfflineWhenTimerCompletesAndStillFailing() = runTest {
+    // Mock failed connection
+    `when`(mockCollectionReference.get(any<com.google.firebase.firestore.Source>()))
+        .thenReturn(
+            Tasks.forException(
+                com.google.firebase.firestore.FirebaseFirestoreException(
+                    "Unavailable",
+                    com.google.firebase.firestore.FirebaseFirestoreException.Code.UNAVAILABLE)))
+
+    // Initial state
+    assertFalse(profilesRepositoryFirestore.isWaiting.value)
+    assertFalse(profilesRepositoryFirestore.waitingDone.value)
+
+    // First failed request
+    profilesRepositoryFirestore.getProfilesInRadius(
+        GeoPoint(0.0, 0.0), 300.0, onSuccess = { fail("Should not succeed") }, onFailure = {})
+
+    // Let the handler execute the initial failure
+    shadowOf(Looper.getMainLooper()).idle()
+
+    // Verify waiting state started
+    assertTrue(profilesRepositoryFirestore.isWaiting.value)
+    assertFalse(profilesRepositoryFirestore.waitingDone.value)
+
+    // Advance time to complete the connection timeout
+    shadowOf(Looper.getMainLooper())
+        .idleFor(Duration.ofMillis(profilesRepositoryFirestore.connectionTimeOutMs))
+
+    // Let any pending handlers execute
+    shadowOf(Looper.getMainLooper()).idle()
+
+    // Verify timeout completed
+    assertTrue(profilesRepositoryFirestore.waitingDone.value)
+  }
+
+  @Test
+  fun handleConnectionFailure_successfulRetry() {
+    // Mock successful connection
+    `when`(mockCollectionReference.get(any<com.google.firebase.firestore.Source>()))
+        .thenReturn(Tasks.forResult(mockProfileQuerySnapshot))
+    `when`(mockProfileQuerySnapshot.documents).thenReturn(listOf())
+
+    var onFailureCalled = false
+    profilesRepositoryFirestore.handleConnectionFailure { onFailureCalled = true }
+
+    // Let initial handler execute
+    shadowOf(Looper.getMainLooper()).idle()
+
+    // Advance time by connectionTimeOutMs
+    shadowOf(Looper.getMainLooper())
+        .idleFor(Duration.ofMillis(profilesRepositoryFirestore.connectionTimeOutMs))
+
+    // Let retry handler execute
+    shadowOf(Looper.getMainLooper()).idle()
+
+    // Verify states after successful retry
+    assertFalse(profilesRepositoryFirestore.isWaiting.value)
+    assertFalse(profilesRepositoryFirestore.waitingDone.value)
+    assertFalse(onFailureCalled)
+  }
+
+  @Test
+  fun checkConnectionPeriodically_onSuccess() {
+    // Mock successful connection
+    `when`(mockCollectionReference.get(any<com.google.firebase.firestore.Source>()))
+        .thenReturn(Tasks.forResult(mockProfileQuerySnapshot))
+    `when`(mockProfileQuerySnapshot.documents).thenReturn(listOf())
+
+    // Set initial waiting state
+    profilesRepositoryFirestore.isWaiting.value = true
+    profilesRepositoryFirestore.waitingDone.value = true
+
+    // Call the method
+    profilesRepositoryFirestore.checkConnectionPeriodically {}
+
+    // Let the handler execute
+    shadowOf(Looper.getMainLooper()).idle()
+
+    // Verify states reset after successful connection
+    assertFalse(profilesRepositoryFirestore.isWaiting.value)
+    assertFalse(profilesRepositoryFirestore.waitingDone.value)
+  }
+
+  @Test
+  fun checkConnectionPeriodically_onFailure() {
+    // Mock failed connection with FirebaseFirestoreException
+    `when`(mockCollectionReference.get(any<com.google.firebase.firestore.Source>()))
+        .thenReturn(
+            Tasks.forException(
+                com.google.firebase.firestore.FirebaseFirestoreException(
+                    "Unavailable",
+                    com.google.firebase.firestore.FirebaseFirestoreException.Code.UNAVAILABLE)))
+
+    // Call the method
+    profilesRepositoryFirestore.checkConnectionPeriodically {}
+
+    // Let initial handler execute
+    shadowOf(Looper.getMainLooper()).idle()
+
+    // Verify waiting state started
+    assertTrue(profilesRepositoryFirestore.isWaiting.value)
+
+    // Advance time by periodicTimeCheckWaitTime to verify retry is scheduled
+    shadowOf(Looper.getMainLooper())
+        .idleFor(Duration.ofMillis(profilesRepositoryFirestore.periodicTimeCheckWaitTime))
+
+    // Let retry handler execute
+    shadowOf(Looper.getMainLooper()).idle()
+
+    // Should still be in waiting state as connection is still failing
+    assertTrue(profilesRepositoryFirestore.isWaiting.value)
   }
 }
