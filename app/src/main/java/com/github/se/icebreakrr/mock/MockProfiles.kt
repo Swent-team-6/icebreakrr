@@ -1,8 +1,5 @@
 package com.github.se.icebreakrr.mock
 
-import android.os.Handler
-import android.os.Looper
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.github.se.icebreakrr.model.profile.Gender
@@ -33,54 +30,9 @@ open class MockProfileRepository : ProfilesRepository {
    * Checks internet connection after a delay If still no connection after 15 seconds, updates
    * waitingDone state
    */
-  override fun checkConnectionPeriodically(onFailure: (Exception) -> Unit) {
-    val handler = Handler(Looper.getMainLooper())
-    handler.postDelayed(
-        object : Runnable {
-          override fun run() {
-            getProfilesInRadius(
-                GeoPoint(0.0, 0.0),
-                300.0,
-                onSuccess = { profiles ->
-                  Log.e("Connection Check", "Connection restored")
-                  _waitingDone.value = false
-                  _isWaiting.value = false
-                },
-                onFailure = {
-                  Log.e(
-                      "Connection Check",
-                      "Connection still lost, retrying in ${periodicTimeCheckWaitTime/1000} seconds...")
-                  handler.postDelayed(this, periodicTimeCheckWaitTime)
-                })
-          }
-        },
-        0)
-  }
+  override fun checkConnectionPeriodically(onFailure: (Exception) -> Unit) {}
 
-  private fun handleConnectionFailure(onFailure: (Exception) -> Unit) {
-    val handler = Handler(Looper.getMainLooper())
-    handler.postDelayed(
-        {
-          Log.e("Connection Check", "Retrying connection...")
-          getProfilesInRadius(
-              GeoPoint(0.0, 0.0),
-              300.0,
-              onSuccess = { profiles -> Log.e("Connection Check", "Connection restored") },
-              onFailure = {
-                Log.e("Connection Check", "Connection lost after retry")
-                onFailure(Exception("Connexion lost"))
-              })
-        },
-        connectionTimeOutMs) // 15 secondes de délai avant de retenter la connexion
-  }
-
-  override fun updateIsWaiting(waiting: Boolean) {
-    isWaiting.value = waiting
-  }
-
-  override fun updateWaitingDone(waiting: Boolean) {
-    waitingDone.value = waiting
-  }
+  override fun handleConnectionFailure(onFailure: (Exception) -> Unit) {}
 
   // Returns a hardcoded fake profile ID
   override fun getNewProfileId(): String {
