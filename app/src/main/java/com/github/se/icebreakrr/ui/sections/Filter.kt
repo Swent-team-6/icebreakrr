@@ -344,7 +344,11 @@ fun FilterScreen(
                 Text(
                     "Tags",
                     fontSize = (screenHeight.value * titleFontSizeFactor).sp,
-                    modifier = Modifier.padding(vertical = 8.dp).testTag("TagsTitle"))
+                    modifier = Modifier
+                        .padding(vertical = SMALL_PADDING.dp)
+                        .testTag("TagsTitle")
+                        .semantics(mergeDescendants = true) {}
+                )
                 TagSelector(
                     selectedTag =
                         filteringTags.value.map { tag -> Pair(tag, tagsViewModel.tagToColor(tag)) },
