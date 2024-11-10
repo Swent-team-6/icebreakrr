@@ -153,6 +153,7 @@ dependencies {
     implementation(libs.coil.compose)
 
     implementation(libs.firebase.firestore.ktx)
+    implementation(libs.firebase.functions.ktx)
     implementation(libs.firebase.storage.ktx)
     testImplementation(libs.junit)
     globalTestImplementation(libs.androidx.junit)
@@ -185,7 +186,15 @@ dependencies {
     // Android Studio Preview support
     implementation(libs.compose.preview)
     // Accompanist Flow Layout dependency
-    implementation("com.google.accompanist:accompanist-flowlayout:0.32.0")
+    implementation(libs.accompanist.flowlayout)
+
+    // Add Firebase Cloud Messaging System
+    implementation(libs.firebase.messaging.ktx)
+
+    // Arch Core Testing library for InstantTaskExecutorRule
+    testImplementation(libs.androidx.core.testing)
+
+
 
     debugImplementation(libs.compose.tooling)
     implementation(libs.coil.compose)
@@ -204,6 +213,11 @@ dependencies {
     // ------------       Mockito     --------------
     testImplementation(libs.mockito.core)
     testImplementation(libs.mockito.kotlin)
+
+    testImplementation(libs.mockito.mockito.core.v520)
+    testImplementation(libs.mockito.inline.v520) // For mocking static methods if needed
+
+
     androidTestImplementation(libs.mockito.kotlin)
     androidTestImplementation(libs.mockito.android)
 
@@ -234,7 +248,7 @@ tasks.register("jacocoTestReport", JacocoReport::class) {
         "**/R$*.class",
         "**/BuildConfig.*",
         "**/Manifest*.*",
-        "**/*Test*.*",
+          "**/*Test*.*",
         "android/**/*.*",
     )
 
