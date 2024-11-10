@@ -45,6 +45,8 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -66,6 +68,19 @@ const val tagSelectorHeightFactor = 0.25f
 const val tagSelectorWidthFactor = 0.8f
 const val tagSelectorTextSizeFactor = 0.1f
 const val titleFontSizeFactor = 0.03f
+
+// Add these constants at the top of the file with the other constants
+const val MINIMUM_AGE = 13
+const val GENDER_BUTTON_WIDTH_FACTOR = 0.3f
+const val GENDER_BUTTON_HEIGHT_FACTOR = 0.06f
+const val HORIZONTAL_SPACING_FACTOR = 0.02f
+const val AGE_SEPARATOR_FONT_SIZE = 24
+const val DEFAULT_PADDING = 16
+const val SMALL_PADDING = 8
+const val CORNER_RADIUS = 8
+const val DEFAULT_RADIUS = 300.0
+const val DEFAULT_LATITUDE = 0.0
+const val DEFAULT_LONGITUDE = 0.0
 
 // This file was written with the help of Cursor, Claude, ChatGPT
 @OptIn(ExperimentalMaterial3Api::class)
@@ -128,7 +143,7 @@ fun FilterScreen(
       ageRangeError = false
     } else {
       val newAge = input.toIntOrNull()
-      if (newAge != null && newAge >= 13) {
+      if (newAge != null && newAge >= MINIMUM_AGE) {
         ageFrom = newAge
         ageRangeError = ageTo != null && newAge > ageTo!!
       } else {
@@ -145,7 +160,7 @@ fun FilterScreen(
       ageRangeError = false
     } else {
       val newAge = input.toIntOrNull()
-      if (newAge != null && newAge >= 13) {
+      if (newAge != null && newAge >= MINIMUM_AGE) {
         ageTo = newAge
         ageRangeError = ageFrom != null && newAge < ageFrom!!
       } else {
@@ -199,7 +214,7 @@ fun FilterScreen(
             },
             colors = TopAppBarDefaults.topAppBarColors(containerColor = IcebreakrrBlue))
       }) { innerPadding ->
-        Column(modifier = Modifier.fillMaxSize().padding(innerPadding).padding(16.dp)) {
+        Column(modifier = Modifier.fillMaxSize().padding(innerPadding).padding(DEFAULT_PADDING.dp)) {
           Text(
               "Gender",
               fontSize = (screenHeight.value * titleFontSizeFactor).sp,
@@ -226,47 +241,19 @@ fun FilterScreen(
               "Age Range",
               fontSize = (screenHeight.value * titleFontSizeFactor).sp,
               modifier = Modifier.padding(vertical = 8.dp).testTag("AgeRangeTitle"))
-          val textFieldHeight = screenHeight * textFieldHeightFactor
-          val textFieldWidth = screenWidth * textFieldWidthFactor
 
-          Row(
-              modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
-              horizontalArrangement = Arrangement.Center) {
-                OutlinedTextField(
-                    value = ageFromInput,
-                    onValueChange = { validateAndUpdateAgeFrom(it) },
-                    modifier =
-                        Modifier.height(IntrinsicSize.Min)
-                            .width(textFieldWidth)
-                            .testTag("AgeFromTextField")
-                            .onFocusChanged { if (!it.isFocused) validateAgeRange() },
-                    label = { Text("From") },
-                    singleLine = true,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    textStyle = TextStyle(fontSize = (textFieldHeight.value * textSizeFactor).sp),
-                    isError = ageFromInput.isNotEmpty() && (ageFrom == null || ageRangeError))
-                Spacer(modifier = Modifier.width(screenWidth * 0.02f))
-                Text(
-                    " - ",
-                    modifier =
-                        Modifier.padding(horizontal = 8.dp).align(Alignment.CenterVertically),
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.Bold)
-                Spacer(modifier = Modifier.width(screenWidth * 0.02f))
-                OutlinedTextField(
-                    value = ageToInput,
-                    onValueChange = { validateAndUpdateAgeTo(it) },
-                    modifier =
-                        Modifier.height(IntrinsicSize.Min)
-                            .width(textFieldWidth)
-                            .testTag("AgeToTextField")
-                            .onFocusChanged { if (!it.isFocused) validateAgeRange() },
-                    label = { Text("To") },
-                    singleLine = true,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    textStyle = TextStyle(fontSize = (textFieldHeight.value * textSizeFactor).sp),
-                    isError = ageToInput.isNotEmpty() && (ageTo == null || ageRangeError))
-              }
+          AgeRangeInputFields(
+              ageFromInput = ageFromInput,
+              ageToInput = ageToInput,
+              onAgeFromChange = { validateAndUpdateAgeFrom(it) },
+              onAgeToChange = { validateAndUpdateAgeTo(it) },
+              validateAgeRange = { validateAgeRange() },
+              ageFrom = ageFrom,
+              ageTo = ageTo,
+              ageRangeError = ageRangeError,
+              screenHeight = screenHeight,
+              screenWidth = screenWidth
+          )
 
           val tagSelectorHeight = screenHeight * tagSelectorHeightFactor
           val tagSelectorWidth = screenWidth * tagSelectorWidthFactor
@@ -289,9 +276,8 @@ fun FilterScreen(
               height = tagSelectorHeight,
               width = tagSelectorWidth,
               textSize = (tagSelectorHeight.value * tagSelectorTextSizeFactor).sp)
-          Box(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
-            Button(
-                onClick = {
+          FilterActionButton(
+              onClick = {
                   filterViewModel.setFilteredTags(tagsViewModel.filteringTags.value)
                   tagsViewModel.applyFilters()
                   tagsViewModel.leaveUI()
@@ -302,43 +288,37 @@ fun FilterScreen(
                   filterViewModel.setGenders(currentSelectedGenders)
 
                   when {
-                    ageFrom != null && ageTo != null && !ageRangeError -> {
-                      filterViewModel.setAgeRange(ageFrom!!..ageTo!!)
-                    }
-                    ageFrom == null && ageTo == null -> {
-                      filterViewModel.setAgeRange(null)
-                    }
-                    ageFrom != null && ageTo == null -> {
-                      filterViewModel.setAgeRange(ageFrom!!..Int.MAX_VALUE)
-                    }
-                    ageFrom == null && ageTo != null -> {
-                      filterViewModel.setAgeRange(0..ageTo!!)
-                    }
-                    else -> {
-                      filterViewModel.setAgeRange(null)
-                    }
+                      ageFrom != null && ageTo != null && !ageRangeError -> {
+                          filterViewModel.setAgeRange(ageFrom!!..ageTo!!)
+                      }
+                      ageFrom == null && ageTo == null -> {
+                          filterViewModel.setAgeRange(null)
+                      }
+                      ageFrom != null && ageTo == null -> {
+                          filterViewModel.setAgeRange(ageFrom!!..Int.MAX_VALUE)
+                      }
+                      ageFrom == null && ageTo != null -> {
+                          filterViewModel.setAgeRange(0..ageTo!!)
+                      }
+                      else -> {
+                          filterViewModel.setAgeRange(null)
+                      }
                   }
 
                   profilesViewModel.getFilteredProfilesInRadius(
-                      GeoPoint(0.0, 0.0),
-                      300.0,
+                      GeoPoint(DEFAULT_LATITUDE, DEFAULT_LONGITUDE),
+                      DEFAULT_RADIUS,
                       filterViewModel.selectedGenders.value,
                       filterViewModel.ageRange.value,
-                      tagsViewModel.filteredTags.value)
+                      tagsViewModel.filteredTags.value
+                  )
 
                   navigationActions.goBack()
-                },
-                modifier =
-                    Modifier.width(buttonWidth)
-                        .height(buttonHeight)
-                        .testTag("FilterButton")
-                        .align(Alignment.Center),
-                colors =
-                    ButtonDefaults.buttonColors(
-                        containerColor = IcebreakrrBlue, contentColor = Color.White)) {
-                  Text("Filter", color = Color.White, fontSize = buttonTextSize)
-                }
-          }
+              },
+              buttonWidth = buttonWidth,
+              buttonHeight = buttonHeight,
+              buttonTextSize = buttonTextSize
+          )
         }
       }
 }
@@ -348,11 +328,8 @@ fun GenderButton(selected: Boolean, onClick: () -> Unit, label: String) {
   val screenWidth = LocalConfiguration.current.screenWidthDp.dp
   val screenHeight = LocalConfiguration.current.screenHeightDp.dp
 
-  val genderButtonWidthFactor = 0.3f
-  val genderButtonHeightFactor = 0.06f
-
-  val buttonWidth = screenWidth * genderButtonWidthFactor
-  val buttonHeight = screenHeight * genderButtonHeightFactor
+  val buttonWidth = screenWidth * GENDER_BUTTON_WIDTH_FACTOR
+  val buttonHeight = screenHeight * GENDER_BUTTON_HEIGHT_FACTOR
 
   Button(
       onClick = onClick,
@@ -364,11 +341,103 @@ fun GenderButton(selected: Boolean, onClick: () -> Unit, label: String) {
           ButtonDefaults.buttonColors(
               containerColor =
                   if (selected) IcebreakrrBlue else MaterialTheme.colorScheme.surfaceVariant),
-      shape = RoundedCornerShape(8.dp)) {
+      shape = RoundedCornerShape(CORNER_RADIUS.dp)) {
         Text(
             text = label,
             color = if (selected) Color.White else MaterialTheme.colorScheme.onSurfaceVariant,
             fontSize = (buttonHeight.value * textSizeFactor).sp,
         )
       }
+}
+
+@Composable
+fun AgeRangeInputFields(
+    ageFromInput: String,
+    ageToInput: String,
+    onAgeFromChange: (String) -> Unit,
+    onAgeToChange: (String) -> Unit,
+    validateAgeRange: () -> Unit,
+    ageFrom: Int?,
+    ageTo: Int?,
+    ageRangeError: Boolean,
+    screenHeight: Dp,
+    screenWidth: Dp
+) {
+    val textFieldHeight = screenHeight * textFieldHeightFactor
+    val textFieldWidth = screenWidth * textFieldWidthFactor
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = DEFAULT_PADDING.dp),
+        horizontalArrangement = Arrangement.Center
+    ) {
+        OutlinedTextField(
+            value = ageFromInput,
+            onValueChange = onAgeFromChange,
+            modifier = Modifier
+                .height(IntrinsicSize.Min)
+                .width(textFieldWidth)
+                .testTag("AgeFromTextField")
+                .onFocusChanged { if (!it.isFocused) validateAgeRange() },
+            label = { Text("From") },
+            singleLine = true,
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+            textStyle = TextStyle(fontSize = (textFieldHeight.value * textSizeFactor).sp),
+            isError = ageFromInput.isNotEmpty() && (ageFrom == null || ageRangeError)
+        )
+        Spacer(modifier = Modifier.width(screenWidth * HORIZONTAL_SPACING_FACTOR))
+        Text(
+            " - ",
+            modifier = Modifier
+                .padding(horizontal = SMALL_PADDING.dp)
+                .align(Alignment.CenterVertically),
+            fontSize = AGE_SEPARATOR_FONT_SIZE.sp,
+            fontWeight = FontWeight.Bold
+        )
+        Spacer(modifier = Modifier.width(screenWidth * HORIZONTAL_SPACING_FACTOR))
+        OutlinedTextField(
+            value = ageToInput,
+            onValueChange = onAgeToChange,
+            modifier = Modifier
+                .height(IntrinsicSize.Min)
+                .width(textFieldWidth)
+                .testTag("AgeToTextField")
+                .onFocusChanged { if (!it.isFocused) validateAgeRange() },
+            label = { Text("To") },
+            singleLine = true,
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+            textStyle = TextStyle(fontSize = (textFieldHeight.value * textSizeFactor).sp),
+            isError = ageToInput.isNotEmpty() && (ageTo == null || ageRangeError)
+        )
+    }
+}
+
+@Composable
+fun FilterActionButton(
+    onClick: () -> Unit,
+    buttonWidth: Dp,
+    buttonHeight: Dp,
+    buttonTextSize: TextUnit
+) {
+    Box(modifier = Modifier.fillMaxWidth().padding(DEFAULT_PADDING.dp)) {
+        Button(
+            onClick = onClick,
+            modifier = Modifier
+                .width(buttonWidth)
+                .height(buttonHeight)
+                .testTag("FilterButton")
+                .align(Alignment.Center),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = IcebreakrrBlue,
+                contentColor = Color.White
+            )
+        ) {
+            Text(
+                "Filter",
+                color = Color.White,
+                fontSize = buttonTextSize
+            )
+        }
+    }
 }
