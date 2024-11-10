@@ -10,7 +10,6 @@ import com.google.firebase.firestore.GeoPoint
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.util.Calendar
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -24,7 +23,6 @@ import kotlinx.coroutines.test.setMain
 import org.hamcrest.CoreMatchers.`is`
 import org.hamcrest.CoreMatchers.nullValue
 import org.hamcrest.MatcherAssert.assertThat
-import org.junit.After
 import org.junit.After
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertThrows
@@ -91,10 +89,10 @@ class ProfilesViewModelTest {
     ppRepository = mock(ProfilePicRepository::class.java)
     profilesViewModel = ProfilesViewModel(profilesRepository, ppRepository)
     Dispatchers.setMain(testDispatcher) // Set main dispatcher first
-      mockProfileViewModel = mock(ProfilesViewModel::class.java)
+    mockProfileViewModel = mock(ProfilesViewModel::class.java)
 
-      bitmapFactoryMock = mockStatic(BitmapFactory::class.java)
-      bitmapMock = mockStatic(Bitmap::class.java)
+    bitmapFactoryMock = mockStatic(BitmapFactory::class.java)
+    bitmapMock = mockStatic(Bitmap::class.java)
 
     whenever(profilesRepository.isWaiting).thenReturn(MutableStateFlow(false))
     whenever(profilesRepository.waitingDone).thenReturn(MutableStateFlow(false))
@@ -104,8 +102,8 @@ class ProfilesViewModelTest {
   @After
   fun tearDown() {
     Dispatchers.resetMain()
-      bitmapFactoryMock.close()
-      bitmapMock.close()
+    bitmapFactoryMock.close()
+    bitmapMock.close()
   }
 
   @Test
