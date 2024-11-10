@@ -224,7 +224,7 @@ fun ProfileEditingScreen(
                 Spacer(modifier = Modifier.height(padding))
 
                 UnsavedChangesDialog(
-                    showDialog = showDialog && isMofidied,
+                    showDialog = showDialog && isModified,
                     onDismiss = { showDialog = false },
                     onConfirm = {
                       showDialog = false
