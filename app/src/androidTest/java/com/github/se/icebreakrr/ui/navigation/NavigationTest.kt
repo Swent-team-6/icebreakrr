@@ -1,30 +1,7 @@
 package com.github.se.icebreakrr.ui.navigation
 
-import android.content.Intent
-import androidx.compose.ui.test.assertIsDisplayed
-import androidx.compose.ui.test.junit4.createAndroidComposeRule
-import androidx.compose.ui.test.onNodeWithTag
-import androidx.compose.ui.test.performClick
-import androidx.test.core.app.ActivityScenario
-import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.github.se.icebreakrr.MainActivity
-import com.github.se.icebreakrr.R
-import com.github.se.icebreakrr.mock.MockProfileViewModel
-import com.github.se.icebreakrr.model.profile.ProfilePicRepositoryStorage
-import com.github.se.icebreakrr.model.profile.ProfilesRepository
-import com.github.se.icebreakrr.model.profile.ProfilesViewModel
-import com.github.se.icebreakrr.model.tags.TagsRepository
-import com.github.se.icebreakrr.model.tags.TagsViewModel
-import com.google.firebase.Firebase
-import com.google.firebase.storage.storage
-import org.junit.Before
-import org.junit.Rule
-import org.junit.Test
-import org.junit.runner.RunWith
-import org.mockito.Mockito
-
-//@RunWith(AndroidJUnit4::class)
-//class NavigationTest {
+// @RunWith(AndroidJUnit4::class)
+// class NavigationTest {
 //
 //  @get:Rule val composeTestRule = createAndroidComposeRule<MainActivity>()
 //
@@ -88,4 +65,4 @@ import org.mockito.Mockito
 //    composeTestRule.onNodeWithTag("logOutButton").performClick()
 //    composeTestRule.onNodeWithTag("loginScreen").assertIsDisplayed()
 //  }
-//}
+// }

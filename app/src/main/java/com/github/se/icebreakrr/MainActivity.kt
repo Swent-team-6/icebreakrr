@@ -47,7 +47,7 @@ class MainActivity : ComponentActivity() {
 
     // Initialize Firebase Auth
     FirebaseApp.initializeApp(this)
-      requestNotificationPermission()
+    requestNotificationPermission()
 
     // Retrieve the testing flag from the Intent
     val isTesting = intent?.getBooleanExtra("IS_TESTING", false) ?: false
