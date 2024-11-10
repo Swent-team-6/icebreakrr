@@ -7,11 +7,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 
-//This File was generated with the help of Cursor AI
+// This File was generated with the help of Cursor AI
 
 /**
- * A reusable dialog component that prompts users when they attempt to leave a screen with unsaved changes.
- * This dialog gives users two options:
+ * A reusable dialog component that prompts users when they attempt to leave a screen with unsaved
+ * changes. This dialog gives users two options:
  * 1. Cancel: Stay on the current screen
  * 2. Discard: Leave without saving changes
  *
@@ -40,22 +40,13 @@ fun UnsavedChangesDialog(
     onConfirm: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    if (showDialog) {
-        AlertDialog(
-            onDismissRequest = onDismiss,
-            title = { Text("You are about to leave this page") },
-            text = { Text("Your changes will not be saved.") },
-            confirmButton = {
-                TextButton(onClick = onConfirm) {
-                    Text("Discard changes")
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = onDismiss) {
-                    Text("Cancel")
-                }
-            },
-            modifier = modifier.testTag("alertDialog")
-        )
-    }
-} 
+  if (showDialog) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("You are about to leave this page") },
+        text = { Text("Your changes will not be saved.") },
+        confirmButton = { TextButton(onClick = onConfirm) { Text("Discard changes") } },
+        dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel") } },
+        modifier = modifier.testTag("alertDialog"))
+  }
+}

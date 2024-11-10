@@ -64,9 +64,7 @@ import com.google.firebase.firestore.GeoPoint
 
 // This file was written with the help of Cursor, Claude, ChatGPT
 
-/**
- * Constants used for layout calculations and default values
- */
+/** Constants used for layout calculations and default values */
 const val textSizeFactor = 0.3f
 const val textFieldHeightFactor = 0.08f
 const val textFieldWidthFactor = 0.2f
@@ -93,8 +91,8 @@ val IcebreakrrBlue: Color = Color(0xFF1FAEF0)
 val IcebreakrrGrey: Color = Color(0xFF808080)
 
 /**
- * Main composable for the Filter screen. Allows users to set and modify filtering criteria
- * for profiles, including gender preferences, age range, and tags.
+ * Main composable for the Filter screen. Allows users to set and modify filtering criteria for
+ * profiles, including gender preferences, age range, and tags.
  *
  * @param navigationActions Navigation handler for screen transitions
  * @param tagsViewModel ViewModel for managing tags
@@ -167,16 +165,17 @@ fun FilterScreen(
     if (manSelected) currentGenderSelection.add(Gender.MEN)
     if (womanSelected) currentGenderSelection.add(Gender.WOMEN)
     if (otherSelected) currentGenderSelection.add(Gender.OTHER)
-    
+
     val gendersChanged = currentGenderSelection != filterViewModel.selectedGenders.value
 
     // Check if age range changed
-    val currentAgeRange = when {
-        ageFrom != null && ageTo != null && !ageRangeError -> ageFrom!!..ageTo!!
-        ageFrom != null && ageTo == null -> ageFrom!!..Int.MAX_VALUE
-        ageFrom == null && ageTo != null -> 0..ageTo!!
-        else -> null
-    }
+    val currentAgeRange =
+        when {
+          ageFrom != null && ageTo != null && !ageRangeError -> ageFrom!!..ageTo!!
+          ageFrom != null && ageTo == null -> ageFrom!!..Int.MAX_VALUE
+          ageFrom == null && ageTo != null -> 0..ageTo!!
+          else -> null
+        }
     val ageRangeChanged = currentAgeRange != filterViewModel.ageRange.value
 
     // Check if tags changed
@@ -254,10 +253,10 @@ fun FilterScreen(
               IconButton(
                   onClick = {
                     if (isModified) {
-                        showDialog = true
+                      showDialog = true
                     } else {
-                        tagsViewModel.leaveUI()
-                        navigationActions.goBack()
+                      tagsViewModel.leaveUI()
+                      navigationActions.goBack()
                     }
                   },
                   modifier = Modifier.testTag("Back Button")) {
@@ -270,188 +269,185 @@ fun FilterScreen(
             colors = TopAppBarDefaults.topAppBarColors(containerColor = IcebreakrrBlue))
       }) { innerPadding ->
         Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .clickable(
+            modifier =
+                Modifier.fillMaxSize().clickable(
                     interactionSource = remember { MutableInteractionSource() },
-                    indication = null
-                ) {
-                    currentFocusManager.clearFocus()
-                }
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(innerPadding)
-                    .padding(DEFAULT_PADDING.dp)
-            ) {
-                Text(
-                    "Gender",
-                    fontSize = (screenHeight.value * titleFontSizeFactor).sp,
-                    modifier = Modifier.padding(vertical = 8.dp).testTag("GenderTitle"))
+                    indication = null) {
+                      currentFocusManager.clearFocus()
+                    }) {
+              Column(
+                  modifier =
+                      Modifier.fillMaxSize().padding(innerPadding).padding(DEFAULT_PADDING.dp)) {
+                    Text(
+                        "Gender",
+                        fontSize = (screenHeight.value * titleFontSizeFactor).sp,
+                        modifier = Modifier.padding(vertical = 8.dp).testTag("GenderTitle"))
 
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.Center,
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    GenderButton(
-                        selected = manSelected,
-                        onClick = { 
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                      GenderButton(
+                          selected = manSelected,
+                          onClick = {
                             manSelected = !manSelected
                             isModified = checkModified()
-                        },
-                        label = "Men")
-                    GenderButton(
-                        selected = womanSelected,
-                        onClick = { 
+                          },
+                          label = "Men")
+                      GenderButton(
+                          selected = womanSelected,
+                          onClick = {
                             womanSelected = !womanSelected
                             isModified = checkModified()
-                        },
-                        label = "Women")
-                    GenderButton(
-                        selected = otherSelected,
-                        onClick = { 
+                          },
+                          label = "Women")
+                      GenderButton(
+                          selected = otherSelected,
+                          onClick = {
                             otherSelected = !otherSelected
                             isModified = checkModified()
+                          },
+                          label = "Other")
+                    }
+
+                    Text(
+                        "Age Range",
+                        fontSize = (screenHeight.value * titleFontSizeFactor).sp,
+                        modifier = Modifier.padding(vertical = 8.dp).testTag("AgeRangeTitle"))
+
+                    AgeRangeInputFields(
+                        ageFromInput = ageFromInput,
+                        ageToInput = ageToInput,
+                        onAgeFromChange = { validateAndUpdateAgeFrom(it) },
+                        onAgeToChange = { validateAndUpdateAgeTo(it) },
+                        validateAgeRange = { validateAgeRange() },
+                        ageFrom = ageFrom,
+                        ageTo = ageTo,
+                        ageRangeError = ageRangeError,
+                        screenHeight = screenHeight,
+                        screenWidth = screenWidth,
+                        onFromFocusChanged = { isAgeFromFocused = it },
+                        onToFocusChanged = { isAgeToFocused = it })
+
+                    val tagSelectorHeight = screenHeight * tagSelectorHeightFactor
+                    val tagSelectorWidth = screenWidth * tagSelectorWidthFactor
+
+                    Text(
+                        "Tags",
+                        fontSize = (screenHeight.value * titleFontSizeFactor).sp,
+                        modifier =
+                            Modifier.padding(vertical = SMALL_PADDING.dp)
+                                .testTag("TagsTitle")
+                                .semantics(mergeDescendants = true) {})
+                    TagSelector(
+                        selectedTag =
+                            filteringTags.value.map { tag ->
+                              Pair(tag, tagsViewModel.tagToColor(tag))
+                            },
+                        outputTag =
+                            tagsSuggestions.value.map { tag ->
+                              Pair(tag, tagsViewModel.tagToColor(tag))
+                            },
+                        stringQuery = stringQuery.value,
+                        expanded = expanded,
+                        onTagClick = { tag ->
+                          tagsViewModel.removeFilter(tag)
+                          isModified = checkModified()
                         },
-                        label = "Other")
-                }
+                        onStringChanged = { tagsViewModel.setQuery(it, filteringTags.value) },
+                        textColor = MaterialTheme.colorScheme.onSurface,
+                        onDropDownItemClicked = { tag ->
+                          tagsViewModel.addFilter(tag)
+                          isModified = checkModified()
+                        },
+                        height = tagSelectorHeight,
+                        width = tagSelectorWidth,
+                        textSize = (tagSelectorHeight.value * tagSelectorTextSizeFactor).sp)
+                    FilterActionButton(
+                        onClick = {
+                          filterViewModel.setFilteredTags(tagsViewModel.filteringTags.value)
+                          tagsViewModel.applyFilters()
+                          tagsViewModel.leaveUI()
 
-                Text(
-                    "Age Range",
-                    fontSize = (screenHeight.value * titleFontSizeFactor).sp,
-                    modifier = Modifier.padding(vertical = 8.dp).testTag("AgeRangeTitle"))
+                          if (manSelected) currentSelectedGenders.add(Gender.MEN)
+                          if (womanSelected) currentSelectedGenders.add(Gender.WOMEN)
+                          if (otherSelected) currentSelectedGenders.add(Gender.OTHER)
+                          filterViewModel.setGenders(currentSelectedGenders)
 
-                AgeRangeInputFields(
-                    ageFromInput = ageFromInput,
-                    ageToInput = ageToInput,
-                    onAgeFromChange = { validateAndUpdateAgeFrom(it) },
-                    onAgeToChange = { validateAndUpdateAgeTo(it) },
-                    validateAgeRange = { validateAgeRange() },
-                    ageFrom = ageFrom,
-                    ageTo = ageTo,
-                    ageRangeError = ageRangeError,
-                    screenHeight = screenHeight,
-                    screenWidth = screenWidth,
-                    onFromFocusChanged = { isAgeFromFocused = it },
-                    onToFocusChanged = { isAgeToFocused = it }
-                )
-
-                val tagSelectorHeight = screenHeight * tagSelectorHeightFactor
-                val tagSelectorWidth = screenWidth * tagSelectorWidthFactor
-
-                Text(
-                    "Tags",
-                    fontSize = (screenHeight.value * titleFontSizeFactor).sp,
-                    modifier = Modifier
-                        .padding(vertical = SMALL_PADDING.dp)
-                        .testTag("TagsTitle")
-                        .semantics(mergeDescendants = true) {}
-                )
-                TagSelector(
-                    selectedTag =
-                        filteringTags.value.map { tag -> Pair(tag, tagsViewModel.tagToColor(tag)) },
-                    outputTag =
-                        tagsSuggestions.value.map { tag -> Pair(tag, tagsViewModel.tagToColor(tag)) },
-                    stringQuery = stringQuery.value,
-                    expanded = expanded,
-                    onTagClick = { tag -> 
-                        tagsViewModel.removeFilter(tag)
-                        isModified = checkModified()
-                    },
-                    onStringChanged = { tagsViewModel.setQuery(it, filteringTags.value) },
-                    textColor = MaterialTheme.colorScheme.onSurface,
-                    onDropDownItemClicked = { tag -> 
-                        tagsViewModel.addFilter(tag)
-                        isModified = checkModified()
-                    },
-                    height = tagSelectorHeight,
-                    width = tagSelectorWidth,
-                    textSize = (tagSelectorHeight.value * tagSelectorTextSizeFactor).sp)
-                FilterActionButton(
-                    onClick = {
-                        filterViewModel.setFilteredTags(tagsViewModel.filteringTags.value)
-                        tagsViewModel.applyFilters()
-                        tagsViewModel.leaveUI()
-
-                        if (manSelected) currentSelectedGenders.add(Gender.MEN)
-                        if (womanSelected) currentSelectedGenders.add(Gender.WOMEN)
-                        if (otherSelected) currentSelectedGenders.add(Gender.OTHER)
-                        filterViewModel.setGenders(currentSelectedGenders)
-
-                        when {
+                          when {
                             ageFrom != null && ageTo != null && !ageRangeError -> {
-                                filterViewModel.setAgeRange(ageFrom!!..ageTo!!)
+                              filterViewModel.setAgeRange(ageFrom!!..ageTo!!)
                             }
                             ageFrom == null && ageTo == null -> {
-                                filterViewModel.setAgeRange(null)
+                              filterViewModel.setAgeRange(null)
                             }
                             ageFrom != null && ageTo == null -> {
-                                filterViewModel.setAgeRange(ageFrom!!..Int.MAX_VALUE)
+                              filterViewModel.setAgeRange(ageFrom!!..Int.MAX_VALUE)
                             }
                             ageFrom == null && ageTo != null -> {
-                                filterViewModel.setAgeRange(0..ageTo!!)
+                              filterViewModel.setAgeRange(0..ageTo!!)
                             }
                             else -> {
-                                filterViewModel.setAgeRange(null)
+                              filterViewModel.setAgeRange(null)
                             }
-                        }
+                          }
 
-                        profilesViewModel.getFilteredProfilesInRadius(
-                            GeoPoint(DEFAULT_LATITUDE, DEFAULT_LONGITUDE),
-                            DEFAULT_RADIUS,
-                            filterViewModel.selectedGenders.value,
-                            filterViewModel.ageRange.value,
-                            tagsViewModel.filteredTags.value
-                        )
+                          profilesViewModel.getFilteredProfilesInRadius(
+                              GeoPoint(DEFAULT_LATITUDE, DEFAULT_LONGITUDE),
+                              DEFAULT_RADIUS,
+                              filterViewModel.selectedGenders.value,
+                              filterViewModel.ageRange.value,
+                              tagsViewModel.filteredTags.value)
 
-                        navigationActions.goBack()
-                    },
-                    onReset = {
-                        // Reset gender selection UI only
-                        manSelected = false
-                        womanSelected = false
-                        otherSelected = false
-                        currentSelectedGenders.clear()
+                          navigationActions.goBack()
+                        },
+                        onReset = {
+                          // Reset gender selection UI only
+                          manSelected = false
+                          womanSelected = false
+                          otherSelected = false
+                          currentSelectedGenders.clear()
 
-                        // Reset age range UI only
-                        ageFromInput = ""
-                        ageToInput = ""
-                        ageFrom = null
-                        ageTo = null
-                        ageRangeError = false
+                          // Reset age range UI only
+                          ageFromInput = ""
+                          ageToInput = ""
+                          ageFrom = null
+                          ageTo = null
+                          ageRangeError = false
 
-                        // Reset tags UI only
-                        tagsViewModel.leaveUI()
+                          // Reset tags UI only
+                          tagsViewModel.leaveUI()
 
-                        // Set modified flag
-                        isModified = checkModified()
+                          // Set modified flag
+                          isModified = checkModified()
 
-                        // Show confirmation toast
-                        Toast.makeText(context, "Page reset, click on Filter to save", Toast.LENGTH_SHORT).show()
-                    },
-                    buttonWidth = buttonWidth,
-                    buttonHeight = buttonHeight,
-                    buttonTextSize = buttonTextSize,
-                    enabled = !isAgeFromFocused && !isAgeToFocused
-                )
-            }
+                          // Show confirmation toast
+                          Toast.makeText(
+                                  context,
+                                  "Page reset, click on Filter to save",
+                                  Toast.LENGTH_SHORT)
+                              .show()
+                        },
+                        buttonWidth = buttonWidth,
+                        buttonHeight = buttonHeight,
+                        buttonTextSize = buttonTextSize,
+                        enabled = !isAgeFromFocused && !isAgeToFocused)
+                  }
 
-            // Dialog at the end of the Box
-            if (showDialog) {
+              // Dialog at the end of the Box
+              if (showDialog) {
                 UnsavedChangesDialog(
                     showDialog = showDialog,
                     onDismiss = { showDialog = false },
                     onConfirm = {
-                        showDialog = false
-                        tagsViewModel.leaveUI()
-                        navigationActions.goBack()
-                    }
-                )
+                      showDialog = false
+                      tagsViewModel.leaveUI()
+                      navigationActions.goBack()
+                    })
+              }
             }
-        }
-    }
+      }
 }
 
 /**
@@ -489,8 +485,8 @@ fun GenderButton(selected: Boolean, onClick: () -> Unit, label: String) {
 }
 
 /**
- * Composable for the age range input fields. Provides two text fields for entering
- * minimum and maximum age values with validation.
+ * Composable for the age range input fields. Provides two text fields for entering minimum and
+ * maximum age values with validation.
  *
  * @param ageFromInput Current value of the minimum age field
  * @param ageToInput Current value of the maximum age field
@@ -520,66 +516,58 @@ fun AgeRangeInputFields(
     onFromFocusChanged: (Boolean) -> Unit,
     onToFocusChanged: (Boolean) -> Unit
 ) {
-    val textFieldHeight = screenHeight * textFieldHeightFactor
-    val textFieldWidth = screenWidth * textFieldWidthFactor
+  val textFieldHeight = screenHeight * textFieldHeightFactor
+  val textFieldWidth = screenWidth * textFieldWidthFactor
 
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = DEFAULT_PADDING.dp),
-        horizontalArrangement = Arrangement.Center
-    ) {
+  Row(
+      modifier = Modifier.fillMaxWidth().padding(horizontal = DEFAULT_PADDING.dp),
+      horizontalArrangement = Arrangement.Center) {
         OutlinedTextField(
             value = ageFromInput,
             onValueChange = onAgeFromChange,
-            modifier = Modifier
-                .height(IntrinsicSize.Min)
-                .width(textFieldWidth)
-                .testTag("AgeFromTextField")
-                .onFocusChanged { 
-                    if (!it.isFocused) validateAgeRange()
-                    onFromFocusChanged(it.isFocused)
-                },
+            modifier =
+                Modifier.height(IntrinsicSize.Min)
+                    .width(textFieldWidth)
+                    .testTag("AgeFromTextField")
+                    .onFocusChanged {
+                      if (!it.isFocused) validateAgeRange()
+                      onFromFocusChanged(it.isFocused)
+                    },
             label = { Text("From") },
             singleLine = true,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
             textStyle = TextStyle(fontSize = (textFieldHeight.value * textSizeFactor).sp),
-            isError = ageFromInput.isNotEmpty() && (ageFrom == null || ageRangeError)
-        )
+            isError = ageFromInput.isNotEmpty() && (ageFrom == null || ageRangeError))
         Spacer(modifier = Modifier.width(screenWidth * HORIZONTAL_SPACING_FACTOR))
         Text(
             " - ",
-            modifier = Modifier
-                .padding(horizontal = SMALL_PADDING.dp)
-                .align(Alignment.CenterVertically),
+            modifier =
+                Modifier.padding(horizontal = SMALL_PADDING.dp).align(Alignment.CenterVertically),
             fontSize = AGE_SEPARATOR_FONT_SIZE.sp,
-            fontWeight = FontWeight.Bold
-        )
+            fontWeight = FontWeight.Bold)
         Spacer(modifier = Modifier.width(screenWidth * HORIZONTAL_SPACING_FACTOR))
         OutlinedTextField(
             value = ageToInput,
             onValueChange = onAgeToChange,
-            modifier = Modifier
-                .height(IntrinsicSize.Min)
-                .width(textFieldWidth)
-                .testTag("AgeToTextField")
-                .onFocusChanged { 
-                    if (!it.isFocused) validateAgeRange()
-                    onToFocusChanged(it.isFocused)
-                },
+            modifier =
+                Modifier.height(IntrinsicSize.Min)
+                    .width(textFieldWidth)
+                    .testTag("AgeToTextField")
+                    .onFocusChanged {
+                      if (!it.isFocused) validateAgeRange()
+                      onToFocusChanged(it.isFocused)
+                    },
             label = { Text("To") },
             singleLine = true,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
             textStyle = TextStyle(fontSize = (textFieldHeight.value * textSizeFactor).sp),
-            isError = ageToInput.isNotEmpty() && (ageTo == null || ageRangeError)
-        )
-    }
+            isError = ageToInput.isNotEmpty() && (ageTo == null || ageRangeError))
+      }
 }
 
 /**
- * Composable for the filter action buttons (Filter and Reset).
- * The Filter button is disabled when text fields are focused to prevent
- * accidental submissions while typing.
+ * Composable for the filter action buttons (Filter and Reset). The Filter button is disabled when
+ * text fields are focused to prevent accidental submissions while typing.
  *
  * @param onClick Callback for when the Filter button is clicked
  * @param onReset Callback for when the Reset button is clicked
@@ -597,50 +585,32 @@ fun FilterActionButton(
     buttonTextSize: TextUnit,
     enabled: Boolean = true
 ) {
-    Box(modifier = Modifier.fillMaxWidth().padding(DEFAULT_PADDING.dp)) {
-        Row(
-            modifier = Modifier.align(Alignment.Center),
-            horizontalArrangement = Arrangement.spacedBy(SMALL_PADDING.dp)
-        ) {
-            // Reset Button
-            Button(
-                onClick = onReset,
-                modifier = Modifier
-                    .width(buttonWidth)
-                    .height(buttonHeight)
-                    .testTag("ResetButton"),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = IcebreakrrGrey,
-                    contentColor = Color.White
-                )
-            ) {
-                Text(
-                    "Reset",
-                    color = Color.White,
-                    fontSize = buttonTextSize
-                )
-            }
+  Box(modifier = Modifier.fillMaxWidth().padding(DEFAULT_PADDING.dp)) {
+    Row(
+        modifier = Modifier.align(Alignment.Center),
+        horizontalArrangement = Arrangement.spacedBy(SMALL_PADDING.dp)) {
+          // Reset Button
+          Button(
+              onClick = onReset,
+              modifier = Modifier.width(buttonWidth).height(buttonHeight).testTag("ResetButton"),
+              colors =
+                  ButtonDefaults.buttonColors(
+                      containerColor = IcebreakrrGrey, contentColor = Color.White)) {
+                Text("Reset", color = Color.White, fontSize = buttonTextSize)
+              }
 
-            // Filter Button
-            Button(
-                onClick = onClick,
-                enabled = enabled,
-                modifier = Modifier
-                    .width(buttonWidth)
-                    .height(buttonHeight)
-                    .testTag("FilterButton"),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = IcebreakrrBlue,
-                    contentColor = Color.White,
-                    disabledContainerColor = IcebreakrrBlue.copy(alpha = 0.5f)
-                )
-            ) {
-                Text(
-                    "Filter",
-                    color = Color.White,
-                    fontSize = buttonTextSize
-                )
-            }
+          // Filter Button
+          Button(
+              onClick = onClick,
+              enabled = enabled,
+              modifier = Modifier.width(buttonWidth).height(buttonHeight).testTag("FilterButton"),
+              colors =
+                  ButtonDefaults.buttonColors(
+                      containerColor = IcebreakrrBlue,
+                      contentColor = Color.White,
+                      disabledContainerColor = IcebreakrrBlue.copy(alpha = 0.5f))) {
+                Text("Filter", color = Color.White, fontSize = buttonTextSize)
+              }
         }
-    }
+  }
 }

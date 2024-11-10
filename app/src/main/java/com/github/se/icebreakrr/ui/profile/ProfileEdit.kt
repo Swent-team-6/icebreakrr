@@ -25,8 +25,8 @@ import com.github.se.icebreakrr.model.profile.Profile
 import com.github.se.icebreakrr.model.profile.ProfilesViewModel
 import com.github.se.icebreakrr.model.tags.TagsViewModel
 import com.github.se.icebreakrr.ui.navigation.NavigationActions
-import com.github.se.icebreakrr.ui.tags.TagSelector
 import com.github.se.icebreakrr.ui.sections.shared.UnsavedChangesDialog
+import com.github.se.icebreakrr.ui.tags.TagSelector
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 
@@ -210,11 +210,10 @@ fun ProfileEditingScreen(
                     showDialog = showDialog && isMofidied,
                     onDismiss = { showDialog = false },
                     onConfirm = {
-                        showDialog = false
-                        tagsViewModel.leaveUI()
-                        navigationActions.goBack()
-                    }
-                )
+                      showDialog = false
+                      tagsViewModel.leaveUI()
+                      navigationActions.goBack()
+                    })
               }
         }
   }

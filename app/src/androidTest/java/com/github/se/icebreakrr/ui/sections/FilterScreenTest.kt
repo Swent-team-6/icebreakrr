@@ -58,10 +58,7 @@ class FilterScreenTest {
     composeTestRule.waitForIdle()
 
     // Find the back button within the TopAppBar and click it
-    composeTestRule.onNodeWithTag("Back Button")
-        .assertExists()
-        .assertIsDisplayed()
-        .performClick()
+    composeTestRule.onNodeWithTag("Back Button").assertExists().assertIsDisplayed().performClick()
 
     // Verify that goBack was called
     verify(navigationActionsMock).goBack()
@@ -74,53 +71,34 @@ class FilterScreenTest {
     composeTestRule.waitForIdle()
 
     // Check if the title in the top bar is displayed
-    composeTestRule.onNodeWithTag("FilterTopBar")
-        .assertExists()
-        .assertIsDisplayed()
+    composeTestRule.onNodeWithTag("FilterTopBar").assertExists().assertIsDisplayed()
 
     // Check if gender title and buttons are displayed
-    composeTestRule.onNodeWithText("Gender")
-        .assertExists()
-        .assertIsDisplayed()
-    
-    composeTestRule.onNodeWithTag("GenderButtonMen")
-        .assertExists()
-        .assertIsDisplayed()
-    
-    composeTestRule.onNodeWithTag("GenderButtonWomen")
-        .assertExists()
-        .assertIsDisplayed()
-    
-    composeTestRule.onNodeWithTag("GenderButtonOther")
-        .assertExists()
-        .assertIsDisplayed()
+    composeTestRule.onNodeWithText("Gender").assertExists().assertIsDisplayed()
+
+    composeTestRule.onNodeWithTag("GenderButtonMen").assertExists().assertIsDisplayed()
+
+    composeTestRule.onNodeWithTag("GenderButtonWomen").assertExists().assertIsDisplayed()
+
+    composeTestRule.onNodeWithTag("GenderButtonOther").assertExists().assertIsDisplayed()
 
     // Check if age range title and input fields are displayed
-    composeTestRule.onNodeWithText("Age Range")
-        .assertExists()
-        .assertIsDisplayed()
-    
-    composeTestRule.onNodeWithTag("AgeFromTextField")
-        .assertExists()
-        .assertIsDisplayed()
-    
-    composeTestRule.onNodeWithTag("AgeToTextField")
-        .assertExists()
-        .assertIsDisplayed()
+    composeTestRule.onNodeWithText("Age Range").assertExists().assertIsDisplayed()
+
+    composeTestRule.onNodeWithTag("AgeFromTextField").assertExists().assertIsDisplayed()
+
+    composeTestRule.onNodeWithTag("AgeToTextField").assertExists().assertIsDisplayed()
 
     // Check if tags title is displayed using the test tag
-    composeTestRule.onNodeWithTag("TagsTitle", useUnmergedTree = true)
+    composeTestRule
+        .onNodeWithTag("TagsTitle", useUnmergedTree = true)
         .assertExists()
         .assertIsDisplayed()
 
     // Check if the filter and reset buttons are displayed
-    composeTestRule.onNodeWithTag("FilterButton")
-        .assertExists()
-        .assertIsDisplayed()
-    
-    composeTestRule.onNodeWithTag("ResetButton")
-        .assertExists()
-        .assertIsDisplayed()
+    composeTestRule.onNodeWithTag("FilterButton").assertExists().assertIsDisplayed()
+
+    composeTestRule.onNodeWithTag("ResetButton").assertExists().assertIsDisplayed()
   }
 
   @Test
@@ -333,30 +311,33 @@ class FilterScreenTest {
       FilterScreen(
           navigationActionsMock,
           profilesViewModel = profilesViewModelMock,
-          filterViewModel = filterViewModel
-      )
+          filterViewModel = filterViewModel)
     }
 
     composeTestRule.waitForIdle()
 
     // Test case 1: Select genders and set valid age range
-    composeTestRule.onNodeWithTag("GenderButtonMen")
+    composeTestRule
+        .onNodeWithTag("GenderButtonMen")
         .assertExists()
         .assertIsDisplayed()
         .performClick()
 
-    composeTestRule.onNodeWithTag("GenderButtonWomen")
+    composeTestRule
+        .onNodeWithTag("GenderButtonWomen")
         .assertExists()
         .assertIsDisplayed()
         .performClick()
 
     // Set valid age range
-    composeTestRule.onNodeWithTag("AgeFromTextField")
+    composeTestRule
+        .onNodeWithTag("AgeFromTextField")
         .assertExists()
         .assertIsDisplayed()
         .performTextInput("25")
 
-    composeTestRule.onNodeWithTag("AgeToTextField")
+    composeTestRule
+        .onNodeWithTag("AgeToTextField")
         .assertExists()
         .assertIsDisplayed()
         .performTextInput("30")
@@ -365,26 +346,20 @@ class FilterScreenTest {
     composeTestRule.onNodeWithText("Gender").performClick()
 
     // Click the filter button
-    composeTestRule.onNodeWithTag("FilterButton")
-        .assertExists()
-        .assertIsDisplayed()
-        .performClick()
+    composeTestRule.onNodeWithTag("FilterButton").assertExists().assertIsDisplayed().performClick()
 
     // Assert that the correct age range is set
     assertEquals(25..30, filterViewModel.ageRange.value)
 
     // Test case 2: Clear age range
-    composeTestRule.onNodeWithTag("AgeFromTextField")
-        .performTextClearance()
-    composeTestRule.onNodeWithTag("AgeToTextField")
-        .performTextClearance()
+    composeTestRule.onNodeWithTag("AgeFromTextField").performTextClearance()
+    composeTestRule.onNodeWithTag("AgeToTextField").performTextClearance()
 
     // Click outside to clear focus and trigger validation
     composeTestRule.onNodeWithText("Gender").performClick()
 
     // Click the filter button again
-    composeTestRule.onNodeWithTag("FilterButton")
-        .performClick()
+    composeTestRule.onNodeWithTag("FilterButton").performClick()
 
     // Now the age range should be null
     assertNull(filterViewModel.ageRange.value)
@@ -427,22 +402,21 @@ class FilterScreenTest {
   @Test
   fun testResetButton() {
     composeTestRule.setContent {
-        FilterScreen(
-            navigationActionsMock,
-            profilesViewModel = profilesViewModelMock,
-            filterViewModel = filterViewModel
-        )
+      FilterScreen(
+          navigationActionsMock,
+          profilesViewModel = profilesViewModelMock,
+          filterViewModel = filterViewModel)
     }
 
     // Set up initial state
     // Select genders
     composeTestRule.onNodeWithTag("GenderButtonMen").performClick()
     composeTestRule.onNodeWithTag("GenderButtonWomen").performClick()
-    
+
     // Set age range
     composeTestRule.onNodeWithTag("AgeFromTextField").performTextInput("25")
     composeTestRule.onNodeWithTag("AgeToTextField").performTextInput("30")
-    
+
     // Click outside to clear focus
     composeTestRule.onNodeWithText("Gender").performClick()
 
@@ -465,23 +439,20 @@ class FilterScreenTest {
   @Test
   fun testUnsavedChangesDialog() {
     composeTestRule.setContent {
-        FilterScreen(
-            navigationActionsMock,
-            profilesViewModel = profilesViewModelMock,
-            filterViewModel = filterViewModel
-        )
+      FilterScreen(
+          navigationActionsMock,
+          profilesViewModel = profilesViewModelMock,
+          filterViewModel = filterViewModel)
     }
 
     // Make some changes to trigger the dialog
     composeTestRule.onNodeWithTag("GenderButtonMen").performClick()
-    
+
     // Try to go back
     composeTestRule.onNodeWithTag("Back Button").performClick()
 
     // Verify dialog is shown
-    composeTestRule.onNodeWithTag("alertDialog")
-        .assertExists()
-        .assertIsDisplayed()
+    composeTestRule.onNodeWithTag("alertDialog").assertExists().assertIsDisplayed()
 
     // Test cancel button
     composeTestRule.onNodeWithText("Cancel").performClick()
@@ -496,5 +467,4 @@ class FilterScreenTest {
     composeTestRule.onNodeWithTag("alertDialog").assertDoesNotExist()
     verify(navigationActionsMock).goBack()
   }
-
 }
