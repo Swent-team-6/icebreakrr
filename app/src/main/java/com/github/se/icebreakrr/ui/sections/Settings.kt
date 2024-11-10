@@ -100,7 +100,7 @@ fun SettingsScreen(profilesViewModel: ProfilesViewModel, navigationActions: Navi
                   auth.currentUser?.let { logout(context, navigationActions) }
                 }
               },
-              colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFCE0E00)),
+              colors = ButtonDefaults.buttonColors(containerColor = Color.Red),
               modifier = Modifier.fillMaxWidth().testTag("logOutButton")) {
                 Text("Log Out", color = Color.White)
               }
