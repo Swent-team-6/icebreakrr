@@ -1,5 +1,7 @@
 package com.github.se.icebreakrr.model.profile
 
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import com.google.android.gms.tasks.Task
 import com.google.firebase.Firebase
@@ -7,10 +9,90 @@ import com.google.firebase.auth.auth
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.GeoPoint
+import kotlinx.coroutines.flow.MutableStateFlow
 
 class ProfilesRepositoryFirestore(private val db: FirebaseFirestore) : ProfilesRepository {
 
   private val collectionPath = "profiles"
+
+  private val _isWaiting = MutableStateFlow(false)
+  override val isWaiting: MutableStateFlow<Boolean> = _isWaiting
+
+  private val _waitingDone = MutableStateFlow(false)
+  override val waitingDone: MutableStateFlow<Boolean> = _waitingDone
+
+  override val connectionTimeOutMs: Long = 15000
+  override val periodicTimeCheckWaitTime: Long = 5000
+
+  // Generated with the help of CursorAI
+  /**
+   * Periodically checks the connection status by attempting to fetch profiles. If the connection
+   * fails, it will retry every [periodicTimeCheckWaitTime] milliseconds (5 seconds by default).
+   *
+   * The check is performed by attempting to fetch profiles from Firestore. If successful, it means
+   * the connection is restored and the waiting states are reset. If unsuccessful, it schedules
+   * another check after the specified delay.
+   *
+   * @param onFailure Callback function that is invoked when a connection attempt fails. Takes an
+   *   Exception as parameter.
+   */
+  override fun checkConnectionPeriodically(onFailure: (Exception) -> Unit) {
+    val handler = Handler(Looper.getMainLooper())
+    handler.postDelayed(
+        object : Runnable {
+          override fun run() {
+            getProfilesInRadius(
+                GeoPoint(0.0, 0.0),
+                300.0,
+                onSuccess = { profiles ->
+                  Log.e("Connection Check", "Connection restored")
+                  _waitingDone.value = false
+                  _isWaiting.value = false
+                },
+                onFailure = {
+                  Log.e(
+                      "Connection Check",
+                      "Connection still lost, retrying in ${periodicTimeCheckWaitTime/1000} seconds...")
+                  handler.postDelayed(this, periodicTimeCheckWaitTime)
+                })
+          }
+        },
+        0)
+  }
+
+  // Generated with the help of CursorAI
+  /**
+   * Handles a connection failure by attempting one final connection retry after
+   * [connectionTimeOutMs] milliseconds (15 seconds by default).
+   *
+   * The retry is performed by attempting to fetch profiles from Firestore:
+   * - If successful: Resets the waiting states (_waitingDone and _isWaiting to false)
+   * - If unsuccessful: Sets _waitingDone to true and calls the onFailure callback
+   *
+   * @param onFailure Callback function that is invoked if the final retry attempt fails. Takes an
+   *   Exception as parameter.
+   */
+  public override fun handleConnectionFailure(onFailure: (Exception) -> Unit) {
+    val handler = Handler(Looper.getMainLooper())
+    handler.postDelayed(
+        {
+          Log.e("Connection Check", "Retrying connection...")
+          getProfilesInRadius(
+              GeoPoint(0.0, 0.0),
+              300.0,
+              onSuccess = { profiles ->
+                Log.e("Connection Check", "Connection restored")
+                _waitingDone.value = false
+                _isWaiting.value = false
+              },
+              onFailure = {
+                Log.e("Connection Check", "Connection lost after retry")
+                _waitingDone.value = true
+                onFailure(Exception("Connection lost"))
+              })
+        },
+        connectionTimeOutMs) // 15 secondes de délai avant de retenter la connexion
+  }
 
   /**
    * Generates a new unique profile ID from Firestore.
@@ -49,7 +131,7 @@ class ProfilesRepositoryFirestore(private val db: FirebaseFirestore) : ProfilesR
       onFailure: (Exception) -> Unit
   ) {
     // TODO Add GeoFirestore functionality
-    val task = db.collection(collectionPath).get()
+    val task = db.collection(collectionPath).get(com.google.firebase.firestore.Source.SERVER)
 
     task.addOnCompleteListener { result ->
       if (result.isSuccessful) {
@@ -58,10 +140,18 @@ class ProfilesRepositoryFirestore(private val db: FirebaseFirestore) : ProfilesR
                 ?: emptyList()
 
         onSuccess(profiles)
+        waitingDone.value = false
+        isWaiting.value = false
       } else {
         result.exception?.let { e ->
           Log.e("ProfilesRepositoryFirestore", "Error getting profiles", e)
-          onFailure(e)
+          if (e is com.google.firebase.firestore.FirebaseFirestoreException) {
+            if (!_isWaiting.value && !_waitingDone.value) {
+              _isWaiting.value = true
+              handleConnectionFailure(onFailure)
+            }
+            onFailure(e)
+          }
         }
       }
     }

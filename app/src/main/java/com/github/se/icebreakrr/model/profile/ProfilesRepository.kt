@@ -1,8 +1,18 @@
 package com.github.se.icebreakrr.model.profile
 
 import com.google.firebase.firestore.GeoPoint
+import kotlinx.coroutines.flow.MutableStateFlow
 
 interface ProfilesRepository {
+
+  val connectionTimeOutMs: Long
+  val periodicTimeCheckWaitTime: Long
+  val isWaiting: MutableStateFlow<Boolean>
+  val waitingDone: MutableStateFlow<Boolean>
+
+  fun checkConnectionPeriodically(onFailure: (Exception) -> Unit)
+
+  fun handleConnectionFailure(onFailure: (Exception) -> Unit)
 
   fun getNewProfileId(): String
 
