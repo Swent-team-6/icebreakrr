@@ -62,8 +62,12 @@ import com.github.se.icebreakrr.ui.sections.shared.UnsavedChangesDialog
 import com.github.se.icebreakrr.ui.tags.TagSelector
 import com.google.firebase.firestore.GeoPoint
 
+// This file was written with the help of Cursor, Claude, ChatGPT
+
+/**
+ * Constants used for layout calculations and default values
+ */
 const val textSizeFactor = 0.3f
-val IcebreakrrBlue: Color = Color(0xFF1FAEF0)
 const val textFieldHeightFactor = 0.08f
 const val textFieldWidthFactor = 0.2f
 const val buttonHeightFactor = 0.07f
@@ -72,8 +76,6 @@ const val tagSelectorHeightFactor = 0.25f
 const val tagSelectorWidthFactor = 0.8f
 const val tagSelectorTextSizeFactor = 0.1f
 const val titleFontSizeFactor = 0.03f
-
-// Add these constants at the top of the file with the other constants
 const val MINIMUM_AGE = 13
 const val GENDER_BUTTON_WIDTH_FACTOR = 0.3f
 const val GENDER_BUTTON_HEIGHT_FACTOR = 0.06f
@@ -86,10 +88,19 @@ const val DEFAULT_RADIUS = 300.0
 const val DEFAULT_LATITUDE = 0.0
 const val DEFAULT_LONGITUDE = 0.0
 
-// Add this constant with the other color constants
+// Custom colors
+val IcebreakrrBlue: Color = Color(0xFF1FAEF0)
 val IcebreakrrGrey: Color = Color(0xFF808080)
 
-// This file was written with the help of Cursor, Claude, ChatGPT
+/**
+ * Main composable for the Filter screen. Allows users to set and modify filtering criteria
+ * for profiles, including gender preferences, age range, and tags.
+ *
+ * @param navigationActions Navigation handler for screen transitions
+ * @param tagsViewModel ViewModel for managing tags
+ * @param filterViewModel ViewModel for managing filter states
+ * @param profilesViewModel ViewModel for managing profile data
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FilterScreen(
@@ -439,6 +450,13 @@ fun FilterScreen(
     }
 }
 
+/**
+ * Composable for a gender selection button with consistent styling.
+ *
+ * @param selected Whether this gender is currently selected
+ * @param onClick Callback for when the button is clicked
+ * @param label Text to display on the button
+ */
 @Composable
 fun GenderButton(selected: Boolean, onClick: () -> Unit, label: String) {
   val screenWidth = LocalConfiguration.current.screenWidthDp.dp
@@ -466,6 +484,23 @@ fun GenderButton(selected: Boolean, onClick: () -> Unit, label: String) {
       }
 }
 
+/**
+ * Composable for the age range input fields. Provides two text fields for entering
+ * minimum and maximum age values with validation.
+ *
+ * @param ageFromInput Current value of the minimum age field
+ * @param ageToInput Current value of the maximum age field
+ * @param onAgeFromChange Callback for minimum age changes
+ * @param onAgeToChange Callback for maximum age changes
+ * @param validateAgeRange Callback to validate the age range
+ * @param ageFrom Parsed minimum age value
+ * @param ageTo Parsed maximum age value
+ * @param ageRangeError Whether there's an error in the age range
+ * @param screenHeight Current screen height for responsive sizing
+ * @param screenWidth Current screen width for responsive sizing
+ * @param onFromFocusChanged Callback for minimum age field focus changes
+ * @param onToFocusChanged Callback for maximum age field focus changes
+ */
 @Composable
 fun AgeRangeInputFields(
     ageFromInput: String,
@@ -537,6 +572,18 @@ fun AgeRangeInputFields(
     }
 }
 
+/**
+ * Composable for the filter action buttons (Filter and Reset).
+ * The Filter button is disabled when text fields are focused to prevent
+ * accidental submissions while typing.
+ *
+ * @param onClick Callback for when the Filter button is clicked
+ * @param onReset Callback for when the Reset button is clicked
+ * @param buttonWidth Width for both buttons
+ * @param buttonHeight Height for both buttons
+ * @param buttonTextSize Text size for button labels
+ * @param enabled Whether the Filter button is enabled
+ */
 @Composable
 fun FilterActionButton(
     onClick: () -> Unit,
