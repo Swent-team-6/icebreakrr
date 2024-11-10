@@ -19,7 +19,6 @@ import com.github.se.icebreakrr.model.profile.ProfilesViewModel
 import com.github.se.icebreakrr.ui.navigation.BottomNavigationMenu
 import com.github.se.icebreakrr.ui.navigation.LIST_TOP_LEVEL_DESTINATIONS
 import com.github.se.icebreakrr.ui.navigation.NavigationActions
-import com.github.se.icebreakrr.ui.navigation.Route
 import com.github.se.icebreakrr.ui.sections.shared.ProfileCard
 import com.github.se.icebreakrr.ui.sections.shared.TopBar
 
