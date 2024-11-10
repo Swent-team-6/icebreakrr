@@ -45,7 +45,7 @@ fun NotificationScreen(navigationActions: NavigationActions, profileViewModel: P
         BottomNavigationMenu(
             onTabSelect = { route -> navigationActions.navigateTo(route) },
             tabList = LIST_TOP_LEVEL_DESTINATIONS,
-            selectedItem = Route.NOTIFICATIONS)
+            selectedItem = navigationActions.currentRoute())
       },
       content = { innerPadding ->
         LazyColumn(
