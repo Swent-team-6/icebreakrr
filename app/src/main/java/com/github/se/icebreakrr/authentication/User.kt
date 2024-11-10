@@ -43,7 +43,7 @@ fun logout(context: Context, navigationActions: NavigationActions) {
   // Sign out from Google and reset the google account choice
   googleSignInClient.signOut().addOnCompleteListener { signOutTask ->
     if (signOutTask.isSuccessful) {
-      googleSignInClient.revokeAccess().addOnCompleteListener { revokeTask ->
+      googleSignInClient.revokeAccess().addOnCompleteListener { _ ->
         navigationActions.navigateTo(Screen.AUTH)
       }
     } else {
