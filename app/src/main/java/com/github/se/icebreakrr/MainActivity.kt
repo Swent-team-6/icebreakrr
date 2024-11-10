@@ -1,7 +1,6 @@
 package com.github.se.icebreakrr
 
 import android.Manifest
-import android.annotation.SuppressLint
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
@@ -131,14 +130,14 @@ fun IcebreakrrNavHost(
         route = Route.AUTH,
     ) {
       composable(Screen.AUTH) {
-          if (meetingRequestViewModel != null) {
-              SignInScreen(
-                  profileViewModel,
-                  meetingRequestViewModel,
-                  navigationActions,
-                  filterViewModel = filterViewModel,
-                  tagsViewModel = tagsViewModel)
-          }
+        if (meetingRequestViewModel != null) {
+          SignInScreen(
+              profileViewModel,
+              meetingRequestViewModel,
+              navigationActions,
+              filterViewModel = filterViewModel,
+              tagsViewModel = tagsViewModel)
+        }
       }
     }
 
