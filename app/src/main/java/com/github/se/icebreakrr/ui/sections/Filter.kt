@@ -60,6 +60,8 @@ import com.github.se.icebreakrr.model.tags.TagsViewModel
 import com.github.se.icebreakrr.ui.navigation.NavigationActions
 import com.github.se.icebreakrr.ui.sections.shared.UnsavedChangesDialog
 import com.github.se.icebreakrr.ui.tags.TagSelector
+import com.github.se.icebreakrr.ui.theme.Grey
+import com.github.se.icebreakrr.ui.theme.IceBreakrrBlue
 import com.google.firebase.firestore.GeoPoint
 
 // This file was written with the help of Cursor, Claude, ChatGPT
@@ -75,6 +77,7 @@ const val tagSelectorWidthFactor = 0.8f
 const val tagSelectorTextSizeFactor = 0.1f
 const val titleFontSizeFactor = 0.03f
 const val MINIMUM_AGE = 13
+const val EMPTY_FROM_INPUT_AGE = 0
 const val GENDER_BUTTON_WIDTH_FACTOR = 0.3f
 const val GENDER_BUTTON_HEIGHT_FACTOR = 0.06f
 const val HORIZONTAL_SPACING_FACTOR = 0.02f
@@ -87,8 +90,8 @@ const val DEFAULT_LATITUDE = 0.0
 const val DEFAULT_LONGITUDE = 0.0
 
 // Custom colors
-val IcebreakrrBlue: Color = Color(0xFF1FAEF0)
-val IcebreakrrGrey: Color = Color(0xFF808080)
+val IcebreakrrBlue: Color = IceBreakrrBlue
+val IcebreakrrGrey: Color = Grey
 
 /**
  * Main composable for the Filter screen. Allows users to set and modify filtering criteria for
@@ -386,7 +389,7 @@ fun FilterScreen(
                               filterViewModel.setAgeRange(ageFrom!!..Int.MAX_VALUE)
                             }
                             ageFrom == null && ageTo != null -> {
-                              filterViewModel.setAgeRange(0..ageTo!!)
+                              filterViewModel.setAgeRange(EMPTY_FROM_INPUT_AGE..ageTo!!)
                             }
                             else -> {
                               filterViewModel.setAgeRange(null)
