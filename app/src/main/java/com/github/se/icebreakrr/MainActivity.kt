@@ -105,7 +105,12 @@ fun IcebreakrrApp() {
         route = Route.AUTH,
     ) {
       composable(Screen.AUTH) {
-        SignInScreen(profileViewModel, meetingRequestViewModel, navigationActions)
+        SignInScreen(
+            profileViewModel,
+            meetingRequestViewModel,
+            navigationActions,
+            filterViewModel = filterViewModel,
+            tagsViewModel = tagsViewModel)
       }
     }
 
