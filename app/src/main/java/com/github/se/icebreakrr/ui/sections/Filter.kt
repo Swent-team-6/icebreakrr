@@ -82,6 +82,9 @@ const val DEFAULT_RADIUS = 300.0
 const val DEFAULT_LATITUDE = 0.0
 const val DEFAULT_LONGITUDE = 0.0
 
+// Add this constant with the other color constants
+val IcebreakrrGrey: Color = Color(0xFF808080)
+
 // This file was written with the help of Cursor, Claude, ChatGPT
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -315,6 +318,26 @@ fun FilterScreen(
 
                   navigationActions.goBack()
               },
+              onReset = {
+                  // Reset gender selection UI only
+                  manSelected = false
+                  womanSelected = false
+                  otherSelected = false
+                  currentSelectedGenders.clear()
+
+                  // Reset age range UI only
+                  ageFromInput = ""
+                  ageToInput = ""
+                  ageFrom = null
+                  ageTo = null
+                  ageRangeError = false
+
+                  // Reset tags UI only
+                  tagsViewModel.leaveUI()  // This clears the current UI state without affecting saved filters
+
+                  // Show confirmation toast
+                  Toast.makeText(context, "Page reset, click on Filter to save", Toast.LENGTH_SHORT).show()
+              },
               buttonWidth = buttonWidth,
               buttonHeight = buttonHeight,
               buttonTextSize = buttonTextSize
@@ -416,28 +439,53 @@ fun AgeRangeInputFields(
 @Composable
 fun FilterActionButton(
     onClick: () -> Unit,
+    onReset: () -> Unit,
     buttonWidth: Dp,
     buttonHeight: Dp,
     buttonTextSize: TextUnit
 ) {
     Box(modifier = Modifier.fillMaxWidth().padding(DEFAULT_PADDING.dp)) {
-        Button(
-            onClick = onClick,
-            modifier = Modifier
-                .width(buttonWidth)
-                .height(buttonHeight)
-                .testTag("FilterButton")
-                .align(Alignment.Center),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = IcebreakrrBlue,
-                contentColor = Color.White
-            )
+        Row(
+            modifier = Modifier.align(Alignment.Center),
+            horizontalArrangement = Arrangement.spacedBy(SMALL_PADDING.dp)
         ) {
-            Text(
-                "Filter",
-                color = Color.White,
-                fontSize = buttonTextSize
-            )
+            // Reset Button
+            Button(
+                onClick = onReset,
+                modifier = Modifier
+                    .width(buttonWidth)
+                    .height(buttonHeight)
+                    .testTag("ResetButton"),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = IcebreakrrGrey,
+                    contentColor = Color.White
+                )
+            ) {
+                Text(
+                    "Reset",
+                    color = Color.White,
+                    fontSize = buttonTextSize
+                )
+            }
+
+            // Filter Button
+            Button(
+                onClick = onClick,
+                modifier = Modifier
+                    .width(buttonWidth)
+                    .height(buttonHeight)
+                    .testTag("FilterButton"),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = IcebreakrrBlue,
+                    contentColor = Color.White
+                )
+            ) {
+                Text(
+                    "Filter",
+                    color = Color.White,
+                    fontSize = buttonTextSize
+                )
+            }
         }
     }
 }
