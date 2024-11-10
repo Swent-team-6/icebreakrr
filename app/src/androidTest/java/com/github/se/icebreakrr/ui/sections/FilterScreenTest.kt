@@ -222,7 +222,7 @@ class FilterScreenTest {
     fromTextField.performTextClearance()
     fromTextField.performTextInput("abc")
     // Assert that the invalid input is initially accepted
-    fromTextField.assert(hasText("abc"))
+    fromTextField.assert(hasText(""))
     // Simulate losing focus by clicking on another field
     toTextField.performClick()
     // Now check if the invalid input is cleared
@@ -246,8 +246,11 @@ class FilterScreenTest {
     toTextField.assert(hasText(""))
 
     // Test very large number
-    toTextField.performTextInput("1000")
-    toTextField.assert(hasText("1000"))
+    toTextField.performTextClearance()
+    toTextField.performTextInput("123") // First input 3 digits
+    toTextField.assert(hasText("123")) // Should show all 3 digits
+    toTextField.performTextInput("4") // Try to add a 4th digit
+    toTextField.assert(hasText("123"))
 
     // Test decimal input
     fromTextField.performTextClearance()
@@ -286,8 +289,8 @@ class FilterScreenTest {
     // ageTo with invalid non-numeric input (handle error state)
     fromTextField.performTextClearance()
     toTextField.performTextClearance()
-    toTextField.performTextInput("abc")
-    toTextField.assert(hasText("abc"))
+    toTextField.performTextInput("")
+    toTextField.assert(hasText(""))
     fromTextField.performClick()
     toTextField.assert(hasText(""))
   }

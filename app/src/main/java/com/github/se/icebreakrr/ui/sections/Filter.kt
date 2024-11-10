@@ -524,7 +524,15 @@ fun AgeRangeInputFields(
       horizontalArrangement = Arrangement.Center) {
         OutlinedTextField(
             value = ageFromInput,
-            onValueChange = onAgeFromChange,
+            onValueChange = { newValue ->
+              if (newValue.length <= 3) {
+                onAgeFromChange(newValue.filter { it.isDigit() })
+              }
+            },
+            keyboardOptions =
+                KeyboardOptions(
+                    autoCorrectEnabled = false, keyboardType = KeyboardType.NumberPassword),
+            maxLines = 1,
             modifier =
                 Modifier.height(IntrinsicSize.Min)
                     .width(textFieldWidth)
@@ -535,7 +543,6 @@ fun AgeRangeInputFields(
                     },
             label = { Text("From") },
             singleLine = true,
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
             textStyle = TextStyle(fontSize = (textFieldHeight.value * textSizeFactor).sp),
             isError = ageFromInput.isNotEmpty() && (ageFrom == null || ageRangeError))
         Spacer(modifier = Modifier.width(screenWidth * HORIZONTAL_SPACING_FACTOR))
@@ -548,7 +555,15 @@ fun AgeRangeInputFields(
         Spacer(modifier = Modifier.width(screenWidth * HORIZONTAL_SPACING_FACTOR))
         OutlinedTextField(
             value = ageToInput,
-            onValueChange = onAgeToChange,
+            onValueChange = { newValue ->
+              if (newValue.length <= 3) {
+                onAgeToChange(newValue.filter { it.isDigit() })
+              }
+            },
+            keyboardOptions =
+                KeyboardOptions(
+                    autoCorrectEnabled = false, keyboardType = KeyboardType.NumberPassword),
+            maxLines = 1,
             modifier =
                 Modifier.height(IntrinsicSize.Min)
                     .width(textFieldWidth)
@@ -559,7 +574,6 @@ fun AgeRangeInputFields(
                     },
             label = { Text("To") },
             singleLine = true,
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
             textStyle = TextStyle(fontSize = (textFieldHeight.value * textSizeFactor).sp),
             isError = ageToInput.isNotEmpty() && (ageTo == null || ageRangeError))
       }
