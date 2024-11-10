@@ -1,9 +1,11 @@
 package com.github.se.icebreakrr
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
@@ -21,7 +23,6 @@ import androidx.navigation.compose.rememberNavController
 import com.github.se.icebreakrr.config.LocalIsTesting
 import com.github.se.icebreakrr.model.filter.FilterViewModel
 import com.github.se.icebreakrr.model.message.MeetingRequestManager
-import com.github.se.icebreakrr.model.message.MeetingRequestManager.meetingRequestViewModel
 import com.github.se.icebreakrr.model.message.MeetingRequestViewModel
 import com.github.se.icebreakrr.model.profile.ProfilesViewModel
 import com.github.se.icebreakrr.model.tags.TagsViewModel
@@ -42,26 +43,29 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.functions.FirebaseFunctions
 
 class MainActivity : ComponentActivity() {
-  private lateinit var auth: FirebaseAuth
-  private lateinit var meetingRequestViewModel: MeetingRequestViewModel
+  private var auth: FirebaseAuth? = null
+  private var functions: FirebaseFunctions? = null
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
-    FirebaseApp.initializeApp(this)
-
-    auth = FirebaseAuth.getInstance()
-
     // Retrieve the testing flag from the Intent
     val isTesting = intent?.getBooleanExtra("IS_TESTING", false) ?: false
 
+    Log.d("IS_TESTING : ", isTesting.toString())
+
     if (!isTesting) {
       requestNotificationPermission()
+      FirebaseApp.initializeApp(this)
+      auth = FirebaseAuth.getInstance()
+      functions = FirebaseFunctions.getInstance()
     }
 
     setContent {
       // Provide the `isTesting` flag to the entire composable tree
       CompositionLocalProvider(LocalIsTesting provides isTesting) {
-        SampleAppTheme { Surface(modifier = Modifier.fillMaxSize()) { IcebreakrrApp() } }
+        SampleAppTheme {
+          Surface(modifier = Modifier.fillMaxSize()) { IcebreakrrApp(auth, functions) }
+        }
       }
     }
   }
@@ -89,25 +93,40 @@ class MainActivity : ComponentActivity() {
  * @see SettingsScreen
  * @see NotificationScreen
  */
+@SuppressLint("SuspiciousIndentation")
 @Composable
-fun IcebreakrrApp() {
-  val navController = rememberNavController()
-  val navigationActions = NavigationActions(navController)
+fun IcebreakrrApp(auth: FirebaseAuth?, functions: FirebaseFunctions?) {
   val profileViewModel: ProfilesViewModel = viewModel(factory = ProfilesViewModel.Factory)
   val tagsViewModel: TagsViewModel = viewModel(factory = TagsViewModel.Factory)
   val filterViewModel: FilterViewModel = viewModel(factory = FilterViewModel.Factory)
-  val ourUserUid = FirebaseAuth.getInstance().currentUser?.uid
-  val ourName = FirebaseAuth.getInstance().currentUser?.displayName
-  val functions = FirebaseFunctions.getInstance()
+  val ourUserUid = auth?.currentUser?.uid ?: "null"
+  val ourName = auth?.currentUser?.displayName ?: "null"
 
   MeetingRequestManager.meetingRequestViewModel =
       viewModel(
           factory =
-              MeetingRequestViewModel.Companion.Factory(
-                  profileViewModel, functions, ourUserUid, ourName))
+              functions?.let {
+                MeetingRequestViewModel.Companion.Factory(profileViewModel, it, ourUserUid, ourName)
+              })
   val meetingRequestViewModel = MeetingRequestManager.meetingRequestViewModel
 
-  NavHost(navController = navController, startDestination = Route.AUTH) {
+  if (functions != null) {
+    IcebreakrrNavHost(
+        profileViewModel, tagsViewModel, filterViewModel, meetingRequestViewModel, Route.AUTH)
+  }
+}
+
+@Composable
+fun IcebreakrrNavHost(
+    profileViewModel: ProfilesViewModel,
+    tagsViewModel: TagsViewModel,
+    filterViewModel: FilterViewModel,
+    meetingRequestViewModel: MeetingRequestViewModel?,
+    startDestination: String
+) {
+  val navController = rememberNavController()
+  val navigationActions = NavigationActions(navController)
+  NavHost(navController = navController, startDestination = startDestination) {
     navigation(
         startDestination = Screen.AUTH,
         route = Route.AUTH,
