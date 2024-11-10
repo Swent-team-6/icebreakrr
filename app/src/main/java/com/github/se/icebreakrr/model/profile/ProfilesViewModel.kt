@@ -5,6 +5,7 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.widget.Toast
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.google.firebase.Firebase
@@ -39,6 +40,9 @@ open class ProfilesViewModel(
 
   private val _tempProfilePictureBitmap = MutableStateFlow<Bitmap?>(null)
   val tempProfilePictureBitmap: StateFlow<Bitmap?> = _tempProfilePictureBitmap
+
+  private var _isConnected = MutableStateFlow(true)
+  var isConnected: StateFlow<Boolean> = _isConnected
 
   companion object {
     val Factory: ViewModelProvider.Factory =
@@ -108,8 +112,19 @@ open class ProfilesViewModel(
           _profiles.value = profileList
           _filteredProfiles.value = filteredProfiles
           _loading.value = false
+          _isConnected.value = true
         },
-        onFailure = { e -> handleError(e) })
+        onFailure = { e ->
+          Log.e("ConnectionCheck", "Firebase Request FAILED")
+          Log.e(
+              "ConnectionCheck",
+              "Current state: waiting=${repository.isWaiting.value}, done=${repository.waitingDone.value}")
+          handleError(e)
+          if (_isConnected.value && repository.waitingDone.value) {
+            _isConnected.value = false
+            repository.checkConnectionPeriodically({})
+          }
+        })
   }
 
   /**

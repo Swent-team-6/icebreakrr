@@ -16,6 +16,24 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 open class MockProfileRepository : ProfilesRepository {
+
+  private val _isWaiting = MutableStateFlow(false)
+  override val isWaiting: MutableStateFlow<Boolean> = _isWaiting
+
+  private val _waitingDone = MutableStateFlow(false)
+  override val waitingDone: MutableStateFlow<Boolean> = _waitingDone
+
+  override val connectionTimeOutMs: Long = 15000
+  override val periodicTimeCheckWaitTime: Long = 5000
+
+  /**
+   * Checks internet connection after a delay If still no connection after 15 seconds, updates
+   * waitingDone state
+   */
+  override fun checkConnectionPeriodically(onFailure: (Exception) -> Unit) {}
+
+  override fun handleConnectionFailure(onFailure: (Exception) -> Unit) {}
+
   // Returns a hardcoded fake profile ID
   override fun getNewProfileId(): String {
     return "fake-profile-id"

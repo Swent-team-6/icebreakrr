@@ -45,6 +45,7 @@ import androidx.compose.ui.unit.sp
 import com.github.se.icebreakrr.model.profile.ProfilesViewModel
 import com.github.se.icebreakrr.model.tags.TagsViewModel
 import com.github.se.icebreakrr.ui.navigation.NavigationActions
+import com.github.se.icebreakrr.ui.sections.shared.UnsavedChangesDialog
 import com.github.se.icebreakrr.ui.tags.TagSelector
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
@@ -224,28 +225,15 @@ fun ProfileEditingScreen(
 
                 Spacer(modifier = Modifier.height(padding))
 
-                // Modal for unsaved changes on leave page with back button
-                if (showDialog && isModified) {
-                  AlertDialog(
-                      onDismissRequest = { showDialog = false },
-                      title = { Text("You are about to leave this page") },
-                      text = { Text("Your changes will not be saved.") },
-                      confirmButton = {
-                        TextButton(
-                            onClick = {
-                              showDialog = false
-                              tagsViewModel.leaveUI()
-                              profilesViewModel.clearTempProfilePictureBitmap()
-                              navigationActions.goBack()
-                            }) {
-                              Text("Discard changes")
-                            }
-                      },
-                      dismissButton = {
-                        TextButton(onClick = { showDialog = false }) { Text("Cancel") }
-                      },
-                      modifier = Modifier.testTag("alertDialog"))
-                }
+                UnsavedChangesDialog(
+                    showDialog = showDialog && isMofidied,
+                    onDismiss = { showDialog = false },
+                    onConfirm = {
+                      showDialog = false
+                      tagsViewModel.leaveUI()
+                        profilesViewModel.clearTempProfilePictureBitmap()
+                      navigationActions.goBack()
+                    })
               }
         }
   }
