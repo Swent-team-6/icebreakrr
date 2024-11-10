@@ -93,7 +93,6 @@ class MainActivity : ComponentActivity() {
  * @see SettingsScreen
  * @see NotificationScreen
  */
-@SuppressLint("SuspiciousIndentation")
 @Composable
 fun IcebreakrrApp(auth: FirebaseAuth?, functions: FirebaseFunctions?) {
   val profileViewModel: ProfilesViewModel = viewModel(factory = ProfilesViewModel.Factory)
@@ -132,9 +131,14 @@ fun IcebreakrrNavHost(
         route = Route.AUTH,
     ) {
       composable(Screen.AUTH) {
-        if (meetingRequestViewModel != null) {
-          SignInScreen(profileViewModel, meetingRequestViewModel, navigationActions)
-        }
+          if (meetingRequestViewModel != null) {
+              SignInScreen(
+                  profileViewModel,
+                  meetingRequestViewModel,
+                  navigationActions,
+                  filterViewModel = filterViewModel,
+                  tagsViewModel = tagsViewModel)
+          }
       }
     }
 
