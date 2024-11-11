@@ -37,6 +37,7 @@ import com.github.se.icebreakrr.model.profile.ProfilesViewModel
 import com.github.se.icebreakrr.ui.navigation.BottomNavigationMenu
 import com.github.se.icebreakrr.ui.navigation.LIST_TOP_LEVEL_DESTINATIONS
 import com.github.se.icebreakrr.ui.navigation.NavigationActions
+import com.github.se.icebreakrr.ui.navigation.Route
 import com.github.se.icebreakrr.ui.navigation.Screen
 import com.github.se.icebreakrr.ui.sections.shared.ProfileCard
 import com.github.se.icebreakrr.ui.sections.shared.TopBar
@@ -64,9 +65,13 @@ fun SettingsScreen(profilesViewModel: ProfilesViewModel, navigationActions: Navi
       modifier = Modifier.testTag("settingsScreen").fillMaxSize(),
       bottomBar = {
         BottomNavigationMenu(
-            onTabSelect = { route -> navigationActions.navigateTo(route) },
+            onTabSelect = { route ->
+              if (route.route != Route.SETTINGS) {
+                navigationActions.navigateTo(route)
+              }
+            },
             tabList = LIST_TOP_LEVEL_DESTINATIONS,
-            selectedItem = navigationActions.currentRoute())
+            selectedItem = Route.SETTINGS)
       },
   ) { innerPadding ->
     Column(

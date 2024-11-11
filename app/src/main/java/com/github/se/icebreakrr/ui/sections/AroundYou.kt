@@ -32,6 +32,7 @@ import com.github.se.icebreakrr.model.tags.TagsViewModel
 import com.github.se.icebreakrr.ui.navigation.BottomNavigationMenu
 import com.github.se.icebreakrr.ui.navigation.LIST_TOP_LEVEL_DESTINATIONS
 import com.github.se.icebreakrr.ui.navigation.NavigationActions
+import com.github.se.icebreakrr.ui.navigation.Route
 import com.github.se.icebreakrr.ui.navigation.Screen
 import com.github.se.icebreakrr.ui.sections.shared.FilterFloatingActionButton
 import com.github.se.icebreakrr.ui.sections.shared.ProfileCard
@@ -66,9 +67,13 @@ fun AroundYouScreen(
       modifier = Modifier.testTag("aroundYouScreen"),
       bottomBar = {
         BottomNavigationMenu(
-            onTabSelect = { route -> navigationActions.navigateTo(route) },
+            onTabSelect = { route ->
+              if (route.route != Route.AROUND_YOU) {
+                navigationActions.navigateTo(route)
+              }
+            },
             tabList = LIST_TOP_LEVEL_DESTINATIONS,
-            selectedItem = navigationActions.currentRoute())
+            selectedItem = Route.AROUND_YOU)
       },
       topBar = { TopBar("Around You") },
       content = { innerPadding ->

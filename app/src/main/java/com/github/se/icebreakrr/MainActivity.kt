@@ -20,6 +20,7 @@ import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
 import com.github.se.icebreakrr.config.LocalIsTesting
 import com.github.se.icebreakrr.model.filter.FilterViewModel
+import com.github.se.icebreakrr.model.message.MeetingRequestManager
 import com.github.se.icebreakrr.model.message.MeetingRequestViewModel
 import com.github.se.icebreakrr.model.profile.ProfilesViewModel
 import com.github.se.icebreakrr.model.tags.TagsViewModel
@@ -41,21 +42,24 @@ import com.google.firebase.functions.FirebaseFunctions
 
 class MainActivity : ComponentActivity() {
   private lateinit var auth: FirebaseAuth
+  private lateinit var functions: FirebaseFunctions
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
-
-    // Initialize Firebase Auth
-    FirebaseApp.initializeApp(this)
-    requestNotificationPermission()
-
     // Retrieve the testing flag from the Intent
     val isTesting = intent?.getBooleanExtra("IS_TESTING", false) ?: false
+
+    requestNotificationPermission()
+    FirebaseApp.initializeApp(this)
+    auth = FirebaseAuth.getInstance()
+    functions = FirebaseFunctions.getInstance()
 
     setContent {
       // Provide the `isTesting` flag to the entire composable tree
       CompositionLocalProvider(LocalIsTesting provides isTesting) {
-        SampleAppTheme { Surface(modifier = Modifier.fillMaxSize()) { IcebreakrrApp() } }
+        SampleAppTheme {
+          Surface(modifier = Modifier.fillMaxSize()) { IcebreakrrApp(auth, functions) }
+        }
       }
     }
   }
@@ -84,33 +88,51 @@ class MainActivity : ComponentActivity() {
  * @see NotificationScreen
  */
 @Composable
-fun IcebreakrrApp() {
-  val navController = rememberNavController()
-  val navigationActions = NavigationActions(navController)
+fun IcebreakrrApp(auth: FirebaseAuth, functions: FirebaseFunctions) {
   val profileViewModel: ProfilesViewModel = viewModel(factory = ProfilesViewModel.Factory)
   val tagsViewModel: TagsViewModel = viewModel(factory = TagsViewModel.Factory)
   val filterViewModel: FilterViewModel = viewModel(factory = FilterViewModel.Factory)
-  val ourUserUid = FirebaseAuth.getInstance().currentUser?.uid
-  val ourName = FirebaseAuth.getInstance().currentUser?.displayName
-  val functions = FirebaseFunctions.getInstance()
-  val meetingRequestViewModel: MeetingRequestViewModel =
+  val ourUserUid = auth.currentUser?.uid ?: "null"
+  val ourName = auth.currentUser?.displayName ?: "null"
+
+  MeetingRequestManager.meetingRequestViewModel =
       viewModel(
           factory =
               MeetingRequestViewModel.Companion.Factory(
                   profileViewModel, functions, ourUserUid, ourName))
+  val meetingRequestViewModel = MeetingRequestManager.meetingRequestViewModel
 
-  NavHost(navController = navController, startDestination = Route.AUTH) {
+  IcebreakrrNavHost(
+      profileViewModel, tagsViewModel, filterViewModel, meetingRequestViewModel, Route.AUTH)
+}
+
+@Composable
+fun IcebreakrrNavHost(
+    profileViewModel: ProfilesViewModel,
+    tagsViewModel: TagsViewModel,
+    filterViewModel: FilterViewModel,
+    meetingRequestViewModel: MeetingRequestViewModel?,
+    startDestination: String
+) {
+  val navController = rememberNavController()
+  val navigationActions = NavigationActions(navController)
+  NavHost(navController = navController, startDestination = startDestination) {
     navigation(
         startDestination = Screen.AUTH,
         route = Route.AUTH,
     ) {
       composable(Screen.AUTH) {
-        SignInScreen(
-            profileViewModel,
-            meetingRequestViewModel,
-            navigationActions,
-            filterViewModel = filterViewModel,
-            tagsViewModel = tagsViewModel)
+        if (meetingRequestViewModel != null) {
+          SignInScreen(
+              profileViewModel,
+              meetingRequestViewModel,
+              navigationActions,
+              filterViewModel = filterViewModel,
+              tagsViewModel = tagsViewModel)
+        } else {
+          throw IllegalStateException(
+              "The Meeting Request View Model shouldn't be null : Bad initialization")
+        }
       }
     }
 
@@ -122,12 +144,17 @@ fun IcebreakrrApp() {
         AroundYouScreen(navigationActions, profileViewModel, tagsViewModel, filterViewModel)
       }
       composable(Screen.OTHER_PROFILE_VIEW + "?userId={userId}") { navBackStackEntry ->
-        OtherProfileView(
-            profileViewModel,
-            tagsViewModel,
-            meetingRequestViewModel,
-            navigationActions,
-            navBackStackEntry)
+        if (meetingRequestViewModel != null) {
+          OtherProfileView(
+              profileViewModel,
+              tagsViewModel,
+              meetingRequestViewModel,
+              navigationActions,
+              navBackStackEntry)
+        } else {
+          throw IllegalStateException(
+              "The Meeting Request View Model shouldn't be null : Bad initialization")
+        }
       }
     }
 
