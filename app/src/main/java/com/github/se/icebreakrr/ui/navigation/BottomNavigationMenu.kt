@@ -37,7 +37,7 @@ fun BottomNavigationMenu(
   NavigationBar(
       modifier = Modifier.fillMaxWidth().height(60.dp).testTag("bottomNavigationMenu"),
       containerColor = IceBreakrrBlue,
-      contentColor = Color.White) {
+      contentColor = Color.Gray) {
         tabList.forEach { tab ->
           NavigationBarItem(
               icon = { Icon(tab.icon, contentDescription = stringResource(id = tab.textId)) },
@@ -46,7 +46,7 @@ fun BottomNavigationMenu(
               onClick = { onTabSelect(tab) },
               colors =
                   NavigationBarItemDefaults.colors(
-                      selectedIconColor = Color.White,
+                      selectedIconColor = Color.Gray,
                       unselectedIconColor = Color.White,
                       selectedTextColor = Color.White,
                       unselectedTextColor = Color.White,

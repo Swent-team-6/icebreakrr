@@ -37,4 +37,16 @@ class MeetingRequestServiceTest {
     // Assert that showNotification was never called
     verify(meetingRequestService, never()).showNotification(anyString(), anyString())
   }
+
+  @Test
+  fun testOnMessageReceived_withNotification() {
+    // Arrange
+    val remoteMessage = RemoteMessage.Builder("1").setMessageType("Notification").build()
+
+    // Act
+    meetingRequestService.onMessageReceived(remoteMessage)
+
+    // Assert that showNotification was never called
+    verify(meetingRequestService, never()).showNotification(anyString(), anyString())
+  }
 }

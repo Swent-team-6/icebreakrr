@@ -50,7 +50,7 @@ class MeetingRequestViewModel(
   }
 
   /**
-   * Sets the good token for our message
+   * Sets the good token for our message, locally and in the profile's backend
    *
    * @param newToken the current token of the user to which we want to send the message
    */
@@ -62,6 +62,14 @@ class MeetingRequestViewModel(
       val updatedProfile = currentProfile.copy(fcmToken = newToken)
       profilesViewModel.updateProfile(updatedProfile)
     }
+  }
+  /**
+   * Sets the good token for our message just locally
+   *
+   * @param newToken the current token of the user to which we want to send the message
+   */
+  fun onLocalTokenChange(newToken: String) {
+    meetingRequestState = meetingRequestState.copy(targetToken = newToken)
   }
   /**
    * Sets the message of the meeting request
