@@ -298,7 +298,7 @@ fun ProfileHeader(
                       .testTag("alertDialogReportBlock")) {
                 Column(
                     modifier = Modifier.padding(PADDING_LARGE),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    verticalArrangement = Arrangement.spacedBy(PADDING_SMALL)) {
                       Text(
                           text = stringResource(R.string.block_report_modal_title),
                           style = MaterialTheme.typography.titleLarge,
@@ -307,7 +307,7 @@ fun ProfileHeader(
                       // Content
                       if (showReportOptions) {
                         Column {
-                          Text("Select a reason for reporting:")
+                          Text(stringResource(R.string.report_reason_prompt))
                           reportType.values().forEach { reportType ->
                             TextButton(
                                 onClick = { selectedReportType = reportType },
@@ -335,7 +335,7 @@ fun ProfileHeader(
                                     showReportOptions = false
                                     selectedReportType = null
                                   }) {
-                                    Text("Cancel")
+                                    Text(stringResource(R.string.cancel))
                                   }
                               TextButton(
                                   onClick = {
@@ -364,7 +364,7 @@ fun ProfileHeader(
                                     showBlockConfirmation = false
                                     blockReportModal = false
                                   }) {
-                                    Text("Cancel")
+                                    Text(stringResource(R.string.cancel))
                                   }
                               TextButton(
                                   onClick = {
@@ -376,7 +376,7 @@ fun ProfileHeader(
                                             Toast.LENGTH_SHORT)
                                         .show()
                                   }) {
-                                    Text("Block")
+                                    Text(stringResource(R.string.block))
                                   }
                             }
                       } else {
@@ -384,14 +384,16 @@ fun ProfileHeader(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically) {
-                              TextButton(onClick = { blockReportModal = false }) { Text("Cancel") }
+                              TextButton(onClick = { blockReportModal = false }) {
+                                Text(stringResource(R.string.cancel))
+                              }
 
                               Row {
                                 TextButton(onClick = { showBlockConfirmation = true }) {
-                                  Text("Block")
+                                  Text(stringResource(R.string.block))
                                 }
                                 TextButton(onClick = { showReportOptions = true }) {
-                                  Text("Report")
+                                  Text(stringResource(R.string.report))
                                 }
                               }
                             }
