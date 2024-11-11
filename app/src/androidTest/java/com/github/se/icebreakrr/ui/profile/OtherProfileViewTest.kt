@@ -5,6 +5,7 @@ import androidx.compose.ui.test.assertIsNotDisplayed
 import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -15,6 +16,7 @@ import com.github.se.icebreakrr.model.profile.Profile
 import com.github.se.icebreakrr.model.profile.ProfilePicRepository
 import com.github.se.icebreakrr.model.profile.ProfilesRepository
 import com.github.se.icebreakrr.model.profile.ProfilesViewModel
+import com.github.se.icebreakrr.model.profile.reportType
 import com.github.se.icebreakrr.model.tags.TagsRepository
 import com.github.se.icebreakrr.model.tags.TagsViewModel
 import com.github.se.icebreakrr.ui.navigation.NavigationActions
@@ -127,4 +129,136 @@ class OtherProfileViewTest {
     composeTestRule.onNodeWithTag("cancelButton").performClick()
     composeTestRule.onNodeWithTag("bluredBackground").assertIsNotDisplayed()
   }
+
+
+  @Test
+  fun testFlagButtonDisplaysReportBlockDialog() {
+    fakeProfilesViewModel.setLoading(false)
+    fakeProfilesViewModel.setSelectedProfile(Profile.getMockedProfiles()[0])
+
+    composeTestRule.setContent {
+      OtherProfileView(
+        fakeProfilesViewModel, tagsViewModel, meetingRequestViewModel, navigationActions, null)
+    }
+
+    composeTestRule.onNodeWithTag("flagButton").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("flagButton").performClick()
+
+    composeTestRule.onNodeWithTag("alertDialogReportBlock").assertIsDisplayed()
+    composeTestRule.onNodeWithText("Block").assertIsDisplayed()
+    composeTestRule.onNodeWithText("Report").assertIsDisplayed()
+  }
+
+  @Test
+  fun testBlockUserFlowWithCancel() {
+    fakeProfilesViewModel.setLoading(false)
+    fakeProfilesViewModel.setSelectedProfile(Profile.getMockedProfiles()[0])
+
+    composeTestRule.setContent {
+      OtherProfileView(
+        fakeProfilesViewModel, tagsViewModel, meetingRequestViewModel, navigationActions, null)
+    }
+
+    composeTestRule.onNodeWithTag("flagButton").performClick()
+    composeTestRule.onNodeWithTag("alertDialogReportBlock").assertIsDisplayed()
+    composeTestRule.onNodeWithText("Block").performClick()
+
+    composeTestRule.onNodeWithTag("blockConfirmationDialog").assertIsDisplayed()
+    composeTestRule.onNodeWithText("Do you really want to block this user?").assertIsDisplayed()
+
+    composeTestRule.onNodeWithText("Cancel").performClick()
+    composeTestRule.onNodeWithTag("blockConfirmationDialog").assertIsNotDisplayed()
+    composeTestRule.onNodeWithTag("alertDialogReportBlock").assertIsNotDisplayed()
+  }
+
+  @Test
+  fun testBlockUserFlowWithConfirm() {
+    fakeProfilesViewModel.setLoading(false)
+    fakeProfilesViewModel.setSelectedProfile(Profile.getMockedProfiles()[0])
+
+    composeTestRule.setContent {
+      OtherProfileView(
+        fakeProfilesViewModel, tagsViewModel, meetingRequestViewModel, navigationActions, null)
+    }
+
+    composeTestRule.onNodeWithTag("flagButton").performClick()
+    composeTestRule.onNodeWithTag("alertDialogReportBlock").assertIsDisplayed()
+    composeTestRule.onNodeWithText("Block").performClick()
+
+    composeTestRule.onNodeWithTag("blockConfirmationDialog").assertIsDisplayed()
+    composeTestRule.onNodeWithText("Do you really want to block this user?").assertIsDisplayed()
+
+    composeTestRule.onNodeWithText("Confirm").performClick()
+    composeTestRule.onNodeWithTag("blockConfirmationDialog").assertIsNotDisplayed()
+    composeTestRule.onNodeWithTag("alertDialogReportBlock").assertIsNotDisplayed()
+  }
+
+  @Test
+  fun testReportUserUI() {
+    fakeProfilesViewModel.setLoading(false)
+    fakeProfilesViewModel.setSelectedProfile(Profile.getMockedProfiles()[1])
+
+    composeTestRule.setContent {
+      OtherProfileView(
+        fakeProfilesViewModel, tagsViewModel, meetingRequestViewModel, navigationActions, null)
+    }
+
+    composeTestRule.onNodeWithTag("flagButton").performClick()
+    composeTestRule.onNodeWithText("Report").performClick()
+
+    composeTestRule.onNodeWithText("Select a reason for reporting:").assertIsDisplayed()
+
+    reportType.values().forEach { reportType ->
+      composeTestRule.onNodeWithText(reportType.displayName).assertIsDisplayed()
+    }
+  }
+
+  @Test
+  fun testReportSubmissionWithCancel() {
+    fakeProfilesViewModel.setLoading(false)
+    fakeProfilesViewModel.setSelectedProfile(Profile.getMockedProfiles()[1])
+
+    composeTestRule.setContent {
+      OtherProfileView(
+        fakeProfilesViewModel, tagsViewModel, meetingRequestViewModel, navigationActions, null)
+    }
+
+    composeTestRule.onNodeWithTag("flagButton").performClick()
+    composeTestRule.onNodeWithText("Report").performClick()
+
+    composeTestRule.onNodeWithText("Cancel").performClick()
+    composeTestRule.onNodeWithTag("alertDialogReportBlock").assertIsNotDisplayed()
+
+    composeTestRule.onNodeWithTag("flagButton").performClick()
+    composeTestRule.onNodeWithText("Report").performClick()
+
+    composeTestRule.onNodeWithText(reportType.values()[0].displayName).performClick()
+
+    composeTestRule.onNodeWithText("Cancel").performClick()
+    composeTestRule.onNodeWithTag("alertDialogReportBlock").assertIsNotDisplayed()
+
+  }
+
+  @Test
+  fun testReportSubmissionWithConfirm() {
+    fakeProfilesViewModel.setLoading(false)
+    fakeProfilesViewModel.setSelectedProfile(Profile.getMockedProfiles()[1])
+
+    composeTestRule.setContent {
+      OtherProfileView(
+        fakeProfilesViewModel, tagsViewModel, meetingRequestViewModel, navigationActions, null)
+    }
+
+    composeTestRule.onNodeWithTag("flagButton").performClick()
+    composeTestRule.onNodeWithText("Report").performClick()
+
+    composeTestRule.onNodeWithText(reportType.values()[1].displayName).performClick()
+    composeTestRule.onNodeWithText("Report").performClick()
+
+    composeTestRule.onNodeWithTag("alertDialogReportBlock").assertIsNotDisplayed()
+
+  }
+
+
 }
+
