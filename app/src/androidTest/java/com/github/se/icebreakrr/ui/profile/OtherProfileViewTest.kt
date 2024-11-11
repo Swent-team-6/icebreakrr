@@ -130,7 +130,6 @@ class OtherProfileViewTest {
     composeTestRule.onNodeWithTag("bluredBackground").assertIsNotDisplayed()
   }
 
-
   @Test
   fun testFlagButtonDisplaysReportBlockDialog() {
     fakeProfilesViewModel.setLoading(false)
@@ -138,7 +137,7 @@ class OtherProfileViewTest {
 
     composeTestRule.setContent {
       OtherProfileView(
-        fakeProfilesViewModel, tagsViewModel, meetingRequestViewModel, navigationActions, null)
+          fakeProfilesViewModel, tagsViewModel, meetingRequestViewModel, navigationActions, null)
     }
 
     composeTestRule.onNodeWithTag("flagButton").assertIsDisplayed()
@@ -156,7 +155,7 @@ class OtherProfileViewTest {
 
     composeTestRule.setContent {
       OtherProfileView(
-        fakeProfilesViewModel, tagsViewModel, meetingRequestViewModel, navigationActions, null)
+          fakeProfilesViewModel, tagsViewModel, meetingRequestViewModel, navigationActions, null)
     }
 
     composeTestRule.onNodeWithTag("flagButton").performClick()
@@ -178,7 +177,7 @@ class OtherProfileViewTest {
 
     composeTestRule.setContent {
       OtherProfileView(
-        fakeProfilesViewModel, tagsViewModel, meetingRequestViewModel, navigationActions, null)
+          fakeProfilesViewModel, tagsViewModel, meetingRequestViewModel, navigationActions, null)
     }
 
     composeTestRule.onNodeWithTag("flagButton").performClick()
@@ -200,7 +199,7 @@ class OtherProfileViewTest {
 
     composeTestRule.setContent {
       OtherProfileView(
-        fakeProfilesViewModel, tagsViewModel, meetingRequestViewModel, navigationActions, null)
+          fakeProfilesViewModel, tagsViewModel, meetingRequestViewModel, navigationActions, null)
     }
 
     composeTestRule.onNodeWithTag("flagButton").performClick()
@@ -220,7 +219,7 @@ class OtherProfileViewTest {
 
     composeTestRule.setContent {
       OtherProfileView(
-        fakeProfilesViewModel, tagsViewModel, meetingRequestViewModel, navigationActions, null)
+          fakeProfilesViewModel, tagsViewModel, meetingRequestViewModel, navigationActions, null)
     }
 
     composeTestRule.onNodeWithTag("flagButton").performClick()
@@ -236,7 +235,6 @@ class OtherProfileViewTest {
 
     composeTestRule.onNodeWithText("Cancel").performClick()
     composeTestRule.onNodeWithTag("alertDialogReportBlock").assertIsNotDisplayed()
-
   }
 
   @Test
@@ -246,7 +244,7 @@ class OtherProfileViewTest {
 
     composeTestRule.setContent {
       OtherProfileView(
-        fakeProfilesViewModel, tagsViewModel, meetingRequestViewModel, navigationActions, null)
+          fakeProfilesViewModel, tagsViewModel, meetingRequestViewModel, navigationActions, null)
     }
 
     composeTestRule.onNodeWithTag("flagButton").performClick()
@@ -256,9 +254,5 @@ class OtherProfileViewTest {
     composeTestRule.onNodeWithText("Report").performClick()
 
     composeTestRule.onNodeWithTag("alertDialogReportBlock").assertIsNotDisplayed()
-
   }
-
-
 }
-

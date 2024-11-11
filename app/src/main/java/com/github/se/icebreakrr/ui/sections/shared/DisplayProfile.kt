@@ -17,7 +17,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.Create
 import androidx.compose.material.icons.filled.Send
@@ -138,10 +137,10 @@ fun ProfileHeader(
     onEditClick: () -> Unit
 ) {
 
-    var reportModal by remember { mutableStateOf(false) };
-    var showReportOptions by remember { mutableStateOf(false) }
-    var selectedReportType by remember { mutableStateOf<reportType?>(null) }
-    var showBlockConfirmation by remember { mutableStateOf(false) }
+  var reportModal by remember { mutableStateOf(false) }
+  var showReportOptions by remember { mutableStateOf(false) }
+  var selectedReportType by remember { mutableStateOf<reportType?>(null) }
+  var showBlockConfirmation by remember { mutableStateOf(false) }
 
   Box(
       modifier =
@@ -176,24 +175,21 @@ fun ProfileHeader(
                   tint = Color.White)
             }
 
-      // Flag button
-      if (!myProfile){
+        // Flag button
+        if (!myProfile) {
           Box(
-              modifier =
-              Modifier.align(Alignment.TopEnd).padding(16.dp).size(requestButtonSize),
+              modifier = Modifier.align(Alignment.TopEnd).padding(16.dp).size(requestButtonSize),
               contentAlignment = Alignment.Center) {
-              IconButton(
-                  onClick = { reportModal = true },
-                  modifier = Modifier.testTag("flagButton")) {
-                  Icon(
-                      painter = painterResource(id = R.drawable.ic_flag),
-                      contentDescription = "report/block user",
-                      tint = Color.White,
-                      modifier = Modifier.fillMaxSize(0.7f))
+                IconButton(
+                    onClick = { reportModal = true }, modifier = Modifier.testTag("flagButton")) {
+                      Icon(
+                          painter = painterResource(id = R.drawable.ic_flag),
+                          contentDescription = "report/block user",
+                          tint = Color.White,
+                          modifier = Modifier.fillMaxSize(0.7f))
+                    }
               }
-          }
-
-      }
+        }
 
         // Overlay with username and edit button
         Row(
@@ -250,122 +246,102 @@ fun ProfileHeader(
             }
       }
 
-    if (reportModal){
-        // Report modal
-        AlertDialog(
-            onDismissRequest = { reportModal = false },
-            title = { Text("What would you like to do?") },
-            text = {
-                if (showReportOptions) {
-                    Column {
-                        Text("Select a reason for reporting:")
-                        reportType.values().forEach { reportType ->
-                            TextButton(
-                                onClick = { selectedReportType = reportType },
-                                modifier = Modifier.fillMaxWidth()
-                            ) {
-                                Text(
-                                    reportType.displayName,
-                                    color = if (selectedReportType == reportType) IceBreakrrBlue else Color.Black
-                                )
-                            }
-                        }
+  if (reportModal) {
+    // Report modal
+    AlertDialog(
+        onDismissRequest = { reportModal = false },
+        title = { Text("What would you like to do?") },
+        text = {
+          if (showReportOptions) {
+            Column {
+              Text("Select a reason for reporting:")
+              reportType.values().forEach { reportType ->
+                TextButton(
+                    onClick = { selectedReportType = reportType },
+                    modifier = Modifier.fillMaxWidth()) {
+                      Text(
+                          reportType.displayName,
+                          color =
+                              if (selectedReportType == reportType) IceBreakrrBlue else Color.Black)
                     }
+              }
+            }
+          }
+        },
+        confirmButton = {
+          if (showReportOptions) {
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp),
+                horizontalArrangement = Arrangement.End,
+                verticalAlignment = Alignment.CenterVertically) {
+                  TextButton(
+                      onClick = {
+                        reportModal = false
+                        showReportOptions = false
+                        selectedReportType = null
+                      }) {
+                        Text("Cancel")
+                      }
+                  TextButton(
+                      onClick = {
+                        // Handle report submission
+                        reportModal = false
+                        showReportOptions = false
+                        selectedReportType = null
+                      },
+                      enabled = selectedReportType != null) {
+                        Text("Report")
+                      }
                 }
-            },
-            confirmButton = {
-                if (showReportOptions) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 8.dp),
-                        horizontalArrangement = Arrangement.End,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        TextButton(
-                            onClick = {
-                                reportModal = false
-                                showReportOptions = false
-                                selectedReportType = null
-                            }
-                        ) {
-                            Text("Cancel")
-                        }
-                        TextButton(
-                            onClick = {
-                                // Handle report submission
-                                reportModal = false
-                                showReportOptions = false
-                                selectedReportType = null
-                            },
-                            enabled = selectedReportType != null
-                        ) {
-                            Text("Report")
-                        }
-                    }
-                } else {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .wrapContentHeight()
-                            .padding(horizontal = 8.dp),
-                        horizontalArrangement = Arrangement.SpaceEvenly,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        TextButton(
-                            onClick = {
-                                showBlockConfirmation = true
-                                reportModal = false
-                            }
-                        ) {
-                            Text("Block")
-                        }
-                        TextButton(
-                            onClick = { showReportOptions = true }
-                        ) {
-                            Text("Report")
-                        }
-                    }
+          } else {
+            Row(
+                modifier = Modifier.fillMaxWidth().wrapContentHeight().padding(horizontal = 8.dp),
+                horizontalArrangement = Arrangement.SpaceEvenly,
+                verticalAlignment = Alignment.CenterVertically) {
+                  TextButton(
+                      onClick = {
+                        showBlockConfirmation = true
+                        reportModal = false
+                      }) {
+                        Text("Block")
+                      }
+                  TextButton(onClick = { showReportOptions = true }) { Text("Report") }
                 }
-            },
-            dismissButton = {
-                if (!showReportOptions) {
-                    TextButton(
-                        onClick = { showReportOptions = false }
-                    ) {
-                        Text("Back")
-                    }
-                }
-            },
-            modifier = Modifier.testTag("alertDialogReportBlock")
-        )
-    }
+          }
+        },
+        dismissButton = {
+          if (!showReportOptions) {
+            TextButton(onClick = { showReportOptions = false }) { Text("Back") }
+          }
+        },
+        modifier = Modifier.testTag("alertDialogReportBlock"))
+  }
 
-    if (showBlockConfirmation) {
-        AlertDialog(
-            onDismissRequest = { showBlockConfirmation = false },
-            title = { Text("Block User") },
-            text = { Text("Do you really want to block this user?") },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        // Handle block user logic here
-                        showBlockConfirmation = false
-                    }
-                ) {
-                    Text("Confirm")
-                }
-            },
-            dismissButton = {
-                TextButton(
-                    onClick = { showBlockConfirmation = false; showReportOptions = false }
-                ) {
-                    Text("Cancel")
-                }
-            },
-            modifier = Modifier.testTag("blockConfirmationDialog")
-        )
-    }
+  if (showBlockConfirmation) {
+    AlertDialog(
+        onDismissRequest = { showBlockConfirmation = false },
+        title = { Text("Block User") },
+        text = { Text("Do you really want to block this user?") },
+        confirmButton = {
+          TextButton(
+              onClick = {
+                // Handle block user logic here
+                showBlockConfirmation = false
+              }) {
+                Text("Confirm")
+              }
+        },
+        dismissButton = {
+          TextButton(
+              onClick = {
+                showBlockConfirmation = false
+                showReportOptions = false
+              }) {
+                Text("Cancel")
+              }
+        },
+        modifier = Modifier.testTag("blockConfirmationDialog"))
+  }
 }
 
 /**
