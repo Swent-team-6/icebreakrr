@@ -1,12 +1,19 @@
 package com.github.se.icebreakrr.model.profile
 
+import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.net.Uri
 import android.util.Log
+import android.widget.Toast
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.GeoPoint
 import com.google.firebase.firestore.firestore
 import com.google.firebase.storage.storage
+import java.io.ByteArrayOutputStream
+import java.io.InputStream
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
@@ -31,6 +38,9 @@ open class ProfilesViewModel(
   private val _error = MutableStateFlow<Exception?>(null)
   val error: StateFlow<Exception?> = _error
 
+  private val _tempProfilePictureBitmap = MutableStateFlow<Bitmap?>(null)
+  val tempProfilePictureBitmap: StateFlow<Bitmap?> = _tempProfilePictureBitmap
+
   private var _isConnected = MutableStateFlow(true)
   var isConnected: StateFlow<Boolean> = _isConnected
 
@@ -48,7 +58,7 @@ open class ProfilesViewModel(
   }
 
   /**
-   * Returns a new unique profile ID
+   * Returns a new unique profile ID.
    *
    * @return A unique profile ID as a String.
    */
@@ -56,7 +66,7 @@ open class ProfilesViewModel(
     return repository.getNewProfileId()
   }
 
-  /** Initializes the repository, fetch profiles */
+  /** Initializes the repository and fetches profiles. */
   init {
     repository.init {
       // Fetch profiles on initialization
@@ -180,9 +190,46 @@ open class ProfilesViewModel(
         userId = userId,
         imageData = imageData,
         onSuccess = { url ->
-          _selectedProfile.update { selected -> selected?.copy(profilePictureUrl = url) }
+          // _selectedProfile cannot be null here, as it must be set to current user before calling
+          // this function
+          _selectedProfile.update { selected -> selected!!.copy(profilePictureUrl = url) }
+          updateProfile(selectedProfile.value!!)
         },
         onFailure = { e -> handleError(e) })
+  }
+
+  /**
+   * Generates a temporary profile picture Bitmap from an image URI.
+   *
+   * @param context The context used to access the content resolver.
+   * @param imageUri The URI of the image to be converted.
+   */
+  fun generateTempProfilePictureBitmap(context: Context, imageUri: Uri) {
+    val bitmap = imageUriToBitmap(context, imageUri)
+    _tempProfilePictureBitmap.value = bitmap
+  }
+
+  /** Clears the temporary profile picture Bitmap. */
+  fun clearTempProfilePictureBitmap() {
+    _tempProfilePictureBitmap.value = null
+  }
+
+  /**
+   * Validates and uploads the profile picture if a temporary profile picture Bitmap exists.
+   *
+   * @param context The context used to show a Toast message in case of failure.
+   */
+  fun validateAndUploadProfilePicture(context: Context) {
+    val imageData =
+        bitmapToJpgByteArray(
+            tempProfilePictureBitmap.value ?: return) // do nothing if null (no selected image)
+    if (imageData != null) {
+      uploadCurrentUserProfilePicture(imageData)
+      clearTempProfilePictureBitmap()
+    } else {
+      Toast.makeText(context, "Failed to upload profile picture", Toast.LENGTH_SHORT).show()
+      clearTempProfilePictureBitmap()
+    }
   }
 
   /**
@@ -197,8 +244,72 @@ open class ProfilesViewModel(
           _selectedProfile.update { currentProfile ->
             currentProfile?.copy(profilePictureUrl = null)
           }
+          updateProfile(selectedProfile.value!!)
         },
         onFailure = { e -> handleError(e) })
+  }
+
+  /**
+   * Converts an image URI to a processed Bitmap, cropping the image to a square at the center.
+   *
+   * @param context The context used to access the content resolver.
+   * @param imageUri The URI of the image to be converted.
+   * @param maxResolution The maximum resolution for the output Bitmap. Default is 600.
+   * @return A Bitmap representing the processed image, or null if an error occurs.
+   */
+  private fun imageUriToBitmap(context: Context, imageUri: Uri, maxResolution: Int = 600): Bitmap? {
+    return try {
+      // Open an InputStream from the URI
+      val inputStream: InputStream? = context.contentResolver.openInputStream(imageUri)
+
+      // Decode InputStream to Bitmap
+      val bitmap = BitmapFactory.decodeStream(inputStream)
+      inputStream?.close() // Close the InputStream after decoding
+
+      // Calculate the dimensions for the square crop
+      val dimension = minOf(bitmap.width, bitmap.height)
+      val xOffset = (bitmap.width - dimension) / 2
+      val yOffset = (bitmap.height - dimension) / 2
+
+      // Crop the Bitmap to a square at the center
+      val croppedBitmap = Bitmap.createBitmap(bitmap, xOffset, yOffset, dimension, dimension)
+
+      // Resize the cropped bitmap if it exceeds the maximum resolution
+      if (dimension > maxResolution) {
+        val scale = maxResolution.toFloat() / dimension
+        Bitmap.createScaledBitmap(
+            croppedBitmap,
+            (croppedBitmap.width * scale).toInt(),
+            (croppedBitmap.height * scale).toInt(),
+            true)
+      } else {
+        croppedBitmap
+      }
+    } catch (e: Exception) {
+      e.printStackTrace()
+      null
+    }
+  }
+
+  /**
+   * Converts a Bitmap to a JPEG byte array.
+   *
+   * @param bitmap The Bitmap to be converted.
+   * @param quality The quality of the JPEG compression (0-100). Default is 100.
+   * @return A byte array representing the JPEG image, or null if an error occurs.
+   */
+  private fun bitmapToJpgByteArray(bitmap: Bitmap, quality: Int = 100): ByteArray? {
+    return try {
+      // Compress Bitmap to JPEG format and store in ByteArrayOutputStream
+      val byteArrayOutputStream = ByteArrayOutputStream()
+      bitmap.compress(Bitmap.CompressFormat.JPEG, quality, byteArrayOutputStream)
+
+      // Return ByteArray of compressed JPEG image (representing .jpg)
+      byteArrayOutputStream.toByteArray()
+    } catch (e: Exception) {
+      e.printStackTrace()
+      null
+    }
   }
 
   /**

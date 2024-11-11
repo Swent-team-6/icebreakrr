@@ -1,7 +1,14 @@
 package com.github.se.icebreakrr.model.profile
 
+import android.content.ContentResolver
+import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.net.Uri
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.GeoPoint
+import java.io.ByteArrayInputStream
+import java.io.ByteArrayOutputStream
 import java.util.Calendar
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -22,16 +29,21 @@ import org.junit.Assert.assertThrows
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
+import org.mockito.MockedStatic
 import org.mockito.Mockito.mock
+import org.mockito.Mockito.mockStatic
+import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.whenever
 
 class ProfilesViewModelTest {
+  private lateinit var context: Context
   private lateinit var profilesRepository: ProfilesRepository
   private lateinit var ppRepository: ProfilePicRepository
   private lateinit var profilesViewModel: ProfilesViewModel
+  private lateinit var mockProfileViewModel: ProfilesViewModel
   @OptIn(ExperimentalCoroutinesApi::class)
   private val testDispatcher: TestDispatcher = UnconfinedTestDispatcher()
 
@@ -66,13 +78,21 @@ class ProfilesViewModelTest {
           tags = listOf("adventurous", "outgoing"),
           profilePictureUrl = null)
 
+  private lateinit var bitmapFactoryMock: MockedStatic<BitmapFactory>
+  private lateinit var bitmapMock: MockedStatic<Bitmap>
+
   @OptIn(ExperimentalCoroutinesApi::class)
   @Before
   fun setUp() {
+    context = mock(Context::class.java)
     profilesRepository = mock(ProfilesRepository::class.java)
     ppRepository = mock(ProfilePicRepository::class.java)
     profilesViewModel = ProfilesViewModel(profilesRepository, ppRepository)
     Dispatchers.setMain(testDispatcher) // Set main dispatcher first
+    mockProfileViewModel = mock(ProfilesViewModel::class.java)
+
+    bitmapFactoryMock = mockStatic(BitmapFactory::class.java)
+    bitmapMock = mockStatic(Bitmap::class.java)
 
     whenever(profilesRepository.isWaiting).thenReturn(MutableStateFlow(false))
     whenever(profilesRepository.waitingDone).thenReturn(MutableStateFlow(false))
@@ -82,6 +102,8 @@ class ProfilesViewModelTest {
   @After
   fun tearDown() {
     Dispatchers.resetMain()
+    bitmapFactoryMock.close()
+    bitmapMock.close()
   }
 
   @Test
@@ -329,6 +351,125 @@ class ProfilesViewModelTest {
 
     verify(ppRepository).deleteProfilePicture(eq("1"), any(), any())
     assertThat(profilesViewModel.error.value, `is`(exception))
+  }
+
+  @Test
+  fun generateTempProfilePictureBitmapSucceeds() = runBlocking {
+    // Mock ContentResolver and Uri
+    val contentResolver = mock(ContentResolver::class.java)
+    val uri = mock(Uri::class.java)
+    whenever(context.contentResolver).thenReturn(contentResolver)
+
+    // Create a test image as InputStream
+    val testImageBytes = ByteArray(100) { it.toByte() }
+    val inputStream = ByteArrayInputStream(testImageBytes)
+    whenever(contentResolver.openInputStream(uri)).thenReturn(inputStream)
+
+    // Create a mock bitmap that will be "decoded" from the input stream
+    val mockBitmap = mock(Bitmap::class.java)
+    whenever(mockBitmap.width).thenReturn(100)
+    whenever(mockBitmap.height).thenReturn(100)
+
+    // Mock BitmapFactory.decodeStream to return our mock bitmap
+    bitmapFactoryMock.`when`<Bitmap> { BitmapFactory.decodeStream(any()) }.thenReturn(mockBitmap)
+
+    // Mock Bitmap.createBitmap to return the same mock bitmap
+    bitmapMock
+        .`when`<Bitmap> { Bitmap.createBitmap(any<Bitmap>(), any(), any(), any(), any()) }
+        .thenReturn(mockBitmap)
+
+    profilesViewModel.generateTempProfilePictureBitmap(context, uri)
+
+    assertThat(profilesViewModel.tempProfilePictureBitmap.value, `is`(mockBitmap))
+  }
+
+  @Test
+  fun generateTempProfilePictureBitmapClampsToMaxResolution() = runBlocking {
+    // Mock ContentResolver and Uri
+    val contentResolver = mock(ContentResolver::class.java)
+    val uri = mock(Uri::class.java)
+    whenever(context.contentResolver).thenReturn(contentResolver)
+
+    // Create a test image as InputStream
+    val testImageBytes = ByteArray(100) { it.toByte() }
+    val inputStream = ByteArrayInputStream(testImageBytes)
+    whenever(contentResolver.openInputStream(uri)).thenReturn(inputStream)
+
+    // Create a mock bitmap that will be "decoded" from the input stream
+    val mockBitmap = mock(Bitmap::class.java)
+    whenever(mockBitmap.width).thenReturn(1200) // Width greater than max resolution
+    whenever(mockBitmap.height).thenReturn(1200) // Height greater than max resolution
+
+    // Mock BitmapFactory.decodeStream to return our mock bitmap
+    bitmapFactoryMock.`when`<Bitmap> { BitmapFactory.decodeStream(any()) }.thenReturn(mockBitmap)
+
+    // Mock Bitmap.createBitmap to return the same mock bitmap
+    bitmapMock
+        .`when`<Bitmap> { Bitmap.createBitmap(any<Bitmap>(), any(), any(), any(), any()) }
+        .thenReturn(mockBitmap)
+
+    // Mock Bitmap.createScaledBitmap to return a scaled bitmap
+    val scaledBitmap = mock(Bitmap::class.java)
+    bitmapMock
+        .`when`<Bitmap> { Bitmap.createScaledBitmap(any(), eq(600), eq(600), eq(true)) }
+        .thenReturn(scaledBitmap)
+
+    profilesViewModel.generateTempProfilePictureBitmap(context, uri)
+
+    // Verify that the bitmap was scaled down to the max resolution
+    assertThat(profilesViewModel.tempProfilePictureBitmap.value, `is`(scaledBitmap))
+  }
+
+  @Test
+  fun validateAndUploadProfilePictureWithNoTempBitmapDoesNothing() = runBlocking {
+    profilesViewModel.clearTempProfilePictureBitmap() // Ensure no temp bitmap exists
+    profilesViewModel.validateAndUploadProfilePicture(context)
+
+    // Verify no interactions with upload functionality
+    verify(profilesRepository, never()).updateProfile(any(), any(), any())
+  }
+
+  @Test
+  fun validateAndUploadProfilePictureSucceeds() = runBlocking {
+    // Mock successful profile setup
+    whenever(profilesRepository.getProfileByUid(eq("1"), any(), any())).thenAnswer {
+      val onSuccess = it.getArgument<(Profile) -> Unit>(1)
+      onSuccess(profile1)
+    }
+    profilesViewModel.getProfileByUid("1")
+
+    // Create and set a mock bitmap
+    val mockBitmap = mock(Bitmap::class.java)
+    whenever(mockBitmap.compress(eq(Bitmap.CompressFormat.JPEG), eq(100), any())).thenAnswer {
+      val stream = it.getArgument<ByteArrayOutputStream>(2)
+      stream.write(ByteArray(100))
+      true
+    }
+
+    // Set the temp bitmap
+    val field = ProfilesViewModel::class.java.getDeclaredField("_tempProfilePictureBitmap")
+    field.isAccessible = true
+    val tempProfilePictureBitmap = field.get(profilesViewModel) as MutableStateFlow<Bitmap?>
+    tempProfilePictureBitmap.value = mockBitmap
+
+    profilesViewModel.validateAndUploadProfilePicture(context)
+
+    // Verify upload was called and temp bitmap was cleared
+    verify(ppRepository).uploadProfilePicture(eq("1"), any(), any(), any())
+    assertThat(profilesViewModel.tempProfilePictureBitmap.value, `is`(nullValue()))
+  }
+
+  @Test
+  fun clearTempProfilePictureBitmapSucceeds() {
+    val mockBitmap = mock(Bitmap::class.java)
+    val field = ProfilesViewModel::class.java.getDeclaredField("_tempProfilePictureBitmap")
+    field.isAccessible = true
+    val tempProfilePictureBitmap = field.get(profilesViewModel) as MutableStateFlow<Bitmap?>
+    tempProfilePictureBitmap.value = mockBitmap
+
+    profilesViewModel.clearTempProfilePictureBitmap()
+
+    assertThat(profilesViewModel.tempProfilePictureBitmap.value, `is`(nullValue()))
   }
 
   // Generated with the help of CursorAI
