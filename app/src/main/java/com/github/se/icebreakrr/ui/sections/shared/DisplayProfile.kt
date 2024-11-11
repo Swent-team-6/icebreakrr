@@ -358,7 +358,7 @@ fun ProfileHeader(
             },
             dismissButton = {
                 TextButton(
-                    onClick = { showBlockConfirmation = false }
+                    onClick = { showBlockConfirmation = false; showReportOptions = false }
                 ) {
                     Text("Cancel")
                 }
