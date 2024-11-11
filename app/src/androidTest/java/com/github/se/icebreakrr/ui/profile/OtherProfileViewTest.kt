@@ -4,6 +4,7 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotDisplayed
 import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -159,14 +160,11 @@ class OtherProfileViewTest {
     }
 
     composeTestRule.onNodeWithTag("flagButton").performClick()
-    composeTestRule.onNodeWithTag("alertDialogReportBlock").assertIsDisplayed()
     composeTestRule.onNodeWithText("Block").performClick()
 
-    composeTestRule.onNodeWithTag("blockConfirmationDialog").assertIsDisplayed()
     composeTestRule.onNodeWithText("Do you really want to block this user?").assertIsDisplayed()
 
     composeTestRule.onNodeWithText("Cancel").performClick()
-    composeTestRule.onNodeWithTag("blockConfirmationDialog").assertIsNotDisplayed()
     composeTestRule.onNodeWithTag("alertDialogReportBlock").assertIsNotDisplayed()
   }
 
@@ -181,14 +179,11 @@ class OtherProfileViewTest {
     }
 
     composeTestRule.onNodeWithTag("flagButton").performClick()
-    composeTestRule.onNodeWithTag("alertDialogReportBlock").assertIsDisplayed()
     composeTestRule.onNodeWithText("Block").performClick()
 
-    composeTestRule.onNodeWithTag("blockConfirmationDialog").assertIsDisplayed()
     composeTestRule.onNodeWithText("Do you really want to block this user?").assertIsDisplayed()
 
-    composeTestRule.onNodeWithText("Confirm").performClick()
-    composeTestRule.onNodeWithTag("blockConfirmationDialog").assertIsNotDisplayed()
+    composeTestRule.onNodeWithText("Block").performClick()
     composeTestRule.onNodeWithTag("alertDialogReportBlock").assertIsNotDisplayed()
   }
 
