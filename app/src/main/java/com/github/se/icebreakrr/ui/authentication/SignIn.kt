@@ -47,12 +47,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.github.se.icebreakrr.R
 import com.github.se.icebreakrr.config.LocalIsTesting
+import com.github.se.icebreakrr.model.filter.FilterViewModel
 import com.github.se.icebreakrr.model.message.MeetingRequestViewModel
 import com.github.se.icebreakrr.model.profile.Gender
 import com.github.se.icebreakrr.model.profile.Profile
 import com.github.se.icebreakrr.model.profile.ProfilesViewModel
+import com.github.se.icebreakrr.model.tags.TagsViewModel
 import com.github.se.icebreakrr.ui.navigation.NavigationActions
 import com.github.se.icebreakrr.ui.navigation.TopLevelDestinations
+import com.github.se.icebreakrr.utils.NetworkUtils
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
@@ -61,6 +64,7 @@ import com.google.firebase.Timestamp
 import com.google.firebase.auth.AuthResult
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.auth.auth
+import com.google.firebase.firestore.GeoPoint
 import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -76,7 +80,9 @@ import kotlinx.coroutines.tasks.await
 fun SignInScreen(
     profilesViewModel: ProfilesViewModel,
     meetingRequestViewModel: MeetingRequestViewModel,
-    navigationActions: NavigationActions
+    navigationActions: NavigationActions,
+    filterViewModel: FilterViewModel,
+    tagsViewModel: TagsViewModel
 ) {
 
   // State to hold the current Firebase user
@@ -118,7 +124,7 @@ fun SignInScreen(
                 FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
                   if (task.isSuccessful) {
                     val fcmToken = task.result
-                    meetingRequestViewModel.onRemoteTokenChange(token)
+                    meetingRequestViewModel.onLocalTokenChange(token)
                     if (profile == null) { // if doesn't exist create new user
 
                       val newProfile =
@@ -184,18 +190,27 @@ fun SignInScreen(
           // Authenticate With Google Button
           GoogleSignInButton(
               onClick = {
-
-                // If in test mode, simulate a logged-in user
                 if (isTesting) {
                   navigationActions.navigateTo(TopLevelDestinations.AROUND_YOU)
                 } else {
-                  val gso =
-                      GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                          .requestIdToken(token)
-                          .requestEmail()
-                          .build()
-                  val googleSignInClient = GoogleSignIn.getClient(context, gso)
-                  launcher.launch(googleSignInClient.signInIntent)
+                  if (!NetworkUtils.isNetworkAvailable(context)) {
+                    NetworkUtils.showNoInternetToast(context)
+                  } else {
+                    val gso =
+                        GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                            .requestIdToken(token)
+                            .requestEmail()
+                            .build()
+                    val googleSignInClient = GoogleSignIn.getClient(context, gso)
+                    launcher.launch(googleSignInClient.signInIntent)
+
+                    profilesViewModel.getFilteredProfilesInRadius(
+                        GeoPoint(0.0, 0.0),
+                        300.0,
+                        filterViewModel.selectedGenders.value,
+                        filterViewModel.ageRange.value,
+                        tagsViewModel.filteredTags.value)
+                  }
                 }
               })
         }

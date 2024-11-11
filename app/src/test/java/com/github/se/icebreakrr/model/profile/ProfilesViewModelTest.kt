@@ -3,11 +3,23 @@ package com.github.se.icebreakrr.model.profile
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.GeoPoint
 import java.util.Calendar
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.TestDispatcher
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.advanceTimeBy
+import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
 import org.hamcrest.CoreMatchers.`is`
 import org.hamcrest.CoreMatchers.nullValue
 import org.hamcrest.MatcherAssert.assertThat
+import org.junit.After
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertThrows
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.mockito.Mockito.mock
@@ -20,6 +32,8 @@ class ProfilesViewModelTest {
   private lateinit var profilesRepository: ProfilesRepository
   private lateinit var ppRepository: ProfilePicRepository
   private lateinit var profilesViewModel: ProfilesViewModel
+  @OptIn(ExperimentalCoroutinesApi::class)
+  private val testDispatcher: TestDispatcher = UnconfinedTestDispatcher()
 
   private val birthDate2002 =
       Timestamp(
@@ -52,11 +66,22 @@ class ProfilesViewModelTest {
           tags = listOf("adventurous", "outgoing"),
           profilePictureUrl = null)
 
+  @OptIn(ExperimentalCoroutinesApi::class)
   @Before
   fun setUp() {
     profilesRepository = mock(ProfilesRepository::class.java)
     ppRepository = mock(ProfilePicRepository::class.java)
     profilesViewModel = ProfilesViewModel(profilesRepository, ppRepository)
+    Dispatchers.setMain(testDispatcher) // Set main dispatcher first
+
+    whenever(profilesRepository.isWaiting).thenReturn(MutableStateFlow(false))
+    whenever(profilesRepository.waitingDone).thenReturn(MutableStateFlow(false))
+  }
+
+  @OptIn(ExperimentalCoroutinesApi::class)
+  @After
+  fun tearDown() {
+    Dispatchers.resetMain()
   }
 
   @Test
@@ -304,5 +329,88 @@ class ProfilesViewModelTest {
 
     verify(ppRepository).deleteProfilePicture(eq("1"), any(), any())
     assertThat(profilesViewModel.error.value, `is`(exception))
+  }
+
+  // Generated with the help of CursorAI
+  @OptIn(ExperimentalCoroutinesApi::class)
+  @Test
+  fun showsOfflineWhenTimerCompletesAndStillFailing() = runTest {
+
+    // Mock repository states
+    whenever(profilesRepository.isWaiting).thenReturn(MutableStateFlow(false))
+    whenever(profilesRepository.waitingDone).thenReturn(MutableStateFlow(false))
+
+    // Initial state
+    assertTrue(profilesViewModel.isConnected.value)
+    assertFalse(profilesRepository.waitingDone.value)
+    assertFalse(profilesRepository.isWaiting.value)
+
+    // Simulate a failed request that starts the timer
+    val center = GeoPoint(0.0, 0.0)
+    val radiusInMeters = 300.0
+    val exception =
+        com.google.firebase.firestore.FirebaseFirestoreException(
+            "Unavailable",
+            com.google.firebase.firestore.FirebaseFirestoreException.Code.UNAVAILABLE)
+
+    whenever(profilesRepository.getProfilesInRadius(eq(center), eq(radiusInMeters), any(), any()))
+        .thenAnswer {
+          val onFailure = it.getArgument<(Exception) -> Unit>(3)
+          onFailure(exception)
+        }
+
+    // First failed request starts the timer
+    profilesViewModel.getFilteredProfilesInRadius(center, radiusInMeters)
+
+    // Advance time to complete the timer
+    advanceTimeBy(15_001)
+
+    // Mock repository states
+    whenever(profilesRepository.isWaiting).thenReturn(MutableStateFlow(true))
+    whenever(profilesRepository.waitingDone).thenReturn(MutableStateFlow(true))
+
+    // Another failed request after timer completes
+    profilesViewModel.getFilteredProfilesInRadius(center, radiusInMeters)
+
+    // Should now be offline
+    assertFalse(profilesViewModel.isConnected.value)
+  }
+
+  @OptIn(ExperimentalCoroutinesApi::class)
+  @Test
+  fun showsOnlineWhenDifferentError() = runTest {
+    whenever(profilesRepository.isWaiting).thenReturn(MutableStateFlow(false))
+    whenever(profilesRepository.waitingDone).thenReturn(MutableStateFlow(false))
+    // Initial state
+    assertTrue(profilesViewModel.isConnected.value)
+    assertFalse(profilesRepository.waitingDone.value)
+    assertFalse(profilesRepository.isWaiting.value)
+
+    // Simulate a failed request that doesn't start the timer
+    val center = GeoPoint(0.0, 0.0)
+    val radiusInMeters = 1000.0
+    val exception = Exception("Test exception")
+
+    // Mock repository states
+    whenever(profilesRepository.isWaiting).thenReturn(MutableStateFlow(false))
+    whenever(profilesRepository.waitingDone).thenReturn(MutableStateFlow(false))
+
+    whenever(profilesRepository.getProfilesInRadius(eq(center), eq(radiusInMeters), any(), any()))
+        .thenAnswer {
+          val onFailure = it.getArgument<(Exception) -> Unit>(3)
+          onFailure(exception)
+        }
+
+    // First failed request doesn't start the timer
+    profilesViewModel.getFilteredProfilesInRadius(center, radiusInMeters)
+
+    // Advance time
+    advanceTimeBy(16_000)
+
+    // Another failed request after timer completes
+    profilesViewModel.getFilteredProfilesInRadius(center, radiusInMeters)
+
+    // Should still be online because it wasn't the correct error
+    assertTrue(profilesViewModel.isConnected.value)
   }
 }
