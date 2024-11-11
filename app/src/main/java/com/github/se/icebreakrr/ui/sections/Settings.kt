@@ -1,6 +1,5 @@
 package com.github.se.icebreakrr.ui.sections
 
-import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -30,6 +29,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
+import com.github.se.icebreakrr.authentication.logout
+import com.github.se.icebreakrr.config.LocalIsTesting
 import com.github.se.icebreakrr.mock.getMockedProfiles
 import com.github.se.icebreakrr.model.profile.Profile
 import com.github.se.icebreakrr.model.profile.ProfilesViewModel
@@ -41,6 +42,7 @@ import com.github.se.icebreakrr.ui.navigation.Screen
 import com.github.se.icebreakrr.ui.sections.shared.ProfileCard
 import com.github.se.icebreakrr.ui.sections.shared.TopBar
 import com.google.firebase.Firebase
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.auth
 
 // This File was written with the help of Cursor
@@ -48,6 +50,7 @@ import com.google.firebase.auth.auth
 fun SettingsScreen(profilesViewModel: ProfilesViewModel, navigationActions: NavigationActions) {
   val context = LocalContext.current
   val scrollState = rememberScrollState()
+  lateinit var auth: FirebaseAuth
 
   LaunchedEffect(Unit) {
     Firebase.auth.currentUser?.let { profilesViewModel.getProfileByUid(it.uid) }
@@ -55,6 +58,7 @@ fun SettingsScreen(profilesViewModel: ProfilesViewModel, navigationActions: Navi
 
   val isLoading = profilesViewModel.loading.collectAsState(initial = true).value
   val profile = profilesViewModel.selectedProfile.collectAsState().value
+  val isTesting = LocalIsTesting.current
 
   Scaffold(
       topBar = { TopBar("Settings") },
@@ -94,9 +98,14 @@ fun SettingsScreen(profilesViewModel: ProfilesViewModel, navigationActions: Navi
 
           Button(
               onClick = {
-                Toast.makeText(context, "Log Out (Not yet implemented)", Toast.LENGTH_SHORT).show()
+                if (isTesting) {
+                  navigationActions.navigateTo(Screen.AUTH)
+                } else {
+                  auth = FirebaseAuth.getInstance()
+                  auth.currentUser?.let { logout(context, navigationActions) }
+                }
               },
-              colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFCE0E00)),
+              colors = ButtonDefaults.buttonColors(containerColor = Color.Red),
               modifier = Modifier.fillMaxWidth().testTag("logOutButton")) {
                 Text("Log Out", color = Color.White)
               }
