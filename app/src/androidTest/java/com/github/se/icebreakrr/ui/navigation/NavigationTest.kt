@@ -92,8 +92,10 @@ class NavigationTest {
     composeTestRule.onNodeWithTag("navItem_${R.string.notifications}").performClick()
     composeTestRule.onNodeWithTag("notificationScreen").assertIsDisplayed()
 
-    // Test navigation to the Notifications screen
+    // Test navigation to the AroundYou screen
     composeTestRule.onNodeWithTag("navItem_${R.string.around_you}").performClick()
     composeTestRule.onNodeWithTag("aroundYouScreen").assertIsDisplayed()
+
+    // Test navigation to the Filter screen
   }
 }

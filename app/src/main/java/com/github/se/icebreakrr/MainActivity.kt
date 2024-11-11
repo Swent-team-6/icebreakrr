@@ -4,7 +4,6 @@ import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
@@ -42,22 +41,18 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.functions.FirebaseFunctions
 
 class MainActivity : ComponentActivity() {
-  private var auth: FirebaseAuth? = null
-  private var functions: FirebaseFunctions? = null
+  private lateinit var auth: FirebaseAuth
+  private lateinit var functions: FirebaseFunctions
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     // Retrieve the testing flag from the Intent
     val isTesting = intent?.getBooleanExtra("IS_TESTING", false) ?: false
 
-    Log.d("IS_TESTING : ", isTesting.toString())
-
-    if (!isTesting) {
-      requestNotificationPermission()
-      FirebaseApp.initializeApp(this)
-      auth = FirebaseAuth.getInstance()
-      functions = FirebaseFunctions.getInstance()
-    }
+    requestNotificationPermission()
+    FirebaseApp.initializeApp(this)
+    auth = FirebaseAuth.getInstance()
+    functions = FirebaseFunctions.getInstance()
 
     setContent {
       // Provide the `isTesting` flag to the entire composable tree
@@ -93,25 +88,22 @@ class MainActivity : ComponentActivity() {
  * @see NotificationScreen
  */
 @Composable
-fun IcebreakrrApp(auth: FirebaseAuth?, functions: FirebaseFunctions?) {
+fun IcebreakrrApp(auth: FirebaseAuth, functions: FirebaseFunctions) {
   val profileViewModel: ProfilesViewModel = viewModel(factory = ProfilesViewModel.Factory)
   val tagsViewModel: TagsViewModel = viewModel(factory = TagsViewModel.Factory)
   val filterViewModel: FilterViewModel = viewModel(factory = FilterViewModel.Factory)
-  val ourUserUid = auth?.currentUser?.uid ?: "null"
-  val ourName = auth?.currentUser?.displayName ?: "null"
+  val ourUserUid = auth.currentUser?.uid ?: "null"
+  val ourName = auth.currentUser?.displayName ?: "null"
 
   MeetingRequestManager.meetingRequestViewModel =
       viewModel(
           factory =
-              functions?.let {
-                MeetingRequestViewModel.Companion.Factory(profileViewModel, it, ourUserUid, ourName)
-              })
+              MeetingRequestViewModel.Companion.Factory(
+                  profileViewModel, functions, ourUserUid, ourName))
   val meetingRequestViewModel = MeetingRequestManager.meetingRequestViewModel
 
-  if (functions != null) {
-    IcebreakrrNavHost(
-        profileViewModel, tagsViewModel, filterViewModel, meetingRequestViewModel, Route.AUTH)
-  }
+  IcebreakrrNavHost(
+      profileViewModel, tagsViewModel, filterViewModel, meetingRequestViewModel, Route.AUTH)
 }
 
 @Composable
@@ -137,6 +129,9 @@ fun IcebreakrrNavHost(
               navigationActions,
               filterViewModel = filterViewModel,
               tagsViewModel = tagsViewModel)
+        } else {
+          throw IllegalStateException(
+              "The Meeting Request View Model shouldn't be null : Bad initialization")
         }
       }
     }
@@ -156,6 +151,9 @@ fun IcebreakrrNavHost(
               meetingRequestViewModel,
               navigationActions,
               navBackStackEntry)
+        } else {
+          throw IllegalStateException(
+              "The Meeting Request View Model shouldn't be null : Bad initialization")
         }
       }
     }
