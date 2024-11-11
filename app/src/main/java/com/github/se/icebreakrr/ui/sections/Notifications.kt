@@ -43,7 +43,11 @@ fun NotificationScreen(navigationActions: NavigationActions, profileViewModel: P
       topBar = { TopBar("Inbox") },
       bottomBar = {
         BottomNavigationMenu(
-            onTabSelect = { route -> navigationActions.navigateTo(route) },
+            onTabSelect = { route ->
+              if (route.route != Route.NOTIFICATIONS) {
+                navigationActions.navigateTo(route)
+              }
+            },
             tabList = LIST_TOP_LEVEL_DESTINATIONS,
             selectedItem = Route.NOTIFICATIONS)
       },

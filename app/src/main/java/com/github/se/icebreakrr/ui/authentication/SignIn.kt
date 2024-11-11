@@ -124,7 +124,7 @@ fun SignInScreen(
                 FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
                   if (task.isSuccessful) {
                     val fcmToken = task.result
-                    meetingRequestViewModel.onRemoteTokenChange(token)
+                    meetingRequestViewModel.onLocalTokenChange(token)
                     if (profile == null) { // if doesn't exist create new user
 
                       val newProfile =

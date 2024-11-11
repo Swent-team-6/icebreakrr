@@ -17,6 +17,7 @@ import com.github.se.icebreakrr.model.profile.ProfilePicRepository
 import com.github.se.icebreakrr.model.profile.ProfilesRepository
 import com.github.se.icebreakrr.model.profile.ProfilesViewModel
 import com.github.se.icebreakrr.ui.navigation.NavigationActions
+import com.github.se.icebreakrr.ui.navigation.Route
 import com.github.se.icebreakrr.ui.navigation.TopLevelDestinations
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.GeoPoint
@@ -43,6 +44,8 @@ class NotificationTest {
     mockProfilesRepository = Mockito.mock(ProfilesRepository::class.java)
     mockPPRepository = Mockito.mock(ProfilePicRepository::class.java)
     profilesViewModel = ProfilesViewModel(mockProfilesRepository, mockPPRepository)
+
+    `when`(navigationActions.currentRoute()).thenReturn(Route.NOTIFICATIONS)
   }
 
   @Test
