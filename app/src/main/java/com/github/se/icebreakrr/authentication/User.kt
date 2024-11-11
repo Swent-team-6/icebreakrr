@@ -46,7 +46,7 @@ fun logout(context: Context, navigationActions: NavigationActions) {
       googleSignInClient.revokeAccess().addOnCompleteListener { _ ->
         navigationActions.navigateTo(Screen.AUTH)
       }
-    } else {//On error
+    } else { // On error
       Log.e("GoogleSignIn", "Failed to sign out from Google.")
     }
   }
