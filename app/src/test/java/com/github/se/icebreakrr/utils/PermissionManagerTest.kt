@@ -8,8 +8,8 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.core.content.ContextCompat
 import androidx.test.core.app.ApplicationProvider
 import junit.framework.TestCase.assertEquals
+import junit.framework.TestCase.assertNotNull
 import kotlinx.coroutines.runBlocking
-import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -22,9 +22,7 @@ import org.robolectric.RobolectricTestRunner
 class PermissionManagerTest {
 
   @Mock private lateinit var mockContext: Context
-
   @Mock private lateinit var mockActivity: ComponentActivity
-
   @Mock private lateinit var mockLauncher: ActivityResultLauncher<Array<String>>
 
   private lateinit var permissionManager: PermissionManager
@@ -34,11 +32,8 @@ class PermissionManagerTest {
     MockitoAnnotations.openMocks(this)
     `when`(mockContext.applicationContext).thenReturn(ApplicationProvider.getApplicationContext())
     permissionManager = PermissionManager(mockContext)
-  }
-
-  @After
-  fun tearDown() {
-    permissionManager.unregisterReceiver()
+    permissionManager.initializeLauncher(
+        mockActivity, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), true)
   }
 
   @Test
@@ -60,28 +55,67 @@ class PermissionManagerTest {
 
     val status =
         permissionManager.permissionStatuses.value[Manifest.permission.ACCESS_FINE_LOCATION]
-    assertEquals(PermissionStatus.Granted, status)
+    assertEquals(PackageManager.PERMISSION_GRANTED, status)
   }
 
   @Test
   fun updatePermissionStatus_shouldUpdateFlow() {
-    val permission = Manifest.permission.ACCESS_FINE_LOCATION
-    permissionManager.updatePermissionStatus(permission, PermissionStatus.Granted)
+    `when`(ContextCompat.checkSelfPermission(mockContext, Manifest.permission.ACCESS_FINE_LOCATION))
+        .thenReturn(PackageManager.PERMISSION_GRANTED)
+    permissionManager.updateAllPermissions()
 
-    assertEquals(PermissionStatus.Granted, permissionManager.permissionStatuses.value[permission])
+    val status =
+        permissionManager.permissionStatuses.value[Manifest.permission.ACCESS_FINE_LOCATION]
+    assertEquals(PackageManager.PERMISSION_GRANTED, status)
   }
 
   @Test
   fun initialPermissionStatuses_shouldIncludeLocationPermission() {
-    val initialStatuses = permissionManager.initialPermissionStatuses()
-
-    assertEquals(
-        PermissionStatus.Unknown, initialStatuses[Manifest.permission.ACCESS_FINE_LOCATION])
+    val permission = Manifest.permission.ACCESS_FINE_LOCATION
+    assertNotNull(permissionManager.permissionStatuses.value[permission])
   }
 
   @Test
-  fun unregisterReceiver_shouldUnregisterBroadcastReceiver() {
-    permissionManager.unregisterReceiver()
-    verify(mockContext).unregisterReceiver(any())
+  fun updateAllPermissions_whenNoChange_shouldNotUpdateStatuses() = runBlocking {
+    `when`(ContextCompat.checkSelfPermission(mockContext, Manifest.permission.ACCESS_FINE_LOCATION))
+        .thenReturn(PackageManager.PERMISSION_DENIED)
+
+    permissionManager.updateAllPermissions()
+
+    val status =
+        permissionManager.permissionStatuses.value[Manifest.permission.ACCESS_FINE_LOCATION]
+    assertEquals(PackageManager.PERMISSION_DENIED, status)
+  }
+
+  @Test
+  fun requestPermissions_updatesPermissionStatusOnGrant() = runBlocking {
+    `when`(ContextCompat.checkSelfPermission(mockContext, Manifest.permission.ACCESS_FINE_LOCATION))
+        .thenReturn(PackageManager.PERMISSION_GRANTED)
+
+    permissionManager.permissionLauncher = mockLauncher
+    val permissions = arrayOf(Manifest.permission.ACCESS_FINE_LOCATION)
+    permissionManager.requestPermissions(permissions)
+
+    // Simulate permission granted
+    permissionManager.updateAllPermissions()
+    val status =
+        permissionManager.permissionStatuses.value[Manifest.permission.ACCESS_FINE_LOCATION]
+    assertEquals(PackageManager.PERMISSION_GRANTED, status)
+  }
+
+  @Test
+  fun requestPermissions_updatesPermissionStatusOnDenial() = runBlocking {
+    `when`(ContextCompat.checkSelfPermission(mockContext, Manifest.permission.ACCESS_FINE_LOCATION))
+        .thenReturn(PackageManager.PERMISSION_DENIED)
+
+    permissionManager.permissionLauncher = mockLauncher
+    val permissions = arrayOf(Manifest.permission.ACCESS_FINE_LOCATION)
+    permissionManager.requestPermissions(permissions)
+
+    // Simulate permission denied
+    permissionManager.updateAllPermissions()
+    val status =
+        permissionManager.permissionStatuses.value[Manifest.permission.ACCESS_FINE_LOCATION]
+    assertEquals(PackageManager.PERMISSION_DENIED, status)
   }
 }
