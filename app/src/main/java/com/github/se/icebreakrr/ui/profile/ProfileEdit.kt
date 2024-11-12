@@ -172,9 +172,9 @@ fun ProfileEditingScreen(
                 OutlinedTextField(
                     value = catchphrase,
                     onValueChange = {
-                      if(it.text.length <= CATCHPHRASE_MAX) {
-                          catchphrase = it
-                          isModified = true
+                      if (it.text.length <= CATCHPHRASE_MAX) {
+                        catchphrase = it
+                        isModified = true
                       }
                     },
                     label = {
@@ -191,8 +191,8 @@ fun ProfileEditingScreen(
                     value = description,
                     onValueChange = {
                       if (it.text.length <= DESSCRIPTION_MAX) {
-                          description = it
-                          isModified = true
+                        description = it
+                        isModified = true
                       }
                     },
                     label = { Text("Description") },

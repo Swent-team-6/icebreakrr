@@ -87,41 +87,37 @@ fun InfoSection(profile: Profile, tagsViewModel: TagsViewModel) {
 
         // Description Section
 
-      Column (
-          modifier = Modifier.padding(4.dp),
-          verticalArrangement = Arrangement.spacedBy(2.dp)
-      ) {
-          Text(
-              text = "Description",
-              style =
-                  TextStyle(
-                      fontSize = informationTitleSize,
-                      lineHeight = informationTitleLineHeight,
-                      fontWeight = FontWeight(informationTitleFontWeight),
-                      color = IceBreakrrBlue,
-                      letterSpacing = informationTitleLetterSpacing,
-                  ))
-          ProfileDescription(profile.description)
-      }
+        Column(
+            modifier = Modifier.padding(4.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+              Text(
+                  text = "Description",
+                  style =
+                      TextStyle(
+                          fontSize = informationTitleSize,
+                          lineHeight = informationTitleLineHeight,
+                          fontWeight = FontWeight(informationTitleFontWeight),
+                          color = IceBreakrrBlue,
+                          letterSpacing = informationTitleLetterSpacing,
+                      ))
+              ProfileDescription(profile.description)
+            }
 
-      // Tags Section
-      Column(
-          modifier = Modifier.padding(4.dp),
-          verticalArrangement = Arrangement.spacedBy(2.dp)
-      ) {
-          Text(
-              text = "Tags",
-              style =
-                  TextStyle(
-                      fontSize = informationTitleSize,
-                      lineHeight = informationTitleLineHeight,
-                      fontWeight = FontWeight(informationTitleFontWeight),
-                      color = IceBreakrrBlue,
-                      letterSpacing = informationTitleLetterSpacing,
-                  ))
-          TagsSection(userTags)
+        // Tags Section
+        Column(
+            modifier = Modifier.padding(4.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+              Text(
+                  text = "Tags",
+                  style =
+                      TextStyle(
+                          fontSize = informationTitleSize,
+                          lineHeight = informationTitleLineHeight,
+                          fontWeight = FontWeight(informationTitleFontWeight),
+                          color = IceBreakrrBlue,
+                          letterSpacing = informationTitleLetterSpacing,
+                      ))
+              TagsSection(userTags)
+            }
       }
-  }
 }
 
 /**

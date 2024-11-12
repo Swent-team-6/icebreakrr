@@ -254,7 +254,7 @@ fun TagSelector(
             },
             modifier = Modifier.testTag("inputTagSelector"))
       }
-      RowOfClickTags(selectedTag, TagStyle(textColor, Color.Red, textSize)) { s -> onTagClick(s)}
+      RowOfClickTags(selectedTag, TagStyle(textColor, Color.Red, textSize)) { s -> onTagClick(s) }
     }
   }
 }

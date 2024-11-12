@@ -359,9 +359,9 @@ fun FilterScreen(
                           isModified = checkModified()
                         },
                         onStringChanged = {
-                            stringQuery.value = it
-                            tagsViewModel.setQuery(it, filteringTags.value)
-                                          },
+                          stringQuery.value = it
+                          tagsViewModel.setQuery(it, filteringTags.value)
+                        },
                         textColor = MaterialTheme.colorScheme.onSurface,
                         onDropDownItemClicked = { tag ->
                           tagsViewModel.addFilter(tag)
