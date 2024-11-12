@@ -207,7 +207,7 @@ fun RowOfClickTags(l: List<Pair<String, Color>>, tagStyle: TagStyle, onClick: (S
 fun TagSelector(
     selectedTag: List<Pair<String, Color>>,
     outputTag: List<Pair<String, Color>>,
-    stringQuery: String,
+    stringQuery: MutableState<String>,
     expanded: MutableState<Boolean>,
     onTagClick: (String) -> Unit,
     onDropDownItemClicked: (String) -> Unit,
@@ -236,13 +236,14 @@ fun TagSelector(
                     onClick = {
                       expanded.value = false
                       onDropDownItemClicked(tag.first)
+                      stringQuery.value = ""
                     },
                     text = { Tag(tag.first, TagStyle(textColor, tag.second, textSize)) },
                     modifier = Modifier.testTag("tagSelectorDropDownMenuItem"))
               }
             }
         OutlinedTextField(
-            value = stringQuery,
+            value = stringQuery.value,
             onValueChange = {
               onStringChanged(it)
               expanded.value = true
@@ -253,7 +254,7 @@ fun TagSelector(
             },
             modifier = Modifier.testTag("inputTagSelector"))
       }
-      RowOfClickTags(selectedTag, TagStyle(textColor, Color.Red, textSize)) { s -> onTagClick(s) }
+      RowOfClickTags(selectedTag, TagStyle(textColor, Color.Red, textSize)) { s -> onTagClick(s)}
     }
   }
 }

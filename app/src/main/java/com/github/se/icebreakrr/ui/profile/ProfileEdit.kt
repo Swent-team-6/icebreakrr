@@ -88,7 +88,7 @@ fun ProfileEditingScreen(
 
   val selectedTags = tagsViewModel.filteringTags.collectAsState().value
   val tagsSuggestions = tagsViewModel.tagsSuggestions.collectAsState()
-  val stringQuery = tagsViewModel.query.collectAsState()
+  val stringQuery = remember { mutableStateOf("") }
 
   fun updateProfile() {
     profilesViewModel.updateProfile(
@@ -157,7 +157,7 @@ fun ProfileEditingScreen(
 
                 // Name Input
                 Text(
-                    text = "${user.name}, ${user.calculateAge()}",
+                    text = user.name,
                     style = TextStyle(fontSize = textSize.value.sp),
                     modifier =
                         Modifier.fillMaxWidth()
@@ -201,13 +201,14 @@ fun ProfileEditingScreen(
                         tagsSuggestions.value.map { tag ->
                           Pair(tag, tagsViewModel.tagToColor(tag))
                         },
-                    stringQuery = stringQuery.value,
+                    stringQuery = stringQuery,
                     expanded = expanded,
                     onTagClick = { tag ->
                       tagsViewModel.removeFilter(tag)
                       isModified = true
                     },
                     onStringChanged = {
+                      stringQuery.value = it
                       tagsViewModel.setQuery(it, selectedTags)
                       isModified = true
                     },

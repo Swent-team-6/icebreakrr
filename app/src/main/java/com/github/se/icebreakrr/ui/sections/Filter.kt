@@ -149,7 +149,7 @@ fun FilterScreen(
 
   val filteringTags = tagsViewModel.filteringTags.collectAsState()
   val tagsSuggestions = tagsViewModel.tagsSuggestions.collectAsState()
-  val stringQuery = tagsViewModel.query.collectAsState()
+  val stringQuery = remember { mutableStateOf("") }
   val savedFilteredTags = filterViewModel.filteredTags.collectAsState()
   savedFilteredTags.value.forEach { tag -> tagsViewModel.addFilter(tag) }
   val expanded = remember { mutableStateOf(false) }
@@ -352,13 +352,16 @@ fun FilterScreen(
                             tagsSuggestions.value.map { tag ->
                               Pair(tag, tagsViewModel.tagToColor(tag))
                             },
-                        stringQuery = stringQuery.value,
+                        stringQuery = stringQuery,
                         expanded = expanded,
                         onTagClick = { tag ->
                           tagsViewModel.removeFilter(tag)
                           isModified = checkModified()
                         },
-                        onStringChanged = { tagsViewModel.setQuery(it, filteringTags.value) },
+                        onStringChanged = {
+                            stringQuery.value = it
+                            tagsViewModel.setQuery(it, filteringTags.value)
+                                          },
                         textColor = MaterialTheme.colorScheme.onSurface,
                         onDropDownItemClicked = { tag ->
                           tagsViewModel.addFilter(tag)
