@@ -228,7 +228,6 @@ fun ProfileHeader(
                   color = Color.White,
                   modifier = Modifier.testTag("username"))
 
-              val context = LocalContext.current
               // Edit Button or message button
               if (myProfile) {
                 Box(
@@ -239,7 +238,7 @@ fun ProfileHeader(
                     contentAlignment = Alignment.Center) {
                       IconButton(
                           onClick = {
-                            if (isNetworkAvailable(context = context)) {
+                            if (isNetworkAvailable()) {
                               onEditClick()
                             } else {
                               showNoInternetToast(context = context)
@@ -262,7 +261,7 @@ fun ProfileHeader(
                     contentAlignment = Alignment.Center) {
                       IconButton(
                           onClick = {
-                            if (isNetworkAvailable(context = context)) {
+                            if (isNetworkAvailable()) {
                               onEditClick()
                             } else {
                               showNoInternetToast(context = context)
