@@ -123,9 +123,7 @@ class ProfileEditingScreenTest {
     }
     val profile = Profile.getMockedProfiles()[0]
 
-    composeTestRule
-        .onNodeWithTag("nameAndAge")
-        .assertTextEquals(profile.name)
+    composeTestRule.onNodeWithTag("nameAndAge").assertTextEquals(profile.name)
     composeTestRule.onNodeWithTag("catchphrase").assertTextContains(profile.catchPhrase)
     composeTestRule.onNodeWithTag("description").assertTextContains(profile.description)
   }
