@@ -7,10 +7,18 @@ import com.google.firebase.firestore.GeoPoint
 import org.imperiumlabs.geofirestore.GeoFirestore
 import org.imperiumlabs.geofirestore.extension.setLocation
 
-class GeoFirestoreRepository {
-
-  private val geoFirestore = GeoFirestore(FirebaseFirestore.getInstance().collection("profiles"))
-  private val auth = FirebaseAuth.getInstance()
+class GeoFirestoreRepository(
+    private val geoFirestore: GeoFirestore =
+        GeoFirestore(FirebaseFirestore.getInstance().collection("profiles")),
+    private val auth: FirebaseAuth = FirebaseAuth.getInstance(),
+    private val onSetLocationComplete: (Exception?) -> Unit = { exception ->
+      if (exception != null) {
+        Log.e("GeoFirestoreRepository", "Failed to update user position in Firestore", exception)
+      } else {
+        Log.d("GeoFirestoreRepository", "User position updated successfully")
+      }
+    }
+) {
 
   /**
    * Updates the user's position in Firestore using GeoFirestore.
@@ -22,15 +30,11 @@ class GeoFirestoreRepository {
    * @param newLocation The new geographic location of the user, represented as a `GeoPoint`.
    */
   fun setUserPosition(newLocation: GeoPoint) {
-    Log.d("GeoFirestoreRepository", "Before Auth verification.")
-    val userId = auth.currentUser?.uid ?: return
-    Log.d("GeoFirestoreRepository", "Setting user position..")
-    geoFirestore.setLocation(userId, newLocation) { exception ->
-      if (exception != null) {
-        Log.e("GeoFirestoreRepository", "Failed to update user position in Firestore", exception)
-      } else {
-        Log.d("GeoFirestoreRepository", "User position updated successfully to $newLocation")
-      }
+    val userId = auth.currentUser?.uid
+    if (userId == null) {
+      Log.w("GeoFirestoreRepository", "User is not authenticated. Cannot set location.")
+      return
     }
+    geoFirestore.setLocation(userId, newLocation, onSetLocationComplete)
   }
 }
