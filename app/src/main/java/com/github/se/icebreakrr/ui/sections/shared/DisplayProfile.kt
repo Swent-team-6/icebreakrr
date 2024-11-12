@@ -66,7 +66,7 @@ val descriptionFontSize = 16.sp
 val descriptionLineHeight = 24.sp
 val descriptionFontWeight = 500
 val descriptionLetterSpacing = 0.15.sp
-val tagHeight = 40
+val tagHeight = 50
 val requestButtonSize = 55.dp
 val requestButtonElevation = 8.dp
 
@@ -86,31 +86,42 @@ fun InfoSection(profile: Profile, tagsViewModel: TagsViewModel) {
         ProfileCatchPhrase(profile.catchPhrase)
 
         // Description Section
-        Text(
-            text = "Description",
-            style =
-                TextStyle(
-                    fontSize = informationTitleSize,
-                    lineHeight = informationTitleLineHeight,
-                    fontWeight = FontWeight(informationTitleFontWeight),
-                    color = IceBreakrrBlue,
-                    letterSpacing = informationTitleLetterSpacing,
-                ))
-        ProfileDescription(profile.description)
 
-        // Tags Section
-        Text(
-            text = "Tags",
-            style =
-                TextStyle(
-                    fontSize = informationTitleSize,
-                    lineHeight = informationTitleLineHeight,
-                    fontWeight = FontWeight(informationTitleFontWeight),
-                    color = IceBreakrrBlue,
-                    letterSpacing = informationTitleLetterSpacing,
-                ))
-        TagsSection(userTags)
+      Column (
+          modifier = Modifier.padding(4.dp),
+          verticalArrangement = Arrangement.spacedBy(2.dp)
+      ) {
+          Text(
+              text = "Description",
+              style =
+                  TextStyle(
+                      fontSize = informationTitleSize,
+                      lineHeight = informationTitleLineHeight,
+                      fontWeight = FontWeight(informationTitleFontWeight),
+                      color = IceBreakrrBlue,
+                      letterSpacing = informationTitleLetterSpacing,
+                  ))
+          ProfileDescription(profile.description)
       }
+
+      // Tags Section
+      Column(
+          modifier = Modifier.padding(4.dp),
+          verticalArrangement = Arrangement.spacedBy(2.dp)
+      ) {
+          Text(
+              text = "Tags",
+              style =
+                  TextStyle(
+                      fontSize = informationTitleSize,
+                      lineHeight = informationTitleLineHeight,
+                      fontWeight = FontWeight(informationTitleFontWeight),
+                      color = IceBreakrrBlue,
+                      letterSpacing = informationTitleLetterSpacing,
+                  ))
+          TagsSection(userTags)
+      }
+  }
 }
 
 /**
@@ -293,5 +304,5 @@ fun ProfileDescription(description: String) {
       color = Color.Black.copy(alpha = 0.9f),
       fontSize = 14.sp,
       textAlign = TextAlign.Start,
-      modifier = Modifier.padding(8.dp).testTag("profileDescription"))
+      modifier = Modifier.padding(4.dp).testTag("profileDescription"))
 }
