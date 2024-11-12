@@ -8,7 +8,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.github.se.icebreakrr.model.profile.ProfilesViewModel
-import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.functions.FirebaseFunctions
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
@@ -25,7 +24,6 @@ class MeetingRequestViewModel(
 
   var meetingRequestState by mutableStateOf(MeetingRequest())
   private val SEND_MESSAGE_FUNCTION_NAME = "sendMessage"
-  private var currentUserName: String? = ""
 
   companion object {
     class Factory(
@@ -48,10 +46,6 @@ class MeetingRequestViewModel(
   init {
     viewModelScope.launch {
       meetingRequestState = meetingRequestState.copy(senderUID = ourUserId ?: "null")
-      val auth = FirebaseAuth.getInstance()
-      auth.currentUser?.reload()?.addOnCompleteListener { task ->
-        currentUserName = auth.currentUser?.displayName
-      }
     }
   }
 
@@ -97,7 +91,7 @@ class MeetingRequestViewModel(
           hashMapOf(
               "targetToken" to meetingRequestState.targetToken,
               "senderUID" to meetingRequestState.senderUID,
-              "body" to currentUserName + " : " + meetingRequestState.message,
+              "body" to ourName + " : " + meetingRequestState.message,
               "picture" to meetingRequestState.picture,
               "location" to meetingRequestState.location)
       try {

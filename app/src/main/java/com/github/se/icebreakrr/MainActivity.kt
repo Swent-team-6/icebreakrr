@@ -93,16 +93,20 @@ fun IcebreakrrApp(auth: FirebaseAuth, functions: FirebaseFunctions) {
   val profileViewModel: ProfilesViewModel = viewModel(factory = ProfilesViewModel.Factory)
   val tagsViewModel: TagsViewModel = viewModel(factory = TagsViewModel.Factory)
   val filterViewModel: FilterViewModel = viewModel(factory = FilterViewModel.Factory)
-  val ourUserUid = auth.currentUser?.uid ?: "null"
-  val ourName = auth.currentUser?.displayName ?: "null"
-  Log.d("USER ID", ourUserUid)
-  Log.d("DISPLAY NAME", ourName)
+  var userName: String? = "null"
+  var userUid: String? = "null"
+  auth.currentUser?.reload()?.addOnCompleteListener { task ->
+    userName = auth.currentUser?.displayName
+    userUid = auth.currentUser?.uid
+  }
+  Log.d("USER ID", userUid ?: "null")
+  Log.d("DISPLAY NAME", userName ?: "null")
 
   MeetingRequestManager.meetingRequestViewModel =
       viewModel(
           factory =
               MeetingRequestViewModel.Companion.Factory(
-                  profileViewModel, functions, ourUserUid, ourName))
+                  profileViewModel, functions, userUid, userName))
   val meetingRequestViewModel = MeetingRequestManager.meetingRequestViewModel
 
   IcebreakrrNavHost(
