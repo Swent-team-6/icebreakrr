@@ -16,6 +16,7 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
+import org.mockito.Mockito
 import org.mockito.Mockito.eq
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
@@ -113,5 +114,53 @@ class GeoFirestoreRepositoryTest {
         logEntries.any {
           it.type == Log.ERROR && it.msg.contains("Failed to update user position")
         })
+  }
+
+  @Test
+  fun `setUserPosition should log success when location is set successfully`() {
+    // Create a test callback to verify the success of the update
+    val testCallback: (Exception?) -> Unit = { exception ->
+      if (exception == null) {
+        Log.d("GeoFirestoreRepository", "User position updated successfully")
+      }
+    }
+
+    // Reset `geoFirestoreRepository` with success callback
+    geoFirestoreRepository =
+        GeoFirestoreRepository(
+            geoFirestore = mockGeoFirestore, auth = mockAuth, onSetLocationComplete = testCallback)
+
+    // Simulate the success of the setLocation method
+    `when`(mockGeoFirestore.setLocation(any(), any(), any())).thenAnswer {
+      testCallback(null)
+      null
+    }
+
+    // Call the test method
+    geoFirestoreRepository.setUserPosition(GeoPoint(10.0, 20.0))
+
+    // Verify that success was logged
+    val logEntries = ShadowLog.getLogsForTag("GeoFirestoreRepository")
+    assertTrue(
+        logEntries.any {
+          it.type == Log.DEBUG && it.msg.contains("User position updated successfully")
+        })
+  }
+
+  @Test
+  fun `setUserPosition should not attempt to set location if user ID is null`() {
+    // Simulate an unauthenticated user to test the case without UID
+    `when`(mockAuth.currentUser).thenReturn(null)
+
+    // Call the test method
+    geoFirestoreRepository.setUserPosition(GeoPoint(10.0, 20.0))
+
+    // Check that no location update attempt has been made
+    verify(mockGeoFirestore, Mockito.never()).setLocation(any(), any(), any())
+
+    // Check that the warning has been logged
+    val logEntries = ShadowLog.getLogsForTag("GeoFirestoreRepository")
+    assertTrue(
+        logEntries.any { it.type == Log.WARN && it.msg.contains("User is not authenticated") })
   }
 }
