@@ -4,14 +4,13 @@ import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
 
 class ProfilePicRepositoryStorage(private val firebaseStorage: FirebaseStorage) :
-  ProfilePicRepository {
+    ProfilePicRepository {
   private val MAX_SIZE = 4
-  private val HEX_FF= 0xFF
-  private val HEX_D8= 0xD8
+  private val HEX_FF = 0xFF
+  private val HEX_D8 = 0xD8
   private val HEX_D9 = 0xD9
 
-
-    /**
+  /**
    * Retrieves a reference to the profile picture storage location for a given user.
    *
    * @param userId The ID of the user whose profile picture reference is to be retrieved.

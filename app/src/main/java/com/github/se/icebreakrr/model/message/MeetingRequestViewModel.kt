@@ -50,7 +50,7 @@ class MeetingRequestViewModel(
       meetingRequestState = meetingRequestState.copy(senderUID = ourUserId ?: "null")
       val auth = FirebaseAuth.getInstance()
       auth.currentUser?.reload()?.addOnCompleteListener { task ->
-          currentUserName = auth.currentUser?.displayName
+        currentUserName = auth.currentUser?.displayName
       }
     }
   }

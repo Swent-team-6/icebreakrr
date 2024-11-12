@@ -25,8 +25,8 @@ class ProfilesRepositoryFirestore(private val db: FirebaseFirestore) : ProfilesR
   override val periodicTimeCheckWaitTime: Long = 5000
 
   val DEFAULT_RADIUS = 300.0
-  val DEFAULT_LONGITUDE  = 0.0
-  val DEFAULT_LATITUDE  = 0.0
+  val DEFAULT_LONGITUDE = 0.0
+  val DEFAULT_LATITUDE = 0.0
   private val PERIOD = 1000
 
   // Generated with the help of CursorAI

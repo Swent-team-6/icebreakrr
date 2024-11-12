@@ -40,58 +40,53 @@ private const val TOAST_MESSAGE = "Requests are not implemented yet :)"
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun NotificationScreen(navigationActions: NavigationActions, profileViewModel: ProfilesViewModel) {
-    val context = LocalContext.current
-    val cardList = profileViewModel.profiles.collectAsState()
-    val navFunction = {
-        Toast.makeText(context, TOAST_MESSAGE, Toast.LENGTH_SHORT).show()
-    }
+  val context = LocalContext.current
+  val cardList = profileViewModel.profiles.collectAsState()
+  val navFunction = { Toast.makeText(context, TOAST_MESSAGE, Toast.LENGTH_SHORT).show() }
 
-    Scaffold(
-        modifier = Modifier.testTag("notificationScreen"),
-        topBar = { TopBar("Inbox") },
-        bottomBar = {
-            BottomNavigationMenu(
-                onTabSelect = { route ->
-                    if (route.route != Route.NOTIFICATIONS) {
-                        navigationActions.navigateTo(route)
-                    }
-                },
-                tabList = LIST_TOP_LEVEL_DESTINATIONS,
-                selectedItem = Route.NOTIFICATIONS
-            )
-        },
-        content = { innerPadding ->
-            LazyColumn(
-                modifier = Modifier
-                    .padding(innerPadding)
+  Scaffold(
+      modifier = Modifier.testTag("notificationScreen"),
+      topBar = { TopBar("Inbox") },
+      bottomBar = {
+        BottomNavigationMenu(
+            onTabSelect = { route ->
+              if (route.route != Route.NOTIFICATIONS) {
+                navigationActions.navigateTo(route)
+              }
+            },
+            tabList = LIST_TOP_LEVEL_DESTINATIONS,
+            selectedItem = Route.NOTIFICATIONS)
+      },
+      content = { innerPadding ->
+        LazyColumn(
+            modifier =
+                Modifier.padding(innerPadding)
                     .padding(horizontal = HORIZONTAL_PADDING)
-                    .testTag("notificationScroll")
-            ) {
-                item {
-                    Text(
-                        text = "Pending meeting requests",
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier
-                            .padding(vertical = TEXT_VERTICAL_PADDING)
-                            .testTag("notificationFirstText")
-                    )
-                    Column(verticalArrangement = Arrangement.spacedBy(CARD_SPACING)) {
-                        cardList.value.take(MAX_PENDING_CARDS).forEach { p -> ProfileCard(p, onclick = navFunction) }
-                    }
-                    Text(
-                        text = "Passed",
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier
-                            .padding(vertical = TEXT_VERTICAL_PADDING)
-                            .testTag("notificationSecondText")
-                    )
-                    Column(verticalArrangement = Arrangement.spacedBy(CARD_SPACING)) {
-                        cardList.value.drop(MAX_PENDING_CARDS).forEach { p ->
-                            ProfileCard(p, onclick = navFunction, greyedOut = true)
-                        }
-                    }
+                    .testTag("notificationScroll")) {
+              item {
+                Text(
+                    text = "Pending meeting requests",
+                    fontWeight = FontWeight.Bold,
+                    modifier =
+                        Modifier.padding(vertical = TEXT_VERTICAL_PADDING)
+                            .testTag("notificationFirstText"))
+                Column(verticalArrangement = Arrangement.spacedBy(CARD_SPACING)) {
+                  cardList.value.take(MAX_PENDING_CARDS).forEach { p ->
+                    ProfileCard(p, onclick = navFunction)
+                  }
                 }
+                Text(
+                    text = "Passed",
+                    fontWeight = FontWeight.Bold,
+                    modifier =
+                        Modifier.padding(vertical = TEXT_VERTICAL_PADDING)
+                            .testTag("notificationSecondText"))
+                Column(verticalArrangement = Arrangement.spacedBy(CARD_SPACING)) {
+                  cardList.value.drop(MAX_PENDING_CARDS).forEach { p ->
+                    ProfileCard(p, onclick = navFunction, greyedOut = true)
+                  }
+                }
+              }
             }
-        }
-    )
+      })
 }

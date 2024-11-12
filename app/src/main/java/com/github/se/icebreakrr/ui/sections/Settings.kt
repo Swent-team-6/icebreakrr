@@ -57,102 +57,93 @@ private val TOGGLE_BOX_HEIGHT = 55.dp
 
 @Composable
 fun SettingsScreen(profilesViewModel: ProfilesViewModel, navigationActions: NavigationActions) {
-    val context = LocalContext.current
-    val scrollState = rememberScrollState()
-    lateinit var auth: FirebaseAuth
+  val context = LocalContext.current
+  val scrollState = rememberScrollState()
+  lateinit var auth: FirebaseAuth
 
-    LaunchedEffect(Unit) {
-        FirebaseAuth.getInstance().currentUser?.let { profilesViewModel.getProfileByUid(it.uid) }
-    }
+  LaunchedEffect(Unit) {
+    FirebaseAuth.getInstance().currentUser?.let { profilesViewModel.getProfileByUid(it.uid) }
+  }
 
-    val isLoading = profilesViewModel.loading.collectAsState(initial = true).value
-    val profile = profilesViewModel.selectedProfile.collectAsState().value
-    val isTesting = LocalIsTesting.current
+  val isLoading = profilesViewModel.loading.collectAsState(initial = true).value
+  val profile = profilesViewModel.selectedProfile.collectAsState().value
+  val isTesting = LocalIsTesting.current
 
-    Scaffold(
-        topBar = { TopBar("Settings") },
-        modifier = Modifier.testTag("settingsScreen").fillMaxSize(),
-        bottomBar = {
-            BottomNavigationMenu(
-                onTabSelect = { route ->
-                    if (route.route != Route.SETTINGS) {
-                        navigationActions.navigateTo(route)
-                    }
-                },
-                tabList = LIST_TOP_LEVEL_DESTINATIONS,
-                selectedItem = Route.SETTINGS)
-        },
-    ) { innerPadding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
+  Scaffold(
+      topBar = { TopBar("Settings") },
+      modifier = Modifier.testTag("settingsScreen").fillMaxSize(),
+      bottomBar = {
+        BottomNavigationMenu(
+            onTabSelect = { route ->
+              if (route.route != Route.SETTINGS) {
+                navigationActions.navigateTo(route)
+              }
+            },
+            tabList = LIST_TOP_LEVEL_DESTINATIONS,
+            selectedItem = Route.SETTINGS)
+      },
+  ) { innerPadding ->
+    Column(
+        modifier =
+            Modifier.fillMaxSize()
                 .padding(innerPadding)
                 .padding(SCREEN_PADDING)
                 .verticalScroll(scrollState),
-            verticalArrangement = Arrangement.Top,
-            horizontalAlignment = Alignment.Start
-        ) {
-            // Display ProfileCard
-            val displayProfile = profile ?: Profile.getMockedProfiles().first()
-            ProfileCard(profile = displayProfile, isSettings = true) {
-                navigationActions.navigateTo(Screen.PROFILE)
-            }
+        verticalArrangement = Arrangement.Top,
+        horizontalAlignment = Alignment.Start) {
+          // Display ProfileCard
+          val displayProfile = profile ?: Profile.getMockedProfiles().first()
+          ProfileCard(profile = displayProfile, isSettings = true) {
+            navigationActions.navigateTo(Screen.PROFILE)
+          }
 
-            Spacer(modifier = Modifier.height(SPACER_HEIGHT_SMALL))
+          Spacer(modifier = Modifier.height(SPACER_HEIGHT_SMALL))
 
-            // Display Toggle Options
-            ToggleOptionBox(label = "Toggle Location")
-            ToggleOptionBox(label = "Option 1")
+          // Display Toggle Options
+          ToggleOptionBox(label = "Toggle Location")
+          ToggleOptionBox(label = "Option 1")
 
-            Spacer(modifier = Modifier.height(SPACER_HEIGHT_LARGE))
+          Spacer(modifier = Modifier.height(SPACER_HEIGHT_LARGE))
 
-            // Log Out Button
-            Button(
-                onClick = {
-                    if (isTesting) {
-                        navigationActions.navigateTo(Screen.AUTH)
-                    } else {
-                        auth = FirebaseAuth.getInstance()
-                        auth.currentUser?.let { logout(context, navigationActions) }
-                    }
-                },
-                colors = ButtonDefaults.buttonColors(containerColor = BUTTON_COLOR),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .testTag(LOGOUT_BUTTON_TAG)
-            ) {
+          // Log Out Button
+          Button(
+              onClick = {
+                if (isTesting) {
+                  navigationActions.navigateTo(Screen.AUTH)
+                } else {
+                  auth = FirebaseAuth.getInstance()
+                  auth.currentUser?.let { logout(context, navigationActions) }
+                }
+              },
+              colors = ButtonDefaults.buttonColors(containerColor = BUTTON_COLOR),
+              modifier = Modifier.fillMaxWidth().testTag(LOGOUT_BUTTON_TAG)) {
                 Text("Log Out", color = BUTTON_TEXT_COLOR)
-            }
+              }
         }
-    }
+  }
 }
 
 @Composable
 fun ToggleOptionBox(label: String) {
-    val toggleState = remember { mutableStateOf(false) }
+  val toggleState = remember { mutableStateOf(false) }
 
-    Card(
-        shape = RoundedCornerShape(CARD_CORNER_RADIUS),
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = SPACER_HEIGHT_SMALL)
-            .height(TOGGLE_BOX_HEIGHT)
-            .testTag(label),
-        elevation = CardDefaults.cardElevation(defaultElevation = CARD_ELEVATION)
-    ) {
+  Card(
+      shape = RoundedCornerShape(CARD_CORNER_RADIUS),
+      modifier =
+          Modifier.fillMaxWidth()
+              .padding(vertical = SPACER_HEIGHT_SMALL)
+              .height(TOGGLE_BOX_HEIGHT)
+              .testTag(label),
+      elevation = CardDefaults.cardElevation(defaultElevation = CARD_ELEVATION)) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(SCREEN_PADDING),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(label)
-            Spacer(modifier = Modifier.weight(1f))
-            Switch(
-                checked = toggleState.value,
-                modifier = Modifier.testTag("switch$label"),
-                onCheckedChange = { toggleState.value = it }
-            )
-        }
-    }
+            modifier = Modifier.fillMaxWidth().padding(SCREEN_PADDING),
+            verticalAlignment = Alignment.CenterVertically) {
+              Text(label)
+              Spacer(modifier = Modifier.weight(1f))
+              Switch(
+                  checked = toggleState.value,
+                  modifier = Modifier.testTag("switch$label"),
+                  onCheckedChange = { toggleState.value = it })
+            }
+      }
 }

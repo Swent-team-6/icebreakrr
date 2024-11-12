@@ -27,7 +27,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.github.se.icebreakrr.ui.theme.MeetDark
 
-
 private val WIDTH = 312.dp
 private val HEIGHT_MAJOR = 254.dp
 private val HEIGHT_MINOR = 125.dp
@@ -46,7 +45,6 @@ private val TEXT_FIELD_HEIGHT = 56.dp
 private val TEXT_FIELD_WIDTH = 292.dp
 private val ROW_HEIGHT = 49.dp
 private val ROW_WIDTH = 312.dp
-
 
 @Composable
 fun SendRequestScreen(
@@ -69,7 +67,11 @@ fun SendRequestScreen(
               modifier =
                   Modifier.width(WIDTH)
                       .height(HEIGHT_MINOR)
-                      .padding(start = PADDING_MINOR, top = PADDING_MINOR, end = PADDING_MINOR, bottom = BOTTOM_PADDING)) {
+                      .padding(
+                          start = PADDING_MINOR,
+                          top = PADDING_MINOR,
+                          end = PADDING_MINOR,
+                          bottom = BOTTOM_PADDING)) {
                 Column(
                     verticalArrangement = Arrangement.spacedBy(PADDING_MAJOR, Alignment.Top),
                     horizontalAlignment = Alignment.Start,
@@ -110,7 +112,10 @@ fun SendRequestScreen(
                 }
               },
               modifier =
-                  Modifier.padding(PADDING_MAJOR).width(TEXT_FIELD_WIDTH).height(TEXT_FIELD_HEIGHT).testTag("messageTextField"))
+                  Modifier.padding(PADDING_MAJOR)
+                      .width(TEXT_FIELD_WIDTH)
+                      .height(TEXT_FIELD_HEIGHT)
+                      .testTag("messageTextField"))
           Row(
               horizontalArrangement = Arrangement.spacedBy(BOTTOM_PADDING, Alignment.End),
               verticalAlignment = Alignment.CenterVertically,
@@ -119,7 +124,8 @@ fun SendRequestScreen(
                     onClick = { onCancelClick() },
                     enabled = true,
                     modifier =
-                        Modifier.padding(start = BOTTOM_PADDING, end = PADDING_MINOR).testTag("cancelButton")) {
+                        Modifier.padding(start = BOTTOM_PADDING, end = PADDING_MINOR)
+                            .testTag("cancelButton")) {
                       Text("Cancel")
                     }
               }

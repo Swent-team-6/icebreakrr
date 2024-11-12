@@ -19,3 +19,7 @@ val MidBlue = Color(0xFF1C9EDA)
 val DarkBlue = Color(0xFF12648A)
 
 val MeetDark = Color(0xFF1D1B20)
+
+val lightGray = Color(0xFF575757)
+val grayedOut = Color(0x88888888)
+val extendedTagsColor = Color(0xFFDCDCDC)

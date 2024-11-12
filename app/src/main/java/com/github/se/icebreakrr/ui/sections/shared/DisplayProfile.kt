@@ -246,7 +246,6 @@ fun ProfileHeader(
  *
  * @param catchPhrase The user's catchphrase.
  */
-
 private val alpha_catchphrase = 0.8f
 private val fontSize = 16.sp
 private val maxLines = 2
@@ -292,9 +291,9 @@ fun TagsSection(listOfTags: List<Pair<String, Color>>) {
  *
  * @param description The user's description or bio.
  */
-
 private val alpha_description = 0.9f
 private val padding_description = 4.dp
+
 @Composable
 fun ProfileDescription(description: String) {
   Text(

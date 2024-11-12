@@ -82,7 +82,6 @@ import kotlinx.coroutines.tasks.await
  *
  * @param navigationActions A class that handles the navigation between screens.
  */
-
 val FONTSIZE = 64.sp
 val LINEHEIGHT = 25.07.sp
 val FONTWEIGHT = FontWeight(500)

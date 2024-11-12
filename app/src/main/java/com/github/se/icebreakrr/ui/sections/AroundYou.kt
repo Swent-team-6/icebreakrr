@@ -19,7 +19,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
@@ -37,6 +36,7 @@ import com.github.se.icebreakrr.ui.navigation.Screen
 import com.github.se.icebreakrr.ui.sections.shared.FilterFloatingActionButton
 import com.github.se.icebreakrr.ui.sections.shared.ProfileCard
 import com.github.se.icebreakrr.ui.sections.shared.TopBar
+import com.github.se.icebreakrr.ui.theme.lightGray
 import com.github.se.icebreakrr.utils.NetworkUtils.isNetworkAvailable
 import com.github.se.icebreakrr.utils.NetworkUtils.showNoInternetToast
 import com.google.firebase.firestore.GeoPoint
@@ -45,9 +45,8 @@ import com.google.firebase.firestore.GeoPoint
 private val COLUMN_VERTICAL_PADDING = 16.dp
 private val COLUMN_HORIZONTAL_PADDING = 8.dp
 private val TEXT_SIZE_LARGE = 20.sp
-private val TOP_BAR_HEIGHT = 90.dp
-private val NO_CONNECTION_TEXT_COLOR = Color(0xFF575757)
-private val EMPTY_PROFILE_TEXT_COLOR = Color(0xFF575757)
+private val NO_CONNECTION_TEXT_COLOR = lightGray
+private val EMPTY_PROFILE_TEXT_COLOR = lightGray
 
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -59,90 +58,79 @@ fun AroundYouScreen(
     filterViewModel: FilterViewModel
 ) {
 
-    val filteredProfiles = profilesViewModel.filteredProfiles.collectAsState()
-    val isLoading = profilesViewModel.loading.collectAsState()
-    val context = LocalContext.current
-    val isConnected = profilesViewModel.isConnected.collectAsState()
+  val filteredProfiles = profilesViewModel.filteredProfiles.collectAsState()
+  val isLoading = profilesViewModel.loading.collectAsState()
+  val context = LocalContext.current
+  val isConnected = profilesViewModel.isConnected.collectAsState()
 
-    Scaffold(
-        modifier = Modifier.testTag("aroundYouScreen"),
-        bottomBar = {
-            BottomNavigationMenu(
-                onTabSelect = { route ->
-                    if (route.route != Route.AROUND_YOU) {
-                        navigationActions.navigateTo(route)
-                    }
-                },
-                tabList = LIST_TOP_LEVEL_DESTINATIONS,
-                selectedItem = Route.AROUND_YOU)
-        },
-        topBar = { TopBar("Around You") },
-        content = { innerPadding ->
-            PullToRefreshBox(
-                filterViewModel = filterViewModel,
-                tagsViewModel = tagsViewModel,
-                isRefreshing = isLoading.value,
-                onRefresh = profilesViewModel::getFilteredProfilesInRadius,
-                modifier = Modifier.padding(innerPadding)) {
-                LazyColumn(
-                    contentPadding = PaddingValues(vertical = COLUMN_VERTICAL_PADDING),
-                    verticalArrangement = Arrangement.spacedBy(COLUMN_VERTICAL_PADDING),
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(horizontal = COLUMN_HORIZONTAL_PADDING)
-                ) {
+  Scaffold(
+      modifier = Modifier.testTag("aroundYouScreen"),
+      bottomBar = {
+        BottomNavigationMenu(
+            onTabSelect = { route ->
+              if (route.route != Route.AROUND_YOU) {
+                navigationActions.navigateTo(route)
+              }
+            },
+            tabList = LIST_TOP_LEVEL_DESTINATIONS,
+            selectedItem = Route.AROUND_YOU)
+      },
+      topBar = { TopBar("Around You") },
+      content = { innerPadding ->
+        PullToRefreshBox(
+            filterViewModel = filterViewModel,
+            tagsViewModel = tagsViewModel,
+            isRefreshing = isLoading.value,
+            onRefresh = profilesViewModel::getFilteredProfilesInRadius,
+            modifier = Modifier.padding(innerPadding)) {
+              LazyColumn(
+                  contentPadding = PaddingValues(vertical = COLUMN_VERTICAL_PADDING),
+                  verticalArrangement = Arrangement.spacedBy(COLUMN_VERTICAL_PADDING),
+                  modifier =
+                      Modifier.fillMaxSize().padding(horizontal = COLUMN_HORIZONTAL_PADDING)) {
                     if (!isConnected.value) {
-                        item {
-                            Box(
-                                contentAlignment = Alignment.Center,
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .testTag("noConnectionPrompt")
-                            ) {
-                                Text(
-                                    text = "No Internet Connection",
-                                    fontSize = TEXT_SIZE_LARGE,
-                                    fontWeight = FontWeight.Bold,
-                                    color = NO_CONNECTION_TEXT_COLOR
-                                )
+                      item {
+                        Box(
+                            contentAlignment = Alignment.Center,
+                            modifier = Modifier.fillMaxSize().testTag("noConnectionPrompt")) {
+                              Text(
+                                  text = "No Internet Connection",
+                                  fontSize = TEXT_SIZE_LARGE,
+                                  fontWeight = FontWeight.Bold,
+                                  color = NO_CONNECTION_TEXT_COLOR)
                             }
-                        }
+                      }
                     } else if (filteredProfiles.value.isNotEmpty()) {
-                        items(filteredProfiles.value.size) { index ->
-                            ProfileCard(
-                                profile = filteredProfiles.value[index],
-                                onclick = {
-                                    if (isNetworkAvailable(context = context)) {
-                                        navigationActions.navigateTo(
-                                            Screen.OTHER_PROFILE_VIEW +
-                                                    "?userId=${filteredProfiles.value[index].uid}")
-                                    } else {
-                                        showNoInternetToast(context)
-                                    }
-                                })
-                        }
+                      items(filteredProfiles.value.size) { index ->
+                        ProfileCard(
+                            profile = filteredProfiles.value[index],
+                            onclick = {
+                              if (isNetworkAvailable(context = context)) {
+                                navigationActions.navigateTo(
+                                    Screen.OTHER_PROFILE_VIEW +
+                                        "?userId=${filteredProfiles.value[index].uid}")
+                              } else {
+                                showNoInternetToast(context)
+                              }
+                            })
+                      }
                     } else {
-                        item {
-                            Box(
-                                contentAlignment = Alignment.Center,
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .testTag("emptyProfilePrompt")
-                            ) {
-                                Text(
-                                    text = "There is no one around. Try moving!",
-                                    fontSize = TEXT_SIZE_LARGE,
-                                    fontWeight = FontWeight.Bold,
-                                    color = EMPTY_PROFILE_TEXT_COLOR
-                                )
+                      item {
+                        Box(
+                            contentAlignment = Alignment.Center,
+                            modifier = Modifier.fillMaxSize().testTag("emptyProfilePrompt")) {
+                              Text(
+                                  text = "There is no one around. Try moving!",
+                                  fontSize = TEXT_SIZE_LARGE,
+                                  fontWeight = FontWeight.Bold,
+                                  color = EMPTY_PROFILE_TEXT_COLOR)
                             }
-                        }
+                      }
                     }
-                }
+                  }
             }
-        },
-        floatingActionButton = { FilterFloatingActionButton(navigationActions) }
-    )
+      },
+      floatingActionButton = { FilterFloatingActionButton(navigationActions) })
 }
 
 @Composable
@@ -153,39 +141,34 @@ fun PullToRefreshBox(
     isRefreshing: Boolean,
     onRefresh:
         (
-        center: GeoPoint,
-        radiusInMeters: Double,
-        genders: List<Gender>?,
-        ageRange: IntRange?,
-        tags: List<String>?) -> Unit,
+            center: GeoPoint,
+            radiusInMeters: Double,
+            genders: List<Gender>?,
+            ageRange: IntRange?,
+            tags: List<String>?) -> Unit,
     modifier: Modifier = Modifier,
     state: PullToRefreshState = rememberPullToRefreshState(),
     contentAlignment: Alignment = Alignment.TopStart,
     indicator: @Composable BoxScope.() -> Unit = {
-        Indicator(
-            modifier = Modifier
-                .align(Alignment.TopCenter)
-                .testTag("refreshIndicator"),
-            isRefreshing = isRefreshing,
-            state = state
-        )
+      Indicator(
+          modifier = Modifier.align(Alignment.TopCenter).testTag("refreshIndicator"),
+          isRefreshing = isRefreshing,
+          state = state)
     },
     content: @Composable BoxScope.() -> Unit
 ) {
 
-    Box(
-        modifier.pullToRefresh(state = state, isRefreshing = isRefreshing) {
-            onRefresh(
-                GeoPoint(DEFAULT_LATITUDE, DEFAULT_LONGITUDE),
-                DEFAULT_RADIUS,
-                filterViewModel.selectedGenders.value,
-                filterViewModel.ageRange.value,
-                tagsViewModel.filteredTags.value
-            )
-        },
-        contentAlignment = contentAlignment
-    ) {
+  Box(
+      modifier.pullToRefresh(state = state, isRefreshing = isRefreshing) {
+        onRefresh(
+            GeoPoint(DEFAULT_LATITUDE, DEFAULT_LONGITUDE),
+            DEFAULT_RADIUS,
+            filterViewModel.selectedGenders.value,
+            filterViewModel.ageRange.value,
+            tagsViewModel.filteredTags.value)
+      },
+      contentAlignment = contentAlignment) {
         content()
         indicator()
-    }
+      }
 }

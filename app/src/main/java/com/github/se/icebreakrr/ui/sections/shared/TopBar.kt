@@ -26,21 +26,19 @@ private val TOP_BAR_BACKGROUND_COLOR = IceBreakrrBlue
 
 @Composable
 fun TopBar(s: String) {
-    Box(
-        contentAlignment = Alignment.Center,
-        modifier = Modifier
-            .background(TOP_BAR_BACKGROUND_COLOR)
-            .fillMaxWidth()
-            .heightIn(TOP_BAR_HEIGHT)
-            .testTag("topBar")
-    ) {
+  Box(
+      contentAlignment = Alignment.Center,
+      modifier =
+          Modifier.background(TOP_BAR_BACKGROUND_COLOR)
+              .fillMaxWidth()
+              .heightIn(TOP_BAR_HEIGHT)
+              .testTag("topBar")) {
         Text(
             text = s,
             fontSize = TOP_BAR_TEXT_SIZE,
             color = TOP_BAR_TEXT_COLOR,
             fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Center,
-            modifier = Modifier.fillMaxWidth()
-        )
-    }
+            modifier = Modifier.fillMaxWidth())
+      }
 }

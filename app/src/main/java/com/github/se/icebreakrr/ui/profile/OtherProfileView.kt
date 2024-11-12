@@ -35,7 +35,6 @@ import com.github.se.icebreakrr.ui.sections.shared.ProfileHeader
  *
  * @param navigationActions Actions to navigate between screens.
  */
-
 private val ALPHA = 0.5f
 
 @Composable

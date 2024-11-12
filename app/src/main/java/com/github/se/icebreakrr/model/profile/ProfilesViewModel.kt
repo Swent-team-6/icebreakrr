@@ -263,7 +263,11 @@ open class ProfilesViewModel(
    * @param maxResolution The maximum resolution for the output Bitmap. Default is 600.
    * @return A Bitmap representing the processed image, or null if an error occurs.
    */
-  private fun imageUriToBitmap(context: Context, imageUri: Uri, maxResolution: Int = MAX_RESOLUTION): Bitmap? {
+  private fun imageUriToBitmap(
+      context: Context,
+      imageUri: Uri,
+      maxResolution: Int = MAX_RESOLUTION
+  ): Bitmap? {
     return try {
       // Open an InputStream from the URI
       val inputStream: InputStream? = context.contentResolver.openInputStream(imageUri)
