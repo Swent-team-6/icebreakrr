@@ -69,8 +69,8 @@ fun ProfileEditingScreen(
   val catchphraseHeight = screenHeight * 0.10f
   val descriptionHeight = screenHeight * 0.16f
 
-  val CATCHPHRASE_MAX = 100
-  val DESSCRIPTION_MAX = 300
+  val CATCHPHRASE_MAX = 200
+  val DESSCRIPTION_MAX = 400
 
   LaunchedEffect(Unit) {
     Firebase.auth.currentUser?.let { profilesViewModel.getProfileByUid(it.uid) }
