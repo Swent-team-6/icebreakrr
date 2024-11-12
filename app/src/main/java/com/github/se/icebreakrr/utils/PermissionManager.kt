@@ -24,6 +24,7 @@ class PermissionManager(private val context: Context) {
    *
    * @param activity The `ComponentActivity` for launching permission requests.
    * @param permissions The list of permissions to be managed.
+   * @param isTest A flag indicating if the test is being run (default is `false`).
    */
   fun initializeLauncher(
       activity: ComponentActivity,
