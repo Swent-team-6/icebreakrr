@@ -96,6 +96,26 @@ class LocationServiceTest {
   }
 
   @Test
+  fun `test startLocationUpdates does not call onError when location is available`() {
+    val onLocationUpdate: (Location) -> Unit = mock()
+    val onError: (String) -> Unit = mock()
+
+    locationService.startLocationUpdates(onLocationUpdate, onError)
+
+    verify(fusedLocationProviderClient)
+        .requestLocationUpdates(
+            anyOrNull(), locationCallbackCaptor.capture(), eq(Looper.getMainLooper()))
+
+    val locationCallback = locationCallbackCaptor.value
+
+    val locationAvailability = mock(LocationAvailability::class.java)
+    `when`(locationAvailability.isLocationAvailable).thenReturn(true)
+    locationCallback.onLocationAvailability(locationAvailability)
+
+    verify(onError, never()).invoke(anyOrNull())
+  }
+
+  @Test
   fun `test stopLocationUpdates removes location callback`() {
     locationService.startLocationUpdates(mock(), mock())
     locationService.stopLocationUpdates()
@@ -120,7 +140,7 @@ class LocationServiceTest {
     locationService.startLocationUpdates(onLocationUpdate, onError)
 
     // Verify that the onError callback is called with the error message
-    verify(onError).invoke("Unexpected error occurred: Simulated exception")
+    verify(onError).invoke("Error with location request: Simulated exception")
   }
 
   @Test
