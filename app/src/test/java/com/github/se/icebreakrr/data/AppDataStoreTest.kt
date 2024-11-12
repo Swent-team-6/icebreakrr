@@ -16,6 +16,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
 
+// This file was written with the help of CursorAI
 @OptIn(ExperimentalCoroutinesApi::class)
 class AppDataStoreTest {
   private val testScope = TestScope(UnconfinedTestDispatcher() + Job())

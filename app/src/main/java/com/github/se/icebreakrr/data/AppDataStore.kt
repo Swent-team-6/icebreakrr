@@ -10,6 +10,8 @@ import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
+// This file was written with the help of CursorAI
+
 /**
  * Manages persistent app preferences using DataStore. This class handles storage and retrieval of
  * user preferences such as:

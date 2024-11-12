@@ -8,22 +8,21 @@ import android.widget.Toast
 // This File was written with the help of Cursor AI
 
 /**
- * Utility object for handling network-related operations and checks.
- * Provides functionality to:
+ * Utility object for handling network-related operations and checks. Provides functionality to:
  * - Check network connectivity
  * - Display network status messages
  * - Initialize network monitoring
  */
 object NetworkUtils {
   /**
-   * ConnectivityManager instance used to monitor network state.
-   * Initialized via [init] or [setConnectivityManagerForTesting].
+   * ConnectivityManager instance used to monitor network state. Initialized via [init] or
+   * [setConnectivityManagerForTesting].
    */
   private var connectivityManager: ConnectivityManager? = null
 
   /**
-   * Initializes the NetworkUtils with the application context.
-   * Must be called before using other methods in this class.
+   * Initializes the NetworkUtils with the application context. Must be called before using other
+   * methods in this class.
    *
    * @param context The application context used to get the ConnectivityManager service
    */
@@ -32,8 +31,8 @@ object NetworkUtils {
   }
 
   /**
-   * Sets a custom ConnectivityManager instance for testing purposes.
-   * This allows mocking of network states in unit tests.
+   * Sets a custom ConnectivityManager instance for testing purposes. This allows mocking of network
+   * states in unit tests.
    *
    * @param manager The mock ConnectivityManager instance to use for testing
    */
@@ -42,8 +41,8 @@ object NetworkUtils {
   }
 
   /**
-   * Checks if the device currently has a valid internet connection.
-   * Uses NET_CAPABILITY_VALIDATED to ensure the network can reach the internet.
+   * Checks if the device currently has a valid internet connection. Uses NET_CAPABILITY_VALIDATED
+   * to ensure the network can reach the internet.
    *
    * @return true if internet is available, false otherwise
    */
