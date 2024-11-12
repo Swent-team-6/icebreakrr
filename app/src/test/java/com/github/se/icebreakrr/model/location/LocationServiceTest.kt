@@ -17,8 +17,11 @@ import org.mockito.Mockito.any
 import org.mockito.Mockito.doThrow
 import org.mockito.Mockito.eq
 import org.mockito.Mockito.mock
+import org.mockito.Mockito.never
+import org.mockito.Mockito.reset
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
+import org.mockito.kotlin.anyOrNull
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
@@ -118,5 +121,61 @@ class LocationServiceTest {
 
     // Verify that the onError callback is called with the error message
     verify(onError).invoke("Unexpected error occurred: Simulated exception")
+  }
+
+  @Test
+  fun `test startLocationUpdates does not update if location difference is below threshold`() {
+    val onLocationUpdate: (Location) -> Unit = mock()
+    val onError: (String) -> Unit = mock()
+
+    // Start location updates
+    locationService.startLocationUpdates(onLocationUpdate, onError)
+
+    // Capture the LocationCallback passed to fusedLocationProviderClient
+    verify(fusedLocationProviderClient)
+        .requestLocationUpdates(
+            anyOrNull(), locationCallbackCaptor.capture(), eq(Looper.getMainLooper()))
+
+    val locationCallback = locationCallbackCaptor.value
+
+    // Simulate a location result with the initial location
+    `when`(locationResult.lastLocation).thenReturn(location)
+    `when`(location.distanceTo(location)).thenReturn(5.0f) // Distance less than the threshold
+
+    // Simulate the first location update
+    locationCallback.onLocationResult(locationResult)
+    verify(onLocationUpdate).invoke(location) // First update should invoke the callback
+
+    // Reset the onLocationUpdate mock to track only the second update
+    reset(onLocationUpdate)
+
+    // Simulate a second location result with minimal movement
+    locationCallback.onLocationResult(locationResult)
+
+    // Verify that the onLocationUpdate callback is not called again
+    verify(onLocationUpdate, never()).invoke(anyOrNull())
+  }
+
+  @Test
+  fun `test startLocationUpdates updates immediately if lastKnownLocation is null`() {
+    val onLocationUpdate: (Location) -> Unit = mock()
+    val onError: (String) -> Unit = mock()
+
+    // Start location updates
+    locationService.startLocationUpdates(onLocationUpdate, onError)
+
+    // Capture the LocationCallback
+    verify(fusedLocationProviderClient)
+        .requestLocationUpdates(
+            anyOrNull(), locationCallbackCaptor.capture(), eq(Looper.getMainLooper()))
+
+    val locationCallback = locationCallbackCaptor.value
+
+    // Simulate a location result with a new location
+    `when`(locationResult.lastLocation).thenReturn(location)
+    locationCallback.onLocationResult(locationResult)
+
+    // Verify that onLocationUpdate is called immediately since lastKnownLocation is initially null
+    verify(onLocationUpdate).invoke(location)
   }
 }
