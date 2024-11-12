@@ -69,6 +69,9 @@ fun ProfileEditingScreen(
   val catchphraseHeight = screenHeight * 0.10f
   val descriptionHeight = screenHeight * 0.16f
 
+  val CATCHPHRASE_MAX = 100
+  val DESSCRIPTION_MAX = 300
+
   LaunchedEffect(Unit) {
     Firebase.auth.currentUser?.let { profilesViewModel.getProfileByUid(it.uid) }
   }
@@ -169,8 +172,10 @@ fun ProfileEditingScreen(
                 OutlinedTextField(
                     value = catchphrase,
                     onValueChange = {
-                      catchphrase = it
-                      isModified = true
+                      if(it.text.length <= CATCHPHRASE_MAX) {
+                          catchphrase = it
+                          isModified = true
+                      }
                     },
                     label = {
                       Text("Catchphrase", modifier = Modifier.testTag("catchphraseLabel"))
@@ -185,8 +190,10 @@ fun ProfileEditingScreen(
                 OutlinedTextField(
                     value = description,
                     onValueChange = {
-                      description = it
-                      isModified = true
+                      if (it.text.length <= DESSCRIPTION_MAX) {
+                          description = it
+                          isModified = true
+                      }
                     },
                     label = { Text("Description") },
                     textStyle = TextStyle(fontSize = textSize.value.sp * 0.6),
