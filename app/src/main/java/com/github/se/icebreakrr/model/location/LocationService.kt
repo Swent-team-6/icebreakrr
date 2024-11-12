@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.location.Location
 import android.os.Looper
 import android.util.Log
-import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationAvailability
 import com.google.android.gms.location.LocationCallback
@@ -82,12 +81,9 @@ class LocationService(private val fusedLocationProviderClient: FusedLocationProv
       // Request location updates, passing the defined callback and main looper
       fusedLocationProviderClient.requestLocationUpdates(
           locationRequest, locationCallback, Looper.getMainLooper())
-    } catch (e: ApiException) {
-      Log.e("LocationService", "Error with location request: ${e.message}")
-      onError?.invoke("Failed to request location updates: ${e.message}")
     } catch (e: Exception) {
-      Log.e("LocationService", "Unexpected error: ${e.message}")
-      onError?.invoke("Unexpected error occurred: ${e.message}")
+      Log.e("LocationService", "Error with location request: ${e.message}")
+      onError?.invoke("Error with location request: ${e.message}")
     }
   }
 
