@@ -50,16 +50,7 @@ class MeetingRequestViewModel(
       meetingRequestState = meetingRequestState.copy(senderUID = ourUserId ?: "null")
       val auth = FirebaseAuth.getInstance()
       auth.currentUser?.reload()?.addOnCompleteListener { task ->
-        if (task.isSuccessful) {
           currentUserName = auth.currentUser?.displayName
-          if (currentUserName != null) {
-            Log.d("LOG SUCCESSFUL", currentUserName ?: "null")
-          } else {
-            Log.d("LOG FAILED", currentUserName ?: "null")
-          }
-        } else {
-          Log.d("User data couldn't be loaded !", "Not working")
-        }
       }
     }
   }

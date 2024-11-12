@@ -16,18 +16,31 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.github.se.icebreakrr.ui.theme.IceBreakrrBlue
 
+// Define constants for layout dimensions
+private val TOP_BAR_HEIGHT = 90.dp
+
+// Define constants for font sizes and colors
+private val TOP_BAR_TEXT_SIZE = 40.sp
+private val TOP_BAR_TEXT_COLOR = Color.White
+private val TOP_BAR_BACKGROUND_COLOR = IceBreakrrBlue
+
 @Composable
 fun TopBar(s: String) {
-  Box(
-      contentAlignment = Alignment.Center,
-      modifier =
-          Modifier.background(IceBreakrrBlue).fillMaxWidth().heightIn(90.dp).testTag("topBar")) {
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = Modifier
+            .background(TOP_BAR_BACKGROUND_COLOR)
+            .fillMaxWidth()
+            .heightIn(TOP_BAR_HEIGHT)
+            .testTag("topBar")
+    ) {
         Text(
             text = s,
-            fontSize = 40.sp,
-            color = Color.White,
+            fontSize = TOP_BAR_TEXT_SIZE,
+            color = TOP_BAR_TEXT_COLOR,
             fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Center,
-            modifier = Modifier.fillMaxWidth())
-      }
+            modifier = Modifier.fillMaxWidth()
+        )
+    }
 }

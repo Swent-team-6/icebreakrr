@@ -69,6 +69,7 @@ val descriptionLetterSpacing = 0.15.sp
 val tagHeight = 50
 val requestButtonSize = 55.dp
 val requestButtonElevation = 8.dp
+val fillMaxSizeMax = 0.7f
 
 @Composable
 fun InfoSection(profile: Profile, tagsViewModel: TagsViewModel) {
@@ -209,7 +210,7 @@ fun ProfileHeader(
                                 imageVector = Icons.Filled.Create,
                                 contentDescription = "Edit Profile",
                                 tint = Color.White,
-                                modifier = Modifier.fillMaxSize(0.7f))
+                                modifier = Modifier.fillMaxSize(fillMaxSizeMax))
                           }
                     }
               } else {
@@ -232,7 +233,7 @@ fun ProfileHeader(
                                 imageVector = Icons.AutoMirrored.Filled.Send,
                                 contentDescription = "send request",
                                 tint = Color.White,
-                                modifier = Modifier.fillMaxSize(0.7f))
+                                modifier = Modifier.fillMaxSize(fillMaxSizeMax))
                           }
                     }
               }
@@ -245,6 +246,11 @@ fun ProfileHeader(
  *
  * @param catchPhrase The user's catchphrase.
  */
+
+private val alpha_catchphrase = 0.8f
+private val fontSize = 16.sp
+private val maxLines = 2
+
 @Composable
 fun ProfileCatchPhrase(catchPhrase: String) {
   Text(
@@ -256,11 +262,11 @@ fun ProfileCatchPhrase(catchPhrase: String) {
               fontWeight = FontWeight(catchPhraseWeight),
               color = IceBreakrrBlue,
           ),
-      color = Color.Black.copy(alpha = 0.8f),
+      color = Color.Black.copy(alpha = alpha_catchphrase),
       fontWeight = FontWeight.Medium,
-      fontSize = 16.sp,
+      fontSize = fontSize,
       textAlign = TextAlign.Left,
-      maxLines = 2,
+      maxLines = maxLines,
       overflow = TextOverflow.Ellipsis,
       modifier = Modifier.testTag("catchPhrase"))
 }
@@ -286,6 +292,9 @@ fun TagsSection(listOfTags: List<Pair<String, Color>>) {
  *
  * @param description The user's description or bio.
  */
+
+private val alpha_description = 0.9f
+private val padding_description = 4.dp
 @Composable
 fun ProfileDescription(description: String) {
   Text(
@@ -297,8 +306,8 @@ fun ProfileDescription(description: String) {
               fontWeight = FontWeight(descriptionFontWeight),
               color = IceBreakrrBlue,
               letterSpacing = descriptionLetterSpacing),
-      color = Color.Black.copy(alpha = 0.9f),
+      color = Color.Black.copy(alpha = alpha_description),
       fontSize = 14.sp,
       textAlign = TextAlign.Start,
-      modifier = Modifier.padding(4.dp).testTag("profileDescription"))
+      modifier = Modifier.padding(padding_description).testTag("profileDescription"))
 }
