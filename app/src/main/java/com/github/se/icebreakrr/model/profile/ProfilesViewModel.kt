@@ -41,7 +41,7 @@ open class ProfilesViewModel(
   private val _tempProfilePictureBitmap = MutableStateFlow<Bitmap?>(null)
   val tempProfilePictureBitmap: StateFlow<Bitmap?> = _tempProfilePictureBitmap
 
-  private var _isConnected = MutableStateFlow(true)
+  var _isConnected = MutableStateFlow(true)
   var isConnected: StateFlow<Boolean> = _isConnected
 
   companion object {
