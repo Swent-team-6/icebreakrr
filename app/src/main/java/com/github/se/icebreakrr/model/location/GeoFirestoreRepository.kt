@@ -11,13 +11,7 @@ class GeoFirestoreRepository(
     private val geoFirestore: GeoFirestore =
         GeoFirestore(FirebaseFirestore.getInstance().collection("profiles")),
     private val auth: FirebaseAuth = FirebaseAuth.getInstance(),
-    private val onSetLocationComplete: (Exception?) -> Unit = { exception ->
-      if (exception != null) {
-        Log.e("GeoFirestoreRepository", "Failed to update user position in Firestore", exception)
-      } else {
-        Log.d("GeoFirestoreRepository", "User position updated successfully")
-      }
-    }
+    private val onSetLocationComplete: (Exception?) -> Unit = {}
 ) {
 
   /**
