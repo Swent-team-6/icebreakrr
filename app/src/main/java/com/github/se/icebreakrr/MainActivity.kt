@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
@@ -94,6 +95,8 @@ fun IcebreakrrApp(auth: FirebaseAuth, functions: FirebaseFunctions) {
   val filterViewModel: FilterViewModel = viewModel(factory = FilterViewModel.Factory)
   val ourUserUid = auth.currentUser?.uid ?: "null"
   val ourName = auth.currentUser?.displayName ?: "null"
+  Log.d("USER ID", ourUserUid)
+  Log.d("DISPLAY NAME", ourName)
 
   MeetingRequestManager.meetingRequestViewModel =
       viewModel(
