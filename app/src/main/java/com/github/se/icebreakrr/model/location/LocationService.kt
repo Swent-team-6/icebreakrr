@@ -55,17 +55,19 @@ class LocationService(private val fusedLocationProviderClient: FusedLocationProv
   private var onError: ((String) -> Unit)? = null
 
   /**
-   * Starts location updates and provides location data via the callback only if the user has moved
-   * more than [UPDATE_DISTANCE_METERS] since the last known location.
+   * Starts high-accuracy location updates.
    *
-   * @param onLocationUpdate Callback function to provide the latest location data.
-   * @param onError Optional callback function to handle errors, providing an error message.
+   * Requests location updates, invoking [onLocationUpdate] with each new [Location]. Returns `true`
+   * if updates start successfully, `false` otherwise.
+   *
+   * @param onLocationUpdate Callback with the latest [Location].
+   * @return `true` if updates started, `false` if an error occurred.
    */
   @SuppressLint("MissingPermission")
   fun startLocationUpdates(
       onLocationUpdate: (Location) -> Unit,
       onError: ((String) -> Unit)? = null
-  ) {
+  ): Boolean {
 
     this.onLocationUpdate = onLocationUpdate
     this.onError = onError
@@ -82,9 +84,11 @@ class LocationService(private val fusedLocationProviderClient: FusedLocationProv
       fusedLocationProviderClient.requestLocationUpdates(
           locationRequest, locationCallback, Looper.getMainLooper())
     } catch (e: Exception) {
-      Log.e("LocationService", "Error with location request: ${e.message}")
       onError?.invoke("Error with location request: ${e.message}")
+      return false
     }
+    Log.d("LocationService", "Location updates started")
+    return true
   }
 
   /** Stops location updates to conserve resources. */
@@ -92,6 +96,6 @@ class LocationService(private val fusedLocationProviderClient: FusedLocationProv
     // Remove the location callback to stop receiving updates
     fusedLocationProviderClient.removeLocationUpdates(locationCallback)
     onLocationUpdate = null
-    onError = null
+    Log.d("LocationService", "Location updates stopped")
   }
 }
