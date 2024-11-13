@@ -46,6 +46,7 @@ open class ProfilesViewModel(
 
   fun updateIsConnected(boolean: Boolean) {
     _isConnected.value = boolean
+    repository.checkConnectionPeriodically({})
   }
 
   companion object {
