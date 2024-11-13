@@ -16,6 +16,7 @@ import androidx.compose.material3.pulltorefresh.PullToRefreshState
 import androidx.compose.material3.pulltorefresh.pullToRefresh
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -38,6 +39,7 @@ import com.github.se.icebreakrr.ui.sections.shared.FilterFloatingActionButton
 import com.github.se.icebreakrr.ui.sections.shared.ProfileCard
 import com.github.se.icebreakrr.ui.sections.shared.TopBar
 import com.github.se.icebreakrr.utils.NetworkUtils.isNetworkAvailable
+import com.github.se.icebreakrr.utils.NetworkUtils.isNetworkAvailableWithContext
 import com.github.se.icebreakrr.utils.NetworkUtils.showNoInternetToast
 import com.google.firebase.firestore.GeoPoint
 
@@ -63,6 +65,28 @@ fun AroundYouScreen(
   val context = LocalContext.current
   val isConnected = profilesViewModel.isConnected.collectAsState()
 
+  // Define constants for magic numbers
+  val defaultGeoPoint = GeoPoint(0.0, 0.0)
+  val searchRadius = 300.0
+  val verticalPadding = 16.dp
+  val horizontalPadding = 8.dp
+  val messageTextSize = 20.sp
+  val messageTextColor = Color(0xFF575757)
+
+  // Check network state when screen loads
+  LaunchedEffect(Unit) {
+    if (!isNetworkAvailable()) {
+      profilesViewModel.updateIsConnected(false)
+    } else {
+      profilesViewModel.getFilteredProfilesInRadius(
+          defaultGeoPoint,
+          searchRadius,
+          filterViewModel.selectedGenders.value,
+          filterViewModel.ageRange.value,
+          tagsViewModel.filteredTags.value)
+    }
+  }
+
   Scaffold(
       modifier = Modifier.testTag("aroundYouScreen"),
       bottomBar = {
@@ -84,9 +108,9 @@ fun AroundYouScreen(
             onRefresh = profilesViewModel::getFilteredProfilesInRadius,
             modifier = Modifier.padding(innerPadding)) {
               LazyColumn(
-                  contentPadding = PaddingValues(vertical = 16.dp),
-                  verticalArrangement = Arrangement.spacedBy(16.dp),
-                  modifier = Modifier.fillMaxSize().padding(horizontal = 8.dp)) {
+                  contentPadding = PaddingValues(vertical = verticalPadding),
+                  verticalArrangement = Arrangement.spacedBy(verticalPadding),
+                  modifier = Modifier.fillMaxSize().padding(horizontal = horizontalPadding)) {
                     if (!isConnected.value) {
                       item {
                         Box(
@@ -94,9 +118,9 @@ fun AroundYouScreen(
                             modifier = Modifier.fillMaxSize().testTag("noConnectionPrompt")) {
                               Text(
                                   text = "No Internet Connection",
-                                  fontSize = 20.sp,
+                                  fontSize = messageTextSize,
                                   fontWeight = FontWeight.Bold,
-                                  color = Color(0xFF575757))
+                                  color = messageTextColor)
                             }
                       }
                     } else if (filteredProfiles.value.isNotEmpty()) {
@@ -104,7 +128,7 @@ fun AroundYouScreen(
                         ProfileCard(
                             profile = filteredProfiles.value[index],
                             onclick = {
-                              if (isNetworkAvailable(context = context)) {
+                              if (isNetworkAvailableWithContext(context)) {
                                 navigationActions.navigateTo(
                                     Screen.OTHER_PROFILE_VIEW +
                                         "?userId=${filteredProfiles.value[index].uid}")
@@ -120,9 +144,9 @@ fun AroundYouScreen(
                             modifier = Modifier.fillMaxSize().testTag("emptyProfilePrompt")) {
                               Text(
                                   text = "There is no one around. Try moving!",
-                                  fontSize = 20.sp,
+                                  fontSize = messageTextSize,
                                   fontWeight = FontWeight.Bold,
-                                  color = Color(0xFF575757))
+                                  color = messageTextColor)
                             }
                       }
                     }
@@ -175,12 +199,14 @@ fun PullToRefreshBox(
     content: @Composable BoxScope.() -> Unit
 ) {
 
+  val defaultGeoPoint = GeoPoint(0.0, 0.0)
+  val searchRadius = 300.0
+
   Box(
       modifier.pullToRefresh(state = state, isRefreshing = isRefreshing) {
-        // TODO Mocked values, to change with  current location
         onRefresh(
-            GeoPoint(0.0, 0.0),
-            300.0,
+            defaultGeoPoint,
+            searchRadius,
             filterViewModel.selectedGenders.value,
             filterViewModel.ageRange.value,
             tagsViewModel.filteredTags.value)

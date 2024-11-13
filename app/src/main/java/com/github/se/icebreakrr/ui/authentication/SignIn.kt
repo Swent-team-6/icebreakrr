@@ -26,6 +26,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -47,6 +48,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.github.se.icebreakrr.R
 import com.github.se.icebreakrr.config.LocalIsTesting
+import com.github.se.icebreakrr.data.AppDataStore
 import com.github.se.icebreakrr.model.filter.FilterViewModel
 import com.github.se.icebreakrr.model.message.MeetingRequestViewModel
 import com.github.se.icebreakrr.model.profile.Gender
@@ -82,7 +84,8 @@ fun SignInScreen(
     meetingRequestViewModel: MeetingRequestViewModel,
     navigationActions: NavigationActions,
     filterViewModel: FilterViewModel,
-    tagsViewModel: TagsViewModel
+    tagsViewModel: TagsViewModel,
+    appDataStore: AppDataStore
 ) {
 
   // State to hold the current Firebase user
@@ -110,6 +113,12 @@ fun SignInScreen(
             user = result.user
             user?.let { firebaseUser ->
               coroutineScope.launch {
+
+                // Get the token from Firebase
+                user?.getIdToken(false)?.await()?.token?.let { token ->
+                  // Save the token to DataStore
+                  appDataStore.saveAuthToken(token)
+                }
 
                 // Checking if user already exists
                 profilesViewModel.getProfileByUid(firebaseUser.uid)
@@ -162,6 +171,9 @@ fun SignInScreen(
                   Color(0xFF12648A) // Dark blue
                   ))
 
+  // Add this to collect the auth token state
+  val hasAuthToken = appDataStore.hasAuthToken.collectAsState(initial = false)
+
   Scaffold(
       modifier = Modifier.fillMaxSize().testTag("loginScreen"),
       content = { paddingValues ->
@@ -193,8 +205,19 @@ fun SignInScreen(
                 if (isTesting) {
                   navigationActions.navigateTo(TopLevelDestinations.AROUND_YOU)
                 } else {
-                  if (!NetworkUtils.isNetworkAvailable(context)) {
-                    NetworkUtils.showNoInternetToast(context)
+                  if (!NetworkUtils.isNetworkAvailable()) {
+                    if (hasAuthToken.value) {
+                      // If offline but has token, allow access
+                      navigationActions.navigateTo(TopLevelDestinations.AROUND_YOU)
+                      profilesViewModel.getFilteredProfilesInRadius(
+                          GeoPoint(0.0, 0.0),
+                          300.0,
+                          filterViewModel.selectedGenders.value,
+                          filterViewModel.ageRange.value,
+                          tagsViewModel.filteredTags.value)
+                    } else {
+                      NetworkUtils.showNoInternetToast(context)
+                    }
                   } else {
                     val gso =
                         GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)

@@ -228,7 +228,6 @@ fun ProfileHeader(
                   color = Color.White,
                   modifier = Modifier.testTag("username"))
 
-              val context = LocalContext.current
               // Edit Button or message button
               if (myProfile) {
                 Box(
@@ -239,7 +238,7 @@ fun ProfileHeader(
                     contentAlignment = Alignment.Center) {
                       IconButton(
                           onClick = {
-                            if (isNetworkAvailable(context = context)) {
+                            if (isNetworkAvailable()) {
                               onEditClick()
                             } else {
                               showNoInternetToast(context = context)
@@ -262,7 +261,7 @@ fun ProfileHeader(
                     contentAlignment = Alignment.Center) {
                       IconButton(
                           onClick = {
-                            if (isNetworkAvailable(context = context)) {
+                            if (isNetworkAvailable()) {
                               onEditClick()
                             } else {
                               showNoInternetToast(context = context)
@@ -439,7 +438,7 @@ fun TagsSection(listOfTags: List<Pair<String, Color>>) {
   Box(
       modifier =
           Modifier.fillMaxWidth()
-              .height((((listOfTags.size / 2) * tagHeight).dp))
+              .height((((listOfTags.size) * tagHeight).dp))
               .testTag("tagSection")) {
         RowOfTags(listOfTags, TagStyle())
       }
