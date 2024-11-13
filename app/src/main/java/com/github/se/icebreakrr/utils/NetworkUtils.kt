@@ -18,7 +18,7 @@ object NetworkUtils {
    * ConnectivityManager instance used to monitor network state. Initialized via [init] or
    * [setConnectivityManagerForTesting].
    */
-  private var connectivityManager: ConnectivityManager? = null
+  public var connectivityManager: ConnectivityManager? = null
 
   /**
    * Initializes the NetworkUtils with the application context. Must be called before using other
@@ -47,6 +47,13 @@ object NetworkUtils {
    * @return true if internet is available, false otherwise
    */
   fun isNetworkAvailable(): Boolean {
+    val currentNetwork = connectivityManager?.activeNetwork
+    val caps = connectivityManager?.getNetworkCapabilities(currentNetwork)
+    return caps?.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED) ?: false
+  }
+
+  fun isNetworkAvailableWithContext(context: Context): Boolean {
+    val connectivityManager = context.getSystemService(ConnectivityManager::class.java)
     val currentNetwork = connectivityManager?.activeNetwork
     val caps = connectivityManager?.getNetworkCapabilities(currentNetwork)
     return caps?.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED) ?: false

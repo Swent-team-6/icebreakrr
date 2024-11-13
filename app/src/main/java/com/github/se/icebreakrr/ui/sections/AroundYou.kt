@@ -39,6 +39,7 @@ import com.github.se.icebreakrr.ui.sections.shared.FilterFloatingActionButton
 import com.github.se.icebreakrr.ui.sections.shared.ProfileCard
 import com.github.se.icebreakrr.ui.sections.shared.TopBar
 import com.github.se.icebreakrr.utils.NetworkUtils.isNetworkAvailable
+import com.github.se.icebreakrr.utils.NetworkUtils.isNetworkAvailableWithContext
 import com.github.se.icebreakrr.utils.NetworkUtils.showNoInternetToast
 import com.google.firebase.firestore.GeoPoint
 
@@ -75,7 +76,7 @@ fun AroundYouScreen(
   // Check network state when screen loads
   LaunchedEffect(Unit) {
     if (!isNetworkAvailable()) {
-      profilesViewModel._isConnected.value = false
+      profilesViewModel.updateIsConnected(false)
     } else {
       profilesViewModel.getFilteredProfilesInRadius(
           defaultGeoPoint,
@@ -127,7 +128,7 @@ fun AroundYouScreen(
                         ProfileCard(
                             profile = filteredProfiles.value[index],
                             onclick = {
-                              if (isNetworkAvailable()) {
+                              if (isNetworkAvailableWithContext(context)) {
                                 navigationActions.navigateTo(
                                     Screen.OTHER_PROFILE_VIEW +
                                         "?userId=${filteredProfiles.value[index].uid}")

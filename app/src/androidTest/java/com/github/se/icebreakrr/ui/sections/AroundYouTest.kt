@@ -22,6 +22,8 @@ import com.github.se.icebreakrr.ui.navigation.Screen
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.GeoPoint
 import java.util.Calendar
+import kotlinx.coroutines.flow.MutableStateFlow
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -46,6 +48,18 @@ class AroundYouScreenTest {
     mockPPRepository = mock(ProfilePicRepository::class.java)
     profilesViewModel = ProfilesViewModel(mockProfilesRepository, mockPPRepository)
 
+    // Mock repository state flows
+    `when`(mockProfilesRepository.isWaiting).thenReturn(MutableStateFlow(false))
+    `when`(mockProfilesRepository.waitingDone).thenReturn(MutableStateFlow(false))
+
+    // Mock successful connection check
+    `when`(mockProfilesRepository.getProfilesInRadius(any(), any(), any(), any())).thenAnswer {
+        invocation ->
+      val onSuccessCallback = invocation.getArgument<(List<Profile>) -> Unit>(2)
+      onSuccessCallback(emptyList())
+      null
+    }
+
     // Mock initial behavior of repository
     `when`(navigationActions.currentRoute()).thenReturn(Route.AROUND_YOU)
 
@@ -56,14 +70,29 @@ class AroundYouScreenTest {
           viewModel(factory = TagsViewModel.Factory),
           viewModel(factory = FilterViewModel.Factory))
     }
+
+    // Trigger initial connection check
+    profilesViewModel.getFilteredProfilesInRadius(GeoPoint(0.0, 0.0), 300.0)
   }
 
   @Test
   fun displayTextWhenEmpty() {
-    // Simulate an empty profile list
-    profilesViewModel.getFilteredProfilesInRadius(
-        center = GeoPoint(0.0, 0.0), radiusInMeters = 300.0)
-    composeTestRule.onNodeWithTag("emptyProfilePrompt").assertIsDisplayed()
+    // Mock the repository behavior
+    `when`(mockProfilesRepository.getProfilesInRadius(any(), any(), any(), any())).thenAnswer {
+        invocation ->
+      val onSuccessCallback = invocation.getArgument<(List<Profile>) -> Unit>(2)
+      onSuccessCallback(emptyList())
+      null
+    }
+
+    // Trigger the fetch
+    profilesViewModel.getFilteredProfilesInRadius(GeoPoint(0.0, 0.0), 300.0)
+
+    // Wait for the UI to update
+    composeTestRule.waitForIdle()
+
+    // Assert the empty state text is displayed
+    composeTestRule.onNodeWithTag("emptyProfilePrompt").assertExists().assertIsDisplayed()
   }
 
   @Test
@@ -76,18 +105,20 @@ class AroundYouScreenTest {
 
   @Test
   fun navigationOnCardClick() {
-    // Simulate the repository returning a list with one profile
+    // Create a mock profile
     val profile = mockProfile()
 
-    // Stub the behavior for the callback with matchers for all parameters
+    assertTrue(profilesViewModel.isConnected.value)
+
+    // Mock the repository behavior
     `when`(mockProfilesRepository.getProfilesInRadius(any(), any(), any(), any())).thenAnswer {
         invocation ->
-      // Capture the onSuccess callback and invoke it with a list containing the mock profile
       val onSuccessCallback = invocation.getArgument<(List<Profile>) -> Unit>(2)
       onSuccessCallback(listOf(profile))
       null
     }
 
+    // Trigger the fetch
     profilesViewModel.getFilteredProfilesInRadius(GeoPoint(0.0, 0.0), 300.0)
 
     composeTestRule.onAllNodesWithTag("profileCard").onFirst().assertIsDisplayed()
