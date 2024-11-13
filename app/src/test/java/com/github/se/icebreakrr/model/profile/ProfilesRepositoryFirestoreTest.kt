@@ -201,10 +201,10 @@ class ProfilesRepositoryFirestoreTest {
     `when`(mockDocumentSnapshot.getString("profilePictureUrl"))
         .thenReturn("http://example.com/profile.jpg")
 
-      `when`(mockDocumentReference.get(Source.CACHE))
-          .thenReturn(Tasks.forResult(mockDocumentSnapshot))
-      `when`(mockDocumentReference.get(Source.SERVER))
-          .thenReturn(Tasks.forResult(mockDocumentSnapshot))
+    `when`(mockDocumentReference.get(Source.CACHE))
+        .thenReturn(Tasks.forResult(mockDocumentSnapshot))
+    `when`(mockDocumentReference.get(Source.SERVER))
+        .thenReturn(Tasks.forResult(mockDocumentSnapshot))
 
     profilesRepositoryFirestore.getProfileByUid(
         uid = "1",
@@ -225,8 +225,7 @@ class ProfilesRepositoryFirestoreTest {
     profilesRepositoryFirestore.getProfileByUid(
         uid = "1",
         onSuccess = { fail("Success callback should not be called") },
-        onFailure = { exception -> assert(exception.message == "Test exception") }
-    )
+        onFailure = { exception -> assert(exception.message == "Test exception") })
 
     shadowOf(Looper.getMainLooper()).idle()
   }
