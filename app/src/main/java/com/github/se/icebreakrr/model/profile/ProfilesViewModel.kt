@@ -1,5 +1,6 @@
 package com.github.se.icebreakrr.model.profile
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -9,6 +10,7 @@ import android.widget.Toast
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.google.firebase.Firebase
+import com.google.firebase.auth.auth
 import com.google.firebase.firestore.GeoPoint
 import com.google.firebase.firestore.firestore
 import com.google.firebase.storage.storage
@@ -17,6 +19,7 @@ import java.io.InputStream
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
+import java.util.concurrent.ForkJoinPool.ManagedBlocker
 
 open class ProfilesViewModel(
     private val repository: ProfilesRepository,
@@ -32,8 +35,14 @@ open class ProfilesViewModel(
   private val _selectedProfile = MutableStateFlow<Profile?>(null)
   open val selectedProfile: StateFlow<Profile?> = _selectedProfile
 
+    private val _selfProfile = MutableStateFlow<Profile?>(null)
+    open val selfProfile: StateFlow<Profile?> = _selfProfile
+
   private val _loading = MutableStateFlow(false)
   open val loading: StateFlow<Boolean> = _loading
+
+    private val _loadingSelf = MutableStateFlow(false)
+    open val loadingSelf: StateFlow<Boolean> = _loadingSelf
 
   private val _error = MutableStateFlow<Exception?>(null)
   val error: StateFlow<Exception?> = _error
@@ -71,6 +80,7 @@ open class ProfilesViewModel(
     repository.init {
       // Fetch profiles on initialization
       getFilteredProfilesInRadius(GeoPoint(0.0, 0.0), 300.0)
+        getSelfProfile()
     }
   }
 
@@ -107,7 +117,10 @@ open class ProfilesViewModel(
                     // Filter by tags if specified
                     (tags == null ||
                         profile.tags.any { it.lowercase() in tags.map { it.lowercase() } } ||
-                        tags.isEmpty())
+                        tags.isEmpty()) &&
+
+                    // Filter by hasBlocked
+                    !(_selfProfile.value?.hasBlocked?.contains(profile.uid)?:false)
               }
           _profiles.value = profileList
           _filteredProfiles.value = filteredProfiles
@@ -248,6 +261,27 @@ open class ProfilesViewModel(
         },
         onFailure = { e -> handleError(e) })
   }
+
+  /**
+   * Blocks a user by updating the blocking relationship in the repository.
+   *
+   * @param uid The unique ID of the user being blocked.
+   */
+  fun blockUser(uid: String) {
+      updateProfile(selfProfile.value!!.copy(hasBlocked = selfProfile.value!!.hasBlocked + uid))
+    }
+
+  /**
+   * Fetches the current user's profile from the repository.
+   */
+  fun getSelfProfile(){
+      _loadingSelf.value = true
+          repository.getProfileByUid(
+              Firebase.auth.uid ?: "null",
+              onSuccess = { profile ->
+              _selfProfile.value = profile
+              _loadingSelf.value = false }, onFailure = { e -> handleError(e) })
+    }
 
   /**
    * Converts an image URI to a processed Bitmap, cropping the image to a square at the center.

@@ -81,7 +81,10 @@ fun AroundYouScreen(
             filterViewModel = filterViewModel,
             tagsViewModel = tagsViewModel,
             isRefreshing = isLoading.value,
-            onRefresh = profilesViewModel::getFilteredProfilesInRadius,
+            onRefresh = { center, radius, genders, ageRange, tags ->
+                profilesViewModel.getSelfProfile()
+                profilesViewModel.getFilteredProfilesInRadius(center, radius, genders, ageRange, tags)
+            },
             modifier = Modifier.padding(innerPadding)) {
               LazyColumn(
                   contentPadding = PaddingValues(vertical = 16.dp),

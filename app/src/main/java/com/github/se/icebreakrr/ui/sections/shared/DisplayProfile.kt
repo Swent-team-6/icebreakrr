@@ -27,6 +27,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -51,6 +53,7 @@ import androidx.compose.ui.window.Dialog
 import coil.compose.AsyncImage
 import com.github.se.icebreakrr.R
 import com.github.se.icebreakrr.model.profile.Profile
+import com.github.se.icebreakrr.model.profile.ProfilesViewModel
 import com.github.se.icebreakrr.model.profile.reportType
 import com.github.se.icebreakrr.model.tags.TagsViewModel
 import com.github.se.icebreakrr.ui.navigation.NavigationActions
@@ -59,6 +62,8 @@ import com.github.se.icebreakrr.ui.tags.TagStyle
 import com.github.se.icebreakrr.ui.theme.IceBreakrrBlue
 import com.github.se.icebreakrr.utils.NetworkUtils.isNetworkAvailable
 import com.github.se.icebreakrr.utils.NetworkUtils.showNoInternetToast
+import com.google.firebase.Firebase
+import com.google.firebase.auth.auth
 
 private const val ASPECT_RATIO_SQUARE = 1f
 private const val MAX_DIALOG_WIDTH_FACTOR = 0.95f
@@ -147,6 +152,7 @@ fun ProfileHeader(
     profile: Profile,
     navigationActions: NavigationActions,
     myProfile: Boolean,
+    profilesViewModel: ProfilesViewModel,
     onEditClick: () -> Unit
 ) {
 
@@ -368,13 +374,18 @@ fun ProfileHeader(
                                   }
                               TextButton(
                                   onClick = {
+                                      if (isNetworkAvailable(context = context)) {
+                                        profilesViewModel.blockUser(profile.uid)
+                                        Toast.makeText(
+                                            context,
+                                            R.string.block_success_message,
+                                            Toast.LENGTH_SHORT)
+                                            .show()
+                                      } else{
+                                        showNoInternetToast(context = context)
+                                      }
                                     showBlockConfirmation = false
                                     blockReportModal = false
-                                    Toast.makeText(
-                                            context,
-                                            context.getString(R.string.block_success_message),
-                                            Toast.LENGTH_SHORT)
-                                        .show()
                                   }) {
                                     Text(stringResource(R.string.block))
                                   }

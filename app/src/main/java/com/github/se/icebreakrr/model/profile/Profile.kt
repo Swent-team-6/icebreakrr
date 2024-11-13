@@ -24,7 +24,8 @@ data class Profile(
     val description: String,
     val tags: List<String> = listOf(),
     val profilePictureUrl: String? = null,
-    val fcmToken: String? = null
+    val fcmToken: String? = null,
+    var hasBlocked: List<String> = listOf(),
 ) {
   /**
    * Calculates the user's age based on their birth date.
