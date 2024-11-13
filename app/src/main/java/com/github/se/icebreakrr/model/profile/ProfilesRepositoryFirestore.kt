@@ -281,7 +281,8 @@ class ProfilesRepositoryFirestore(private val db: FirebaseFirestore) : ProfilesR
       val tags = (document.get("tags") as? List<*>)?.filterIsInstance<String>() ?: listOf()
       val profilePictureUrl = document.getString("profilePictureUrl") // Nullable field
       val fcmToken = document.getString("fcmToken")
-        val hasBlocked = (document.get("hasBlocked") as? List<*>)?.filterIsInstance<String>() ?: listOf()
+      val hasBlocked =
+          (document.get("hasBlocked") as? List<*>)?.filterIsInstance<String>() ?: listOf()
 
       // Create and return the Profile object
       Profile(
