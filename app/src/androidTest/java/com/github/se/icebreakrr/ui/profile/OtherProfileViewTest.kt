@@ -171,6 +171,7 @@ class OtherProfileViewTest {
   fun testBlockUserFlowWithConfirm() {
     fakeProfilesViewModel.setLoading(false)
     fakeProfilesViewModel.setSelectedProfile(Profile.getMockedProfiles()[0])
+    fakeProfilesViewModel.setSelfProfile(Profile.getMockedProfiles()[1])
 
     composeTestRule.setContent {
       OtherProfileView(
