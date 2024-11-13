@@ -126,9 +126,9 @@ open class MockProfileViewModel :
     _selectedProfile.value = profile
   }
 
-    fun setSelfProfile(profile: Profile?) {
-        _selfProfile.value = profile
-    }
+  fun setSelfProfile(profile: Profile?) {
+    _selfProfile.value = profile
+  }
 
   /** Sets the loading state directly for testing purposes */
   fun setLoading(isLoading: Boolean) {
@@ -221,7 +221,19 @@ fun Profile.Companion.getMockedProfiles(): List<Profile> {
           listOf("adventure", "archaeology", "action"))
 
   val hasBlockedList =
-      listOf(listOf("2", "3"), listOf(), listOf(), listOf(), listOf(), listOf(), listOf(), listOf(), listOf(), listOf(), listOf(), listOf())
+      listOf(
+          listOf("2", "3"),
+          listOf(),
+          listOf(),
+          listOf(),
+          listOf(),
+          listOf(),
+          listOf(),
+          listOf(),
+          listOf(),
+          listOf(),
+          listOf(),
+          listOf())
 
   val profiles = mutableListOf<Profile>()
   for (i in uids.indices) {
