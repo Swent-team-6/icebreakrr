@@ -30,5 +30,6 @@ class GeoFirestoreRepository(
       return
     }
     geoFirestore.setLocation(userId, newLocation, onSetLocationComplete)
+    Log.d("GeoFirestoreRepository", "User location set to $newLocation")
   }
 }
