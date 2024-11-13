@@ -10,7 +10,7 @@ import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
-// This file was written with the help of CursorAI
+// File written with the help of CursorAI
 
 /**
  * Manages persistent app preferences using DataStore. This class handles storage and retrieval of
@@ -21,6 +21,18 @@ import kotlinx.coroutines.flow.map
  * All operations are suspending functions or return Flows to ensure safe background execution.
  */
 open class AppDataStore(private val dataStore: DataStore<Preferences>) {
+  companion object {
+    private val Context.dataStore: DataStore<Preferences> by
+        preferencesDataStore(name = "app_preferences")
+
+    // Preference Keys using camelCase as per convention
+    private val authTokenKey = stringPreferencesKey("auth_token")
+    private val discoverableKey = booleanPreferencesKey("is_discoverable")
+
+    // Default values
+    const val DEFAULT_DISCOVERABLE_STATUS = true
+  }
+
   /**
    * Secondary constructor that creates a DataStore instance from a Context.
    *
@@ -28,36 +40,49 @@ open class AppDataStore(private val dataStore: DataStore<Preferences>) {
    */
   constructor(context: Context) : this(context.dataStore)
 
-  companion object {
-    /**
-     * DataStore instance created using the preferencesDataStore delegate. Ensures only one instance
-     * of DataStore is created for the application.
-     */
-    private val Context.dataStore: DataStore<Preferences> by
-        preferencesDataStore(name = "app_preferences")
+  // Common preference Flows
+  val authToken: Flow<String?> = dataStore.data.map { preferences -> preferences[authTokenKey] }
+  val hasAuthToken: Flow<Boolean> = authToken.map { token -> !token.isNullOrEmpty() }
+  val isDiscoverable: Flow<Boolean> = getPreference(discoverableKey, DEFAULT_DISCOVERABLE_STATUS)
 
-    // Preference Keys
-    /** Key for storing the authentication token Type: String */
-    private val AUTH_TOKEN_KEY = stringPreferencesKey("auth_token")
+  /**
+   * Generic function to retrieve a Flow of a stored preference by key, with a default value.
+   *
+   * @param key Preference key to retrieve
+   * @param defaultValue Default value if preference is not set
+   * @return Flow of the preference value
+   */
+  private fun <T : Any?> getPreference(key: Preferences.Key<T>, defaultValue: T): Flow<T> =
+      dataStore.data.map { preferences -> preferences[key] ?: defaultValue }
 
-    /** Key for storing the user's discoverability preference Type: Boolean */
-    private val DISCOVERABLE_KEY = booleanPreferencesKey("is_discoverable")
+  /**
+   * Generic function to store a preference with a given key and value.
+   *
+   * @param key Preference key to store
+   * @param value Value to store
+   */
+  private suspend fun <T> putPreference(key: Preferences.Key<T>, value: T) {
+    dataStore.edit { preferences -> preferences[key] = value }
   }
 
   /**
-   * Provides access to the stored authentication token as a Flow.
+   * Generic function to remove a specific preference by its key.
    *
-   * @return Flow<String?> that emits the current auth token or null if not set
+   * @param key Preference key to remove
    */
-  val authToken: Flow<String?> = dataStore.data.map { preferences -> preferences[AUTH_TOKEN_KEY] }
+  private suspend fun <T> removePreference(key: Preferences.Key<T>) {
+    dataStore.edit { preferences -> preferences.remove(key) }
+  }
 
   /**
    * Saves an authentication token to persistent storage.
    *
    * @param token The authentication token to store
+   * @throws IllegalArgumentException if token is empty or blank
    */
   suspend fun saveAuthToken(token: String) {
-    dataStore.edit { preferences -> preferences[AUTH_TOKEN_KEY] = token }
+    require(token.isNotBlank()) { "Auth token cannot be empty or blank" }
+    putPreference(authTokenKey, token)
   }
 
   /**
@@ -65,7 +90,12 @@ open class AppDataStore(private val dataStore: DataStore<Preferences>) {
    * invalidated.
    */
   suspend fun clearAuthToken() {
-    dataStore.edit { preferences -> preferences.remove(AUTH_TOKEN_KEY) }
+    removePreference(authTokenKey)
+  }
+
+  /** Save discoverability preference */
+  suspend fun saveDiscoverableStatus(isDiscoverable: Boolean) {
+    putPreference(discoverableKey, isDiscoverable)
   }
 
   /**
@@ -75,20 +105,4 @@ open class AppDataStore(private val dataStore: DataStore<Preferences>) {
   suspend fun clearAll() {
     dataStore.edit { preferences -> preferences.clear() }
   }
-
-  /**
-   * Check if we have a valid auth token stored
-   *
-   * @return Flow<Boolean> indicating if we have a token
-   */
-  val hasAuthToken: Flow<Boolean> = authToken.map { token -> !token.isNullOrEmpty() }
-
-  /** Save discoverability preference */
-  suspend fun saveDiscoverableStatus(isDiscoverable: Boolean) {
-    dataStore.edit { preferences -> preferences[DISCOVERABLE_KEY] = isDiscoverable }
-  }
-
-  /** Get discoverability status as a Flow Default value is true to maintain existing behavior */
-  val isDiscoverable: Flow<Boolean> =
-      dataStore.data.map { preferences -> preferences[DISCOVERABLE_KEY] ?: true }
 }
