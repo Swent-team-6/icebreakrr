@@ -201,26 +201,32 @@ class ProfilesRepositoryFirestoreTest {
     `when`(mockDocumentSnapshot.getString("profilePictureUrl"))
         .thenReturn("http://example.com/profile.jpg")
 
-    // Mock the get() method with Source parameter
-    `when`(mockDocumentReference.get(any<Source>()))
-        .thenReturn(Tasks.forResult(mockDocumentSnapshot))
+      `when`(mockDocumentReference.get(Source.CACHE))
+          .thenReturn(Tasks.forResult(mockDocumentSnapshot))
+      `when`(mockDocumentReference.get(Source.SERVER))
+          .thenReturn(Tasks.forResult(mockDocumentSnapshot))
 
     profilesRepositoryFirestore.getProfileByUid(
         uid = "1",
         onSuccess = { profile -> assert(profile?.name == "John Doe") },
         onFailure = { fail("Failure callback should not be called") })
 
-    verify(mockDocumentReference).get()
+    verify(mockDocumentReference).get(Source.CACHE)
   }
 
   @Test
   fun getProfileByUid_shouldCallFailureCallback_onError() {
-    `when`(mockDocumentReference.get()).thenReturn(Tasks.forException(Exception("Test exception")))
+    // Mock both get() variants to handle both network states
+    `when`(mockDocumentReference.get(Source.CACHE))
+        .thenReturn(Tasks.forException(Exception("Test exception")))
+    `when`(mockDocumentReference.get(Source.SERVER))
+        .thenReturn(Tasks.forException(Exception("Test exception")))
 
     profilesRepositoryFirestore.getProfileByUid(
         uid = "1",
         onSuccess = { fail("Success callback should not be called") },
-        onFailure = { exception -> assert(exception.message == "Test exception") })
+        onFailure = { exception -> assert(exception.message == "Test exception") }
+    )
 
     shadowOf(Looper.getMainLooper()).idle()
   }
