@@ -8,6 +8,7 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.datastore.preferences.core.Preferences
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.github.se.icebreakrr.data.AppDataStore
@@ -81,7 +82,7 @@ class SignInScreenTest {
           meetingRequestViewModel,
           navigationActions,
           filterViewModel = filterViewModel,
-          tagsViewModel = tagsViewModel,
+          tagsViewModel = viewModel(factory = TagsViewModel.Factory),
           appDataStore = appDataStore)
     }
 
