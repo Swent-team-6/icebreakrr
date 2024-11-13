@@ -12,6 +12,7 @@ import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.GeoPoint
 import com.google.firebase.firestore.QuerySnapshot
+import com.google.firebase.firestore.Source
 import java.time.Duration
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.fail
@@ -200,7 +201,9 @@ class ProfilesRepositoryFirestoreTest {
     `when`(mockDocumentSnapshot.getString("profilePictureUrl"))
         .thenReturn("http://example.com/profile.jpg")
 
-    `when`(mockDocumentReference.get()).thenReturn(Tasks.forResult(mockDocumentSnapshot))
+    // Mock the get() method with Source parameter
+    `when`(mockDocumentReference.get(any<Source>()))
+        .thenReturn(Tasks.forResult(mockDocumentSnapshot))
 
     profilesRepositoryFirestore.getProfileByUid(
         uid = "1",

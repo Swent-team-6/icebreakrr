@@ -20,7 +20,7 @@ import kotlinx.coroutines.flow.map
  *
  * All operations are suspending functions or return Flows to ensure safe background execution.
  */
-class AppDataStore(private val dataStore: DataStore<Preferences>) {
+open class AppDataStore(private val dataStore: DataStore<Preferences>) {
   /**
    * Secondary constructor that creates a DataStore instance from a Context.
    *

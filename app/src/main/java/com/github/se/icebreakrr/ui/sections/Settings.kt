@@ -111,7 +111,7 @@ fun SettingsScreen(
           Spacer(modifier = Modifier.padding(vertical = verticalSpacing))
 
           ToggleOptionBox(
-              label = "Toggle discoverability",
+              label = "Toggle Discoverability",
               isChecked = isDiscoverable,
               onCheckedChange = { discoverable ->
                 coroutineScope.launch { appDataStore.saveDiscoverableStatus(discoverable) }
