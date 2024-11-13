@@ -109,8 +109,8 @@ class OtherProfileViewTest {
     composeTestRule.onNodeWithTag("requestButton").performClick()
 
     // composeTestRule.onNodeWithTag("bluredBackground").assertIsDisplayed()
-    //composeTestRule.onNodeWithTag("sendButton").assertIsDisplayed()
-    //composeTestRule.onNodeWithTag("cancelButton").assertIsDisplayed()
+    // composeTestRule.onNodeWithTag("sendButton").assertIsDisplayed()
+    // composeTestRule.onNodeWithTag("cancelButton").assertIsDisplayed()
     // composeTestRule.onNodeWithTag("messageTextField").assertIsDisplayed()
 
     // composeTestRule.onNodeWithTag("messageTextField").performTextInput("New message")
