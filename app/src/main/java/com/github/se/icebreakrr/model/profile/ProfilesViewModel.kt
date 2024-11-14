@@ -114,11 +114,15 @@ open class ProfilesViewModel(
         center = center,
         radiusInMeters = radiusInMeters,
         onSuccess = { profileList ->
+          val currentUserId = _selfProfile.value?.uid
           val filteredProfiles =
               profileList.filter { profile ->
 
-                // Filter by genders if specified
-                (genders == null || profile.gender in genders || genders.isEmpty()) &&
+                // Exclude the currently logged-in user's profile
+                profile.uid != currentUserId &&
+
+                    // Filter by genders if specified
+                    (genders == null || profile.gender in genders || genders.isEmpty()) &&
 
                     // Filter by age range if specified
                     (ageRange == null || profile.calculateAge() in ageRange) &&
