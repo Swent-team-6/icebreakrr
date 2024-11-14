@@ -88,8 +88,8 @@ const val DEFAULT_PADDING = 16
 const val SMALL_PADDING = 8
 const val CORNER_RADIUS = 8
 const val DEFAULT_RADIUS = 300.0
-const val DEFAULT_LATITUDE = 0.0
-const val DEFAULT_LONGITUDE = 0.0
+const val DEFAULT_LATITUDE = 46.51827 // Lausanne
+const val DEFAULT_LONGITUDE = 6.619265 // Lausanne
 const val FILTER_ACTION_BUTTON_ALPHA = 0.5f
 val TEXTS_PADDING = 8.dp
 
