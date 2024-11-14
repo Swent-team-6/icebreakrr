@@ -43,6 +43,7 @@ class ProfilesViewModelTest {
   private lateinit var ppRepository: ProfilePicRepository
   private lateinit var profilesViewModel: ProfilesViewModel
   private lateinit var mockProfileViewModel: ProfilesViewModel
+  private lateinit var mockAndThen: () -> Unit
   @OptIn(ExperimentalCoroutinesApi::class)
   private val testDispatcher: TestDispatcher = UnconfinedTestDispatcher()
 
@@ -88,6 +89,7 @@ class ProfilesViewModelTest {
     ppRepository = mock(ProfilePicRepository::class.java)
     profilesViewModel = ProfilesViewModel(profilesRepository, ppRepository)
     mockProfileViewModel = mock(ProfilesViewModel::class.java)
+    mockAndThen = mock()
 
     bitmapFactoryMock = mockStatic(BitmapFactory::class.java)
     bitmapMock = mockStatic(Bitmap::class.java)
@@ -188,6 +190,20 @@ class ProfilesViewModelTest {
     profilesViewModel.getProfileByUid("1")
 
     verify(profilesRepository).getProfileByUid(eq("1"), any(), any())
+    assertThat(profilesViewModel.selectedProfile.value?.uid, `is`("1"))
+  }
+
+  @Test
+  fun getProfileByUidAndThenCallsRepository() = runBlocking {
+    whenever(profilesRepository.getProfileByUid(eq("1"), any(), any())).thenAnswer {
+      val onSuccess = it.getArgument<(Profile) -> Unit>(1)
+      onSuccess(profile1)
+    }
+
+    profilesViewModel.getProfileByUidAndThen("1", mockAndThen)
+
+    verify(profilesRepository).getProfileByUid(eq("1"), any(), any())
+    verify(mockAndThen).invoke()
     assertThat(profilesViewModel.selectedProfile.value?.uid, `is`("1"))
   }
 

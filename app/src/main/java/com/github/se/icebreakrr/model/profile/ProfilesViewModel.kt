@@ -191,6 +191,24 @@ open class ProfilesViewModel(
   }
 
   /**
+   * Fetches a profile by its user ID (UID), and then runs the rest
+   *
+   * @param uid The unique ID of the user whose profile is being retrieved.
+   * @param andThen The rest of the code to run
+   */
+  fun getProfileByUidAndThen(uid: String, andThen: () -> Unit) {
+    _loading.value = true
+    repository.getProfileByUid(
+        uid,
+        onSuccess = { profile ->
+          _selectedProfile.value = profile
+          _loading.value = false
+          andThen()
+        },
+        onFailure = { e -> handleError(e) })
+  }
+
+  /**
    * Deletes a profile by its user ID (UID).
    *
    * @param uid The unique ID of the user whose profile is to be deleted.

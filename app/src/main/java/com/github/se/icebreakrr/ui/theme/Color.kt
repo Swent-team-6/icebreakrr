@@ -24,3 +24,6 @@ val lightGray = Color(0xFF575757)
 val grayedOut = Color(0x88888888)
 val extendedTagsColor = Color(0xFFDCDCDC)
 val messageTextColor = Color(0xFF575757)
+
+val SignInMiddleBlue = Color(0xFF1C9EDA)
+val SignInDarkBlue = Color(0xFF12648A)
