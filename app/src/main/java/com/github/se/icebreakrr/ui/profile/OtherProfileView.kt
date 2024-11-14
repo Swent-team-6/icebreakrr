@@ -35,6 +35,8 @@ import com.github.se.icebreakrr.ui.sections.shared.ProfileHeader
  *
  * @param navigationActions Actions to navigate between screens.
  */
+private val ALPHA = 0.5f
+
 @Composable
 fun OtherProfileView(
     profilesViewModel: ProfilesViewModel,
@@ -88,7 +90,7 @@ fun OtherProfileView(
         Box(
             modifier =
                 Modifier.fillMaxSize()
-                    .background(Color.Black.copy(alpha = 0.5f))
+                    .background(Color.Black.copy(alpha = ALPHA))
                     .clickable {}
                     .testTag("bluredBackground"),
             contentAlignment = Alignment.Center) {

@@ -16,10 +16,10 @@ import androidx.compose.material3.pulltorefresh.PullToRefreshState
 import androidx.compose.material3.pulltorefresh.pullToRefresh
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
@@ -37,9 +37,22 @@ import com.github.se.icebreakrr.ui.navigation.Screen
 import com.github.se.icebreakrr.ui.sections.shared.FilterFloatingActionButton
 import com.github.se.icebreakrr.ui.sections.shared.ProfileCard
 import com.github.se.icebreakrr.ui.sections.shared.TopBar
+import com.github.se.icebreakrr.ui.theme.messageTextColor
 import com.github.se.icebreakrr.utils.NetworkUtils.isNetworkAvailable
+import com.github.se.icebreakrr.utils.NetworkUtils.isNetworkAvailableWithContext
 import com.github.se.icebreakrr.utils.NetworkUtils.showNoInternetToast
 import com.google.firebase.firestore.GeoPoint
+
+// Constants for layout dimensions
+private val COLUMN_VERTICAL_PADDING = 16.dp
+private val COLUMN_HORIZONTAL_PADDING = 8.dp
+private val TEXT_SIZE_LARGE = 20.sp
+private val NO_CONNECTION_TEXT_COLOR = messageTextColor
+private val EMPTY_PROFILE_TEXT_COLOR = messageTextColor
+
+@OptIn(ExperimentalMaterial3Api::class)
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
+@Composable
 
 /**
  * Composable function for displaying the "Around You" screen.
@@ -47,10 +60,10 @@ import com.google.firebase.firestore.GeoPoint
  * It includes a bottom navigation bar and displays the main content of the screen.
  *
  * @param navigationActions The actions used for navigating between screens.
+ * @param profilesViewModel The view model of the profiles
+ * @param tagsViewModel The view model of the tags
+ * @param filterViewModel The view model of the filters
  */
-@OptIn(ExperimentalMaterial3Api::class)
-@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
-@Composable
 fun AroundYouScreen(
     navigationActions: NavigationActions,
     profilesViewModel: ProfilesViewModel,
@@ -62,6 +75,20 @@ fun AroundYouScreen(
   val isLoading = profilesViewModel.loading.collectAsState()
   val context = LocalContext.current
   val isConnected = profilesViewModel.isConnected.collectAsState()
+
+  // Check network state when screen loads
+  LaunchedEffect(Unit) {
+    if (!isNetworkAvailable()) {
+      profilesViewModel.updateIsConnected(false)
+    } else {
+      profilesViewModel.getFilteredProfilesInRadius(
+          GeoPoint(DEFAULT_LATITUDE, DEFAULT_LONGITUDE),
+          DEFAULT_RADIUS,
+          filterViewModel.selectedGenders.value,
+          filterViewModel.ageRange.value,
+          tagsViewModel.filteredTags.value)
+    }
+  }
 
   Scaffold(
       modifier = Modifier.testTag("aroundYouScreen"),
@@ -87,9 +114,10 @@ fun AroundYouScreen(
             },
             modifier = Modifier.padding(innerPadding)) {
               LazyColumn(
-                  contentPadding = PaddingValues(vertical = 16.dp),
-                  verticalArrangement = Arrangement.spacedBy(16.dp),
-                  modifier = Modifier.fillMaxSize().padding(horizontal = 8.dp)) {
+                  contentPadding = PaddingValues(vertical = COLUMN_VERTICAL_PADDING),
+                  verticalArrangement = Arrangement.spacedBy(COLUMN_VERTICAL_PADDING),
+                  modifier =
+                      Modifier.fillMaxSize().padding(horizontal = COLUMN_HORIZONTAL_PADDING)) {
                     if (!isConnected.value) {
                       item {
                         Box(
@@ -97,9 +125,9 @@ fun AroundYouScreen(
                             modifier = Modifier.fillMaxSize().testTag("noConnectionPrompt")) {
                               Text(
                                   text = "No Internet Connection",
-                                  fontSize = 20.sp,
+                                  fontSize = TEXT_SIZE_LARGE,
                                   fontWeight = FontWeight.Bold,
-                                  color = Color(0xFF575757))
+                                  color = NO_CONNECTION_TEXT_COLOR)
                             }
                       }
                     } else if (filteredProfiles.value.isNotEmpty()) {
@@ -107,7 +135,7 @@ fun AroundYouScreen(
                         ProfileCard(
                             profile = filteredProfiles.value[index],
                             onclick = {
-                              if (isNetworkAvailable(context = context)) {
+                              if (isNetworkAvailableWithContext(context)) {
                                 navigationActions.navigateTo(
                                     Screen.OTHER_PROFILE_VIEW +
                                         "?userId=${filteredProfiles.value[index].uid}")
@@ -123,9 +151,9 @@ fun AroundYouScreen(
                             modifier = Modifier.fillMaxSize().testTag("emptyProfilePrompt")) {
                               Text(
                                   text = "There is no one around. Try moving!",
-                                  fontSize = 20.sp,
+                                  fontSize = TEXT_SIZE_LARGE,
                                   fontWeight = FontWeight.Bold,
-                                  color = Color(0xFF575757))
+                                  color = EMPTY_PROFILE_TEXT_COLOR)
                             }
                       }
                     }
@@ -182,8 +210,8 @@ fun PullToRefreshBox(
       modifier.pullToRefresh(state = state, isRefreshing = isRefreshing) {
         // TODO Mocked values, to change with  current location
         onRefresh(
-            GeoPoint(0.0, 0.0),
-            300.0,
+            GeoPoint(DEFAULT_LATITUDE, DEFAULT_LONGITUDE),
+            DEFAULT_RADIUS,
             filterViewModel.selectedGenders.value,
             filterViewModel.ageRange.value,
             tagsViewModel.filteredTags.value)

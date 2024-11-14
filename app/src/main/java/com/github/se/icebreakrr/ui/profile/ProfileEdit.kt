@@ -2,6 +2,7 @@ package com.github.se.icebreakrr.ui.profile
 
 import android.annotation.SuppressLint
 import android.widget.Toast
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -44,9 +45,10 @@ import com.github.se.icebreakrr.model.profile.ProfilesViewModel
 import com.github.se.icebreakrr.model.tags.TagsViewModel
 import com.github.se.icebreakrr.ui.navigation.NavigationActions
 import com.github.se.icebreakrr.ui.sections.shared.UnsavedChangesDialog
+import com.github.se.icebreakrr.ui.sections.shared.handleSafeBackNavigation
 import com.github.se.icebreakrr.ui.tags.TagSelector
-import com.google.firebase.Firebase
-import com.google.firebase.auth.auth
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.ktx.Firebase
 
 @SuppressLint("UnrememberedMutableState", "CoroutineCreationDuringComposition")
 @OptIn(ExperimentalMaterial3Api::class)
@@ -69,6 +71,9 @@ fun ProfileEditingScreen(
   val catchphraseHeight = screenHeight * 0.10f
   val descriptionHeight = screenHeight * 0.16f
 
+  val CATCHPHRASE_MAX = 200
+  val DESSCRIPTION_MAX = 400
+
   LaunchedEffect(Unit) {
     Firebase.auth.currentUser?.let { profilesViewModel.getProfileByUid(it.uid) }
   }
@@ -88,7 +93,7 @@ fun ProfileEditingScreen(
 
   val selectedTags = tagsViewModel.filteringTags.collectAsState().value
   val tagsSuggestions = tagsViewModel.tagsSuggestions.collectAsState()
-  val stringQuery = tagsViewModel.query.collectAsState()
+  val stringQuery = remember { mutableStateOf("") }
 
   fun updateProfile() {
     profilesViewModel.updateProfile(
@@ -114,12 +119,11 @@ fun ProfileEditingScreen(
                 IconButton(
                     modifier = Modifier.testTag("goBackButton"),
                     onClick = {
-                      if (isModified) {
-                        showDialog = true
-                      } else {
-                        tagsViewModel.leaveUI()
-                        navigationActions.goBack()
-                      }
+                      handleSafeBackNavigation(
+                          isModified = isModified,
+                          setShowDialog = { showDialog = it },
+                          tagsViewModel = tagsViewModel,
+                          navigationActions = navigationActions)
                     }) {
                       Icon(Icons.Default.ArrowBack, contentDescription = "Back")
                     }
@@ -157,7 +161,7 @@ fun ProfileEditingScreen(
 
                 // Name Input
                 Text(
-                    text = "${user.name}, ${user.calculateAge()}",
+                    text = user.name,
                     style = TextStyle(fontSize = textSize.value.sp),
                     modifier =
                         Modifier.fillMaxWidth()
@@ -169,8 +173,10 @@ fun ProfileEditingScreen(
                 OutlinedTextField(
                     value = catchphrase,
                     onValueChange = {
-                      catchphrase = it
-                      isModified = true
+                      if (it.text.length <= CATCHPHRASE_MAX) {
+                        catchphrase = it
+                        isModified = true
+                      }
                     },
                     label = {
                       Text("Catchphrase", modifier = Modifier.testTag("catchphraseLabel"))
@@ -185,8 +191,10 @@ fun ProfileEditingScreen(
                 OutlinedTextField(
                     value = description,
                     onValueChange = {
-                      description = it
-                      isModified = true
+                      if (it.text.length <= DESSCRIPTION_MAX) {
+                        description = it
+                        isModified = true
+                      }
                     },
                     label = { Text("Description") },
                     textStyle = TextStyle(fontSize = textSize.value.sp * 0.6),
@@ -201,13 +209,14 @@ fun ProfileEditingScreen(
                         tagsSuggestions.value.map { tag ->
                           Pair(tag, tagsViewModel.tagToColor(tag))
                         },
-                    stringQuery = stringQuery.value,
+                    stringQuery = stringQuery,
                     expanded = expanded,
                     onTagClick = { tag ->
                       tagsViewModel.removeFilter(tag)
                       isModified = true
                     },
                     onStringChanged = {
+                      stringQuery.value = it
                       tagsViewModel.setQuery(it, selectedTags)
                       isModified = true
                     },
@@ -234,5 +243,14 @@ fun ProfileEditingScreen(
                     })
               }
         }
+  }
+
+  // allows the user to navigate back safely with system back button
+  BackHandler {
+    handleSafeBackNavigation(
+        isModified = isModified,
+        setShowDialog = { showDialog = it },
+        tagsViewModel = tagsViewModel,
+        navigationActions = navigationActions)
   }
 }

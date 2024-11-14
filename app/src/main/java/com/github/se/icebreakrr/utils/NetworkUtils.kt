@@ -4,25 +4,55 @@ import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.widget.Toast
-import com.github.se.icebreakrr.R
 
-// Written with the help of CursorAI and Claude
+// This File was written with the help of Cursor AI
 
 /**
- * A utility object for network-related functions.
- *
- * This object provides methods to check network availability and to show a toast message when there
- * is no internet connection.
+ * Utility object for handling network-related operations and checks. Provides functionality to:
+ * - Check network connectivity
+ * - Display network status messages
+ * - Initialize network monitoring
  */
 object NetworkUtils {
+  /**
+   * ConnectivityManager instance used to monitor network state. Initialized via [init] or
+   * [setConnectivityManagerForTesting].
+   */
+  public var connectivityManager: ConnectivityManager? = null
 
   /**
-   * Checks if the network is available.
+   * Initializes the NetworkUtils with the application context. Must be called before using other
+   * methods in this class.
    *
-   * @param context The context used to access system services.
-   * @return True if the network is available, false otherwise.
+   * @param context The application context used to get the ConnectivityManager service
    */
-  fun isNetworkAvailable(context: Context): Boolean {
+  fun init(context: Context) {
+    connectivityManager = context.getSystemService(ConnectivityManager::class.java)
+  }
+
+  /**
+   * Sets a custom ConnectivityManager instance for testing purposes. This allows mocking of network
+   * states in unit tests.
+   *
+   * @param manager The mock ConnectivityManager instance to use for testing
+   */
+  fun setConnectivityManagerForTesting(manager: ConnectivityManager) {
+    connectivityManager = manager
+  }
+
+  /**
+   * Checks if the device currently has a valid internet connection. Uses NET_CAPABILITY_VALIDATED
+   * to ensure the network can reach the internet.
+   *
+   * @return true if internet is available, false otherwise
+   */
+  fun isNetworkAvailable(): Boolean {
+    val currentNetwork = connectivityManager?.activeNetwork
+    val caps = connectivityManager?.getNetworkCapabilities(currentNetwork)
+    return caps?.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED) ?: false
+  }
+
+  fun isNetworkAvailableWithContext(context: Context): Boolean {
     val connectivityManager = context.getSystemService(ConnectivityManager::class.java)
     val currentNetwork = connectivityManager?.activeNetwork
     val caps = connectivityManager?.getNetworkCapabilities(currentNetwork)
@@ -30,11 +60,11 @@ object NetworkUtils {
   }
 
   /**
-   * Shows a toast message indicating that there is no internet connection.
+   * Displays a toast message indicating no internet connection is available.
    *
-   * @param context The context used to display the toast message.
+   * @param context The context used to show the toast message
    */
   fun showNoInternetToast(context: Context) {
-    Toast.makeText(context, context.getString(R.string.No_Internet_Toast), Toast.LENGTH_LONG).show()
+    Toast.makeText(context, "No internet connection", Toast.LENGTH_SHORT).show()
   }
 }

@@ -23,6 +23,15 @@ import com.github.se.icebreakrr.ui.navigation.Route
 import com.github.se.icebreakrr.ui.sections.shared.ProfileCard
 import com.github.se.icebreakrr.ui.sections.shared.TopBar
 
+// Constants for padding and list management
+private val HORIZONTAL_PADDING = 7.dp
+private val TEXT_VERTICAL_PADDING = 16.dp
+private val CARD_SPACING = 16.dp
+private const val MAX_PENDING_CARDS = 4
+private const val TOAST_MESSAGE = "Requests are not implemented yet :)"
+private const val MEETING_REQUEST_MSG = "Pending meeting requests"
+private const val PASSED = "Passed"
+
 /**
  * Composable function for displaying the notification screen.
  *
@@ -35,9 +44,8 @@ import com.github.se.icebreakrr.ui.sections.shared.TopBar
 fun NotificationScreen(navigationActions: NavigationActions, profileViewModel: ProfilesViewModel) {
   val context = LocalContext.current
   val cardList = profileViewModel.profiles.collectAsState()
-  val navFunction = {
-    Toast.makeText(context, "Requests are not implemented yet :)", Toast.LENGTH_SHORT).show()
-  } // fixme : put Route.View instead
+  val navFunction = { Toast.makeText(context, TOAST_MESSAGE, Toast.LENGTH_SHORT).show() }
+
   Scaffold(
       modifier = Modifier.testTag("notificationScreen"),
       topBar = { TopBar("Inbox") },
@@ -55,28 +63,32 @@ fun NotificationScreen(navigationActions: NavigationActions, profileViewModel: P
         LazyColumn(
             modifier =
                 Modifier.padding(innerPadding)
-                    .padding(horizontal = 7.dp)
-                    .testTag("notificationScroll"),
-        ) {
-          item {
-            Text(
-                text = "Pending meeting requests",
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(vertical = 16.dp).testTag("notificationFirstText"))
-            Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-              cardList.value.take(4).forEach { p -> ProfileCard(p, onclick = navFunction) }
-            }
-            Text(
-                text = "Passed",
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(vertical = 16.dp).testTag("notificationSecondText"))
-            Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-              cardList.value.drop(4).forEach { p ->
-                ProfileCard(p, onclick = navFunction, greyedOut = true)
+                    .padding(horizontal = HORIZONTAL_PADDING)
+                    .testTag("notificationScroll")) {
+              item {
+                Text(
+                    text = MEETING_REQUEST_MSG,
+                    fontWeight = FontWeight.Bold,
+                    modifier =
+                        Modifier.padding(vertical = TEXT_VERTICAL_PADDING)
+                            .testTag("notificationFirstText"))
+                Column(verticalArrangement = Arrangement.spacedBy(CARD_SPACING)) {
+                  cardList.value.take(MAX_PENDING_CARDS).forEach { p ->
+                    ProfileCard(p, onclick = navFunction)
+                  }
+                }
+                Text(
+                    text = PASSED,
+                    fontWeight = FontWeight.Bold,
+                    modifier =
+                        Modifier.padding(vertical = TEXT_VERTICAL_PADDING)
+                            .testTag("notificationSecondText"))
+                Column(verticalArrangement = Arrangement.spacedBy(CARD_SPACING)) {
+                  cardList.value.drop(MAX_PENDING_CARDS).forEach { p ->
+                    ProfileCard(p, onclick = navFunction, greyedOut = true)
+                  }
+                }
               }
             }
-          }
-        }
-      },
-  )
+      })
 }
