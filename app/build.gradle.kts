@@ -225,6 +225,10 @@ dependencies {
     androidTestImplementation(libs.mockito.kotlin)
 
     implementation(platform(libs.firebase.bom))
+
+    // Add these under the dependencies block
+    implementation(libs.androidx.datastore.preferences)
+    implementation(libs.androidx.datastore.preferences.core)
 }
 
 tasks.withType<Test> {

@@ -25,6 +25,26 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.github.se.icebreakrr.ui.theme.MeetDark
+
+private val WIDTH = 312.dp
+private val HEIGHT_MAJOR = 254.dp
+private val HEIGHT_MINOR = 125.dp
+private val PADDING_MAJOR = 0.dp
+private val PADDING_MINOR = 24.dp
+private val BOX_SHAPE = RoundedCornerShape(size = 28.dp)
+private val SPACING = 12.dp
+private val BOTTOM_PADDING = 8.dp
+private val FONT_WEIGHT = FontWeight(400)
+private val FONTSIZE_1 = 24.sp
+private val FONTSIZE_2 = 14.sp
+private val LINE_HEIGHT_1 = 32.sp
+private val LINE_HEIGHT_2 = 20.sp
+private val LETTER_SPACING = 0.25.sp
+private val TEXT_FIELD_HEIGHT = 56.dp
+private val TEXT_FIELD_WIDTH = 292.dp
+private val ROW_HEIGHT = 49.dp
+private val ROW_WIDTH = 312.dp
 
 @Composable
 fun SendRequestScreen(
@@ -35,31 +55,35 @@ fun SendRequestScreen(
 ) {
   Box(
       modifier =
-          Modifier.padding(0.dp)
-              .width(312.dp)
-              .height(254.dp)
-              .background(color = Color(0xFFF9F9F9), shape = RoundedCornerShape(size = 28.dp))) {
+          Modifier.padding(PADDING_MAJOR)
+              .width(WIDTH)
+              .height(HEIGHT_MAJOR)
+              .background(color = Color.White, shape = BOX_SHAPE)) {
         Column(
-            verticalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterVertically),
+            verticalArrangement = Arrangement.spacedBy(SPACING, Alignment.CenterVertically),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
           Box(
               modifier =
-                  Modifier.width(312.dp)
-                      .height(125.dp)
-                      .padding(start = 24.dp, top = 24.dp, end = 24.dp, bottom = 9.dp)) {
+                  Modifier.width(WIDTH)
+                      .height(HEIGHT_MINOR)
+                      .padding(
+                          start = PADDING_MINOR,
+                          top = PADDING_MINOR,
+                          end = PADDING_MINOR,
+                          bottom = BOTTOM_PADDING)) {
                 Column(
-                    verticalArrangement = Arrangement.spacedBy(0.dp, Alignment.Top),
+                    verticalArrangement = Arrangement.spacedBy(PADDING_MAJOR, Alignment.Top),
                     horizontalAlignment = Alignment.Start,
                 ) {
                   Text(
                       text = "Meet this person",
                       style =
                           TextStyle(
-                              fontSize = 24.sp,
-                              lineHeight = 32.sp,
-                              fontWeight = FontWeight(400),
-                              color = Color(0xFF1D1B20),
+                              fontSize = FONTSIZE_1,
+                              lineHeight = LINE_HEIGHT_1,
+                              fontWeight = FONT_WEIGHT,
+                              color = MeetDark,
                           ))
                   Text(
                       text =
@@ -68,11 +92,11 @@ fun SendRequestScreen(
                       // M3/body/medium
                       style =
                           TextStyle(
-                              fontSize = 14.sp,
-                              lineHeight = 20.sp,
-                              fontWeight = FontWeight(400),
-                              color = Color(0xFF49454F),
-                              letterSpacing = 0.25.sp,
+                              fontSize = FONTSIZE_2,
+                              lineHeight = LINE_HEIGHT_2,
+                              fontWeight = FONT_WEIGHT,
+                              color = MeetDark,
+                              letterSpacing = LETTER_SPACING,
                           ))
                 }
               }
@@ -88,16 +112,20 @@ fun SendRequestScreen(
                 }
               },
               modifier =
-                  Modifier.padding(0.dp).width(292.dp).height(56.dp).testTag("messageTextField"))
+                  Modifier.padding(PADDING_MAJOR)
+                      .width(TEXT_FIELD_WIDTH)
+                      .height(TEXT_FIELD_HEIGHT)
+                      .testTag("messageTextField"))
           Row(
-              horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End),
+              horizontalArrangement = Arrangement.spacedBy(BOTTOM_PADDING, Alignment.End),
               verticalAlignment = Alignment.CenterVertically,
-              modifier = Modifier.width(312.dp).height(49.dp)) {
+              modifier = Modifier.width(ROW_WIDTH).height(ROW_HEIGHT)) {
                 TextButton(
                     onClick = { onCancelClick() },
                     enabled = true,
                     modifier =
-                        Modifier.padding(start = 8.dp, end = 24.dp).testTag("cancelButton")) {
+                        Modifier.padding(start = BOTTOM_PADDING, end = PADDING_MINOR)
+                            .testTag("cancelButton")) {
                       Text("Cancel")
                     }
               }

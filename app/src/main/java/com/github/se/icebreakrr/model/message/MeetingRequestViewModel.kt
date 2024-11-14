@@ -25,6 +25,9 @@ class MeetingRequestViewModel(
   var meetingRequestState by mutableStateOf(MeetingRequest())
   private val SEND_MESSAGE_FUNCTION_NAME = "sendMessage"
 
+  private var name: String? = null
+  private var userUID: String? = null
+
   companion object {
     class Factory(
         private val profilesViewModel: ProfilesViewModel,
@@ -91,7 +94,7 @@ class MeetingRequestViewModel(
           hashMapOf(
               "targetToken" to meetingRequestState.targetToken,
               "senderUID" to meetingRequestState.senderUID,
-              "body" to ourName + " : " + meetingRequestState.message,
+              "body" to MeetingRequestManager.ourName + " : " + meetingRequestState.message,
               "picture" to meetingRequestState.picture,
               "location" to meetingRequestState.location)
       try {

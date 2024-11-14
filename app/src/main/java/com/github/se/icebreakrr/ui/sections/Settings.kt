@@ -22,8 +22,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -32,6 +32,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import com.github.se.icebreakrr.authentication.logout
 import com.github.se.icebreakrr.config.LocalIsTesting
+import com.github.se.icebreakrr.data.AppDataStore
 import com.github.se.icebreakrr.mock.getMockedProfiles
 import com.github.se.icebreakrr.model.profile.Profile
 import com.github.se.icebreakrr.model.profile.ProfilesViewModel
@@ -42,19 +43,49 @@ import com.github.se.icebreakrr.ui.navigation.Route
 import com.github.se.icebreakrr.ui.navigation.Screen
 import com.github.se.icebreakrr.ui.sections.shared.ProfileCard
 import com.github.se.icebreakrr.ui.sections.shared.TopBar
-import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.auth
+import kotlinx.coroutines.launch
 
-// This File was written with the help of Cursor
+// Constants for dimensions and other settings
+private val SCREEN_PADDING = 16.dp
+private val SPACER_HEIGHT_SMALL = 8.dp
+private val SPACER_HEIGHT_LARGE = 16.dp
+private val CARD_SHAPE = RoundedCornerShape(16.dp)
+private val CARD_HEIGHT = 55.dp
+private val CARD_ELEVATION = 4.dp
+private val BUTTON_COLOR = Color.Red
+private val BUTTON_TEXT_COLOR = Color.White
+private const val LOGOUT_BUTTON_TAG = "logOutButton"
+private val TOGGLE_BOX_HEIGHT = 55.dp
+private val TOGGLE_OPTION_BUTTON_PADDING = 8.dp
+private val CARD_PADDING = 16.dp
+
+/**
+ * Composable function for displaying the Setting screen.
+ *
+ * It includes a bottom navigation bar and displays the main content of the setting screen.
+ *
+ * @param navigationActions The actions used for navigating between screens.
+ * @param profilesViewModel the View model for the profiles
+ * @param appDataStore sets the data or the app
+ */
 @Composable
-fun SettingsScreen(profilesViewModel: ProfilesViewModel, navigationActions: NavigationActions) {
+fun SettingsScreen(
+    profilesViewModel: ProfilesViewModel,
+    navigationActions: NavigationActions,
+    appDataStore: AppDataStore
+) {
   val context = LocalContext.current
   val scrollState = rememberScrollState()
+  val coroutineScope = rememberCoroutineScope()
+
+  // Collect the discoverability state from DataStore
+  val isDiscoverable by appDataStore.isDiscoverable.collectAsState(initial = true)
+
   lateinit var auth: FirebaseAuth
 
   LaunchedEffect(Unit) {
-    Firebase.auth.currentUser?.let { profilesViewModel.getProfileByUid(it.uid) }
+    FirebaseAuth.getInstance().currentUser?.let { profilesViewModel.getProfileByUid(it.uid) }
   }
 
   val isLoading = profilesViewModel.loading.collectAsState(initial = true).value
@@ -77,25 +108,28 @@ fun SettingsScreen(profilesViewModel: ProfilesViewModel, navigationActions: Navi
   ) { innerPadding ->
     Column(
         modifier =
-            Modifier.fillMaxSize().padding(innerPadding).padding(16.dp).verticalScroll(scrollState),
+            Modifier.fillMaxSize()
+                .padding(innerPadding)
+                .padding(SCREEN_PADDING)
+                .verticalScroll(scrollState),
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.Start) {
-          if (profile != null) {
-            ProfileCard(profile = profile, isSettings = true) {
-              navigationActions.navigateTo(Screen.PROFILE)
-            }
-          } else {
-            ProfileCard(profile = Profile.getMockedProfiles()[0], isSettings = true) {
-              navigationActions.navigateTo(Screen.PROFILE)
-            }
+          // Display ProfileCard
+          val displayProfile = profile ?: Profile.getMockedProfiles().first()
+          ProfileCard(profile = displayProfile, isSettings = true) {
+            navigationActions.navigateTo(Screen.PROFILE)
           }
 
-          Spacer(modifier = Modifier.padding(vertical = 8.dp))
+          Spacer(modifier = Modifier.height(SPACER_HEIGHT_SMALL))
 
-          ToggleOptionBox(label = "Toggle Location")
-          ToggleOptionBox(label = "Option 1")
-
-          Spacer(modifier = Modifier.padding(vertical = 16.dp))
+          // Display Toggle Options
+          ToggleOptionBox(
+              label = "Toggle Discoverability",
+              isChecked = isDiscoverable,
+              onCheckedChange = { discoverable ->
+                coroutineScope.launch { appDataStore.saveDiscoverableStatus(discoverable) }
+              })
+          Spacer(modifier = Modifier.height(SPACER_HEIGHT_LARGE))
 
         // this button is temporary and not tested
           Button(
@@ -118,34 +152,47 @@ fun SettingsScreen(profilesViewModel: ProfilesViewModel, navigationActions: Navi
                   navigationActions.navigateTo(Screen.AUTH)
                 } else {
                   auth = FirebaseAuth.getInstance()
-                  auth.currentUser?.let { logout(context, navigationActions) }
+                  auth.currentUser?.let {
+                    logout(context, navigationActions, appDataStore = appDataStore)
+                  }
+                  logout(context, navigationActions, appDataStore)
                 }
               },
-              colors = ButtonDefaults.buttonColors(containerColor = Color.Red),
-              modifier = Modifier.fillMaxWidth().testTag("logOutButton")) {
-                Text("Log Out", color = Color.White)
+              colors = ButtonDefaults.buttonColors(containerColor = BUTTON_COLOR),
+              modifier = Modifier.fillMaxWidth().testTag(LOGOUT_BUTTON_TAG)) {
+                Text("Log Out", color = BUTTON_TEXT_COLOR)
               }
         }
   }
 }
 
 @Composable
-fun ToggleOptionBox(label: String) {
-  val toggleState = remember { mutableStateOf(false) }
+fun ToggleOptionBox(
+    label: String,
+    isChecked: Boolean,
+    onCheckedChange: (Boolean) -> Unit,
+    modifier: Modifier = Modifier
+) {
+  // Constants for card styling
 
   Card(
-      shape = RoundedCornerShape(16.dp),
-      modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp).height(55.dp).testTag(label),
-      elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)) {
+      shape = CARD_SHAPE,
+      modifier =
+          modifier
+              .fillMaxWidth()
+              .padding(vertical = TOGGLE_OPTION_BUTTON_PADDING)
+              .height(TOGGLE_BOX_HEIGHT)
+              .testTag(label),
+      elevation = CardDefaults.cardElevation(defaultElevation = CARD_ELEVATION)) {
         Row(
-            modifier = Modifier.fillMaxWidth().padding(16.dp),
+            modifier = Modifier.fillMaxWidth().padding(CARD_PADDING),
             verticalAlignment = Alignment.CenterVertically) {
               Text(label)
               Spacer(modifier = Modifier.weight(1f))
               Switch(
-                  checked = toggleState.value,
+                  checked = isChecked,
                   modifier = Modifier.testTag("switch$label"),
-                  onCheckedChange = { toggleState.value = it })
+                  onCheckedChange = onCheckedChange)
             }
       }    
 }

@@ -5,6 +5,10 @@ import com.google.firebase.storage.StorageReference
 
 class ProfilePicRepositoryStorage(private val firebaseStorage: FirebaseStorage) :
     ProfilePicRepository {
+  private val MAX_SIZE = 4
+  private val HEX_FF = 0xFF
+  private val HEX_D8 = 0xD8
+  private val HEX_D9 = 0xD9
 
   /**
    * Retrieves a reference to the profile picture storage location for a given user.
@@ -23,11 +27,11 @@ class ProfilePicRepositoryStorage(private val firebaseStorage: FirebaseStorage) 
    * @return True if the byte array is a JPG image, false otherwise.
    */
   private fun isJpgImage(imageData: ByteArray): Boolean {
-    return imageData.size >= 4 &&
-        imageData[0] == 0xFF.toByte() &&
-        imageData[1] == 0xD8.toByte() &&
-        imageData[imageData.size - 2] == 0xFF.toByte() &&
-        imageData[imageData.size - 1] == 0xD9.toByte()
+    return imageData.size >= MAX_SIZE &&
+        imageData[0] == HEX_FF.toByte() &&
+        imageData[1] == HEX_D8.toByte() &&
+        imageData[imageData.size - 2] == HEX_FF.toByte() &&
+        imageData[imageData.size - 1] == HEX_D9.toByte()
   }
 
   /**
