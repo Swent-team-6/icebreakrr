@@ -320,7 +320,7 @@ class ProfilesRepositoryFirestore(private val db: FirebaseFirestore) : ProfilesR
           profilePictureUrl = profilePictureUrl,
           fcmToken = fcmToken,
           location = location,
-          geohash = geohash),
+          geohash = geohash,
           hasBlocked = hasBlocked)
     } catch (e: Exception) {
       Log.e("ProfileRepositoryFirestore", "Error converting document to Profile", e)
