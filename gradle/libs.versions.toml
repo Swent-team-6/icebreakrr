@@ -55,6 +55,9 @@ ktfmt = "0.17.0"
 firebaseFunctionsKtx = "21.0.0"
 firebaseStorageKtx = "21.0.1"
 
+#Utils
+geohashJava = "1.4.0"
+
 [libraries]
 #Google
 androidx-core-testing = { module = "androidx.arch.core:core-testing", version.ref = "coreTesting" }
@@ -97,7 +100,6 @@ firebase-auth = { module = "com.google.firebase:firebase-auth", version.ref = "f
 firebase-database-ktx = { module = "com.google.firebase:firebase-database-ktx", version.ref = "firebaseDatabaseKtx" }
 firebase-firestore = { module = "com.google.firebase:firebase-firestore", version.ref = "firebaseFirestore" }
 firebase-ui-auth = { module = "com.firebaseui:firebase-ui-auth", version.ref = "firebaseUiAuth" }
-geofirestore = { module = "com.github.imperiumlabs:GeoFirestore-Android", version = "v1.5.0" }
 firebase-common-ktx = { group = "com.google.firebase", name = "firebase-common-ktx", version.ref = "firebaseCommonKtx" }
 
 #Testing
@@ -115,6 +117,8 @@ androidx-navigation-testing = { group = "androidx.navigation", name = "navigatio
 firebase-functions-ktx = { group = "com.google.firebase", name = "firebase-functions-ktx", version.ref = "firebaseFunctionsKtx" }
 firebase-storage-ktx = { group = "com.google.firebase", name = "firebase-storage-ktx", version.ref = "firebaseStorageKtx" }
 
+#Utils
+geohashJava = { module = "ch.hsr:geohash", version.ref = "geohashJava" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
