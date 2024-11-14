@@ -41,7 +41,7 @@ class LocationViewModelTest {
 
   @Mock private lateinit var locationService: LocationService
 
-  @Mock private lateinit var geoFirestoreRepository: GeoFirestoreRepository
+  @Mock private lateinit var locationRepositoryFirestore: LocationRepositoryFirestore
 
   @Mock private lateinit var permissionManager: PermissionManager
 
@@ -55,7 +55,7 @@ class LocationViewModelTest {
     Dispatchers.setMain(testDispatcher) // Configure Dispatchers.Main to use the testDispatcher
 
     locationViewModel =
-        LocationViewModel(locationService, geoFirestoreRepository, permissionManager)
+        LocationViewModel(locationService, locationRepositoryFirestore, permissionManager)
   }
 
   @After
@@ -179,7 +179,7 @@ class LocationViewModelTest {
 
     // Capture the `GeoPoint` sent to Firestore
     val geoPointCaptor = argumentCaptor<GeoPoint>()
-    verify(geoFirestoreRepository).setUserPosition(geoPointCaptor.capture())
+    verify(locationRepositoryFirestore).setUserPosition(geoPointCaptor.capture())
 
     // Checking coordinates of `GeoPoint`
     assertEquals(40.7128, geoPointCaptor.firstValue.latitude)
