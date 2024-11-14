@@ -26,6 +26,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -47,7 +48,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.github.se.icebreakrr.R
 import com.github.se.icebreakrr.config.LocalIsTesting
+import com.github.se.icebreakrr.data.AppDataStore
 import com.github.se.icebreakrr.model.filter.FilterViewModel
+import com.github.se.icebreakrr.model.message.MeetingRequestManager
 import com.github.se.icebreakrr.model.message.MeetingRequestViewModel
 import com.github.se.icebreakrr.model.profile.Gender
 import com.github.se.icebreakrr.model.profile.Profile
@@ -55,6 +58,12 @@ import com.github.se.icebreakrr.model.profile.ProfilesViewModel
 import com.github.se.icebreakrr.model.tags.TagsViewModel
 import com.github.se.icebreakrr.ui.navigation.NavigationActions
 import com.github.se.icebreakrr.ui.navigation.TopLevelDestinations
+import com.github.se.icebreakrr.ui.sections.DEFAULT_LATITUDE
+import com.github.se.icebreakrr.ui.sections.DEFAULT_LONGITUDE
+import com.github.se.icebreakrr.ui.sections.DEFAULT_RADIUS
+import com.github.se.icebreakrr.ui.theme.DarkBlue
+import com.github.se.icebreakrr.ui.theme.IceBreakrrBlue
+import com.github.se.icebreakrr.ui.theme.MidBlue
 import com.github.se.icebreakrr.utils.NetworkUtils
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
@@ -76,13 +85,19 @@ import kotlinx.coroutines.tasks.await
  *
  * @param navigationActions A class that handles the navigation between screens.
  */
+val FONTSIZE = 64.sp
+val LINEHEIGHT = 25.07.sp
+val FONTWEIGHT = FontWeight(500)
+val LETTER_SPACING = 0.37.sp
+
 @Composable
 fun SignInScreen(
     profilesViewModel: ProfilesViewModel,
     meetingRequestViewModel: MeetingRequestViewModel,
     navigationActions: NavigationActions,
     filterViewModel: FilterViewModel,
-    tagsViewModel: TagsViewModel
+    tagsViewModel: TagsViewModel,
+    appDataStore: AppDataStore
 ) {
 
   // State to hold the current Firebase user
@@ -111,6 +126,12 @@ fun SignInScreen(
             user?.let { firebaseUser ->
               coroutineScope.launch {
 
+                // Get the token from Firebase
+                user?.getIdToken(false)?.await()?.token?.let { token ->
+                  // Save the token to DataStore
+                  appDataStore.saveAuthToken(token)
+                }
+
                 // Checking if user already exists
                 profilesViewModel.getProfileByUid(firebaseUser.uid)
 
@@ -125,6 +146,8 @@ fun SignInScreen(
                   if (task.isSuccessful) {
                     val fcmToken = task.result
                     meetingRequestViewModel.onLocalTokenChange(token)
+                    MeetingRequestManager.ourUid = firebaseUser.uid
+                    MeetingRequestManager.ourName = firebaseUser.displayName ?: "Unknown"
                     if (profile == null) { // if doesn't exist create new user
 
                       val newProfile =
@@ -136,7 +159,6 @@ fun SignInScreen(
                               catchPhrase = "",
                               description = "",
                               fcmToken = fcmToken)
-
                       profilesViewModel.addNewProfile(newProfile)
                     } else {
                       val updatedProfile = profile.copy(fcmToken = fcmToken)
@@ -157,10 +179,13 @@ fun SignInScreen(
       Brush.linearGradient(
           colors =
               listOf(
-                  Color(0xFF1FAEF0), // Light blue
-                  Color(0xFF1C9EDA), // Mid blue
-                  Color(0xFF12648A) // Dark blue
+                  IceBreakrrBlue, // Light blue
+                  MidBlue, // Mid blue
+                  DarkBlue // Dark blue
                   ))
+
+  // Add this to collect the auth token state
+  val hasAuthToken = appDataStore.hasAuthToken.collectAsState(initial = false)
 
   Scaffold(
       modifier = Modifier.fillMaxSize().testTag("loginScreen"),
@@ -179,12 +204,12 @@ fun SignInScreen(
               text = "IceBreakrr",
               style =
                   TextStyle(
-                      fontSize = 64.sp,
-                      lineHeight = 25.07.sp,
-                      fontWeight = FontWeight(500),
-                      color = Color(0xFFFFFFFF),
+                      fontSize = FONTSIZE,
+                      lineHeight = LINEHEIGHT,
+                      fontWeight = FONTWEIGHT,
+                      color = Color.White,
                       textAlign = TextAlign.Center,
-                      letterSpacing = 0.37.sp,
+                      letterSpacing = LETTER_SPACING,
                   ))
 
           // Authenticate With Google Button
@@ -193,8 +218,19 @@ fun SignInScreen(
                 if (isTesting) {
                   navigationActions.navigateTo(TopLevelDestinations.AROUND_YOU)
                 } else {
-                  if (!NetworkUtils.isNetworkAvailable(context)) {
-                    NetworkUtils.showNoInternetToast(context)
+                  if (!NetworkUtils.isNetworkAvailable()) {
+                    if (hasAuthToken.value) {
+                      // If offline but has token, allow access
+                      navigationActions.navigateTo(TopLevelDestinations.AROUND_YOU)
+                      profilesViewModel.getFilteredProfilesInRadius(
+                          GeoPoint(0.0, 0.0),
+                          300.0,
+                          filterViewModel.selectedGenders.value,
+                          filterViewModel.ageRange.value,
+                          tagsViewModel.filteredTags.value)
+                    } else {
+                      NetworkUtils.showNoInternetToast(context)
+                    }
                   } else {
                     val gso =
                         GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
@@ -205,8 +241,8 @@ fun SignInScreen(
                     launcher.launch(googleSignInClient.signInIntent)
 
                     profilesViewModel.getFilteredProfilesInRadius(
-                        GeoPoint(0.0, 0.0),
-                        300.0,
+                        GeoPoint(DEFAULT_LONGITUDE, DEFAULT_LATITUDE),
+                        DEFAULT_RADIUS,
                         filterViewModel.selectedGenders.value,
                         filterViewModel.ageRange.value,
                         tagsViewModel.filteredTags.value)
@@ -223,16 +259,23 @@ fun SignInScreen(
  *
  * @param onSignInClick Callback invoked when the button is clicked.
  */
+private val BUTTON_SHAPE = RoundedCornerShape(50)
+private val BUTTON_BORDER = BorderStroke(1.dp, Color.LightGray)
+private val PADDING = 8.dp
+private val HEIGHT = 48.dp
+private val SIZE = 30.dp
+private val FONT_SIZE = 16.sp
+
 @Composable
 fun GoogleSignInButton(onClick: () -> Unit) {
   Button(
       onClick = onClick,
       colors = ButtonDefaults.buttonColors(containerColor = Color.White), // Button color
-      shape = RoundedCornerShape(50), // Circular edges for the button
-      border = BorderStroke(1.dp, Color.LightGray),
+      shape = BUTTON_SHAPE, // Circular edges for the button
+      border = BUTTON_BORDER,
       modifier =
-          Modifier.padding(8.dp)
-              .height(48.dp) // Adjust height as needed
+          Modifier.padding(PADDING)
+              .height(HEIGHT) // Adjust height as needed
               .testTag("loginButton")) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -244,14 +287,14 @@ fun GoogleSignInButton(onClick: () -> Unit) {
                       painterResource(id = R.drawable.google_logo), // Ensure this drawable exists
                   contentDescription = "Google Logo",
                   modifier =
-                      Modifier.size(30.dp) // Size of the Google logo
-                          .padding(end = 8.dp))
+                      Modifier.size(SIZE) // Size of the Google logo
+                          .padding(end = PADDING))
 
               // Text for the button
               Text(
                   text = "Sign in with Google",
                   color = Color.Gray, // Text color
-                  fontSize = 16.sp, // Font size
+                  fontSize = FONT_SIZE, // Font size
                   fontWeight = FontWeight.Medium)
             }
       }

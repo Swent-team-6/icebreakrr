@@ -3,12 +3,14 @@ package com.github.se.icebreakrr.model.profile
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
+import com.github.se.icebreakrr.utils.NetworkUtils
 import com.google.android.gms.tasks.Task
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.GeoPoint
+import com.google.firebase.firestore.Source
 import kotlinx.coroutines.flow.MutableStateFlow
 
 class ProfilesRepositoryFirestore(private val db: FirebaseFirestore) : ProfilesRepository {
@@ -23,6 +25,11 @@ class ProfilesRepositoryFirestore(private val db: FirebaseFirestore) : ProfilesR
 
   override val connectionTimeOutMs: Long = 15000
   override val periodicTimeCheckWaitTime: Long = 5000
+
+  val DEFAULT_RADIUS = 300.0
+  val DEFAULT_LONGITUDE = 0.0
+  val DEFAULT_LATITUDE = 0.0
+  private val PERIOD = 1000
 
   // Generated with the help of CursorAI
   /**
@@ -42,8 +49,8 @@ class ProfilesRepositoryFirestore(private val db: FirebaseFirestore) : ProfilesR
         object : Runnable {
           override fun run() {
             getProfilesInRadius(
-                GeoPoint(0.0, 0.0),
-                300.0,
+                GeoPoint(DEFAULT_LONGITUDE, DEFAULT_LATITUDE),
+                DEFAULT_RADIUS,
                 onSuccess = { profiles ->
                   Log.e("Connection Check", "Connection restored")
                   _waitingDone.value = false
@@ -52,7 +59,7 @@ class ProfilesRepositoryFirestore(private val db: FirebaseFirestore) : ProfilesR
                 onFailure = {
                   Log.e(
                       "Connection Check",
-                      "Connection still lost, retrying in ${periodicTimeCheckWaitTime/1000} seconds...")
+                      "Connection still lost, retrying in ${periodicTimeCheckWaitTime/PERIOD} seconds...")
                   handler.postDelayed(this, periodicTimeCheckWaitTime)
                 })
           }
@@ -78,8 +85,8 @@ class ProfilesRepositoryFirestore(private val db: FirebaseFirestore) : ProfilesR
         {
           Log.e("Connection Check", "Retrying connection...")
           getProfilesInRadius(
-              GeoPoint(0.0, 0.0),
-              300.0,
+              GeoPoint(DEFAULT_LONGITUDE, DEFAULT_LATITUDE),
+              DEFAULT_RADIUS,
               onSuccess = { profiles ->
                 Log.e("Connection Check", "Connection restored")
                 _waitingDone.value = false
@@ -202,8 +209,14 @@ class ProfilesRepositoryFirestore(private val db: FirebaseFirestore) : ProfilesR
       onSuccess: (Profile?) -> Unit,
       onFailure: (Exception) -> Unit
   ) {
+    val source =
+        if (NetworkUtils.isNetworkAvailable()) {
+          Source.SERVER
+        } else {
+          Source.CACHE
+        }
     Log.d("ProfilesRepositoryFirestore", "getProfileByUid")
-    db.collection("profiles").document(uid).get().addOnCompleteListener { task ->
+    db.collection("profiles").document(uid).get(source).addOnCompleteListener { task ->
       if (task.isSuccessful) {
         val profile = task.result?.let { document -> documentToProfile(document) }
         onSuccess(profile)

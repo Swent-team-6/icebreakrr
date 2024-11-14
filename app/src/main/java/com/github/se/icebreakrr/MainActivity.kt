@@ -20,6 +20,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
 import com.github.se.icebreakrr.config.LocalIsTesting
+import com.github.se.icebreakrr.data.AppDataStore
 import com.github.se.icebreakrr.model.filter.FilterViewModel
 import com.github.se.icebreakrr.model.location.LocationRepositoryFirestore
 import com.github.se.icebreakrr.model.location.LocationService
@@ -44,6 +45,7 @@ import com.github.se.icebreakrr.utils.PermissionManager
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.firebase.Firebase
+import com.github.se.icebreakrr.utils.NetworkUtils
 import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.firestore
@@ -58,6 +60,7 @@ class MainActivity : ComponentActivity() {
   private lateinit var permissionManager: PermissionManager
   private lateinit var authStateListener: FirebaseAuth.AuthStateListener
   private lateinit var fusedLocationClient: FusedLocationProviderClient
+  private lateinit var appDataStore: AppDataStore
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
@@ -69,6 +72,9 @@ class MainActivity : ComponentActivity() {
     FirebaseApp.initializeApp(this)
     auth = FirebaseAuth.getInstance()
     functions = FirebaseFunctions.getInstance()
+    
+    // Initialize Utils
+    NetworkUtils.init(this)
 
     // Create and initialize the PermissionManager with the list of permissions required
     requestNotificationPermission() // TODO remove this and use the PermissionManager instead
@@ -98,11 +104,17 @@ class MainActivity : ComponentActivity() {
           }
         }
 
+    // Initialize DataStore
+    appDataStore = AppDataStore(this)
+
+
     setContent {
       // Provide the `isTesting` flag to the entire composable tree
       CompositionLocalProvider(LocalIsTesting provides isTesting) {
         SampleAppTheme {
-          Surface(modifier = Modifier.fillMaxSize()) { IcebreakrrApp(auth, functions) }
+          Surface(modifier = Modifier.fillMaxSize()) {
+            IcebreakrrApp(auth, functions, appDataStore)
+          }
         }
       }
     }
@@ -152,22 +164,26 @@ class MainActivity : ComponentActivity() {
  * @see NotificationScreen
  */
 @Composable
-fun IcebreakrrApp(auth: FirebaseAuth, functions: FirebaseFunctions) {
+fun IcebreakrrApp(auth: FirebaseAuth, functions: FirebaseFunctions, appDataStore: AppDataStore) {
   val profileViewModel: ProfilesViewModel = viewModel(factory = ProfilesViewModel.Factory)
   val tagsViewModel: TagsViewModel = viewModel(factory = TagsViewModel.Factory)
   val filterViewModel: FilterViewModel = viewModel(factory = FilterViewModel.Factory)
-  val ourUserUid = auth.currentUser?.uid ?: "null"
-  val ourName = auth.currentUser?.displayName ?: "null"
-
+  var userName: String? = "null"
+  var userUid: String? = "null"
   MeetingRequestManager.meetingRequestViewModel =
       viewModel(
           factory =
               MeetingRequestViewModel.Companion.Factory(
-                  profileViewModel, functions, ourUserUid, ourName))
+                  profileViewModel, functions, userUid, userName))
   val meetingRequestViewModel = MeetingRequestManager.meetingRequestViewModel
 
   IcebreakrrNavHost(
-      profileViewModel, tagsViewModel, filterViewModel, meetingRequestViewModel, Route.AUTH)
+      profileViewModel,
+      tagsViewModel,
+      filterViewModel,
+      meetingRequestViewModel,
+      appDataStore,
+      Route.AUTH)
 }
 
 @Composable
@@ -176,6 +192,7 @@ fun IcebreakrrNavHost(
     tagsViewModel: TagsViewModel,
     filterViewModel: FilterViewModel,
     meetingRequestViewModel: MeetingRequestViewModel?,
+    appDataStore: AppDataStore,
     startDestination: String
 ) {
   val navController = rememberNavController()
@@ -192,7 +209,8 @@ fun IcebreakrrNavHost(
               meetingRequestViewModel,
               navigationActions,
               filterViewModel = filterViewModel,
-              tagsViewModel = tagsViewModel)
+              tagsViewModel = tagsViewModel,
+              appDataStore = appDataStore)
         } else {
           throw IllegalStateException(
               "The Meeting Request View Model shouldn't be null : Bad initialization")
@@ -226,7 +244,9 @@ fun IcebreakrrNavHost(
         startDestination = Screen.SETTINGS,
         route = Route.SETTINGS,
     ) {
-      composable(Screen.SETTINGS) { SettingsScreen(profileViewModel, navigationActions) }
+      composable(Screen.SETTINGS) {
+        SettingsScreen(profileViewModel, navigationActions, appDataStore = appDataStore)
+      }
       composable(Screen.PROFILE) { ProfileView(profileViewModel, tagsViewModel, navigationActions) }
     }
 
