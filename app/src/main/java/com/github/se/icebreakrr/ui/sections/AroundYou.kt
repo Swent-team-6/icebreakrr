@@ -51,6 +51,14 @@ private val EMPTY_PROFILE_TEXT_COLOR = lightGray
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
+
+/**
+ * Composable function for displaying the "Around You" screen.
+ *
+ * It includes a bottom navigation bar and displays the main content of the screen.
+ *
+ * @param navigationActions The actions used for navigating between screens.
+ */
 fun AroundYouScreen(
     navigationActions: NavigationActions,
     profilesViewModel: ProfilesViewModel,
@@ -133,6 +141,24 @@ fun AroundYouScreen(
       floatingActionButton = { FilterFloatingActionButton(navigationActions) })
 }
 
+/**
+ * A composable container with pull-to-refresh functionality, displaying a refresh indicator while
+ * refreshing.
+ *
+ * @param isRefreshing Whether the refresh operation is ongoing; the indicator shows while true.
+ * @param onRefresh Called on pull-to-refresh with parameters for filtering:
+ * - [center]: the central [GeoPoint] for location-based filtering.
+ * - [radiusInMeters]: search radius in meters.
+ * - [genders]: list of [Gender] to filter by.
+ * - [ageRange]: age range for filtering.
+ * - [tags]: tags for filtering.
+ *
+ * @param modifier [Modifier] for styling the container.
+ * @param state State for managing pull-to-refresh gesture.
+ * @param contentAlignment Alignment for the content within the box.
+ * @param indicator Refresh indicator composable, centered by default.
+ * @param content The main content to display inside the container.
+ */
 @Composable
 @ExperimentalMaterial3Api
 fun PullToRefreshBox(

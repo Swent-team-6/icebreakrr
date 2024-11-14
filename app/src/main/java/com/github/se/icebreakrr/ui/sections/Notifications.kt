@@ -29,6 +29,8 @@ private val TEXT_VERTICAL_PADDING = 16.dp
 private val CARD_SPACING = 16.dp
 private const val MAX_PENDING_CARDS = 4
 private const val TOAST_MESSAGE = "Requests are not implemented yet :)"
+private const val MEETING_REQUEST_MSG = "Pending meeting requests"
+private const val PASSED = "Passed"
 
 /**
  * Composable function for displaying the notification screen.
@@ -65,7 +67,7 @@ fun NotificationScreen(navigationActions: NavigationActions, profileViewModel: P
                     .testTag("notificationScroll")) {
               item {
                 Text(
-                    text = "Pending meeting requests",
+                    text = MEETING_REQUEST_MSG,
                     fontWeight = FontWeight.Bold,
                     modifier =
                         Modifier.padding(vertical = TEXT_VERTICAL_PADDING)
@@ -76,7 +78,7 @@ fun NotificationScreen(navigationActions: NavigationActions, profileViewModel: P
                   }
                 }
                 Text(
-                    text = "Passed",
+                    text = PASSED,
                     fontWeight = FontWeight.Bold,
                     modifier =
                         Modifier.padding(vertical = TEXT_VERTICAL_PADDING)

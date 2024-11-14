@@ -44,6 +44,9 @@ private val TAGS_FONT_SIZE = 16.sp
 // Define colors used
 private val GREYED_OUT_COLOR = grayedOut
 
+// Define math constants
+private val TAKE_TAGS = 5
+
 @Composable
 fun ProfileCard(
     profile: Profile,
@@ -91,7 +94,7 @@ fun ProfileCard(
 
                 if (!isSettings) {
                   // Display the first 5 tags in a string format
-                  val tags = profile.tags.take(5).joinToString(" ") { "#$it" }
+                  val tags = profile.tags.take(TAKE_TAGS).joinToString(" ") { "#$it" }
                   Text(text = tags, fontSize = TAGS_FONT_SIZE, color = textColor)
                 } else {
                   Text(text = "Tap to preview profile")

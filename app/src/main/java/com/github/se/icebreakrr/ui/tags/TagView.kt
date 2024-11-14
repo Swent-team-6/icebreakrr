@@ -50,12 +50,20 @@ private val SELECTED_TAG_COLOR = Color.Red
 private val DEFAULT_TAG_BACKGROUND_COLOR = Color.Cyan
 private val EXTEND_TAG_COLOR = extendedTagsColor
 
+private val TAGS_SHOWN_DEFAULT = 3
+
 data class TagStyle(
     val textColor: Color = Color.Black,
     val backGroundColor: Color = DEFAULT_TAG_BACKGROUND_COLOR,
     val fontSize: TextUnit = DEFAULT_TAG_FONT_SIZE,
 )
 
+/**
+ * Creates a small tag with a chosen color and a given text
+ *
+ * @param text : The text we want included in the tag
+ * @param tagStyle : The style of the tag
+ */
 @Composable
 fun Tag(text: String, tagStyle: TagStyle) {
   Box(
@@ -73,6 +81,13 @@ fun Tag(text: String, tagStyle: TagStyle) {
       }
 }
 
+/**
+ * Creates a small tag with a chosen color, a given text, and a action on click event
+ *
+ * @param text : The text we want included in the tag
+ * @param tagStyle : The style of the tag
+ * @param onClick : The on click event
+ */
 @Composable
 fun ClickTag(text: String, tagStyle: TagStyle, onClick: () -> Unit) {
   Surface(
@@ -91,6 +106,12 @@ fun ClickTag(text: String, tagStyle: TagStyle, onClick: () -> Unit) {
       }
 }
 
+/**
+ * A tag that is used to hide a large list of tags
+ *
+ * @param tagStyle: the style of the tag
+ * @param onClick: the click event when the user clicks on the tag
+ */
 @Composable
 fun ExtendTag(tagStyle: TagStyle, onClick: () -> Unit) {
   Surface(
@@ -109,6 +130,12 @@ fun ExtendTag(tagStyle: TagStyle, onClick: () -> Unit) {
       }
 }
 
+/**
+ * This Composable is a row of tags that are that adapts dynamically to the space it has available
+ *
+ * @param l: The list of tags to show
+ * @param tagStyle: the style of your tags
+ */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun RowOfTags(tags: List<Pair<String, Color>>, tagStyle: TagStyle) {
@@ -131,6 +158,14 @@ fun RowOfTags(tags: List<Pair<String, Color>>, tagStyle: TagStyle) {
   }
 }
 
+/**
+ * This Composable is a row of tags that are clickable and that adapts dynamically to the space it
+ * has available
+ *
+ * @param tags: The list of tags to show
+ * @param tagStyle: the style of your tags
+ * @param onClick: the event when the user clicks on a tag
+ */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun RowOfClickTags(tags: List<Pair<String, Color>>, tagStyle: TagStyle, onClick: (String) -> Unit) {
@@ -141,13 +176,13 @@ fun RowOfClickTags(tags: List<Pair<String, Color>>, tagStyle: TagStyle, onClick:
           modifier = Modifier.padding(TAG_PADDING),
           horizontalArrangement = Arrangement.Start,
           verticalArrangement = Arrangement.Top) {
-            val tagsToShow = if (isExtended.value) tags else tags.take(3)
+            val tagsToShow = if (isExtended.value) tags else tags.take(TAGS_SHOWN_DEFAULT)
             tagsToShow.forEach { (text, color) ->
               ClickTag(text, TagStyle(tagStyle.textColor, color, tagStyle.fontSize)) {
                 onClick(text)
               }
             }
-            if (!isExtended.value && tags.size > 3) {
+            if (!isExtended.value && tags.size > TAGS_SHOWN_DEFAULT) {
               ExtendTag(tagStyle) { isExtended.value = true }
             }
           }
@@ -155,6 +190,23 @@ fun RowOfClickTags(tags: List<Pair<String, Color>>, tagStyle: TagStyle, onClick:
   }
 }
 
+/**
+ * This Composable is used in the Edit Profile, allows a user to enter a text in a text field ant to
+ * get a list of tags to choose from We also get a collection of all the tags we have already
+ * selected
+ *
+ * @param selectedTag : all the tags in the that have already been selected
+ * @param outputTag : the tags that drop down in the DropDownMenu
+ * @param stringQuery : The text that is modified by the user
+ * @param expanded : Choose if the drop down menu is activated or not
+ * @param onTagClick : The event happening when the user clicks on a tag
+ * @param onDropDownItemClicked : The event when the user clicks on a DropDownMenuItem
+ * @param onStringChanged : The event when the string is changed by the user
+ * @param textColor : The color of the text we want in the tags selected and on the tags in the drop
+ *   down menu
+ * @param textSize : The size of the text in the tags selected and on the tags in the drop down menu
+ *   The color in the tag depends on the category of the tag
+ */
 @Composable
 fun TagSelector(
     selectedTag: List<Pair<String, Color>>,

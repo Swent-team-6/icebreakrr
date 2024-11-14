@@ -1,16 +1,7 @@
 package com.github.se.icebreakrr.ui.sections.shared
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
@@ -18,9 +9,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.Create
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -47,75 +36,77 @@ import com.github.se.icebreakrr.ui.theme.IceBreakrrBlue
 import com.github.se.icebreakrr.utils.NetworkUtils.isNetworkAvailable
 import com.github.se.icebreakrr.utils.NetworkUtils.showNoInternetToast
 
-/**
- * Displays the user's information section with a catchphrase, tags, and description. The content is
- * scrollable if it exceeds the available screen space.
- *
- * @param catchPhrase The user's catchphrase.
- * @param listOfTags A list of tags related to the user, paired with colors.
- * @param description The user's detailed description.
- */
-val informationTitleSize = 14.sp
-val informationTitleLineHeight = 20.sp
-val informationTitleFontWeight = 500
-val informationTitleLetterSpacing = 0.1.sp
-val catchPhraseSize = 22.sp
-val catchPhraseLineHeight = 28.sp
-val catchPhraseWeight = 400
-val descriptionFontSize = 16.sp
-val descriptionLineHeight = 24.sp
-val descriptionFontWeight = 500
-val descriptionLetterSpacing = 0.15.sp
-val tagHeight = 50
-val requestButtonSize = 55.dp
-val requestButtonElevation = 8.dp
-val fillMaxSizeMax = 0.7f
+// Constants
+private val INFO_SECTION_PADDING = 16.dp
+private val INFO_SECTION_SPACING = 11.dp
+private val CATCHPHRASE_TEXT_STYLE =
+    TextStyle(
+        fontSize = 22.sp, lineHeight = 28.sp, fontWeight = FontWeight.W400, color = IceBreakrrBlue)
+private val TITLE_TEXT_STYLE =
+    TextStyle(
+        fontSize = 14.sp,
+        lineHeight = 20.sp,
+        fontWeight = FontWeight.W500,
+        color = IceBreakrrBlue,
+        letterSpacing = 0.1.sp)
+private val DESCRIPTION_TEXT_STYLE =
+    TextStyle(
+        fontSize = 16.sp,
+        lineHeight = 24.sp,
+        fontWeight = FontWeight.W500,
+        color = IceBreakrrBlue,
+        letterSpacing = 0.15.sp)
+private val TAG_HEIGHT_DP = 50.dp
+private val REQUEST_BUTTON_SIZE = 55.dp
+private val REQUEST_BUTTON_ELEVATION = 8.dp
+private val BUTTON_ICON_SCALE = 0.7f
+private val PROFILE_IMAGE_ASPECT_RATIO = 1f
+private val PROFILE_IMAGE_PADDING = 16.dp
+private val USERNAME_TEXT_STYLE =
+    TextStyle(fontSize = 24.sp, fontWeight = FontWeight.Bold, color = Color.White)
+private val ALPHA_CATCHPHRASE = 0.8f
+private val ALPHA_DESCRIPTION = 0.9f
+private val DESCRIPTION_PADDING = 4.dp
 
+private val COLUMN_PADDING = 4.dp
+private val VERTICAL_ARRANGEMENT = 2.dp
+
+/**
+ * Displays the information about a profile with the tags
+ *
+ * @param profile: the profile to be shown
+ * @param tagsViewModel: the tagsViewModel to know the color pattern of each tag
+ */
 @Composable
 fun InfoSection(profile: Profile, tagsViewModel: TagsViewModel) {
-
   val scrollState = rememberScrollState()
   val userTags =
       profile.tags.map { tagString -> Pair(tagString, tagsViewModel.tagToColor(tagString)) }
 
   Column(
       modifier =
-          Modifier.fillMaxWidth().padding(16.dp).verticalScroll(scrollState).testTag("infoSection"),
-      verticalArrangement = Arrangement.spacedBy(11.dp, Alignment.Top),
+          Modifier.fillMaxWidth()
+              .padding(INFO_SECTION_PADDING)
+              .verticalScroll(scrollState)
+              .testTag("infoSection"),
+      verticalArrangement = Arrangement.spacedBy(INFO_SECTION_SPACING, Alignment.Top),
       horizontalAlignment = Alignment.Start) {
         // Catchphrase Section
         ProfileCatchPhrase(profile.catchPhrase)
 
         // Description Section
-
         Column(
-            modifier = Modifier.padding(4.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-              Text(
-                  text = "Description",
-                  style =
-                      TextStyle(
-                          fontSize = informationTitleSize,
-                          lineHeight = informationTitleLineHeight,
-                          fontWeight = FontWeight(informationTitleFontWeight),
-                          color = IceBreakrrBlue,
-                          letterSpacing = informationTitleLetterSpacing,
-                      ))
+            modifier = Modifier.padding(COLUMN_PADDING),
+            verticalArrangement = Arrangement.spacedBy(VERTICAL_ARRANGEMENT)) {
+              Text(text = "Description", style = TITLE_TEXT_STYLE)
               ProfileDescription(profile.description)
             }
 
         // Tags Section
         Column(
-            modifier = Modifier.padding(4.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-              Text(
-                  text = "Tags",
-                  style =
-                      TextStyle(
-                          fontSize = informationTitleSize,
-                          lineHeight = informationTitleLineHeight,
-                          fontWeight = FontWeight(informationTitleFontWeight),
-                          color = IceBreakrrBlue,
-                          letterSpacing = informationTitleLetterSpacing,
-                      ))
+            modifier = Modifier.padding(COLUMN_PADDING),
+            verticalArrangement = Arrangement.spacedBy(VERTICAL_ARRANGEMENT)) {
+              Text(text = "Tags", style = TITLE_TEXT_STYLE)
               TagsSection(userTags)
             }
       }
@@ -140,11 +131,10 @@ fun ProfileHeader(
 ) {
   Box(
       modifier =
-          Modifier.fillMaxWidth() // Make the image take full width
-              .aspectRatio(1f) // Keep the aspect ratio 1:1 (height == width) => a square
+          Modifier.fillMaxWidth()
+              .aspectRatio(PROFILE_IMAGE_ASPECT_RATIO)
               .background(Color.LightGray)
               .testTag("profileHeader")) {
-
         // Profile image
         AsyncImage(
             model = profile.profilePictureUrl,
@@ -154,16 +144,15 @@ fun ProfileHeader(
                 Modifier.fillMaxSize()
                     .background(Color.LightGray, CircleShape)
                     .testTag("profilePicture"),
-            placeholder = painterResource(id = R.drawable.nopp), // Default image during loading
-            error = painterResource(id = R.drawable.nopp) // Fallback image if URL fails
-            )
+            placeholder = painterResource(id = R.drawable.nopp),
+            error = painterResource(id = R.drawable.nopp))
 
         // Back button
         IconButton(
             onClick = { navigationActions.goBack() },
             modifier =
-                Modifier.align(Alignment.TopStart) // Align to the top start (top-left corner)
-                    .padding(16.dp)
+                Modifier.align(Alignment.TopStart)
+                    .padding(PROFILE_IMAGE_PADDING)
                     .testTag("goBackButton")) {
               Icon(
                   imageVector = Icons.AutoMirrored.Filled.ArrowBack,
@@ -174,139 +163,75 @@ fun ProfileHeader(
         // Overlay with username and edit button
         Row(
             modifier =
-                Modifier.align(Alignment.BottomStart) // Aligns this content to the bottom left
-                    .fillMaxWidth()
-                    .padding(16.dp),
+                Modifier.align(Alignment.BottomStart).fillMaxWidth().padding(PROFILE_IMAGE_PADDING),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween) {
-
               // Username
               Text(
                   text = profile.name,
-                  fontSize = 24.sp,
-                  fontWeight = FontWeight.Bold,
-                  color = Color.White,
+                  style = USERNAME_TEXT_STYLE,
                   modifier = Modifier.testTag("username"))
 
               val context = LocalContext.current
               // Edit Button or message button
-              if (myProfile) {
-                Box(
-                    modifier =
-                        Modifier.size(requestButtonSize)
-                            .shadow(requestButtonElevation, shape = CircleShape)
-                            .background(IceBreakrrBlue, CircleShape),
-                    contentAlignment = Alignment.Center) {
-                      IconButton(
-                          onClick = {
-                            if (isNetworkAvailable(context = context)) {
-                              onEditClick()
-                            } else {
-                              showNoInternetToast(context = context)
-                            }
-                          },
-                          modifier = Modifier.testTag("editButton")) {
-                            Icon(
-                                imageVector = Icons.Filled.Create,
-                                contentDescription = "Edit Profile",
-                                tint = Color.White,
-                                modifier = Modifier.fillMaxSize(fillMaxSizeMax))
+              val buttonIcon =
+                  if (myProfile) Icons.Filled.Create else Icons.AutoMirrored.Filled.Send
+              val buttonDescription = if (myProfile) "Edit Profile" else "Send Request"
+              val buttonTag = if (myProfile) "editButton" else "requestButton"
+              Box(
+                  modifier =
+                      Modifier.size(REQUEST_BUTTON_SIZE)
+                          .shadow(REQUEST_BUTTON_ELEVATION, shape = CircleShape)
+                          .background(IceBreakrrBlue, CircleShape),
+                  contentAlignment = Alignment.Center) {
+                    IconButton(
+                        onClick = {
+                          if (isNetworkAvailable(context = context)) {
+                            onEditClick()
+                          } else {
+                            showNoInternetToast(context = context)
                           }
-                    }
-              } else {
-                Box(
-                    modifier =
-                        Modifier.size(requestButtonSize)
-                            .shadow(requestButtonElevation, shape = CircleShape)
-                            .background(IceBreakrrBlue, CircleShape),
-                    contentAlignment = Alignment.Center) {
-                      IconButton(
-                          onClick = {
-                            if (isNetworkAvailable(context = context)) {
-                              onEditClick()
-                            } else {
-                              showNoInternetToast(context = context)
-                            }
-                          },
-                          modifier = Modifier.testTag("requestButton")) {
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Filled.Send,
-                                contentDescription = "send request",
-                                tint = Color.White,
-                                modifier = Modifier.fillMaxSize(fillMaxSizeMax))
-                          }
-                    }
-              }
+                        },
+                        modifier = Modifier.testTag(buttonTag)) {
+                          Icon(
+                              imageVector = buttonIcon,
+                              contentDescription = buttonDescription,
+                              tint = Color.White,
+                              modifier = Modifier.fillMaxSize(BUTTON_ICON_SCALE))
+                        }
+                  }
             }
       }
 }
-
-/**
- * Displays the user's catchphrase in a medium-sized font with a maximum of two lines.
- *
- * @param catchPhrase The user's catchphrase.
- */
-private val alpha_catchphrase = 0.8f
-private val fontSize = 16.sp
-private val maxLines = 2
 
 @Composable
 fun ProfileCatchPhrase(catchPhrase: String) {
   Text(
       text = catchPhrase,
-      style =
-          TextStyle(
-              fontSize = catchPhraseSize,
-              lineHeight = catchPhraseLineHeight,
-              fontWeight = FontWeight(catchPhraseWeight),
-              color = IceBreakrrBlue,
-          ),
-      color = Color.Black.copy(alpha = alpha_catchphrase),
-      fontWeight = FontWeight.Medium,
-      fontSize = fontSize,
+      style = CATCHPHRASE_TEXT_STYLE,
+      color = Color.Black.copy(alpha = ALPHA_CATCHPHRASE),
       textAlign = TextAlign.Left,
-      maxLines = maxLines,
+      maxLines = 2,
       overflow = TextOverflow.Ellipsis,
       modifier = Modifier.testTag("catchPhrase"))
 }
 
-/**
- * Displays a section with a row of tags, each associated with a color.
- *
- * @param listOfTags A list of tags, each paired with a color.
- */
 @Composable
 fun TagsSection(listOfTags: List<Pair<String, Color>>) {
   Box(
       modifier =
           Modifier.fillMaxWidth()
-              .height((((listOfTags.size / 2) * tagHeight).dp))
+              .height((listOfTags.size / 2 * TAG_HEIGHT_DP.value).dp)
               .testTag("tagSection")) {
         RowOfTags(listOfTags, TagStyle())
       }
 }
 
-/**
- * Displays the user's profile description in a medium-sized font, aligned to the start.
- *
- * @param description The user's description or bio.
- */
-private val alpha_description = 0.9f
-private val padding_description = 4.dp
-
 @Composable
 fun ProfileDescription(description: String) {
   Text(
       text = description,
-      style =
-          TextStyle(
-              fontSize = descriptionFontSize,
-              lineHeight = descriptionLineHeight,
-              fontWeight = FontWeight(descriptionFontWeight),
-              color = IceBreakrrBlue,
-              letterSpacing = descriptionLetterSpacing),
-      color = Color.Black.copy(alpha = alpha_description),
-      fontSize = 14.sp,
-      textAlign = TextAlign.Start,
-      modifier = Modifier.padding(padding_description).testTag("profileDescription"))
+      style = DESCRIPTION_TEXT_STYLE,
+      color = Color.Black.copy(alpha = ALPHA_DESCRIPTION),
+      modifier = Modifier.padding(DESCRIPTION_PADDING).testTag("profileDescription"))
 }
