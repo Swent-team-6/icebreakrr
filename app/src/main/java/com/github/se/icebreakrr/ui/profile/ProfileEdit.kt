@@ -2,6 +2,7 @@ package com.github.se.icebreakrr.ui.profile
 
 import android.annotation.SuppressLint
 import android.widget.Toast
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -44,9 +45,10 @@ import com.github.se.icebreakrr.model.profile.ProfilesViewModel
 import com.github.se.icebreakrr.model.tags.TagsViewModel
 import com.github.se.icebreakrr.ui.navigation.NavigationActions
 import com.github.se.icebreakrr.ui.sections.shared.UnsavedChangesDialog
+import com.github.se.icebreakrr.ui.sections.shared.handleSafeBackNavigation
 import com.github.se.icebreakrr.ui.tags.TagSelector
-import com.google.firebase.Firebase
-import com.google.firebase.auth.auth
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.ktx.Firebase
 
 @SuppressLint("UnrememberedMutableState", "CoroutineCreationDuringComposition")
 @OptIn(ExperimentalMaterial3Api::class)
@@ -114,12 +116,11 @@ fun ProfileEditingScreen(
                 IconButton(
                     modifier = Modifier.testTag("goBackButton"),
                     onClick = {
-                      if (isModified) {
-                        showDialog = true
-                      } else {
-                        tagsViewModel.leaveUI()
-                        navigationActions.goBack()
-                      }
+                      handleSafeBackNavigation(
+                          isModified = isModified,
+                          setShowDialog = { showDialog = it },
+                          tagsViewModel = tagsViewModel,
+                          navigationActions = navigationActions)
                     }) {
                       Icon(Icons.Default.ArrowBack, contentDescription = "Back")
                     }
@@ -234,5 +235,14 @@ fun ProfileEditingScreen(
                     })
               }
         }
+  }
+
+  // allows the user to navigate back safely with system back button
+  BackHandler {
+    handleSafeBackNavigation(
+        isModified = isModified,
+        setShowDialog = { showDialog = it },
+        tagsViewModel = tagsViewModel,
+        navigationActions = navigationActions)
   }
 }
