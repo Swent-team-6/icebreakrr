@@ -76,13 +76,12 @@ fun ProfileEditingScreen(
 
   LaunchedEffect(Unit) {
     Firebase.auth.currentUser?.let { profilesViewModel.getProfileByUid(it.uid) }
+    profilesViewModel.selectedProfile.value?.tags?.forEach { tag -> tagsViewModel.addFilter(tag) }
   }
 
   val isLoading = profilesViewModel.loading.collectAsState(initial = true).value
   val user = profilesViewModel.selectedProfile.collectAsState().value
   val tempBitmap = profilesViewModel.tempProfilePictureBitmap.collectAsState().value
-
-  LaunchedEffect(user?.tags) { user?.tags?.forEach { tag -> tagsViewModel.addFilter(tag) } }
 
   var catchphrase by remember { mutableStateOf(TextFieldValue(user!!.catchPhrase)) }
   var description by remember { mutableStateOf(TextFieldValue(user!!.description)) }
