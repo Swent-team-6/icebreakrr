@@ -9,6 +9,7 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTouchInput
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.test.espresso.action.ViewActions.swipeDown
+import com.github.se.icebreakrr.data.AppDataStore
 import com.github.se.icebreakrr.model.filter.FilterViewModel
 import com.github.se.icebreakrr.model.profile.Gender
 import com.github.se.icebreakrr.model.profile.Profile
@@ -19,6 +20,7 @@ import com.github.se.icebreakrr.model.tags.TagsViewModel
 import com.github.se.icebreakrr.ui.navigation.NavigationActions
 import com.github.se.icebreakrr.ui.navigation.Route
 import com.github.se.icebreakrr.ui.navigation.Screen
+import com.github.se.icebreakrr.utils.PermissionManager
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.GeoPoint
 import java.util.Calendar
@@ -38,6 +40,8 @@ class AroundYouScreenTest {
   private lateinit var mockProfilesRepository: ProfilesRepository
   private lateinit var mockPPRepository: ProfilePicRepository
   private lateinit var profilesViewModel: ProfilesViewModel
+  private lateinit var mockAppDataStore: AppDataStore
+  private lateinit var mockPermissionManager: PermissionManager
 
   @get:Rule val composeTestRule = createComposeRule()
 
@@ -68,7 +72,9 @@ class AroundYouScreenTest {
           navigationActions,
           profilesViewModel,
           viewModel(factory = TagsViewModel.Factory),
-          viewModel(factory = FilterViewModel.Factory))
+          viewModel(factory = FilterViewModel.Factory),
+        mockPermissionManager,
+        mockAppDataStore)
     }
 
     // Trigger initial connection check

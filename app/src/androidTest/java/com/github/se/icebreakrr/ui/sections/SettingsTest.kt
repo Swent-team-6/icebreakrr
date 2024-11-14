@@ -10,6 +10,7 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.datastore.preferences.core.Preferences
 import com.github.se.icebreakrr.data.AppDataStore
+import com.github.se.icebreakrr.model.location.LocationViewModel
 import com.github.se.icebreakrr.model.profile.ProfilePicRepositoryStorage
 import com.github.se.icebreakrr.model.profile.ProfilesRepository
 import com.github.se.icebreakrr.model.profile.ProfilesViewModel
@@ -49,6 +50,7 @@ class SettingsTest {
   private lateinit var mockProfilesRepository: ProfilesRepository
   private lateinit var testDataStore: DataStore<Preferences>
   private lateinit var appDataStore: AppDataStore
+  private lateinit var mockLocationViewModel: LocationViewModel
 
   @Before
   fun setUp() {
@@ -82,7 +84,7 @@ class SettingsTest {
   @Test
   fun testProfileSettingsScreenDisplaysCorrectly() = runTest {
     composeTestRule.setContent {
-      SettingsScreen(profilesViewModel, navigationActionsMock, appDataStore)
+      SettingsScreen(profilesViewModel, navigationActionsMock, mockLocationViewModel, appDataStore)
     }
 
     // Assert that the top bar is displayed
@@ -105,7 +107,7 @@ class SettingsTest {
   @Test
   fun testNavigationActionsOnProfileCardClick() = runTest {
     composeTestRule.setContent {
-      SettingsScreen(profilesViewModel, navigationActionsMock, appDataStore)
+      SettingsScreen(profilesViewModel, navigationActionsMock, mockLocationViewModel, appDataStore)
     }
 
     composeTestRule.onNodeWithTag("profileCard").performClick()
@@ -118,7 +120,7 @@ class SettingsTest {
     appDataStore.saveDiscoverableStatus(false)
 
     composeTestRule.setContent {
-      SettingsScreen(profilesViewModel, navigationActionsMock, appDataStore)
+      SettingsScreen(profilesViewModel, navigationActionsMock, mockLocationViewModel, appDataStore)
     }
 
     // Initial state check
