@@ -50,12 +50,19 @@ import com.github.se.icebreakrr.R
 import com.github.se.icebreakrr.config.LocalIsTesting
 import com.github.se.icebreakrr.data.AppDataStore
 import com.github.se.icebreakrr.model.filter.FilterViewModel
+import com.github.se.icebreakrr.model.message.MeetingRequestManager
 import com.github.se.icebreakrr.model.message.MeetingRequestViewModel
 import com.github.se.icebreakrr.model.profile.ProfilesViewModel
 import com.github.se.icebreakrr.model.tags.TagsViewModel
 import com.github.se.icebreakrr.ui.navigation.NavigationActions
 import com.github.se.icebreakrr.ui.navigation.Screen
 import com.github.se.icebreakrr.ui.navigation.TopLevelDestinations
+import com.github.se.icebreakrr.ui.sections.DEFAULT_LATITUDE
+import com.github.se.icebreakrr.ui.sections.DEFAULT_LONGITUDE
+import com.github.se.icebreakrr.ui.sections.DEFAULT_RADIUS
+import com.github.se.icebreakrr.ui.theme.IceBreakrrBlue
+import com.github.se.icebreakrr.ui.theme.SignInDarkBlue
+import com.github.se.icebreakrr.ui.theme.SignInMiddleBlue
 import com.github.se.icebreakrr.utils.NetworkUtils
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
@@ -69,6 +76,20 @@ import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
+
+// Constant values
+private const val PADDING_PERCENTAGE = 0.2f
+private const val TITLE_FONT_SIZE = 64
+private const val TITLE_LINE_HEIGHT = 25.07
+private const val TITLE_FONT_WEIGHT = 500
+private const val TITLE_LETTER_SPACING = 0.37
+private const val BUTTON_PADDING = 8
+private const val BUTTON_HEIGHT = 48
+private const val BUTTON_CORNER_RADIUS = 50
+private const val BUTTON_BORDER_WIDTH = 1
+private const val GOOGLE_LOGO_SIZE = 30
+private const val GOOGLE_LOGO_PADDING = 8
+private const val BUTTON_TEXT_FONT_SIZE = 16
 
 /**
  * Composable function that displays the SignIn screen. This screen handles the user authentication
@@ -120,6 +141,8 @@ fun SignInScreen(
 
                 // Checking if user already exists
                 profilesViewModel.getProfileByUid(firebaseUser.uid)
+                MeetingRequestManager.ourName = firebaseUser.displayName
+                MeetingRequestManager.ourUid = firebaseUser.uid
 
                 // Wait until loading becomes false which means that we got the user
                 profilesViewModel.loading.first { !it }
@@ -152,13 +175,7 @@ fun SignInScreen(
 
   // Define a linear gradient with the provided colors
   val gradientBrush =
-      Brush.linearGradient(
-          colors =
-              listOf(
-                  Color(0xFF1FAEF0), // Light blue
-                  Color(0xFF1C9EDA), // Mid blue
-                  Color(0xFF12648A) // Dark blue
-                  ))
+      Brush.linearGradient(colors = listOf(IceBreakrrBlue, SignInMiddleBlue, SignInDarkBlue))
 
   // Add this to collect the auth token state
   val hasAuthToken = appDataStore.hasAuthToken.collectAsState(initial = false)
@@ -180,12 +197,12 @@ fun SignInScreen(
               text = "IceBreakrr",
               style =
                   TextStyle(
-                      fontSize = 64.sp,
-                      lineHeight = 25.07.sp,
-                      fontWeight = FontWeight(500),
-                      color = Color(0xFFFFFFFF),
+                      fontSize = TITLE_FONT_SIZE.sp,
+                      lineHeight = TITLE_LINE_HEIGHT.sp,
+                      fontWeight = FontWeight(TITLE_FONT_WEIGHT),
+                      color = Color.White,
                       textAlign = TextAlign.Center,
-                      letterSpacing = 0.37.sp,
+                      letterSpacing = TITLE_LETTER_SPACING.sp,
                   ))
 
           // Authenticate With Google Button
@@ -199,8 +216,8 @@ fun SignInScreen(
                       // If offline but has token, allow access
                       navigationActions.navigateTo(TopLevelDestinations.AROUND_YOU)
                       profilesViewModel.getFilteredProfilesInRadius(
-                          GeoPoint(0.0, 0.0),
-                          300.0,
+                          GeoPoint(DEFAULT_LATITUDE, DEFAULT_LONGITUDE),
+                          DEFAULT_RADIUS,
                           filterViewModel.selectedGenders.value,
                           filterViewModel.ageRange.value,
                           tagsViewModel.filteredTags.value)
@@ -217,8 +234,8 @@ fun SignInScreen(
                     launcher.launch(googleSignInClient.signInIntent)
 
                     profilesViewModel.getFilteredProfilesInRadius(
-                        GeoPoint(0.0, 0.0),
-                        300.0,
+                        GeoPoint(DEFAULT_LATITUDE, DEFAULT_LONGITUDE),
+                        DEFAULT_RADIUS,
                         filterViewModel.selectedGenders.value,
                         filterViewModel.ageRange.value,
                         tagsViewModel.filteredTags.value)
@@ -239,31 +256,27 @@ fun SignInScreen(
 fun GoogleSignInButton(onClick: () -> Unit) {
   Button(
       onClick = onClick,
-      colors = ButtonDefaults.buttonColors(containerColor = Color.White), // Button color
-      shape = RoundedCornerShape(50), // Circular edges for the button
-      border = BorderStroke(1.dp, Color.LightGray),
+      colors = ButtonDefaults.buttonColors(containerColor = Color.White),
+      shape = RoundedCornerShape(BUTTON_CORNER_RADIUS),
+      border = BorderStroke(BUTTON_BORDER_WIDTH.dp, Color.LightGray),
       modifier =
-          Modifier.padding(8.dp)
-              .height(48.dp) // Adjust height as needed
-              .testTag("loginButton")) {
+          Modifier.padding(BUTTON_PADDING.dp).height(BUTTON_HEIGHT.dp).testTag("loginButton")) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center,
             modifier = Modifier.fillMaxWidth()) {
               // Load the Google logo from resources
               Image(
-                  painter =
-                      painterResource(id = R.drawable.google_logo), // Ensure this drawable exists
+                  painter = painterResource(id = R.drawable.google_logo),
                   contentDescription = "Google Logo",
                   modifier =
-                      Modifier.size(30.dp) // Size of the Google logo
-                          .padding(end = 8.dp))
+                      Modifier.size(GOOGLE_LOGO_SIZE.dp).padding(end = GOOGLE_LOGO_PADDING.dp))
 
               // Text for the button
               Text(
                   text = "Sign in with Google",
-                  color = Color.Gray, // Text color
-                  fontSize = 16.sp, // Font size
+                  color = Color.Gray,
+                  fontSize = BUTTON_TEXT_FONT_SIZE.sp,
                   fontWeight = FontWeight.Medium)
             }
       }
