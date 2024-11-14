@@ -98,4 +98,31 @@ class ProfileCreationTest {
     // Verify that navigation didn't occur
     verify(navigationActions, Mockito.never()).navigateTo(TopLevelDestinations.AROUND_YOU)
   }
+
+  @Test
+  fun testGenderSelection() {
+    composeTestRule.setContent {
+      ProfileCreationScreen(tagsViewModel, fakeProfilesViewModel, navigationActions)
+    }
+
+    // Test each gender option
+    composeTestRule.onNodeWithTag("genderSelection").performClick()
+    composeTestRule.onNodeWithText("Men").performClick()
+
+    composeTestRule.onNodeWithTag("genderSelection").performClick()
+    composeTestRule.onNodeWithText("Women").performClick()
+
+    composeTestRule.onNodeWithTag("genderSelection").performClick()
+    composeTestRule.onNodeWithText("Other").performClick()
+  }
+
+  @Test
+  fun testProfilePictureSelection() {
+    composeTestRule.setContent {
+      ProfileCreationScreen(tagsViewModel, fakeProfilesViewModel, navigationActions)
+    }
+
+    composeTestRule.onNodeWithTag("profilePicture").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("profilePicture").performClick()
+  }
 }

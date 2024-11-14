@@ -9,6 +9,7 @@ import android.widget.Toast
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.google.firebase.Firebase
+import com.google.firebase.auth.auth
 import com.google.firebase.firestore.GeoPoint
 import com.google.firebase.firestore.firestore
 import com.google.firebase.storage.storage
@@ -138,6 +139,7 @@ open class ProfilesViewModel(
    * @param profile The profile to be added.
    */
   fun addNewProfile(profile: Profile) {
+    _selectedProfile.value = profile
     _loading.value = true
     repository.addNewProfile(
         profile, onSuccess = { _loading.value = false }, onFailure = { e -> handleError(e) })
@@ -190,13 +192,13 @@ open class ProfilesViewModel(
    * @throws IllegalStateException if the user is not logged in.
    */
   fun uploadCurrentUserProfilePicture(imageData: ByteArray) {
-    val userId = selectedProfile.value?.uid ?: throw IllegalStateException("User not logged in")
     ppRepository.uploadProfilePicture(
-        userId = userId,
+        userId =
+            Firebase.auth.currentUser?.uid ?: throw IllegalStateException("User not logged in"),
         imageData = imageData,
         onSuccess = { url ->
           // _selectedProfile cannot be null here, as it must be set to current user before calling
-          // this function
+          // this functions
           _selectedProfile.update { selected -> selected!!.copy(profilePictureUrl = url) }
           updateProfile(selectedProfile.value!!)
         },

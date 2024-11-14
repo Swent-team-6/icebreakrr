@@ -39,6 +39,28 @@ import com.google.firebase.auth.auth
 import com.google.firebase.messaging.FirebaseMessaging
 import java.util.Calendar
 
+// Add these constants at the top of the file, before the ProfileCreationScreen composable
+private object ProfileCreationConstants {
+  // Layout constants
+  const val DEFAULT_PADDING = 16
+  const val VERTICAL_SPACING = 8
+  const val SECTION_SPACING = 16
+
+  // Size multipliers
+  const val PROFILE_PICTURE_WIDTH_MULTIPLIER = 0.25f
+  const val TEXT_SIZE_MULTIPLIER = 0.08f
+
+  // Font sizes
+  const val INPUT_LABEL_FONT_SIZE = 16
+  const val INPUT_TEXT_FONT_SIZE = 18
+
+  // Text field properties
+  const val DESCRIPTION_MIN_LINES = 3
+
+  // Date constants
+  const val DEFAULT_AGE_YEARS = -20
+}
+
 @Composable
 fun ProfileCreationScreen(
     tagsViewModel: TagsViewModel,
@@ -50,7 +72,8 @@ fun ProfileCreationScreen(
   val screenWidth = configuration.screenWidthDp.dp
   val screenHeight = configuration.screenHeightDp.dp
 
-  val profilePictureSize = screenWidth * 0.25f
+  val profilePictureSize = screenWidth * ProfileCreationConstants.PROFILE_PICTURE_WIDTH_MULTIPLIER
+  val textSize = screenWidth * ProfileCreationConstants.TEXT_SIZE_MULTIPLIER
 
   val scrollState = rememberScrollState()
   val fullName = remember { mutableStateOf("") }
@@ -66,7 +89,6 @@ fun ProfileCreationScreen(
 
   val expanded = remember { mutableStateOf(false) }
 
-  var showDialog by remember { mutableStateOf(false) }
   var isModified by remember { mutableStateOf(false) }
 
   val context = LocalContext.current
@@ -76,7 +98,7 @@ fun ProfileCreationScreen(
         set(Calendar.MINUTE, 0)
         set(Calendar.SECOND, 0)
         set(Calendar.MILLISECOND, 0)
-        add(Calendar.YEAR, -20)
+        add(Calendar.YEAR, ProfileCreationConstants.DEFAULT_AGE_YEARS)
       }
   val defaultDate = calendar.time
 
@@ -101,15 +123,8 @@ fun ProfileCreationScreen(
       DatePickerDialog(
           context,
           { _, year, month, dayOfMonth ->
-            val newCalendar =
-                Calendar.getInstance().apply {
-                  set(year, month, dayOfMonth)
-                  set(Calendar.HOUR_OF_DAY, 0)
-                  set(Calendar.MINUTE, 0)
-                  set(Calendar.SECOND, 0)
-                  set(Calendar.MILLISECOND, 0)
-                }
-            val pickedDate = newCalendar.time
+            calendar.apply { set(year, month, dayOfMonth) }
+            val pickedDate = calendar.time
             selectedDate.value = pickedDate
             birthdate.value = DateUtils.formatDate(pickedDate)
             isDateValid.value = DateUtils.isAgeValid(pickedDate)
@@ -122,13 +137,16 @@ fun ProfileCreationScreen(
   datePicker.datePicker.maxDate = System.currentTimeMillis()
 
   // Add this TextStyle for consistent sizing
-  val inputTextStyle = TextStyle(fontSize = 18.sp, color = MaterialTheme.colorScheme.onSurface)
+  val inputTextStyle =
+      TextStyle(
+          fontSize = ProfileCreationConstants.INPUT_TEXT_FONT_SIZE.sp,
+          color = MaterialTheme.colorScheme.onSurface)
 
   Box(modifier = Modifier.fillMaxSize()) {
     Column(
         modifier =
             Modifier.fillMaxSize()
-                .padding(16.dp)
+                .padding(ProfileCreationConstants.DEFAULT_PADDING.dp)
                 .verticalScroll(scrollState)
                 .testTag("profileCreationContent"),
         horizontalAlignment = Alignment.CenterHorizontally) {
@@ -150,16 +168,26 @@ fun ProfileCreationScreen(
           OutlinedTextField(
               value = fullName.value,
               onValueChange = { fullName.value = it },
-              label = { Text("Full Name", fontSize = 16.sp) },
-              modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp).testTag("fullName"),
+              label = {
+                Text("Full Name", fontSize = ProfileCreationConstants.INPUT_LABEL_FONT_SIZE.sp)
+              },
+              modifier =
+                  Modifier.fillMaxWidth()
+                      .padding(vertical = ProfileCreationConstants.VERTICAL_SPACING.dp)
+                      .testTag("fullName"),
               textStyle = inputTextStyle)
 
           // Birthdate Input
           OutlinedTextField(
               value = birthdate.value,
               onValueChange = { /* Read-only field */},
-              label = { Text("Birthday", fontSize = 16.sp) },
-              modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp).testTag("birthdate"),
+              label = {
+                Text("Birthday", fontSize = ProfileCreationConstants.INPUT_LABEL_FONT_SIZE.sp)
+              },
+              modifier =
+                  Modifier.fillMaxWidth()
+                      .padding(vertical = ProfileCreationConstants.VERTICAL_SPACING.dp)
+                      .testTag("birthdate"),
               textStyle = inputTextStyle,
               readOnly = true,
               trailingIcon = {
@@ -181,36 +209,52 @@ fun ProfileCreationScreen(
           OutlinedTextField(
               value = catchphrase.value,
               onValueChange = { catchphrase.value = it },
-              label = { Text("Catchphrase", fontSize = 16.sp) },
-              modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp).testTag("catchphrase"),
+              label = {
+                Text("Catchphrase", fontSize = ProfileCreationConstants.INPUT_LABEL_FONT_SIZE.sp)
+              },
+              modifier =
+                  Modifier.fillMaxWidth()
+                      .padding(vertical = ProfileCreationConstants.VERTICAL_SPACING.dp)
+                      .testTag("catchphrase"),
               textStyle = inputTextStyle)
 
           // Description Input
           OutlinedTextField(
               value = description.value,
               onValueChange = { description.value = it },
-              label = { Text("Description", fontSize = 16.sp) },
-              modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp).testTag("description"),
+              label = {
+                Text("Description", fontSize = ProfileCreationConstants.INPUT_LABEL_FONT_SIZE.sp)
+              },
+              modifier =
+                  Modifier.fillMaxWidth()
+                      .padding(vertical = ProfileCreationConstants.VERTICAL_SPACING.dp)
+                      .testTag("description"),
               textStyle = inputTextStyle,
-              minLines = 3)
+              minLines = ProfileCreationConstants.DESCRIPTION_MIN_LINES)
 
-          Spacer(modifier = Modifier.height(16.dp))
+          Spacer(modifier = Modifier.height(ProfileCreationConstants.SECTION_SPACING.dp))
 
           // Gender Selection Title
           Text(
               text = "Gender",
               style = MaterialTheme.typography.titleMedium,
-              modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp))
+              modifier =
+                  Modifier.fillMaxWidth()
+                      .padding(bottom = ProfileCreationConstants.VERTICAL_SPACING.dp))
 
           // Gender Selection Buttons Row
           Row(
               modifier =
-                  Modifier.fillMaxWidth().padding(vertical = 8.dp).testTag("genderSelection"),
+                  Modifier.fillMaxWidth()
+                      .padding(vertical = ProfileCreationConstants.VERTICAL_SPACING.dp)
+                      .testTag("genderSelection"),
               horizontalArrangement = Arrangement.SpaceEvenly) {
                 Gender.values().forEach { gender ->
                   OutlinedButton(
                       onClick = { selectedGender = gender },
-                      modifier = Modifier.weight(1f).padding(horizontal = 4.dp),
+                      modifier =
+                          Modifier.weight(1f)
+                              .padding(horizontal = ProfileCreationConstants.VERTICAL_SPACING.dp),
                       colors =
                           ButtonDefaults.outlinedButtonColors(
                               containerColor =
@@ -249,7 +293,7 @@ fun ProfileCreationScreen(
               },
               height = screenHeight,
               width = screenWidth,
-              textSize = (screenHeight.value * 0.03).sp)
+              textSize = (screenHeight.value * ProfileCreationConstants.TEXT_SIZE_MULTIPLIER).sp)
         }
 
     // Add confirmation button in top right corner
@@ -261,26 +305,18 @@ fun ProfileCreationScreen(
               FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
                 if (task.isSuccessful) {
                   val fcmToken = task.result
+                  calendar.time = selectedDate.value!!
                   val newProfile =
                       Profile(
                           uid = user.uid,
                           name = fullName.value,
                           gender = selectedGender!!, // Add this line
-                          birthDate =
-                              Timestamp(
-                                  Calendar.getInstance()
-                                      .apply {
-                                        time = selectedDate.value!!
-                                        set(Calendar.HOUR_OF_DAY, 0)
-                                        set(Calendar.MINUTE, 0)
-                                        set(Calendar.SECOND, 0)
-                                        set(Calendar.MILLISECOND, 0)
-                                      }
-                                      .time),
+                          birthDate = Timestamp(calendar.time),
                           catchPhrase = catchphrase.value,
                           description = description.value,
                           tags = selectedTags,
                           fcmToken = fcmToken)
+                  // Creates profile in DB
                   profilesViewModel.addNewProfile(newProfile)
                   // Upload profile picture if selected
                   profilesViewModel.validateAndUploadProfilePicture(context)
@@ -294,7 +330,10 @@ fun ProfileCreationScreen(
                 .show()
           }
         },
-        modifier = Modifier.align(Alignment.TopEnd).padding(16.dp).testTag("confirmButton")) {
+        modifier =
+            Modifier.align(Alignment.TopEnd)
+                .padding(ProfileCreationConstants.DEFAULT_PADDING.dp)
+                .testTag("confirmButton")) {
           Icon(
               imageVector = Icons.Default.Check,
               contentDescription = "Confirm",
