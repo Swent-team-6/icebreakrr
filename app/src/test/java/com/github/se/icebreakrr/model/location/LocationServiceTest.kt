@@ -59,21 +59,19 @@ class LocationServiceTest {
     val onLocationUpdate: (Location) -> Unit = mock()
     val onError: (String) -> Unit = mock()
 
-    // Start location updates
-    locationService.startLocationUpdates(onLocationUpdate, onError)
+    // Assert that startLocationUpdates returns true when it starts successfully
+    val result = locationService.startLocationUpdates(onLocationUpdate, onError)
+    assert(result)
 
-    // Capture the LocationCallback passed to fusedLocationProviderClient
     verify(fusedLocationProviderClient)
         .requestLocationUpdates(any(), locationCallbackCaptor.capture(), eq(Looper.getMainLooper()))
 
     val locationCallback = locationCallbackCaptor.value
 
-    // Simulate a location result with a valid location
     `when`(locationResult.lastLocation).thenReturn(location)
     locationCallback.onLocationResult(locationResult)
 
-    // Verify that the onLocationUpdate callback is called with the simulated location
-    verify(onLocationUpdate).invoke(location) // Ensure the `invoke` method is called
+    verify(onLocationUpdate).invoke(location)
   }
 
   @Test
@@ -81,7 +79,8 @@ class LocationServiceTest {
     val onLocationUpdate: (Location) -> Unit = mock()
     val onError: (String) -> Unit = mock()
 
-    locationService.startLocationUpdates(onLocationUpdate, onError)
+    val result = locationService.startLocationUpdates(onLocationUpdate, onError)
+    assert(result)
 
     verify(fusedLocationProviderClient)
         .requestLocationUpdates(any(), locationCallbackCaptor.capture(), eq(Looper.getMainLooper()))
@@ -128,18 +127,17 @@ class LocationServiceTest {
     val onLocationUpdate: (Location) -> Unit = mock()
     val onError: (String) -> Unit = mock()
 
-    // Simulate a RuntimeException instead of ApiException
+    // Simulate an exception
     doThrow(RuntimeException("Simulated exception"))
         .`when`(fusedLocationProviderClient)
         .requestLocationUpdates(
-            any(LocationRequest::class.java), // Explicit type for LocationRequest
-            any(LocationCallback::class.java), // Explicit type for LocationCallback
-            any(Looper::class.java) // Explicit type for Looper
-            )
+            any(LocationRequest::class.java),
+            any(LocationCallback::class.java),
+            any(Looper::class.java))
 
-    locationService.startLocationUpdates(onLocationUpdate, onError)
+    val result = locationService.startLocationUpdates(onLocationUpdate, onError)
+    assert(!result) // Expect false due to the exception
 
-    // Verify that the onError callback is called with the error message
     verify(onError).invoke("Error with location request: Simulated exception")
   }
 
