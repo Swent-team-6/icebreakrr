@@ -1,5 +1,6 @@
 package com.github.se.icebreakrr
 
+import ProfileCreationScreen
 import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Build
@@ -105,7 +106,7 @@ class MainActivity : ComponentActivity() {
         }
 
     // Initialize DataStore
-    appDataStore = AppDataStore(this)
+    appDataStore = AppDataStore(context = this)
 
     setContent {
       // Provide the `isTesting` flag to the entire composable tree
@@ -214,6 +215,9 @@ fun IcebreakrrNavHost(
           throw IllegalStateException(
               "The Meeting Request View Model shouldn't be null : Bad initialization")
         }
+      }
+      composable(Screen.PROFILE_CREATION) {
+        ProfileCreationScreen(tagsViewModel, profileViewModel, navigationActions)
       }
     }
 

@@ -22,6 +22,7 @@ object Route {
   const val NOTIFICATIONS = "Notifications"
   const val PROFILE_EDIT = "ProfileEdit"
   const val FILTER = "Filter"
+  const val PROFILE_CREATION = "ProfileCreation"
 }
 
 object Screen {
@@ -33,6 +34,7 @@ object Screen {
   const val FILTER = "Filter Screen"
   const val PROFILE = "Profile Screen"
   const val OTHER_PROFILE_VIEW = "Around You Profile Screen"
+  const val PROFILE_CREATION = "Profile Creation Screen"
 }
 
 object TopLevelDestinations {
