@@ -43,6 +43,7 @@ import com.github.se.icebreakrr.ui.navigation.Screen
 import com.github.se.icebreakrr.ui.sections.shared.ProfileCard
 import com.github.se.icebreakrr.ui.sections.shared.TopBar
 import com.google.firebase.auth.FirebaseAuth
+import kotlinx.coroutines.launch
 
 // Constants for dimensions and other settings
 private val SCREEN_PADDING = 16.dp
@@ -56,6 +57,15 @@ private val BUTTON_TEXT_COLOR = Color.White
 private const val LOGOUT_BUTTON_TAG = "logOutButton"
 private val TOGGLE_BOX_HEIGHT = 55.dp
 
+/**
+ * Composable function for displaying the Setting screen.
+ *
+ * It includes a bottom navigation bar and displays the main content of the setting screen.
+ *
+ * @param navigationActions The actions used for navigating between screens.
+ * @param profilesViewModel the View model for the profiles
+ * @param appDataStore sets the data or the app
+ */
 @Composable
 fun SettingsScreen(
     profilesViewModel: ProfilesViewModel,
@@ -70,11 +80,6 @@ fun SettingsScreen(
   val isDiscoverable by appDataStore.isDiscoverable.collectAsState(initial = true)
 
   lateinit var auth: FirebaseAuth
-
-  // Constants for padding and spacing
-  val screenPadding = 16.dp
-  val verticalSpacing = 8.dp
-  val buttonVerticalSpacing = 16.dp
 
   LaunchedEffect(Unit) {
     FirebaseAuth.getInstance().currentUser?.let { profilesViewModel.getProfileByUid(it.uid) }
@@ -115,9 +120,12 @@ fun SettingsScreen(
           Spacer(modifier = Modifier.height(SPACER_HEIGHT_SMALL))
 
           // Display Toggle Options
-          ToggleOptionBox(label = "Toggle Location")
-          ToggleOptionBox(label = "Option 1")
-
+          ToggleOptionBox(
+              label = "Toggle Discoverability",
+              isChecked = isDiscoverable,
+              onCheckedChange = { discoverable ->
+                coroutineScope.launch { appDataStore.saveDiscoverableStatus(discoverable) }
+              })
           Spacer(modifier = Modifier.height(SPACER_HEIGHT_LARGE))
 
           Button(
@@ -154,15 +162,11 @@ fun ToggleOptionBox(
   val cardPadding = 16.dp
 
   Card(
-      shape = RoundedCornerShape(CARD_CORNER_RADIUS),
-      modifier =
-          Modifier.fillMaxWidth()
-              .padding(vertical = SPACER_HEIGHT_SMALL)
-              .height(TOGGLE_BOX_HEIGHT)
-              .testTag(label),
-      elevation = CardDefaults.cardElevation(defaultElevation = CARD_ELEVATION)) {
+      shape = cardShape,
+      modifier = modifier.fillMaxWidth().padding(vertical = 8.dp).height(cardHeight).testTag(label),
+      elevation = CardDefaults.cardElevation(defaultElevation = cardElevation)) {
         Row(
-            modifier = Modifier.fillMaxWidth().padding(SCREEN_PADDING),
+            modifier = Modifier.fillMaxWidth().padding(cardPadding),
             verticalAlignment = Alignment.CenterVertically) {
               Text(label)
               Spacer(modifier = Modifier.weight(1f))

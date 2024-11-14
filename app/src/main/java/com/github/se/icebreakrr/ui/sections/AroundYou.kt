@@ -37,7 +37,7 @@ import com.github.se.icebreakrr.ui.navigation.Screen
 import com.github.se.icebreakrr.ui.sections.shared.FilterFloatingActionButton
 import com.github.se.icebreakrr.ui.sections.shared.ProfileCard
 import com.github.se.icebreakrr.ui.sections.shared.TopBar
-import com.github.se.icebreakrr.ui.theme.lightGray
+import com.github.se.icebreakrr.ui.theme.messageTextColor
 import com.github.se.icebreakrr.utils.NetworkUtils.isNetworkAvailable
 import com.github.se.icebreakrr.utils.NetworkUtils.isNetworkAvailableWithContext
 import com.github.se.icebreakrr.utils.NetworkUtils.showNoInternetToast
@@ -47,8 +47,8 @@ import com.google.firebase.firestore.GeoPoint
 private val COLUMN_VERTICAL_PADDING = 16.dp
 private val COLUMN_HORIZONTAL_PADDING = 8.dp
 private val TEXT_SIZE_LARGE = 20.sp
-private val NO_CONNECTION_TEXT_COLOR = lightGray
-private val EMPTY_PROFILE_TEXT_COLOR = lightGray
+private val NO_CONNECTION_TEXT_COLOR = messageTextColor
+private val EMPTY_PROFILE_TEXT_COLOR = messageTextColor
 
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -76,10 +76,6 @@ fun AroundYouScreen(
   // Define constants for magic numbers
   val defaultGeoPoint = GeoPoint(0.0, 0.0)
   val searchRadius = 300.0
-  val verticalPadding = 16.dp
-  val horizontalPadding = 8.dp
-  val messageTextSize = 20.sp
-  val messageTextColor = Color(0xFF575757)
 
   // Check network state when screen loads
   LaunchedEffect(Unit) {

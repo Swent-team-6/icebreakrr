@@ -80,6 +80,14 @@ private val DESCRIPTION_PADDING = 4.dp
 private val COLUMN_PADDING = 4.dp
 private val VERTICAL_ARRANGEMENT = 2.dp
 
+private val PADDING_SMALL = 8.dp
+private val PADDING_STANDARD = 16.dp
+private val PADDING_LARGE = 24.dp
+private const val MAX_DIALOG_WIDTH_FACTOR = 0.95f
+val requestButtonSize = 55.dp
+private const val FLAG_BUTTON_WRAP = 0.7f
+private val modalTitleSize = 20.sp
+
 /**
  * Displays the information about a profile with the tags
  *
@@ -223,7 +231,7 @@ fun ProfileHeader(
                   contentAlignment = Alignment.Center) {
                     IconButton(
                         onClick = {
-                          if (isNetworkAvailable(context = context)) {
+                          if (isNetworkAvailable()) {
                             onEditClick()
                           } else {
                             showNoInternetToast(context = context)
