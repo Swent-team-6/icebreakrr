@@ -41,11 +41,11 @@ import com.github.se.icebreakrr.ui.sections.FilterScreen
 import com.github.se.icebreakrr.ui.sections.NotificationScreen
 import com.github.se.icebreakrr.ui.sections.SettingsScreen
 import com.github.se.icebreakrr.ui.theme.SampleAppTheme
+import com.github.se.icebreakrr.utils.NetworkUtils
 import com.github.se.icebreakrr.utils.PermissionManager
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.firebase.Firebase
-import com.github.se.icebreakrr.utils.NetworkUtils
 import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.firestore
@@ -72,7 +72,7 @@ class MainActivity : ComponentActivity() {
     FirebaseApp.initializeApp(this)
     auth = FirebaseAuth.getInstance()
     functions = FirebaseFunctions.getInstance()
-    
+
     // Initialize Utils
     NetworkUtils.init(this)
 
@@ -106,7 +106,6 @@ class MainActivity : ComponentActivity() {
 
     // Initialize DataStore
     appDataStore = AppDataStore(this)
-
 
     setContent {
       // Provide the `isTesting` flag to the entire composable tree
