@@ -155,7 +155,7 @@ class MeetingRequestViewModelTest {
     val callableMock: HttpsCallableResult = mock(HttpsCallableResult::class.java)
     val callableTask: Task<HttpsCallableResult> = Tasks.forResult(callableMock)
     val callable = mock<HttpsCallableReference>()
-    val mockMeetingRequestManager = Mockito.mock(MeetingRequestManager::class.java)
+    val mockMeetingRequestManager = mock(MeetingRequestManager::class.java)
 
     // Setup the function mock to return the task when called
     `when`(callable.call(any())).thenReturn(callableTask) // This makes it chainable
