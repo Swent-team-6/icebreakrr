@@ -270,6 +270,7 @@ fun ProfileCreationScreen(
                 isModified = true
               },
               onStringChanged = {
+                stringQuery.value = it
                 tagsViewModel.setQuery(it, selectedTags)
                 isModified = true
               },
@@ -280,7 +281,7 @@ fun ProfileCreationScreen(
               },
               height = screenHeight,
               width = screenWidth,
-              textSize = (screenHeight.value * ProfileCreationConstants.TEXT_SIZE_MULTIPLIER).sp)
+              textSize = (screenHeight.value * 0.03).sp)
         }
 
     // Add confirmation button in top right corner

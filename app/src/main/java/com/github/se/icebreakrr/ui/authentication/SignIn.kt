@@ -5,6 +5,7 @@ package com.github.se.icebreakrr.ui.authentication
 // The code has been highly inspired by the bootcamp examples and modified for this project.
 
 import android.content.Intent
+import android.util.Log
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResult
@@ -73,7 +74,6 @@ import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.auth.auth
 import com.google.firebase.firestore.GeoPoint
 import com.google.firebase.messaging.FirebaseMessaging
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
@@ -130,6 +130,8 @@ fun SignInScreen(
       rememberFirebaseAuthLauncher(
           onAuthComplete = { result ->
             user = result.user
+            Log.d("USER SIGN-IN NAME", user?.displayName ?: "null") // never null here
+            Log.d("USER SIGN-IN UID", user?.uid ?: "null")
             user?.let { firebaseUser ->
               coroutineScope.launch {
 
@@ -140,35 +142,35 @@ fun SignInScreen(
                 }
 
                 // Checking if user already exists
-                profilesViewModel.getProfileByUid(firebaseUser.uid)
-                MeetingRequestManager.ourName = firebaseUser.displayName
-                MeetingRequestManager.ourUid = firebaseUser.uid
+                profilesViewModel.getProfileByUidAndThen(firebaseUser.uid) {
+                  MeetingRequestManager.ourName = firebaseUser.displayName
+                  MeetingRequestManager.ourUid = firebaseUser.uid
 
-                // Wait until loading becomes false which means that we got the user
-                profilesViewModel.loading.first { !it }
+                  // Check selectedProfile after loading completes
+                  val profile = profilesViewModel.selectedProfile.value
+                  Log.d("PROFILE NAME IN SIGN IN", profile?.name ?: "null") // sometimes null here
+                  Log.d("PROFILE UID IN SIGN IN", profile?.uid ?: "null")
 
-                // Check selectedProfile after loading completes
-                val profile = profilesViewModel.selectedProfile.value
-
-                // checking if profile already exists and add it its fcmToken
-                FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
-                  if (task.isSuccessful) {
-                    val fcmToken = task.result
-                    meetingRequestViewModel.onLocalTokenChange(token)
-                    if (profile == null) {
-                      // If profile doesn't exist, navigate to profile creation
-                      navigationActions.navigateTo(Screen.PROFILE_CREATION)
-                    } else {
-                      val updatedProfile = profile.copy(fcmToken = fcmToken)
-                      profilesViewModel.updateProfile(updatedProfile)
-                      navigationActions.navigateTo(TopLevelDestinations.AROUND_YOU)
+                  // checking if profile already exists and add it its fcmToken
+                  FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                      val fcmToken = task.result
+                      meetingRequestViewModel.onLocalTokenChange(token)
+                      if (profile == null) {
+                        // If profile doesn't exist, navigate to profile creation
+                        navigationActions.navigateTo(Screen.PROFILE_CREATION)
+                      } else {
+                        val updatedProfile = profile.copy(fcmToken = fcmToken)
+                        profilesViewModel.updateProfile(updatedProfile)
+                        navigationActions.navigateTo(TopLevelDestinations.AROUND_YOU)
+                      }
                     }
                   }
-                }
 
-                // Navigate to sign in screen after completion
-                navigationActions.navigateTo(TopLevelDestinations.AROUND_YOU)
-              }
+                  // Navigate to sign in screen after completion
+                  navigationActions.navigateTo(TopLevelDestinations.AROUND_YOU)
+                }
+              } //
             }
           },
           onAuthError = { user = null })
