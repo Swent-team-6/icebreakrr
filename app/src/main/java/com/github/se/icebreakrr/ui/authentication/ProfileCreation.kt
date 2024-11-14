@@ -31,7 +31,6 @@ import com.github.se.icebreakrr.model.profile.ProfilesViewModel
 import com.github.se.icebreakrr.model.tags.TagsViewModel
 import com.github.se.icebreakrr.ui.navigation.NavigationActions
 import com.github.se.icebreakrr.ui.navigation.TopLevelDestinations
-import com.github.se.icebreakrr.ui.profile.ProfilePictureSelector
 import com.github.se.icebreakrr.ui.tags.TagSelector
 import com.google.firebase.Firebase
 import com.google.firebase.Timestamp
@@ -81,7 +80,6 @@ fun ProfileCreationScreen(
   val description = remember { mutableStateOf("") }
 
   val tempBitmap = profilesViewModel.tempProfilePictureBitmap.collectAsState().value
-  val user = profilesViewModel.selectedProfile.collectAsState().value
 
   val selectedTags = tagsViewModel.filteringTags.collectAsState().value
   val tagsSuggestions = tagsViewModel.tagsSuggestions.collectAsState()
@@ -150,19 +148,10 @@ fun ProfileCreationScreen(
                 .verticalScroll(scrollState)
                 .testTag("profileCreationContent"),
         horizontalAlignment = Alignment.CenterHorizontally) {
-
-          // Profile Image
-          ProfilePictureSelector(
-              url = null,
-              localBitmap = tempBitmap,
-              size = profilePictureSize,
-              onSelectionSuccess = { uri ->
-                profilesViewModel.generateTempProfilePictureBitmap(context, uri)
-                isModified = true
-              },
-              onSelectionFailure = {
-                Toast.makeText(context, "Failed to select image", Toast.LENGTH_SHORT).show()
-              })
+          Text(
+              text = "Create Profile",
+              style = MaterialTheme.typography.headlineMedium,
+              modifier = Modifier.padding(bottom = 16.dp).testTag("profileCreationTitle"))
 
           // Full Name Input
           OutlinedTextField(
@@ -318,8 +307,6 @@ fun ProfileCreationScreen(
                           fcmToken = fcmToken)
                   // Creates profile in DB
                   profilesViewModel.addNewProfile(newProfile)
-                  // Upload profile picture if selected
-                  profilesViewModel.validateAndUploadProfilePicture(context)
                   // Navigate to AroundYou screen
                   navigationActions.navigateTo(TopLevelDestinations.AROUND_YOU)
                 }

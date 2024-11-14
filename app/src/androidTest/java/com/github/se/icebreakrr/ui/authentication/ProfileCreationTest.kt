@@ -125,4 +125,17 @@ class ProfileCreationTest {
     composeTestRule.onNodeWithTag("profilePicture").assertIsDisplayed()
     composeTestRule.onNodeWithTag("profilePicture").performClick()
   }
+
+  @Test
+  fun testProfileCreationTitle() {
+    composeTestRule.setContent {
+      ProfileCreationScreen(tagsViewModel, fakeProfilesViewModel, navigationActions)
+    }
+
+    composeTestRule
+        .onNodeWithTag("profileCreationTitle")
+        .assertExists()
+        .assertIsDisplayed()
+        .assertTextEquals("Create Profile")
+  }
 }
