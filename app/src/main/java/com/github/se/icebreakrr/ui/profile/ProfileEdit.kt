@@ -28,6 +28,7 @@ import com.github.se.icebreakrr.ui.navigation.NavigationActions
 import com.github.se.icebreakrr.ui.sections.shared.UnsavedChangesDialog
 import com.github.se.icebreakrr.ui.tags.TagSelector
 import com.google.firebase.Firebase
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.auth
 
 @SuppressLint("UnrememberedMutableState", "CoroutineCreationDuringComposition")
@@ -36,7 +37,8 @@ import com.google.firebase.auth.auth
 fun ProfileEditingScreen(
     navigationActions: NavigationActions,
     tagsViewModel: TagsViewModel,
-    profilesViewModel: ProfilesViewModel
+    profilesViewModel: ProfilesViewModel,
+    auth: FirebaseAuth = FirebaseAuth.getInstance()
 ) {
 
   val configuration = LocalConfiguration.current
@@ -51,7 +53,7 @@ fun ProfileEditingScreen(
   val descriptionHeight = screenHeight * 0.16f
 
   LaunchedEffect(Unit) {
-    Firebase.auth.currentUser?.let { profilesViewModel.getProfileByUid(it.uid) }
+    auth.currentUser?.let { profilesViewModel.getProfileByUid(it.uid) }
   }
 
   val isLoading = profilesViewModel.loading.collectAsState(initial = true).value

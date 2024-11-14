@@ -1,10 +1,17 @@
 [versions]
 #Google
+activityCompose = "1.7.0"
 converterMoshi = "2.9.0"
 coreTesting = "2.2.0"
+googleHiltAndroidCompilerVersion = "2.51"
 googleServices = "4.4.2"
-mockitoInline = "4.0.0"
-mockitoInlineVersion = "5.2.0"
+gradle = "7.4.2"
+hiltAndroid = "2.51.1"
+hiltAndroidCompiler = "2.51.1"
+hiltAndroidTesting = "2.51.1"
+kotlinGradlePlugin = "1.8.0"
+lifecycleViewmodelKtx = "2.8.7"
+mockitoInline = "5.2.0"
 mockitoMockitoCore = "5.2.0"
 playServicesAuth = "21.2.0"
 playServicesLocation = "21.3.0"
@@ -48,20 +55,28 @@ junitVersion = "1.2.1"
 espressoCore = "3.6.1"
 retrofit = "2.9.0"
 robolectric = "4.11.1"
+hilt = "2.51.1"  # Use the appropriate version for Hilt
 
 #CI
 sonar = "4.4.1.3373"
 ktfmt = "0.17.0"
 firebaseFunctionsKtx = "21.0.0"
 firebaseStorageKtx = "21.0.1"
+monitor = "1.7.1"
 
 [libraries]
 #Google
+androidx-activity-compose-v170 = { module = "androidx.activity:activity-compose", version.ref = "activityCompose" }
 androidx-core-testing = { module = "androidx.arch.core:core-testing", version.ref = "coreTesting" }
+androidx-lifecycle-viewmodel-ktx = { module = "androidx.lifecycle:lifecycle-viewmodel-ktx", version.ref = "lifecycleViewmodelKtx" }
 converter-moshi = { module = "com.squareup.retrofit2:converter-moshi", version.ref = "converterMoshi" }
 firebase-messaging-ktx = { module = "com.google.firebase:firebase-messaging-ktx" }
+gradle = { module = "com.android.tools.build:gradle", version.ref = "gradle" }
+hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hiltAndroid" }
+hilt-android-compiler = { module = "com.google.dagger:hilt-android-compiler", version.ref = "hiltAndroidCompiler" }
+hilt-android-testing = { module = "com.google.dagger:hilt-android-testing", version.ref = "hiltAndroidTesting" }
+kotlin-gradle-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlinGradlePlugin" }
 mockito-inline = { module = "org.mockito:mockito-inline", version.ref = "mockitoInline" }
-mockito-inline-v520 = { module = "org.mockito:mockito-inline", version.ref = "mockitoInlineVersion" }
 mockito-mockito-core-v520 = { module = "org.mockito:mockito-core", version.ref = "mockitoMockitoCore" }
 play-services-auth = { module = "com.google.android.gms:play-services-auth", version.ref = "playServicesAuth" }
 play-services-location = { module = "com.google.android.gms:play-services-location", version.ref = "playServicesLocation" }
@@ -114,6 +129,7 @@ mockito-kotlin = { group = "org.mockito.kotlin", name = "mockito-kotlin", versio
 androidx-navigation-testing = { group = "androidx.navigation", name = "navigation-testing", version.ref = "navigationTesting" }
 firebase-functions-ktx = { group = "com.google.firebase", name = "firebase-functions-ktx", version.ref = "firebaseFunctionsKtx" }
 firebase-storage-ktx = { group = "com.google.firebase", name = "firebase-storage-ktx", version.ref = "firebaseStorageKtx" }
+androidx-monitor = { group = "androidx.test", name = "monitor", version.ref = "monitor" }
 
 
 [plugins]

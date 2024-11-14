@@ -197,18 +197,18 @@ fun Profile.Companion.getMockedProfiles(): List<Profile> {
           "I am an adventurer and archaeologist.")
   val tagsList =
       listOf(
-          listOf("travel", "software", "music"),
-          listOf("food", "cooking", "travel"),
-          listOf("cartoon", "kites", "dog"),
-          listOf("superhero", "justice", "truth"),
-          listOf("detective", "thriller", "mystery"),
-          listOf("politics", "power", "drama"),
-          listOf("science", "aliens", "action"),
-          listOf("music", "pop", "secret"),
-          listOf("adventure", "archaeology", "history"),
-          listOf("investigator", "superhero", "strength"),
-          listOf("entertainment", "singing", "frog"),
-          listOf("adventure", "archaeology", "action"))
+          listOf("Travel", "Software", "Music"),
+          listOf("Food", "Cooking", "Travel"),
+          listOf("Cartoon", "Kites", "Dog"),
+          listOf("Superhero", "Justice", "Truth"),
+          listOf("Detective", "Thriller", "Mystery"),
+          listOf("Politics", "Power", "Drama"),
+          listOf("Science", "Aliens", "Action"),
+          listOf("Music", "Pop", "Secret"),
+          listOf("Adventure", "Archaeology", "History"),
+          listOf("Investigator", "Superhero", "Strength"),
+          listOf("Entertainment", "Singing", "Frog"),
+          listOf("Adventure", "Archaeology", "Action"))
 
   val profiles = mutableListOf<Profile>()
   for (i in uids.indices) {

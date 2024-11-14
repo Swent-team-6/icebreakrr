@@ -38,6 +38,7 @@ class MeetingRequestService : FirebaseMessagingService() {
    */
   override fun onNewToken(token: String) {
     super.onNewToken(token)
+    MeetingRequestManager.updateRemoteToken(token)
   }
 
   /**

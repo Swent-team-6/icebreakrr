@@ -23,6 +23,7 @@ import com.github.se.icebreakrr.ui.navigation.Screen
 import com.github.se.icebreakrr.ui.sections.shared.InfoSection
 import com.github.se.icebreakrr.ui.sections.shared.ProfileHeader
 import com.google.firebase.Firebase
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.auth
 
 /**
@@ -37,12 +38,13 @@ import com.google.firebase.auth.auth
 fun ProfileView(
     profilesViewModel: ProfilesViewModel,
     tagsViewModel: TagsViewModel,
-    navigationActions: NavigationActions
+    navigationActions: NavigationActions,
+    auth: FirebaseAuth = FirebaseAuth.getInstance()
 ) {
 
   // Launch a coroutine to fetch the profile when this composable is first displayed
   LaunchedEffect(Unit) {
-    Firebase.auth.currentUser?.let { profilesViewModel.getProfileByUid(it.uid) }
+    auth.currentUser?.let { profilesViewModel.getProfileByUid(it.uid) }
   }
 
   val isLoading = profilesViewModel.loading.collectAsState(initial = true).value

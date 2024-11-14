@@ -7,6 +7,8 @@ plugins {
     alias(libs.plugins.sonar)
     id("jacoco")
     id("com.google.gms.google-services")
+    id("kotlin-kapt")
+    id("com.google.dagger.hilt.android")
 }
 
 val keystorePropertiesFile = rootProject.file("local.properties")
@@ -31,6 +33,7 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
+        testInstrumentationRunner = "com.github.se.CustomTestRunner"
     }
 
     signingConfigs {
@@ -71,12 +74,18 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
 
     kotlinOptions {
-        jvmTarget = "11"
+        jvmTarget = "17"
+    }
+
+    java {
+        toolchain {
+            languageVersion.set(JavaLanguageVersion.of(17))
+        }
     }
 
     packaging {
@@ -155,6 +164,7 @@ dependencies {
     implementation(libs.firebase.firestore.ktx)
     implementation(libs.firebase.functions.ktx)
     implementation(libs.firebase.storage.ktx)
+    implementation(libs.androidx.monitor)
     testImplementation(libs.junit)
     globalTestImplementation(libs.androidx.junit)
     globalTestImplementation(libs.androidx.espresso.core)
@@ -215,7 +225,6 @@ dependencies {
     testImplementation(libs.mockito.kotlin)
 
     testImplementation(libs.mockito.mockito.core.v520)
-    testImplementation(libs.mockito.inline.v520) // For mocking static methods if needed
 
 
     androidTestImplementation(libs.mockito.kotlin)
@@ -225,6 +234,16 @@ dependencies {
     androidTestImplementation(libs.mockito.kotlin)
 
     implementation(platform(libs.firebase.bom))
+
+    //Dagger - hilt :
+    implementation(libs.hilt.android)
+    kapt(libs.hilt.android.compiler)
+    testImplementation(libs.hilt.android.testing)
+    kaptTest(libs.hilt.android.compiler)
+    testAnnotationProcessor(libs.hilt.android.compiler)
+    androidTestImplementation(libs.hilt.android.testing)
+    kaptAndroidTest(libs.hilt.android.compiler)
+    androidTestAnnotationProcessor(libs.hilt.android.compiler)
 }
 
 tasks.withType<Test> {
@@ -263,4 +282,8 @@ tasks.register("jacocoTestReport", JacocoReport::class) {
         include("outputs/unit_test_code_coverage/debugUnitTest/testDebugUnitTest.exec")
         include("outputs/code_coverage/debugAndroidTest/connected/*/coverage.ec")
     })
+}
+
+kapt {
+    correctErrorTypes = true
 }

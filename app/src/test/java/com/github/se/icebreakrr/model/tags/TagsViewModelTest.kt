@@ -132,7 +132,7 @@ class TagsViewModelTest {
         .`when`(repository)
         .getAllTags(anyOrNull(), anyOrNull())
     doAnswer { invocation ->
-          val callback = invocation.getArgument<() -> Unit>(0)
+            val callback = invocation.getArgument<() -> Unit>(0)
           callback.invoke()
           null
         }

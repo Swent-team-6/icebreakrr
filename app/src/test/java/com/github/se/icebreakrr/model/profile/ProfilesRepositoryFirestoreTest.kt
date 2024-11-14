@@ -68,7 +68,7 @@ class ProfilesRepositoryFirestoreTest {
       FirebaseApp.initializeApp(ApplicationProvider.getApplicationContext())
     }
 
-    profilesRepositoryFirestore = ProfilesRepositoryFirestore(mockFirestore)
+    profilesRepositoryFirestore = ProfilesRepositoryFirestore(mockFirestore, FirebaseAuth.getInstance())
 
     `when`(mockFirestore.collection(any())).thenReturn(mockCollectionReference)
     `when`(mockCollectionReference.document(any())).thenReturn(mockDocumentReference)

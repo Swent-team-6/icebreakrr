@@ -1,6 +1,7 @@
 package com.github.se.icebreakrr.ui.sections
 
 import android.annotation.SuppressLint
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -32,6 +33,7 @@ import com.github.se.icebreakrr.model.tags.TagsViewModel
 import com.github.se.icebreakrr.ui.navigation.BottomNavigationMenu
 import com.github.se.icebreakrr.ui.navigation.LIST_TOP_LEVEL_DESTINATIONS
 import com.github.se.icebreakrr.ui.navigation.NavigationActions
+import com.github.se.icebreakrr.ui.navigation.Route
 import com.github.se.icebreakrr.ui.navigation.Screen
 import com.github.se.icebreakrr.ui.sections.shared.FilterFloatingActionButton
 import com.github.se.icebreakrr.ui.sections.shared.ProfileCard
@@ -58,6 +60,7 @@ fun AroundYouScreen(
 ) {
 
   val filteredProfiles = profilesViewModel.filteredProfiles.collectAsState()
+  Log.d("ComposeHierarchy", "[AroundYouScreen] number filtered profiles : ${filteredProfiles.value.size}")
   val isLoading = profilesViewModel.loading.collectAsState()
   val context = LocalContext.current
   val isConnected = profilesViewModel.isConnected.collectAsState()
@@ -66,9 +69,14 @@ fun AroundYouScreen(
       modifier = Modifier.testTag("aroundYouScreen"),
       bottomBar = {
         BottomNavigationMenu(
-            onTabSelect = { route -> navigationActions.navigateTo(route) },
+            onTabSelect = { route ->
+                Log.d("ComposeHierarchy", "[AroundYouScreen] clicked new route : ${route.route}")
+              if (route.route != Route.AROUND_YOU) {
+                navigationActions.navigateTo(route)
+              }
+            },
             tabList = LIST_TOP_LEVEL_DESTINATIONS,
-            selectedItem = navigationActions.currentRoute())
+            selectedItem = Route.AROUND_YOU)
       },
       topBar = { TopBar("Around You") },
       content = { innerPadding ->
