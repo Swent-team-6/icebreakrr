@@ -129,10 +129,10 @@ fun SettingsScreen(
               label = "Toggle location update",
               isChecked = isDiscoverable,
               onCheckedChange = { discoverable ->
-                  when (discoverable) {
-                      true -> locationViewModel.tryToStartLocationUpdates()
-                      false -> locationViewModel.stopLocationUpdates()
-                  }
+                when (discoverable) {
+                  true -> locationViewModel.tryToStartLocationUpdates()
+                  false -> locationViewModel.stopLocationUpdates()
+                }
                 coroutineScope.launch { appDataStore.saveDiscoverableStatus(discoverable) }
               })
           Spacer(modifier = Modifier.height(SPACER_HEIGHT_LARGE))

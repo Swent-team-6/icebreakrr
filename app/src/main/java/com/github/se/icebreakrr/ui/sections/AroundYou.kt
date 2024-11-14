@@ -28,10 +28,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.datastore.dataStore
 import com.github.se.icebreakrr.data.AppDataStore
 import com.github.se.icebreakrr.model.filter.FilterViewModel
-import com.github.se.icebreakrr.model.location.LocationViewModel
 import com.github.se.icebreakrr.model.profile.Gender
 import com.github.se.icebreakrr.model.profile.ProfilesViewModel
 import com.github.se.icebreakrr.model.tags.TagsViewModel
@@ -80,14 +78,16 @@ fun AroundYouScreen(
     appDataStore: AppDataStore
 ) {
 
-    val permissionStatuses = permissionManager.permissionStatuses.collectAsState()
-    val hasLocationPermission = permissionStatuses.value[android.Manifest.permission.ACCESS_FINE_LOCATION] == PackageManager.PERMISSION_GRANTED
-    val filteredProfiles = profilesViewModel.filteredProfiles.collectAsState()
+  val permissionStatuses = permissionManager.permissionStatuses.collectAsState()
+  val hasLocationPermission =
+      permissionStatuses.value[android.Manifest.permission.ACCESS_FINE_LOCATION] ==
+          PackageManager.PERMISSION_GRANTED
+  val filteredProfiles = profilesViewModel.filteredProfiles.collectAsState()
   val isLoading = profilesViewModel.loading.collectAsState()
   val context = LocalContext.current
   val isConnected = profilesViewModel.isConnected.collectAsState()
-    // Collect the discoverability state from DataStore
-    val isDiscoverable by appDataStore.isDiscoverable.collectAsState(initial = false)
+  // Collect the discoverability state from DataStore
+  val isDiscoverable by appDataStore.isDiscoverable.collectAsState(initial = false)
 
   // Check network state when screen loads
   LaunchedEffect(Unit) {
@@ -131,20 +131,22 @@ fun AroundYouScreen(
                 EmptyProfilePrompt(label = "No Internet Connection", testTag = "noConnectionPrompt")
               } else if (!isDiscoverable) {
                 EmptyProfilePrompt(
-                    label = "Activate location sharing in the app settings!", testTag = "activateLocationPrompt")
+                    label = "Activate location sharing in the app settings!",
+                    testTag = "activateLocationPrompt")
               } else if (!hasLocationPermission) {
                 EmptyProfilePrompt(
-                    label = "Precise location permission is required to show profiles. Activate it in your phone settings",
+                    label =
+                        "Precise location permission is required to show profiles. Activate it in your phone settings",
                     testTag = "noLocationPermissionPrompt")
               } else if (filteredProfiles.value.isEmpty()) {
                 EmptyProfilePrompt(
-                    label = "There is no one around. Try moving!",
-                    testTag = "emptyProfilePrompt")
+                    label = "There is no one around. Try moving!", testTag = "emptyProfilePrompt")
               } else {
                 LazyColumn(
-                    contentPadding = PaddingValues( vertical = COLUMN_VERTICAL_PADDING),
+                    contentPadding = PaddingValues(vertical = COLUMN_VERTICAL_PADDING),
                     verticalArrangement = Arrangement.spacedBy(COLUMN_VERTICAL_PADDING),
-                    modifier = Modifier.fillMaxSize().padding(horizontal = COLUMN_HORIZONTAL_PADDING)) {
+                    modifier =
+                        Modifier.fillMaxSize().padding(horizontal = COLUMN_HORIZONTAL_PADDING)) {
                       items(filteredProfiles.value.size) { index ->
                         ProfileCard(
                             profile = filteredProfiles.value[index],
