@@ -90,6 +90,8 @@ const val CORNER_RADIUS = 8
 const val DEFAULT_RADIUS = 300.0
 const val DEFAULT_LATITUDE = 0.0
 const val DEFAULT_LONGITUDE = 0.0
+const val FILTER_ACTION_BUTTON_ALPHA = 0.5f
+val TEXTS_PADDING = 8.dp
 
 // Custom colors
 val IcebreakrrBlue: Color = IceBreakrrBlue
@@ -151,7 +153,7 @@ fun FilterScreen(
 
   val filteringTags = tagsViewModel.filteringTags.collectAsState()
   val tagsSuggestions = tagsViewModel.tagsSuggestions.collectAsState()
-  val stringQuery = tagsViewModel.query.collectAsState()
+  val stringQuery = remember { mutableStateOf("") }
   val savedFilteredTags = filterViewModel.filteredTags.collectAsState()
   savedFilteredTags.value.forEach { tag -> tagsViewModel.addFilter(tag) }
   val expanded = remember { mutableStateOf(false) }
@@ -293,7 +295,8 @@ fun FilterScreen(
                     Text(
                         "Gender",
                         fontSize = (screenHeight.value * titleFontSizeFactor).sp,
-                        modifier = Modifier.padding(vertical = 8.dp).testTag("GenderTitle"))
+                        modifier =
+                            Modifier.padding(vertical = TEXTS_PADDING).testTag("GenderTitle"))
 
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -326,7 +329,8 @@ fun FilterScreen(
                     Text(
                         "Age Range",
                         fontSize = (screenHeight.value * titleFontSizeFactor).sp,
-                        modifier = Modifier.padding(vertical = 8.dp).testTag("AgeRangeTitle"))
+                        modifier =
+                            Modifier.padding(vertical = TEXTS_PADDING).testTag("AgeRangeTitle"))
 
                     AgeRangeInputFields(
                         ageFromInput = ageFromInput,
@@ -361,13 +365,16 @@ fun FilterScreen(
                             tagsSuggestions.value.map { tag ->
                               Pair(tag, tagsViewModel.tagToColor(tag))
                             },
-                        stringQuery = stringQuery.value,
+                        stringQuery = stringQuery,
                         expanded = expanded,
                         onTagClick = { tag ->
                           tagsViewModel.removeFilter(tag)
                           isModified = checkModified()
                         },
-                        onStringChanged = { tagsViewModel.setQuery(it, filteringTags.value) },
+                        onStringChanged = {
+                          stringQuery.value = it
+                          tagsViewModel.setQuery(it, filteringTags.value)
+                        },
                         textColor = MaterialTheme.colorScheme.onSurface,
                         onDropDownItemClicked = { tag ->
                           tagsViewModel.addFilter(tag)
@@ -634,7 +641,8 @@ fun FilterActionButton(
                   ButtonDefaults.buttonColors(
                       containerColor = IcebreakrrBlue,
                       contentColor = Color.White,
-                      disabledContainerColor = IcebreakrrBlue.copy(alpha = 0.5f))) {
+                      disabledContainerColor =
+                          IcebreakrrBlue.copy(alpha = FILTER_ACTION_BUTTON_ALPHA))) {
                 Text("Filter", color = Color.White, fontSize = buttonTextSize)
               }
         }

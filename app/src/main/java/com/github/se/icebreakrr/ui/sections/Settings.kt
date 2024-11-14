@@ -42,12 +42,32 @@ import com.github.se.icebreakrr.ui.navigation.Route
 import com.github.se.icebreakrr.ui.navigation.Screen
 import com.github.se.icebreakrr.ui.sections.shared.ProfileCard
 import com.github.se.icebreakrr.ui.sections.shared.TopBar
-import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.auth
 import kotlinx.coroutines.launch
 
-// This File was written with the help of Cursor
+// Constants for dimensions and other settings
+private val SCREEN_PADDING = 16.dp
+private val SPACER_HEIGHT_SMALL = 8.dp
+private val SPACER_HEIGHT_LARGE = 16.dp
+private val CARD_SHAPE = RoundedCornerShape(16.dp)
+private val CARD_HEIGHT = 55.dp
+private val CARD_ELEVATION = 4.dp
+private val BUTTON_COLOR = Color.Red
+private val BUTTON_TEXT_COLOR = Color.White
+private const val LOGOUT_BUTTON_TAG = "logOutButton"
+private val TOGGLE_BOX_HEIGHT = 55.dp
+private val TOGGLE_OPTION_BUTTON_PADDING = 8.dp
+private val CARD_PADDING = 16.dp
+
+/**
+ * Composable function for displaying the Setting screen.
+ *
+ * It includes a bottom navigation bar and displays the main content of the setting screen.
+ *
+ * @param navigationActions The actions used for navigating between screens.
+ * @param profilesViewModel the View model for the profiles
+ * @param appDataStore sets the data or the app
+ */
 @Composable
 fun SettingsScreen(
     profilesViewModel: ProfilesViewModel,
@@ -63,13 +83,8 @@ fun SettingsScreen(
 
   lateinit var auth: FirebaseAuth
 
-  // Constants for padding and spacing
-  val screenPadding = 16.dp
-  val verticalSpacing = 8.dp
-  val buttonVerticalSpacing = 16.dp
-
   LaunchedEffect(Unit) {
-    Firebase.auth.currentUser?.let { profilesViewModel.getProfileByUid(it.uid) }
+    FirebaseAuth.getInstance().currentUser?.let { profilesViewModel.getProfileByUid(it.uid) }
   }
 
   val isLoading = profilesViewModel.loading.collectAsState(initial = true).value
@@ -94,30 +109,26 @@ fun SettingsScreen(
         modifier =
             Modifier.fillMaxSize()
                 .padding(innerPadding)
-                .padding(screenPadding)
+                .padding(SCREEN_PADDING)
                 .verticalScroll(scrollState),
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.Start) {
-          if (profile != null) {
-            ProfileCard(profile = profile, isSettings = true) {
-              navigationActions.navigateTo(Screen.PROFILE)
-            }
-          } else {
-            ProfileCard(profile = Profile.getMockedProfiles()[0], isSettings = true) {
-              navigationActions.navigateTo(Screen.PROFILE)
-            }
+          // Display ProfileCard
+          val displayProfile = profile ?: Profile.getMockedProfiles().first()
+          ProfileCard(profile = displayProfile, isSettings = true) {
+            navigationActions.navigateTo(Screen.PROFILE)
           }
 
-          Spacer(modifier = Modifier.padding(vertical = verticalSpacing))
+          Spacer(modifier = Modifier.height(SPACER_HEIGHT_SMALL))
 
+          // Display Toggle Options
           ToggleOptionBox(
               label = "Toggle Discoverability",
               isChecked = isDiscoverable,
               onCheckedChange = { discoverable ->
                 coroutineScope.launch { appDataStore.saveDiscoverableStatus(discoverable) }
               })
-
-          Spacer(modifier = Modifier.padding(vertical = buttonVerticalSpacing))
+          Spacer(modifier = Modifier.height(SPACER_HEIGHT_LARGE))
 
           Button(
               onClick = {
@@ -131,9 +142,9 @@ fun SettingsScreen(
                   logout(context, navigationActions, appDataStore)
                 }
               },
-              colors = ButtonDefaults.buttonColors(containerColor = Color.Red),
-              modifier = Modifier.fillMaxWidth().testTag("logOutButton")) {
-                Text("Log Out", color = Color.White)
+              colors = ButtonDefaults.buttonColors(containerColor = BUTTON_COLOR),
+              modifier = Modifier.fillMaxWidth().testTag(LOGOUT_BUTTON_TAG)) {
+                Text("Log Out", color = BUTTON_TEXT_COLOR)
               }
         }
   }
@@ -147,17 +158,18 @@ fun ToggleOptionBox(
     modifier: Modifier = Modifier
 ) {
   // Constants for card styling
-  val cardShape = RoundedCornerShape(16.dp)
-  val cardElevation = 4.dp
-  val cardHeight = 55.dp
-  val cardPadding = 16.dp
 
   Card(
-      shape = cardShape,
-      modifier = modifier.fillMaxWidth().padding(vertical = 8.dp).height(cardHeight).testTag(label),
-      elevation = CardDefaults.cardElevation(defaultElevation = cardElevation)) {
+      shape = CARD_SHAPE,
+      modifier =
+          modifier
+              .fillMaxWidth()
+              .padding(vertical = TOGGLE_OPTION_BUTTON_PADDING)
+              .height(TOGGLE_BOX_HEIGHT)
+              .testTag(label),
+      elevation = CardDefaults.cardElevation(defaultElevation = CARD_ELEVATION)) {
         Row(
-            modifier = Modifier.fillMaxWidth().padding(cardPadding),
+            modifier = Modifier.fillMaxWidth().padding(CARD_PADDING),
             verticalAlignment = Alignment.CenterVertically) {
               Text(label)
               Spacer(modifier = Modifier.weight(1f))

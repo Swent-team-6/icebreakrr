@@ -71,6 +71,9 @@ fun ProfileEditingScreen(
   val catchphraseHeight = screenHeight * 0.10f
   val descriptionHeight = screenHeight * 0.16f
 
+  val CATCHPHRASE_MAX = 200
+  val DESSCRIPTION_MAX = 400
+
   LaunchedEffect(Unit) {
     Firebase.auth.currentUser?.let { profilesViewModel.getProfileByUid(it.uid) }
   }
@@ -90,7 +93,7 @@ fun ProfileEditingScreen(
 
   val selectedTags = tagsViewModel.filteringTags.collectAsState().value
   val tagsSuggestions = tagsViewModel.tagsSuggestions.collectAsState()
-  val stringQuery = tagsViewModel.query.collectAsState()
+  val stringQuery = remember { mutableStateOf("") }
 
   fun updateProfile() {
     profilesViewModel.updateProfile(
@@ -158,7 +161,7 @@ fun ProfileEditingScreen(
 
                 // Name Input
                 Text(
-                    text = "${user.name}, ${user.calculateAge()}",
+                    text = user.name,
                     style = TextStyle(fontSize = textSize.value.sp),
                     modifier =
                         Modifier.fillMaxWidth()
@@ -170,8 +173,10 @@ fun ProfileEditingScreen(
                 OutlinedTextField(
                     value = catchphrase,
                     onValueChange = {
-                      catchphrase = it
-                      isModified = true
+                      if (it.text.length <= CATCHPHRASE_MAX) {
+                        catchphrase = it
+                        isModified = true
+                      }
                     },
                     label = {
                       Text("Catchphrase", modifier = Modifier.testTag("catchphraseLabel"))
@@ -186,8 +191,10 @@ fun ProfileEditingScreen(
                 OutlinedTextField(
                     value = description,
                     onValueChange = {
-                      description = it
-                      isModified = true
+                      if (it.text.length <= DESSCRIPTION_MAX) {
+                        description = it
+                        isModified = true
+                      }
                     },
                     label = { Text("Description") },
                     textStyle = TextStyle(fontSize = textSize.value.sp * 0.6),
@@ -202,13 +209,14 @@ fun ProfileEditingScreen(
                         tagsSuggestions.value.map { tag ->
                           Pair(tag, tagsViewModel.tagToColor(tag))
                         },
-                    stringQuery = stringQuery.value,
+                    stringQuery = stringQuery,
                     expanded = expanded,
                     onTagClick = { tag ->
                       tagsViewModel.removeFilter(tag)
                       isModified = true
                     },
                     onStringChanged = {
+                      stringQuery.value = it
                       tagsViewModel.setQuery(it, selectedTags)
                       isModified = true
                     },

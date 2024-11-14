@@ -177,9 +177,7 @@ class ProfileEditingScreenTest {
     }
     val profile = Profile.getMockedProfiles()[0]
 
-    composeTestRule
-        .onNodeWithTag("nameAndAge")
-        .assertTextEquals("${profile.name}, ${profile.calculateAge()}")
+    composeTestRule.onNodeWithTag("nameAndAge").assertTextEquals(profile.name)
     composeTestRule.onNodeWithTag("catchphrase").assertTextContains(profile.catchPhrase)
     composeTestRule.onNodeWithTag("description").assertTextContains(profile.description)
   }
@@ -199,11 +197,11 @@ class ProfileEditingScreenTest {
     composeTestRule.onNodeWithTag("description").performTextClearance()
     composeTestRule.onNodeWithTag("description").assertTextContains("")
 
-    val longText = "A".repeat(1000)
+    val longText = "A".repeat(100)
     composeTestRule.onNodeWithTag("description").performTextInput(longText)
-    composeTestRule.onNodeWithTag("description").assertTextContains(longText.take(1000))
+    composeTestRule.onNodeWithTag("description").assertTextContains(longText.take(100))
     composeTestRule.onNodeWithTag("catchphrase").performTextInput(longText)
-    composeTestRule.onNodeWithTag("catchphrase").assertTextContains(longText.take(1000))
+    composeTestRule.onNodeWithTag("catchphrase").assertTextContains(longText.take(100))
     composeTestRule.onNodeWithTag("checkButton").performClick()
     verify(navigationActions).goBack()
   }

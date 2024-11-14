@@ -8,6 +8,9 @@ import android.util.Log
 import android.widget.Toast
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import com.github.se.icebreakrr.ui.sections.DEFAULT_LATITUDE
+import com.github.se.icebreakrr.ui.sections.DEFAULT_LONGITUDE
+import com.github.se.icebreakrr.ui.sections.DEFAULT_RADIUS
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.GeoPoint
 import com.google.firebase.firestore.firestore
@@ -49,6 +52,9 @@ open class ProfilesViewModel(
     repository.checkConnectionPeriodically({})
   }
 
+  private val MAX_RESOLUTION = 600
+  private val DEFAULT_QUALITY = 100
+
   companion object {
     val Factory: ViewModelProvider.Factory =
         object : ViewModelProvider.Factory {
@@ -75,7 +81,7 @@ open class ProfilesViewModel(
   init {
     repository.init {
       // Fetch profiles on initialization
-      getFilteredProfilesInRadius(GeoPoint(0.0, 0.0), 300.0)
+      getFilteredProfilesInRadius(GeoPoint(DEFAULT_LATITUDE, DEFAULT_LONGITUDE), DEFAULT_RADIUS)
     }
   }
 
@@ -262,7 +268,11 @@ open class ProfilesViewModel(
    * @param maxResolution The maximum resolution for the output Bitmap. Default is 600.
    * @return A Bitmap representing the processed image, or null if an error occurs.
    */
-  private fun imageUriToBitmap(context: Context, imageUri: Uri, maxResolution: Int = 600): Bitmap? {
+  private fun imageUriToBitmap(
+      context: Context,
+      imageUri: Uri,
+      maxResolution: Int = MAX_RESOLUTION
+  ): Bitmap? {
     return try {
       // Open an InputStream from the URI
       val inputStream: InputStream? = context.contentResolver.openInputStream(imageUri)
@@ -303,7 +313,7 @@ open class ProfilesViewModel(
    * @param quality The quality of the JPEG compression (0-100). Default is 100.
    * @return A byte array representing the JPEG image, or null if an error occurs.
    */
-  private fun bitmapToJpgByteArray(bitmap: Bitmap, quality: Int = 100): ByteArray? {
+  private fun bitmapToJpgByteArray(bitmap: Bitmap, quality: Int = DEFAULT_QUALITY): ByteArray? {
     return try {
       // Compress Bitmap to JPEG format and store in ByteArrayOutputStream
       val byteArrayOutputStream = ByteArrayOutputStream()

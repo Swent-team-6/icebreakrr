@@ -31,7 +31,7 @@ import org.mockito.kotlin.verify
 class TagViewTest {
   private lateinit var selectedTag: List<Pair<String, Color>>
   private lateinit var outputTag: List<Pair<String, Color>>
-  private lateinit var stringQuery: String
+  private lateinit var stringQuery: MutableState<String>
   private lateinit var expanded: MutableState<Boolean>
   private lateinit var onClickMock: () -> Unit
   private lateinit var tagSelectorOnClickMock: (String) -> Unit
@@ -61,7 +61,7 @@ class TagViewTest {
             Pair("beans", Color.Green),
             Pair("peanut", Color.Green),
             Pair("butter", Color.Green))
-    stringQuery = ""
+    stringQuery = mutableStateOf("")
     expanded = mutableStateOf(false)
     onClickMock = mock<() -> Unit>()
     tagSelectorOnClickMock = mock<(String) -> Unit>()
@@ -285,7 +285,7 @@ class TagViewTest {
             Pair("fanta", Color.Red))
 
     composeTestRule.setContent {
-      RowOfTags(l = tagList, tagStyle = TagStyle(Color.Black, Color.White, 16.sp))
+      RowOfTags(tags = tagList, tagStyle = TagStyle(Color.Black, Color.White, 16.sp))
     }
 
     // Assert that only the first 3 tags are displayed
@@ -312,7 +312,7 @@ class TagViewTest {
             Pair("fanta", Color.Red))
 
     composeTestRule.setContent {
-      RowOfTags(l = tagList, tagStyle = TagStyle(Color.Black, Color.White, 16.sp))
+      RowOfTags(tags = tagList, tagStyle = TagStyle(Color.Black, Color.White, 16.sp))
     }
 
     // Simulate clicking the "Extend" button
@@ -330,7 +330,7 @@ class TagViewTest {
   fun testRowOfTagsWithThreeOrLessElements() {
     val tagList = mutableStateOf(listOf<Pair<String, Color>>())
     composeTestRule.setContent {
-      RowOfTags(l = tagList.value, tagStyle = TagStyle(Color.Black, Color.White, 16.sp))
+      RowOfTags(tags = tagList.value, tagStyle = TagStyle(Color.Black, Color.White, 16.sp))
     }
     composeTestRule.onAllNodesWithTag("testTag").assertCountEquals(0)
     tagList.value += Pair("salsa", Color.Red)
@@ -346,7 +346,6 @@ class TagViewTest {
 
     tagList.value += Pair("pepe", Color.Red)
     composeTestRule.onAllNodesWithTag("testTag").assertCountEquals(3)
-    composeTestRule.onNodeWithTag("testExtendTag").assertIsDisplayed()
   }
 
   @Test

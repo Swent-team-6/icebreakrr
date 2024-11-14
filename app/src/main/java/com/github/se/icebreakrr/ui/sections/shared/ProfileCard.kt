@@ -25,7 +25,37 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.github.se.icebreakrr.R
 import com.github.se.icebreakrr.model.profile.Profile
+import com.github.se.icebreakrr.ui.theme.grayedOut
 
+// Define constants for layout dimensions and other configurations
+private val CARD_CORNER_RADIUS = 14.dp
+private val CARD_MAX_HEIGHT = 150.dp
+private val CARD_PADDING_HORIZONTAL = 10.dp
+private val CARD_PADDING_VERTICAL = 6.dp
+private val IMAGE_SIZE = 80.dp
+private val IMAGE_SPACING = 18.dp
+private val TEXT_SPACER_PADDING = 6.dp
+
+// Define constants for font sizes
+private val NAME_FONT_SIZE = 24.sp
+private val CATCHPHRASE_FONT_SIZE = 16.sp
+private val TAGS_FONT_SIZE = 16.sp
+
+// Define colors used
+private val GREYED_OUT_COLOR = grayedOut
+
+// Define math constants
+private val TAKE_TAGS = 5
+
+/**
+ * Displays the ProfileCard, a summarized version of the profiles, that are used in the AroundYou
+ * screen and Notification screen
+ *
+ * @param profile the profile to be displayed
+ * @param isSettings determines if it is the profile in the Setting's menu or not
+ * @param greyedOut sets if the card needs to be grayed out or not
+ * @param onclick the on click action
+ */
 @Composable
 fun ProfileCard(
     profile: Profile,
@@ -35,44 +65,50 @@ fun ProfileCard(
 ) {
   Card(
       onClick = onclick,
-      shape = RoundedCornerShape(14.dp),
-      modifier = Modifier.fillMaxWidth().heightIn(max = 150.dp).testTag("profileCard"),
-  ) {
-    Row(
-        horizontalArrangement = Arrangement.spacedBy(18.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 10.dp, vertical = 6.dp)) {
-          AsyncImage(
-              model = profile.profilePictureUrl,
-              contentDescription = "profile picture",
-              modifier = Modifier.size(80.dp).clip(CircleShape),
-              placeholder = painterResource(id = R.drawable.nopp), // Default image during loading
-              error = painterResource(id = R.drawable.nopp), // Fallback image if URL fails
-          )
+      shape = RoundedCornerShape(CARD_CORNER_RADIUS),
+      modifier = Modifier.fillMaxWidth().heightIn(max = CARD_MAX_HEIGHT).testTag("profileCard")) {
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(IMAGE_SPACING),
+            verticalAlignment = Alignment.CenterVertically,
+            modifier =
+                Modifier.fillMaxWidth()
+                    .padding(
+                        horizontal = CARD_PADDING_HORIZONTAL, vertical = CARD_PADDING_VERTICAL)) {
+              AsyncImage(
+                  model = profile.profilePictureUrl,
+                  contentDescription = "profile picture",
+                  modifier = Modifier.size(IMAGE_SIZE).clip(CircleShape),
+                  placeholder =
+                      painterResource(id = R.drawable.nopp), // Default image during loading
+                  error = painterResource(id = R.drawable.nopp), // Fallback image if URL fails
+              )
 
-          Column(
-              verticalArrangement = Arrangement.Center,
-              horizontalAlignment = Alignment.Start,
-          ) {
-            val textColor = if (greyedOut) Color(0x88888888) else Color.Unspecified
-            Text(
-                text = profile.name,
-                color = textColor,
-                fontSize = 24.sp,
-                fontWeight = FontWeight.Bold)
+              Column(
+                  verticalArrangement = Arrangement.Center,
+                  horizontalAlignment = Alignment.Start,
+              ) {
+                val textColor = if (greyedOut) GREYED_OUT_COLOR else Color.Unspecified
+                Text(
+                    text = profile.name,
+                    color = textColor,
+                    fontSize = NAME_FONT_SIZE,
+                    fontWeight = FontWeight.Bold)
 
-            Text(text = "\"${profile.catchPhrase}\"", color = textColor, fontSize = 16.sp)
+                Text(
+                    text = "\"${profile.catchPhrase}\"",
+                    color = textColor,
+                    fontSize = CATCHPHRASE_FONT_SIZE)
 
-            Spacer(modifier = Modifier.padding(6.dp))
+                Spacer(modifier = Modifier.padding(TEXT_SPACER_PADDING))
 
-            if (!isSettings) {
-              // put the 5 first tags in a string
-              val tags = profile.tags.take(5).joinToString(" ") { "#$it" }
-              Text(text = tags, fontSize = 16.sp, color = textColor)
-            } else {
-              Text(text = "Tap to preview profile")
+                if (!isSettings) {
+                  // Display the first 5 tags in a string format
+                  val tags = profile.tags.take(TAKE_TAGS).joinToString(" ") { "#$it" }
+                  Text(text = tags, fontSize = TAGS_FONT_SIZE, color = textColor)
+                } else {
+                  Text(text = "Tap to preview profile")
+                }
+              }
             }
-          }
-        }
-  }
+      }
 }

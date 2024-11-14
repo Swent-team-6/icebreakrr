@@ -26,6 +26,11 @@ class ProfilesRepositoryFirestore(private val db: FirebaseFirestore) : ProfilesR
   override val connectionTimeOutMs: Long = 15000
   override val periodicTimeCheckWaitTime: Long = 5000
 
+  val DEFAULT_RADIUS = 300.0
+  val DEFAULT_LONGITUDE = 0.0
+  val DEFAULT_LATITUDE = 0.0
+  private val PERIOD = 1000
+
   // Generated with the help of CursorAI
   /**
    * Periodically checks the connection status by attempting to fetch profiles. If the connection
@@ -44,8 +49,8 @@ class ProfilesRepositoryFirestore(private val db: FirebaseFirestore) : ProfilesR
         object : Runnable {
           override fun run() {
             getProfilesInRadius(
-                GeoPoint(0.0, 0.0),
-                300.0,
+                GeoPoint(DEFAULT_LONGITUDE, DEFAULT_LATITUDE),
+                DEFAULT_RADIUS,
                 onSuccess = { profiles ->
                   Log.e("Connection Check", "Connection restored")
                   _waitingDone.value = false
@@ -54,7 +59,7 @@ class ProfilesRepositoryFirestore(private val db: FirebaseFirestore) : ProfilesR
                 onFailure = {
                   Log.e(
                       "Connection Check",
-                      "Connection still lost, retrying in ${periodicTimeCheckWaitTime/1000} seconds...")
+                      "Connection still lost, retrying in ${periodicTimeCheckWaitTime/PERIOD} seconds...")
                   handler.postDelayed(this, periodicTimeCheckWaitTime)
                 })
           }
@@ -80,8 +85,8 @@ class ProfilesRepositoryFirestore(private val db: FirebaseFirestore) : ProfilesR
         {
           Log.e("Connection Check", "Retrying connection...")
           getProfilesInRadius(
-              GeoPoint(0.0, 0.0),
-              300.0,
+              GeoPoint(DEFAULT_LONGITUDE, DEFAULT_LATITUDE),
+              DEFAULT_RADIUS,
               onSuccess = { profiles ->
                 Log.e("Connection Check", "Connection restored")
                 _waitingDone.value = false

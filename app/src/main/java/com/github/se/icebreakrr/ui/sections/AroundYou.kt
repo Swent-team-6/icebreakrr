@@ -20,7 +20,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
@@ -38,10 +37,22 @@ import com.github.se.icebreakrr.ui.navigation.Screen
 import com.github.se.icebreakrr.ui.sections.shared.FilterFloatingActionButton
 import com.github.se.icebreakrr.ui.sections.shared.ProfileCard
 import com.github.se.icebreakrr.ui.sections.shared.TopBar
+import com.github.se.icebreakrr.ui.theme.messageTextColor
 import com.github.se.icebreakrr.utils.NetworkUtils.isNetworkAvailable
 import com.github.se.icebreakrr.utils.NetworkUtils.isNetworkAvailableWithContext
 import com.github.se.icebreakrr.utils.NetworkUtils.showNoInternetToast
 import com.google.firebase.firestore.GeoPoint
+
+// Constants for layout dimensions
+private val COLUMN_VERTICAL_PADDING = 16.dp
+private val COLUMN_HORIZONTAL_PADDING = 8.dp
+private val TEXT_SIZE_LARGE = 20.sp
+private val NO_CONNECTION_TEXT_COLOR = messageTextColor
+private val EMPTY_PROFILE_TEXT_COLOR = messageTextColor
+
+@OptIn(ExperimentalMaterial3Api::class)
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
+@Composable
 
 /**
  * Composable function for displaying the "Around You" screen.
@@ -49,10 +60,10 @@ import com.google.firebase.firestore.GeoPoint
  * It includes a bottom navigation bar and displays the main content of the screen.
  *
  * @param navigationActions The actions used for navigating between screens.
+ * @param profilesViewModel The view model of the profiles
+ * @param tagsViewModel The view model of the tags
+ * @param filterViewModel The view model of the filters
  */
-@OptIn(ExperimentalMaterial3Api::class)
-@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
-@Composable
 fun AroundYouScreen(
     navigationActions: NavigationActions,
     profilesViewModel: ProfilesViewModel,
@@ -65,22 +76,14 @@ fun AroundYouScreen(
   val context = LocalContext.current
   val isConnected = profilesViewModel.isConnected.collectAsState()
 
-  // Define constants for magic numbers
-  val defaultGeoPoint = GeoPoint(0.0, 0.0)
-  val searchRadius = 300.0
-  val verticalPadding = 16.dp
-  val horizontalPadding = 8.dp
-  val messageTextSize = 20.sp
-  val messageTextColor = Color(0xFF575757)
-
   // Check network state when screen loads
   LaunchedEffect(Unit) {
     if (!isNetworkAvailable()) {
       profilesViewModel.updateIsConnected(false)
     } else {
       profilesViewModel.getFilteredProfilesInRadius(
-          defaultGeoPoint,
-          searchRadius,
+          GeoPoint(DEFAULT_LATITUDE, DEFAULT_LONGITUDE),
+          DEFAULT_RADIUS,
           filterViewModel.selectedGenders.value,
           filterViewModel.ageRange.value,
           tagsViewModel.filteredTags.value)
@@ -108,9 +111,10 @@ fun AroundYouScreen(
             onRefresh = profilesViewModel::getFilteredProfilesInRadius,
             modifier = Modifier.padding(innerPadding)) {
               LazyColumn(
-                  contentPadding = PaddingValues(vertical = verticalPadding),
-                  verticalArrangement = Arrangement.spacedBy(verticalPadding),
-                  modifier = Modifier.fillMaxSize().padding(horizontal = horizontalPadding)) {
+                  contentPadding = PaddingValues(vertical = COLUMN_VERTICAL_PADDING),
+                  verticalArrangement = Arrangement.spacedBy(COLUMN_VERTICAL_PADDING),
+                  modifier =
+                      Modifier.fillMaxSize().padding(horizontal = COLUMN_HORIZONTAL_PADDING)) {
                     if (!isConnected.value) {
                       item {
                         Box(
@@ -118,9 +122,9 @@ fun AroundYouScreen(
                             modifier = Modifier.fillMaxSize().testTag("noConnectionPrompt")) {
                               Text(
                                   text = "No Internet Connection",
-                                  fontSize = messageTextSize,
+                                  fontSize = TEXT_SIZE_LARGE,
                                   fontWeight = FontWeight.Bold,
-                                  color = messageTextColor)
+                                  color = NO_CONNECTION_TEXT_COLOR)
                             }
                       }
                     } else if (filteredProfiles.value.isNotEmpty()) {
@@ -144,9 +148,9 @@ fun AroundYouScreen(
                             modifier = Modifier.fillMaxSize().testTag("emptyProfilePrompt")) {
                               Text(
                                   text = "There is no one around. Try moving!",
-                                  fontSize = messageTextSize,
+                                  fontSize = TEXT_SIZE_LARGE,
                                   fontWeight = FontWeight.Bold,
-                                  color = messageTextColor)
+                                  color = EMPTY_PROFILE_TEXT_COLOR)
                             }
                       }
                     }
@@ -199,14 +203,12 @@ fun PullToRefreshBox(
     content: @Composable BoxScope.() -> Unit
 ) {
 
-  val defaultGeoPoint = GeoPoint(0.0, 0.0)
-  val searchRadius = 300.0
-
   Box(
       modifier.pullToRefresh(state = state, isRefreshing = isRefreshing) {
+        // TODO Mocked values, to change with  current location
         onRefresh(
-            defaultGeoPoint,
-            searchRadius,
+            GeoPoint(DEFAULT_LATITUDE, DEFAULT_LONGITUDE),
+            DEFAULT_RADIUS,
             filterViewModel.selectedGenders.value,
             filterViewModel.ageRange.value,
             tagsViewModel.filteredTags.value)
