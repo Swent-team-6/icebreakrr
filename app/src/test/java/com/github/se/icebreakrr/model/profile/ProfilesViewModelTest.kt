@@ -88,7 +88,6 @@ class ProfilesViewModelTest {
     profilesRepository = mock(ProfilesRepository::class.java)
     ppRepository = mock(ProfilePicRepository::class.java)
     profilesViewModel = ProfilesViewModel(profilesRepository, ppRepository)
-    Dispatchers.setMain(testDispatcher) // Set main dispatcher first
     mockProfileViewModel = mock(ProfilesViewModel::class.java)
 
     bitmapFactoryMock = mockStatic(BitmapFactory::class.java)
