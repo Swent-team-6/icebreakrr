@@ -5,8 +5,8 @@ package com.github.se.icebreakrr.model.message
 */
 object MeetingRequestManager {
   var meetingRequestViewModel: MeetingRequestViewModel? = null
-  var ourName : String? = null
-  var ourUid : String? = null
+  var ourName: String? = null
+  var ourUid: String? = null
   /**
    * Update the fcm token stored in the Firebase to keep it up to date
    *
