@@ -1,5 +1,6 @@
 package com.github.se.icebreakrr
 
+import ProfileCreationScreen
 import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Build
@@ -127,12 +128,15 @@ fun IcebreakrrNavHost(
               profileViewModel,
               meetingRequestViewModel,
               navigationActions,
-              filterViewModel = filterViewModel,
-              tagsViewModel = tagsViewModel)
+              filterViewModel,
+              tagsViewModel)
         } else {
           throw IllegalStateException(
               "The Meeting Request View Model shouldn't be null : Bad initialization")
         }
+      }
+      composable(Screen.PROFILE_CREATION) {
+        ProfileCreationScreen(tagsViewModel, profileViewModel, navigationActions)
       }
     }
 
