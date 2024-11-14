@@ -1,5 +1,6 @@
 package com.github.se.icebreakrr.ui.sections
 
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -30,6 +31,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -64,7 +66,6 @@ import com.github.se.icebreakrr.ui.theme.Grey
 import com.github.se.icebreakrr.ui.theme.IceBreakrrBlue
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.auth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.GeoPoint
 import com.google.firebase.firestore.firestore
@@ -111,10 +112,20 @@ val IcebreakrrGrey: Color = Grey
 @Composable
 fun FilterScreen(
     navigationActions: NavigationActions,
-    tagsViewModel: TagsViewModel = viewModel(factory = TagsViewModel.Companion.Factory(FirebaseAuth.getInstance(), FirebaseFirestore.getInstance())),
+    tagsViewModel: TagsViewModel =
+        viewModel(
+            factory =
+                TagsViewModel.Companion.Factory(
+                    FirebaseAuth.getInstance(), FirebaseFirestore.getInstance())),
     filterViewModel: FilterViewModel = viewModel(factory = FilterViewModel.Factory),
-    profilesViewModel: ProfilesViewModel = viewModel(factory = ProfilesViewModel.Companion.Factory(FirebaseAuth.getInstance(), Firebase.firestore))
+    profilesViewModel: ProfilesViewModel =
+        viewModel(
+            factory =
+                ProfilesViewModel.Companion.Factory(FirebaseAuth.getInstance(), Firebase.firestore))
 ) {
+  LaunchedEffect(Unit) {
+    filterViewModel.filteredTags.value.forEach { tag -> tagsViewModel.addFilter(tag) }
+  }
   val context = LocalContext.current
   val currentFocusManager = LocalFocusManager.current
 
@@ -156,7 +167,9 @@ fun FilterScreen(
   val tagsSuggestions = tagsViewModel.tagsSuggestions.collectAsState()
   val stringQuery = tagsViewModel.query.collectAsState()
   val savedFilteredTags = filterViewModel.filteredTags.collectAsState()
-  savedFilteredTags.value.forEach { tag -> tagsViewModel.addFilter(tag) }
+  Log.d("TAGSDEBUG", "[Filter] value of filteringTags start of filter 1 : ${filteringTags.value}")
+  // savedFilteredTags.value.forEach { tag -> tagsViewModel.addFilter(tag) }
+  Log.d("TAGSDEBUG", "[Filter] value of filteringTags start of filter 2 : ${filteringTags.value}")
   val expanded = remember { mutableStateOf(false) }
 
   var ageRangeError by remember { mutableStateOf(false) }
@@ -377,6 +390,9 @@ fun FilterScreen(
                           filterViewModel.setFilteredTags(tagsViewModel.filteringTags.value)
                           tagsViewModel.applyFilters()
                           tagsViewModel.leaveUI()
+                          Log.d(
+                              "TAGSDEBUG",
+                              "[Filter] value of filteringTags after leave ui : ${filteringTags.value}")
 
                           if (manSelected) currentSelectedGenders.add(Gender.MEN)
                           if (womanSelected) currentSelectedGenders.add(Gender.WOMEN)

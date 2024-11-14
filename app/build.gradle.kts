@@ -244,6 +244,7 @@ dependencies {
     androidTestImplementation(libs.hilt.android.testing)
     kaptAndroidTest(libs.hilt.android.compiler)
     androidTestAnnotationProcessor(libs.hilt.android.compiler)
+    androidTestImplementation(libs.androidx.core)
 }
 
 tasks.withType<Test> {

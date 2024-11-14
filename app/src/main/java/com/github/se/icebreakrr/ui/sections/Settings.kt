@@ -23,7 +23,6 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -43,32 +42,41 @@ import com.github.se.icebreakrr.ui.navigation.Route
 import com.github.se.icebreakrr.ui.navigation.Screen
 import com.github.se.icebreakrr.ui.sections.shared.ProfileCard
 import com.github.se.icebreakrr.ui.sections.shared.TopBar
-import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.auth
 
 // This File was written with the help of Cursor
 @Composable
-fun SettingsScreen(profilesViewModel: ProfilesViewModel, navigationActions: NavigationActions, auth: FirebaseAuth = FirebaseAuth.getInstance()) {
-    Log.d("ComposeHierarchy", "[SettingsScreen] beginning")
+fun SettingsScreen(
+    profilesViewModel: ProfilesViewModel,
+    navigationActions: NavigationActions,
+    auth: FirebaseAuth = FirebaseAuth.getInstance()
+) {
+  Log.d("ComposeHierarchy", "[SettingsScreen] beginning")
   val context = LocalContext.current
   val scrollState = rememberScrollState()
 
   LaunchedEffect(Unit) {
     auth.currentUser?.let {
-        Log.d("ComposeHierarchy", "[SettingsScreen] launch of settings get profile with uid : ${it.uid}")
-        profilesViewModel.getProfileByUid(it.uid)
-        Log.d("ComposeHierarchy", "[SettingsScreen] finish get profile")
+      Log.d(
+          "ComposeHierarchy",
+          "[SettingsScreen] launch of settings get profile with uid : ${it.uid}")
+      profilesViewModel.getProfileByUid(it.uid)
+      Log.d("ComposeHierarchy", "[SettingsScreen] finish get profile")
     }
   }
 
   val isLoading = profilesViewModel.loading.collectAsState()
   val profile = profilesViewModel.selectedProfile.collectAsState()
-    val error = profilesViewModel.error.collectAsState()
+  val error = profilesViewModel.error.collectAsState()
 
-  Log.d("ComposeHierarchy","[SettingsScreen] selectedProfile of ProfilesViewModel : ${profile.value?.uid}")
+  Log.d(
+      "ComposeHierarchy",
+      "[SettingsScreen] selectedProfile of ProfilesViewModel : ${profile.value?.uid}")
   Log.d("ComposeHierarchy", "[SettingsScreen] error in ProfilesViewModel : $error")
-    Log.d("ComposeHierarchy", "[SettingsScreen] Has backend of ProfilesViewModel finish loading : $isLoading")
+  Log.d(
+      "ComposeHierarchy",
+      "[SettingsScreen] Has backend of ProfilesViewModel finish loading : $isLoading")
 
   Scaffold(
       topBar = { TopBar("Settings") },
@@ -89,19 +97,19 @@ fun SettingsScreen(profilesViewModel: ProfilesViewModel, navigationActions: Navi
             Modifier.fillMaxSize().padding(innerPadding).padding(16.dp).verticalScroll(scrollState),
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.Start) {
-        if (isLoading.value){
+          if (isLoading.value) {
             CircularProgressIndicator()
-        }else{
+          } else {
             if (profile.value != null) {
-                ProfileCard(profile = profile.value!!, isSettings = true) {
-                    navigationActions.navigateTo(Screen.PROFILE)
-                }
+              ProfileCard(profile = profile.value!!, isSettings = true) {
+                navigationActions.navigateTo(Screen.PROFILE)
+              }
             } else {
-                ProfileCard(profile = Profile.getMockedProfiles()[0], isSettings = true) {
-                    navigationActions.navigateTo(Screen.PROFILE)
-                }
+              ProfileCard(profile = Profile.getMockedProfiles()[0], isSettings = true) {
+                navigationActions.navigateTo(Screen.PROFILE)
+              }
             }
-        }
+          }
 
           Spacer(modifier = Modifier.padding(vertical = 8.dp))
 
@@ -119,7 +127,7 @@ fun SettingsScreen(profilesViewModel: ProfilesViewModel, navigationActions: Navi
               }
         }
   }
-    Log.d("ComposeHierarchy", "[SettingsScreen] end")
+  Log.d("ComposeHierarchy", "[SettingsScreen] end")
 }
 
 @Composable

@@ -2,6 +2,7 @@
 #Google
 activityCompose = "1.7.0"
 converterMoshi = "2.9.0"
+core = "1.6.1"
 coreTesting = "2.2.0"
 googleHiltAndroidCompilerVersion = "2.51"
 googleServices = "4.4.2"
@@ -67,6 +68,7 @@ monitor = "1.7.1"
 [libraries]
 #Google
 androidx-activity-compose-v170 = { module = "androidx.activity:activity-compose", version.ref = "activityCompose" }
+androidx-core = { module = "androidx.test:core", version.ref = "core" }
 androidx-core-testing = { module = "androidx.arch.core:core-testing", version.ref = "coreTesting" }
 androidx-lifecycle-viewmodel-ktx = { module = "androidx.lifecycle:lifecycle-viewmodel-ktx", version.ref = "lifecycleViewmodelKtx" }
 converter-moshi = { module = "com.squareup.retrofit2:converter-moshi", version.ref = "converterMoshi" }

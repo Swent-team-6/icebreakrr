@@ -4,14 +4,9 @@ import android.util.Log
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.github.se.icebreakrr.model.profile.ProfilePicRepositoryStorage
-import com.github.se.icebreakrr.model.profile.ProfilesRepositoryFirestore
-import com.github.se.icebreakrr.model.profile.ProfilesViewModel
-import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.firestore
-import com.google.firebase.storage.storage
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
@@ -40,26 +35,22 @@ data class TagsViewModel(private val repository: TagsRepository) : ViewModel() {
   init {
     repository.init {
       repository.getAllTags(
-        onSuccess = {
-          allTags.clear()
-          allTags.addAll(it)
-        },
-        onFailure = { Log.e("TagsViewModel", "[getAllTags] failed to get the tags : $it") })
+          onSuccess = {
+            allTags.clear()
+            allTags.addAll(it)
+          },
+          onFailure = { Log.e("TagsViewModel", "[getAllTags] failed to get the tags : $it") })
     }
   }
 
   companion object {
-    class Factory(
-      private val auth: FirebaseAuth,
-      private val firestore: FirebaseFirestore
-    ) : ViewModelProvider.Factory {
+    class Factory(private val auth: FirebaseAuth, private val firestore: FirebaseFirestore) :
+        ViewModelProvider.Factory {
 
       @Suppress("UNCHECKED_CAST")
       override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(TagsViewModel::class.java)) {
-          return TagsViewModel(
-            TagsRepository(firestore, auth)
-          ) as T
+          return TagsViewModel(TagsRepository(firestore, auth)) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
       }

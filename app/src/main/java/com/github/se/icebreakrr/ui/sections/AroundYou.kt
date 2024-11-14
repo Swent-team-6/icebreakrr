@@ -60,7 +60,9 @@ fun AroundYouScreen(
 ) {
 
   val filteredProfiles = profilesViewModel.filteredProfiles.collectAsState()
-  Log.d("ComposeHierarchy", "[AroundYouScreen] number filtered profiles : ${filteredProfiles.value.size}")
+  Log.d(
+      "ComposeHierarchy",
+      "[AroundYouScreen] number filtered profiles : ${filteredProfiles.value.size}")
   val isLoading = profilesViewModel.loading.collectAsState()
   val context = LocalContext.current
   val isConnected = profilesViewModel.isConnected.collectAsState()
@@ -70,7 +72,7 @@ fun AroundYouScreen(
       bottomBar = {
         BottomNavigationMenu(
             onTabSelect = { route ->
-                Log.d("ComposeHierarchy", "[AroundYouScreen] clicked new route : ${route.route}")
+              Log.d("ComposeHierarchy", "[AroundYouScreen] clicked new route : ${route.route}")
               if (route.route != Route.AROUND_YOU) {
                 navigationActions.navigateTo(route)
               }

@@ -1,6 +1,5 @@
 package com.github.se.icebreakrr.ui.navigation
 
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
@@ -16,9 +15,7 @@ import com.github.se.icebreakrr.model.profile.ProfilesRepository
 import com.github.se.icebreakrr.model.profile.ProfilesViewModel
 import com.github.se.icebreakrr.model.tags.TagsRepository
 import com.github.se.icebreakrr.model.tags.TagsViewModel
-import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.auth
 import com.google.firebase.functions.FirebaseFunctions
 import com.google.firebase.storage.FirebaseStorage
 import org.junit.Before
@@ -68,7 +65,8 @@ class NavigationTest {
           tagsViewModel,
           mockFilterViewModel,
           mockMeetingRequestViewModel,
-          Route.AUTH, FirebaseAuth.getInstance())
+          Route.AUTH,
+          FirebaseAuth.getInstance())
     }
 
     // Assert that the login screen is shown on launch
@@ -83,7 +81,8 @@ class NavigationTest {
           tagsViewModel,
           mockFilterViewModel,
           mockMeetingRequestViewModel,
-          Route.AROUND_YOU, FirebaseAuth.getInstance())
+          Route.AROUND_YOU,
+          FirebaseAuth.getInstance())
     }
     // Check that the "Around You" screen is displayed after login
     composeTestRule.onNodeWithTag("aroundYouScreen").assertIsDisplayed()

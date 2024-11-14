@@ -19,10 +19,8 @@ import com.github.se.icebreakrr.model.tags.TagsViewModel
 import com.github.se.icebreakrr.ui.navigation.NavigationActions
 import com.github.se.icebreakrr.ui.navigation.Route
 import com.github.se.icebreakrr.ui.navigation.Screen
-import com.google.firebase.Firebase
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.auth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.GeoPoint
 import java.util.Calendar
@@ -57,7 +55,10 @@ class AroundYouScreenTest {
       AroundYouScreen(
           navigationActions,
           profilesViewModel,
-          viewModel(factory = TagsViewModel.Companion.Factory(FirebaseAuth.getInstance(), FirebaseFirestore.getInstance())),
+          viewModel(
+              factory =
+                  TagsViewModel.Companion.Factory(
+                      FirebaseAuth.getInstance(), FirebaseFirestore.getInstance())),
           viewModel(factory = FilterViewModel.Factory))
     }
   }

@@ -1,153 +1,272 @@
 package com.github.se.endToEnd
 
+// import com.google.firebase.functions.dagger.Provides
+
 import android.app.Activity
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.util.Log
 import android.view.View
 import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsNotDisplayed
+import androidx.compose.ui.test.assertIsNotSelected
 import androidx.compose.ui.test.assertIsSelected
-import androidx.compose.ui.test.isSelected
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performTextClearance
+import androidx.compose.ui.test.performTextInput
 import androidx.core.app.ActivityCompat
 import androidx.test.core.app.ActivityScenario
-import androidx.test.espresso.Espresso
 import androidx.test.espresso.Espresso.onIdle
 import androidx.test.espresso.Espresso.onView
-import androidx.test.espresso.action.ViewActions
-import androidx.test.espresso.action.ViewActions.click
-import androidx.test.espresso.assertion.ViewAssertions.matches
-import androidx.test.espresso.matcher.RootMatchers.isPlatformPopup
-import androidx.test.espresso.matcher.ViewMatchers
-import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
-import androidx.test.espresso.matcher.ViewMatchers.isRoot
-import androidx.test.espresso.matcher.ViewMatchers.withContentDescription
-import androidx.test.espresso.matcher.ViewMatchers.withTagValue
-import androidx.test.espresso.matcher.ViewMatchers.withText
 import androidx.test.espresso.util.HumanReadables
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
-import androidx.test.uiautomator.UiDevice
-import androidx.test.uiautomator.UiObject2
-import androidx.test.uiautomator.UiSelector
 import com.github.se.icebreakrr.MainActivity
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.firestore.FirebaseFirestore
+import dagger.hilt.android.testing.HiltAndroidRule
+import dagger.hilt.android.testing.HiltAndroidTest
+import javax.inject.Inject
 import org.hamcrest.Matcher
-import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.Mockito.mock
-import org.mockito.Mockito.`when`
-import android.Manifest
-import android.app.Application
-import android.content.Context
-import android.net.ConnectivityManager
-
-import androidx.compose.ui.test.isDisplayed
-import androidx.compose.ui.test.onNodeWithTag
-import androidx.compose.ui.test.onRoot
-import androidx.compose.ui.test.printToLog
-import androidx.test.core.app.ApplicationProvider
-import androidx.test.espresso.IdlingRegistry
-import androidx.test.espresso.IdlingResource
-import com.google.android.gms.tasks.Task
-import com.google.firebase.FirebaseApp
-import com.google.firebase.auth.AuthResult
-import com.google.firebase.firestore.FirebaseFirestore
-//import com.google.firebase.functions.dagger.Provides
-import dagger.Module
-import dagger.Provides
-import dagger.hilt.InstallIn
-import dagger.hilt.android.HiltAndroidApp
-import dagger.hilt.android.components.ActivityComponent
-import dagger.hilt.android.qualifiers.ApplicationContext
-import dagger.hilt.android.testing.HiltAndroidRule
-import dagger.hilt.android.testing.HiltAndroidTest
-import dagger.hilt.android.testing.HiltTestApplication
-import dagger.hilt.components.SingletonComponent
-import dagger.hilt.testing.TestInstallIn
-import org.junit.After
-import org.mockito.Mockito.doAnswer
-import org.mockito.Mockito.mockStatic
-import org.mockito.Mockito.mockingDetails
-import org.mockito.kotlin.any
-import org.mockito.kotlin.whenever
-import java.io.ByteArrayOutputStream
-import java.io.OutputStream
-import java.util.concurrent.atomic.AtomicBoolean
-import javax.inject.Inject
-import javax.inject.Singleton
 
 @RunWith(AndroidJUnit4::class)
 @HiltAndroidTest
 class M2Test {
-    val intent = Intent(InstrumentationRegistry.getInstrumentation().targetContext, MainActivity::class.java)
-    @Inject lateinit var authInjected: FirebaseAuth
-    @Inject lateinit var firestoreInjected: FirebaseFirestore
+  val intent =
+      Intent(InstrumentationRegistry.getInstrumentation().targetContext, MainActivity::class.java)
+  @Inject lateinit var authInjected: FirebaseAuth
+  @Inject lateinit var firestoreInjected: FirebaseFirestore
 
-    @get:Rule
-    var hiltRule = HiltAndroidRule(this)
+  @get:Rule var hiltRule = HiltAndroidRule(this)
 
-    @get:Rule
-    val composeTestRule = createComposeRule()
+  @get:Rule val composeTestRule = createComposeRule()
 
-    @Before
-    fun setup(){
-        hiltRule.inject()
-        intent.putExtra("IS_TESTING", true)
-        ActivityCompat.setPermissionCompatDelegate(TestPermissionDelegate())
+  @Before
+  fun setup() {
+    hiltRule.inject()
+    intent.putExtra("IS_TESTING", true)
+    ActivityCompat.setPermissionCompatDelegate(TestPermissionDelegate())
+  }
+
+  @Test
+  fun endToEnd2() {
+    ActivityScenario.launch<MainActivity>(intent).use { scenario ->
+      onIdle()
+
+      // check if everything is displayed in the around you
+      composeTestRule.onNodeWithTag("aroundYouScreen").assertIsDisplayed()
+      composeTestRule.onNodeWithTag("topBar").assertIsDisplayed()
+      composeTestRule.onNodeWithTag("filterButton").assertIsDisplayed().assertHasClickAction()
+      composeTestRule.onNodeWithTag("bottomNavigationMenu").assertIsDisplayed()
+      // click on a profile
+      composeTestRule.onNodeWithText("Alice Inwonderland").assertIsDisplayed().performClick()
+      // check if everything is displayed in alice's profile
+      composeTestRule.onNodeWithTag("goBackButton").assertIsDisplayed().assertHasClickAction()
+      composeTestRule.onNodeWithTag("profileHeader").assertIsDisplayed()
+      composeTestRule.onNodeWithTag("username").assertIsDisplayed()
+      composeTestRule.onNodeWithTag("infoSection").assertIsDisplayed()
+      composeTestRule.onNodeWithTag("profileDescription").assertIsDisplayed()
+      composeTestRule.onNodeWithTag("tagSection").assertIsDisplayed()
+      composeTestRule.onNodeWithTag("catchPhrase").assertIsDisplayed()
+      composeTestRule.onNodeWithTag("profilePicture").assertIsDisplayed()
+      composeTestRule.onNodeWithTag("aroundYouProfileScreen").assertIsDisplayed()
+      composeTestRule.onNodeWithTag("requestButton").assertIsDisplayed().assertHasClickAction()
+      // check if alice has the good profile :
+      composeTestRule.onNodeWithText("Alice Inwonderland").assertIsDisplayed()
+      composeTestRule.onNodeWithText("So much to see, so little time").assertIsDisplayed()
+      composeTestRule
+          .onNodeWithText("I am a software engineer who loves to travel and meet new people.")
+          .assertIsDisplayed()
+      composeTestRule.onNodeWithText("#Travel").assertIsDisplayed()
+      composeTestRule.onNodeWithText("#Software").assertIsDisplayed()
+      composeTestRule.onNodeWithText("#Music").assertIsDisplayed()
+      // click on send request :
+      composeTestRule.onNodeWithTag("requestButton").assertIsDisplayed().performClick()
+      // check if everything is displayed :
+      composeTestRule.onNodeWithTag("messageTextField").assertIsDisplayed()
+      composeTestRule.onNodeWithTag("bluredBackground").assertIsDisplayed()
+      composeTestRule.onNodeWithTag("sendButton").assertIsDisplayed().assertHasClickAction()
+      composeTestRule.onNodeWithTag("cancelButton").assertIsDisplayed().assertHasClickAction()
+      // try to send a message :
+      composeTestRule
+          .onNodeWithTag("messageTextField")
+          .performTextInput("Hey, do you want to meet?")
+      composeTestRule.onNodeWithText("Hey, do you want to meet?").assertIsDisplayed()
+      composeTestRule.onNodeWithTag("sendButton").performClick()
+      // reclick on alice profile :
+      composeTestRule.onNodeWithText("Alice Inwonderland").assertIsDisplayed().performClick()
+      // click on send button :
+      composeTestRule.onNodeWithTag("requestButton").performClick()
+      // click on cancel button :
+      composeTestRule
+          .onNodeWithTag("messageTextField")
+          .performTextInput("Hey, do you want to meet?")
+      composeTestRule.onNodeWithText("Hey, do you want to meet?").assertIsDisplayed()
+      composeTestRule.onNodeWithTag("cancelButton").performClick()
+      // click on the go back button :
+      composeTestRule.onNodeWithTag("goBackButton").performClick()
+      // click on the filter button :
+      composeTestRule.onNodeWithTag("filterButton").performClick()
+      // check if everything is on the filter :
+      composeTestRule.onNodeWithTag("Back Button").assertIsDisplayed().assertHasClickAction()
+      composeTestRule.onNodeWithTag("FilterTopBar").assertIsDisplayed()
+      composeTestRule.onNodeWithTag("FilterTopBarTitle").assertIsDisplayed()
+      composeTestRule.onNodeWithTag("GenderButtonMen").assertIsDisplayed().assertHasClickAction()
+      composeTestRule.onNodeWithTag("GenderButtonWomen").assertIsDisplayed().assertHasClickAction()
+      composeTestRule.onNodeWithTag("GenderButtonOther").assertIsDisplayed().assertHasClickAction()
+      composeTestRule.onNodeWithTag("AgeFromTextField").assertIsDisplayed()
+      composeTestRule.onNodeWithTag("AgeToTextField").assertIsDisplayed()
+      composeTestRule.onNodeWithTag("FilterButton").assertIsDisplayed().assertHasClickAction()
+      composeTestRule.onNodeWithTag("ResetButton").assertIsDisplayed().assertHasClickAction()
+      // put filters to filter no one :
+      composeTestRule.onNodeWithTag("AgeFromTextField").performTextInput("500")
+      composeTestRule.onNodeWithTag("AgeToTextField").performTextInput("600")
+      composeTestRule.onNodeWithText("500").assertIsDisplayed()
+      composeTestRule.onNodeWithText("600").assertIsDisplayed()
+      composeTestRule.onNodeWithTag("GenderButtonMen").performClick().assertIsSelected()
+      composeTestRule.onNodeWithTag("GenderButtonWomen").performClick().assertIsSelected()
+      composeTestRule.onNodeWithTag("GenderButtonOther").performClick().assertIsSelected()
+      composeTestRule.onNodeWithTag("GenderButtonMen").performClick().assertIsNotSelected()
+      composeTestRule.onNodeWithTag("GenderButtonWomen").performClick().assertIsNotSelected()
+      composeTestRule.onNodeWithTag("GenderButtonOther").performClick().assertIsNotSelected()
+      composeTestRule.onNodeWithTag("ResetButton").performClick()
+      // now really filter profiles :
+      composeTestRule.onNodeWithTag("GenderButtonMen").performClick()
+      composeTestRule.onNodeWithTag("inputTagSelector").performTextInput("Travel")
+      composeTestRule.onNodeWithText("#Travel").assertIsDisplayed().performClick()
+      composeTestRule
+          .onNodeWithTag("clickTestTag")
+          .assertIsDisplayed()
+          .performClick()
+          .assertIsNotDisplayed()
+      composeTestRule.onNodeWithTag("inputTagSelector").performTextClearance()
+      composeTestRule.onNodeWithTag("inputTagSelector").performTextInput("Travel")
+      composeTestRule.onNodeWithText("#Travel").assertIsDisplayed().performClick()
+      composeTestRule.onNodeWithTag("FilterButton").performClick()
+      // check if filter worked :
+      composeTestRule.onNodeWithText("Bob Marley").assertIsDisplayed()
+      composeTestRule.onNodeWithText("Indiana Jones").assertIsDisplayed()
+      // go to settings :
+      composeTestRule.onNodeWithTag("navItem_2131755372").performClick()
+      // check if everything is displayed :
+      composeTestRule.onNodeWithTag("profileCard").assertIsDisplayed()
+      composeTestRule.onNodeWithTag("settingsScreen").assertIsDisplayed()
+      composeTestRule.onNodeWithTag("logOutButton").assertIsDisplayed()
+      composeTestRule.onNodeWithTag("Toggle Location").assertIsDisplayed()
+      composeTestRule.onNodeWithTag("Option 1").assertIsDisplayed()
+      composeTestRule.onNodeWithTag("switchToggle Location").assertIsDisplayed()
+      composeTestRule.onNodeWithTag("switchOption 1").assertIsDisplayed()
+      // click on your profile :
+      composeTestRule.onNodeWithTag("profileCard").performClick()
+      // test if everything is displayed
+      composeTestRule.onNodeWithTag("profileScreen").assertIsDisplayed()
+      composeTestRule.onNodeWithTag("infoSection").assertIsDisplayed()
+      composeTestRule.onNodeWithTag("profileHeader").assertIsDisplayed()
+      composeTestRule.onNodeWithTag("profilePicture").assertIsDisplayed()
+      composeTestRule.onNodeWithTag("goBackButton").assertIsDisplayed().assertHasClickAction()
+      composeTestRule.onNodeWithTag("username").assertIsDisplayed()
+      composeTestRule.onNodeWithTag("editButton").assertIsDisplayed().assertHasClickAction()
+      // click on edit profile :
+      composeTestRule.onNodeWithTag("editButton").performClick()
+      // check if edit profile is displayed :
+      composeTestRule.onNodeWithTag("profileEditScreen").assertIsDisplayed()
+      composeTestRule.onNodeWithTag("topAppBar").assertIsDisplayed()
+      composeTestRule.onNodeWithTag("goBackButton").assertIsDisplayed().assertHasClickAction()
+      composeTestRule.onNodeWithTag("checkButton").assertIsDisplayed().assertHasClickAction()
+      composeTestRule.onNodeWithTag("profileEditScreenContent").assertIsDisplayed()
+      composeTestRule.onNodeWithTag("profilePicture").assertIsDisplayed()
+      composeTestRule.onNodeWithTag("nameAndAge").assertIsDisplayed()
+      composeTestRule.onNodeWithTag("catchphrase").assertIsDisplayed()
+      composeTestRule.onNodeWithTag("description").assertIsDisplayed()
+      // populate profile :
+      composeTestRule.onNodeWithTag("catchphrase").performTextInput("This is my new catchphrase!")
+      composeTestRule.onNodeWithText("This is my new catchphrase!").assertIsDisplayed()
+      composeTestRule.onNodeWithTag("description").performTextInput("This is my new description!")
+      composeTestRule.onNodeWithText("This is my new description!").assertHasClickAction()
+      // test tag selector :
+      composeTestRule.onNodeWithTag("inputTagSelector").performTextInput("Travel")
+      composeTestRule.onNodeWithText("#Travel").assertIsDisplayed().performClick()
+      composeTestRule
+          .onNodeWithTag("clickTestTag")
+          .assertIsDisplayed()
+          .performClick()
+          .assertIsNotDisplayed()
+      composeTestRule.onNodeWithTag("inputTagSelector").performTextClearance()
+      composeTestRule.onNodeWithTag("inputTagSelector").performTextInput("Travel")
+      composeTestRule.onNodeWithText("#Travel").assertIsDisplayed().performClick()
+      // click on go back :
+      composeTestRule.onNodeWithTag("goBackButton").performClick()
+      // click on cancel :
+      composeTestRule.onNodeWithText("Cancel").performClick()
+      // click on go back :
+      composeTestRule.onNodeWithTag("goBackButton").performClick()
+      // click on discard changes :
+      composeTestRule.onNodeWithText("Discard changes").performClick()
+      // test that profile hasent changed :
+      composeTestRule.onNodeWithText("This is my new catchphrase!").assertIsNotDisplayed()
+      composeTestRule.onNodeWithText("This is my new description!").assertIsNotDisplayed()
+      composeTestRule.onNodeWithText("#Travel").assertIsNotDisplayed()
+      // click on edit profile :
+      composeTestRule.onNodeWithTag("editButton").performClick()
+      // repopulate profile :
+      composeTestRule.onNodeWithTag("catchphrase").performTextInput("This is my new catchphrase!")
+      composeTestRule.onNodeWithText("This is my new catchphrase!").assertIsDisplayed()
+      composeTestRule.onNodeWithTag("description").performTextInput("This is my new description!")
+      composeTestRule.onNodeWithText("This is my new description!").assertHasClickAction()
+      composeTestRule.onNodeWithTag("inputTagSelector").performTextInput("Travel")
+      composeTestRule.onNodeWithText("#Travel").assertIsDisplayed().performClick()
+      // save changes :
+      composeTestRule.onNodeWithTag("checkButton").performClick()
+      // check if profile has been updated :
+      composeTestRule.onNodeWithText("This is my new catchphrase!").assertIsDisplayed()
+      composeTestRule.onNodeWithText("This is my new description!").assertIsDisplayed()
+      composeTestRule.onNodeWithText("#Travel").assertIsDisplayed()
+      // click on go back :
+      composeTestRule.onNodeWithTag("goBackButton").performClick()
+      // click on notification :
+      composeTestRule.onNodeWithText("Notifications").performClick()
+      // check if everything exists on notifications :
+      composeTestRule.onNodeWithTag("notificationScreen").assertIsDisplayed()
+      composeTestRule.onNodeWithTag("notificationScroll").assertIsDisplayed()
+      composeTestRule.onNodeWithTag("notificationFirstText").assertIsDisplayed()
+      composeTestRule.onNodeWithTag("notificationSecondText").assertIsDisplayed()
     }
+  }
 
-    @Test
-    fun endToEnd2(){
-        ActivityScenario.launch<MainActivity>(intent).use { scenario ->
-            onIdle()
-
-            // Check if the "Settings" button is displayed and perform a click
-            composeTestRule.onNodeWithTag("aroundYouScreen")
-                .isDisplayed()
-            composeTestRule.onNodeWithTag("navItem_2131755372").isDisplayed()
-            composeTestRule.onNodeWithTag("navItem_2131755372")
-                .performClick()
-            onIdle()
-            Thread.sleep(2000)
-        }
+  fun logViewHierarchy(viewMatcher: Matcher<View>) {
+    onView(viewMatcher).check { view, _ ->
+      Log.d("ViewHierarchyBite", HumanReadables.describe(view))
     }
-
-    fun logViewHierarchy(viewMatcher: Matcher<View>) {
-        onView(viewMatcher).check { view, _ ->
-            Log.d("ViewHierarchyBite", HumanReadables.describe(view))
-        }
-    }
+  }
 }
+
 class TestPermissionDelegate : ActivityCompat.PermissionCompatDelegate {
 
-    // Simulate the permission request being granted without showing the actual permission dialog
-    override fun requestPermissions(
-        activity: Activity,
-        permissions: Array<out String>,
-        requestCode: Int
-    ): Boolean {
-        // Directly simulate granting the permission
-        return true
-    }
+  // Simulate the permission request being granted without showing the actual permission dialog
+  override fun requestPermissions(
+      activity: Activity,
+      permissions: Array<out String>,
+      requestCode: Int
+  ): Boolean {
+    // Directly simulate granting the permission
+    return true
+  }
 
-    // Handle activity results (return true as a default response)
-    override fun onActivityResult(activity: Activity, requestCode: Int, resultCode: Int, data: Intent?): Boolean {
-        // Return true to indicate the activity result was successfully handled
-        return true
-    }
+  // Handle activity results (return true as a default response)
+  override fun onActivityResult(
+      activity: Activity,
+      requestCode: Int,
+      resultCode: Int,
+      data: Intent?
+  ): Boolean {
+    // Return true to indicate the activity result was successfully handled
+    return true
+  }
 }
-
-
-
-
-
-
-

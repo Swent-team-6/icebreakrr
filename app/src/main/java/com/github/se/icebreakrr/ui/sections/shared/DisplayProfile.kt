@@ -268,7 +268,7 @@ fun TagsSection(listOfTags: List<Pair<String, Color>>) {
   Box(
       modifier =
           Modifier.fillMaxWidth()
-              .height((((listOfTags.size / 2) * tagHeight).dp))
+              .height(((listOfTags.size * tagHeight).dp))
               .testTag("tagSection")) {
         RowOfTags(listOfTags, TagStyle())
       }

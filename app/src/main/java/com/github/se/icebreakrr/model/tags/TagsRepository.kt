@@ -1,7 +1,6 @@
 package com.github.se.icebreakrr.model.tags
 
 import android.util.Log
-import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.auth
 import com.google.firebase.firestore.DocumentSnapshot
@@ -12,7 +11,7 @@ open class TagsRepository(private val db: FirebaseFirestore, private val auth: F
   private val collectionPath = "Tags"
 
   fun init(onSuccess: () -> Unit) {
-      Log.d("ComposeHierarchy", "[TagsRepository][init] begin init")
+    Log.d("ComposeHierarchy", "[TagsRepository][init] begin init")
     auth.addAuthStateListener {
       if (it.currentUser != null) {
         onSuccess()
@@ -29,15 +28,16 @@ open class TagsRepository(private val db: FirebaseFirestore, private val auth: F
    *   error
    */
   fun getAllTags(onSuccess: (List<TagsCategory>) -> Unit, onFailure: (Exception) -> Unit) {
-      Log.d("ComposeHierarchy", "[TagsRepository][getAllTags] begin get tags")
+    Log.d("ComposeHierarchy", "[TagsRepository][getAllTags] begin get tags")
     val categories: MutableList<TagsCategory> = mutableListOf()
     db.collection(collectionPath)
         .get()
         .addOnFailureListener { e: Exception ->
-            Log.d("ComposeHierarchy", "[TagsRepository][getAllTags] onFailure")
-            onFailure(e) }
+          Log.d("ComposeHierarchy", "[TagsRepository][getAllTags] onFailure")
+          onFailure(e)
+        }
         .addOnSuccessListener { docs: QuerySnapshot ->
-            Log.d("ComposeHierarchy", "[TagsRepository][getAllTags] onSuccess")
+          Log.d("ComposeHierarchy", "[TagsRepository][getAllTags] onSuccess")
           for (doc in docs.documents) {
             if (doc.exists()) {
               firestoreToTags(

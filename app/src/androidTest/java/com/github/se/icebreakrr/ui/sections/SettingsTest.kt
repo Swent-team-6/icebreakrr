@@ -1,6 +1,5 @@
 package com.github.se.icebreakrr.ui.sections
 
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsOff
 import androidx.compose.ui.test.assertIsOn
@@ -14,7 +13,6 @@ import com.github.se.icebreakrr.ui.navigation.NavigationActions
 import com.github.se.icebreakrr.ui.navigation.Route
 import com.github.se.icebreakrr.ui.navigation.Screen
 import com.google.firebase.Firebase
-import com.google.firebase.auth.auth
 import com.google.firebase.storage.storage
 import org.junit.Before
 import org.junit.Rule

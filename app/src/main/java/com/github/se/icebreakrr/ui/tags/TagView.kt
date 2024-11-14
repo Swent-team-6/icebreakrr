@@ -238,7 +238,7 @@ fun TagSelector(
                       onDropDownItemClicked(tag.first)
                     },
                     text = { Tag(tag.first, TagStyle(textColor, tag.second, textSize)) },
-                    modifier = Modifier.testTag("tagSelectorDropDownMenuItem"))
+                    modifier = Modifier.testTag("#${tag.first}"))
               }
             }
         OutlinedTextField(

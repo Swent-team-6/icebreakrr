@@ -1,6 +1,7 @@
 package com.github.se.icebreakrr.ui.profile
 
 import android.annotation.SuppressLint
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -27,7 +28,6 @@ import com.github.se.icebreakrr.model.tags.TagsViewModel
 import com.github.se.icebreakrr.ui.navigation.NavigationActions
 import com.github.se.icebreakrr.ui.sections.shared.UnsavedChangesDialog
 import com.github.se.icebreakrr.ui.tags.TagSelector
-import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.auth
 
@@ -54,12 +54,11 @@ fun ProfileEditingScreen(
 
   LaunchedEffect(Unit) {
     auth.currentUser?.let { profilesViewModel.getProfileByUid(it.uid) }
+    profilesViewModel.selectedProfile.value?.tags?.forEach { tag -> tagsViewModel.addFilter(tag) }
   }
 
   val isLoading = profilesViewModel.loading.collectAsState(initial = true).value
   val user = profilesViewModel.selectedProfile.collectAsState().value
-
-  LaunchedEffect(user?.tags) { user?.tags?.forEach { tag -> tagsViewModel.addFilter(tag) } }
 
   var profilePictureUrl by remember { mutableStateOf(user!!.profilePictureUrl) }
   var catchphrase by remember { mutableStateOf(TextFieldValue(user!!.catchPhrase)) }
@@ -69,9 +68,10 @@ fun ProfileEditingScreen(
   var showDialog by remember { mutableStateOf(false) }
   var isMofidied by remember { mutableStateOf(false) }
 
-  val selectedTags = tagsViewModel.filteringTags.collectAsState().value
+  val selectedTags = tagsViewModel.filteringTags.collectAsState()
   val tagsSuggestions = tagsViewModel.tagsSuggestions.collectAsState()
   val stringQuery = tagsViewModel.query.collectAsState()
+  Log.d("TAGSDEBUG", "[Edit Profile] value of filteringTags beginning : ${selectedTags.value}")
 
   fun updateProfile() {
     profilesViewModel.updateProfile(
@@ -82,7 +82,7 @@ fun ProfileEditingScreen(
             birthDate = user.birthDate,
             catchPhrase = catchphrase.text,
             description = description.text,
-            tags = selectedTags,
+            tags = selectedTags.value,
             profilePictureUrl = profilePictureUrl))
   }
 
@@ -181,7 +181,7 @@ fun ProfileEditingScreen(
 
                 TagSelector(
                     selectedTag =
-                        selectedTags.map { tag -> Pair(tag, tagsViewModel.tagToColor(tag)) },
+                        selectedTags.value.map { tag -> Pair(tag, tagsViewModel.tagToColor(tag)) },
                     outputTag =
                         tagsSuggestions.value.map { tag ->
                           Pair(tag, tagsViewModel.tagToColor(tag))
@@ -193,7 +193,7 @@ fun ProfileEditingScreen(
                       isMofidied = true
                     },
                     onStringChanged = {
-                      tagsViewModel.setQuery(it, selectedTags)
+                      tagsViewModel.setQuery(it, selectedTags.value)
                       isMofidied = true
                     },
                     textColor = MaterialTheme.colorScheme.onSurface,

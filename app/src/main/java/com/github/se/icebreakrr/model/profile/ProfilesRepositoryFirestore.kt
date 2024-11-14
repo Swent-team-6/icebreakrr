@@ -4,7 +4,6 @@ import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import com.google.android.gms.tasks.Task
-import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.auth
 import com.google.firebase.firestore.DocumentSnapshot
@@ -12,7 +11,10 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.GeoPoint
 import kotlinx.coroutines.flow.MutableStateFlow
 
-class ProfilesRepositoryFirestore(private val db: FirebaseFirestore, private val auth: FirebaseAuth) : ProfilesRepository {
+class ProfilesRepositoryFirestore(
+    private val db: FirebaseFirestore,
+    private val auth: FirebaseAuth
+) : ProfilesRepository {
 
   private val collectionPath = "profiles"
 
@@ -110,10 +112,14 @@ class ProfilesRepositoryFirestore(private val db: FirebaseFirestore, private val
    * @param onSuccess A callback that is invoked when the user is authenticated.
    */
   override fun init(onSuccess: () -> Unit) {
-      Log.d("ComposeHierarchy", "[ProfilesRepositoryFirestore][init] start of init with uid : ${auth.currentUser?.uid}")
-      auth.addAuthStateListener {
+    Log.d(
+        "ComposeHierarchy",
+        "[ProfilesRepositoryFirestore][init] start of init with uid : ${auth.currentUser?.uid}")
+    auth.addAuthStateListener {
       if (it.currentUser != null) {
-          Log.d("ComposeHierarchy", "[ProfilesRepositoryFirestore][init] end of init before calling onSuccess with current user uid : ${it.currentUser!!.uid}")
+        Log.d(
+            "ComposeHierarchy",
+            "[ProfilesRepositoryFirestore][init] end of init before calling onSuccess with current user uid : ${it.currentUser!!.uid}")
         onSuccess()
       }
     }
@@ -134,12 +140,16 @@ class ProfilesRepositoryFirestore(private val db: FirebaseFirestore, private val
       onFailure: (Exception) -> Unit
   ) {
     // TODO Add GeoFirestore functionality
-    Log.d("ComposeHierarchy", "[ProfilesRepositoryFirestore][getProfilesInRadius] start get profiles in radius")
+    Log.d(
+        "ComposeHierarchy",
+        "[ProfilesRepositoryFirestore][getProfilesInRadius] start get profiles in radius")
     val task = db.collection(collectionPath).get(com.google.firebase.firestore.Source.SERVER)
     Log.d("ComposeHierarchy", "[ProfilesRepositoryFirestore][getProfilesInRadius] generated task")
 
     task.addOnCompleteListener { result ->
-        Log.d("ComposeHierarchy", "[ProfilesRepositoryFirestore][getProfilesInRadius] in onCompleteListener")
+      Log.d(
+          "ComposeHierarchy",
+          "[ProfilesRepositoryFirestore][getProfilesInRadius] in onCompleteListener")
       if (result.isSuccessful) {
         val profiles =
             result.result?.documents?.mapNotNull { document -> documentToProfile(document) }
@@ -210,10 +220,17 @@ class ProfilesRepositoryFirestore(private val db: FirebaseFirestore, private val
   ) {
     Log.d("ProfilesRepositoryFirestore", "getProfileByUid")
     db.collection("profiles").document(uid).get().addOnCompleteListener { task ->
-        Log.d("ComposeHierarchy", "[ProfilesRepositoryFirestore] [getProfileByUid] repository finished gettiing profile")
+      Log.d(
+          "ComposeHierarchy",
+          "[ProfilesRepositoryFirestore] [getProfileByUid] repository finished gettiing profile")
       if (task.isSuccessful) {
-          Log.d("ComposeHierarchy", "[ProfilesRepositoryFirestore] [getProfileByUid] success get profile")
+        Log.d(
+            "ComposeHierarchy",
+            "[ProfilesRepositoryFirestore] [getProfileByUid] success get profile")
         val profile = task.result?.let { document -> documentToProfile(document) }
+        Log.d(
+            "TAGSDEBUG",
+            "[ProfilesRepositoryFIrestore] catchphrase : ${profile?.catchPhrase}, description : ${profile?.description}, tags : ${profile?.tags}")
         onSuccess(profile)
       } else {
         task.exception?.let { e ->
@@ -271,7 +288,7 @@ class ProfilesRepositoryFirestore(private val db: FirebaseFirestore, private val
    * @return The Profile object, or null if conversion fails.
    */
   private fun documentToProfile(document: DocumentSnapshot): Profile? {
-      Log.d("ComposeHierarchy", "[ProfilesRepositoryFirestore] [documentToProfile]")
+    Log.d("ComposeHierarchy", "[ProfilesRepositoryFirestore] [documentToProfile]")
     return try {
       val uid = document.id
       val name = document.getString("name") ?: return null
