@@ -3,6 +3,7 @@ package com.github.se.icebreakrr.model.profile
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
+import com.github.se.icebreakrr.utils.GeoHashUtils
 import com.github.se.icebreakrr.utils.NetworkUtils
 import com.google.android.gms.tasks.Task
 import com.google.firebase.Firebase
@@ -11,6 +12,10 @@ import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.GeoPoint
 import com.google.firebase.firestore.Source
+import kotlin.math.atan2
+import kotlin.math.cos
+import kotlin.math.sin
+import kotlin.math.sqrt
 import kotlinx.coroutines.flow.MutableStateFlow
 
 class ProfilesRepositoryFirestore(private val db: FirebaseFirestore) : ProfilesRepository {
@@ -59,7 +64,7 @@ class ProfilesRepositoryFirestore(private val db: FirebaseFirestore) : ProfilesR
                 onFailure = {
                   Log.e(
                       "Connection Check",
-                      "Connection still lost, retrying in ${periodicTimeCheckWaitTime/PERIOD} seconds...")
+                      "Connection still lost, retrying in ${periodicTimeCheckWaitTime / PERIOD} seconds...")
                   handler.postDelayed(this, periodicTimeCheckWaitTime)
                 })
           }
@@ -79,7 +84,7 @@ class ProfilesRepositoryFirestore(private val db: FirebaseFirestore) : ProfilesR
    * @param onFailure Callback function that is invoked if the final retry attempt fails. Takes an
    *   Exception as parameter.
    */
-  public override fun handleConnectionFailure(onFailure: (Exception) -> Unit) {
+  override fun handleConnectionFailure(onFailure: (Exception) -> Unit) {
     val handler = Handler(Looper.getMainLooper())
     handler.postDelayed(
         {
@@ -124,10 +129,10 @@ class ProfilesRepositoryFirestore(private val db: FirebaseFirestore) : ProfilesR
   }
 
   /**
-   * Temporary implementation: Retrieves all profiles in the Firestore database.
+   * Retrieves profiles within a specified radius from the center point.
    *
-   * @param center The center point for the radius query (currently unused).
-   * @param radiusInMeters The radius around the center (currently unused).
+   * @param center The center point for the radius query.
+   * @param radiusInMeters The radius around the center to retrieve profiles.
    * @param onSuccess A callback invoked with a list of profiles if the operation is successful.
    * @param onFailure A callback invoked with an exception if the operation fails.
    */
@@ -137,20 +142,27 @@ class ProfilesRepositoryFirestore(private val db: FirebaseFirestore) : ProfilesR
       onSuccess: (List<Profile>) -> Unit,
       onFailure: (Exception) -> Unit
   ) {
-    // TODO Add GeoFirestore functionality
-    val task = db.collection(collectionPath).get(com.google.firebase.firestore.Source.SERVER)
+    // Determine geohash precision based on radius
+    val geohashPrecision = if (radiusInMeters <= 50) 7 else 6
+    val centerGeohash = GeoHashUtils.encode(center.latitude, center.longitude, geohashPrecision)
 
-    task.addOnCompleteListener { result ->
-      if (result.isSuccessful) {
-        val profiles =
-            result.result?.documents?.mapNotNull { document -> documentToProfile(document) }
-                ?: emptyList()
-
-        onSuccess(profiles)
-        waitingDone.value = false
-        isWaiting.value = false
-      } else {
-        result.exception?.let { e ->
+    // Fetch profiles within the bounding geohashes
+    db.collection(collectionPath)
+        .whereGreaterThanOrEqualTo("geohash", centerGeohash)
+        .whereLessThanOrEqualTo("geohash", centerGeohash + "\uf8ff")
+        .get()
+        .addOnSuccessListener { result ->
+          waitingDone.value = false
+          isWaiting.value = false
+          val profiles = result.documents.mapNotNull { documentToProfile(it) }
+          val profilesInRadius =
+              profiles.filter { profile ->
+                val profileLocation = profile.location ?: return@filter false
+                calculateDistance(center, profileLocation) <= radiusInMeters
+              }
+          onSuccess(profilesInRadius)
+        }
+        .addOnFailureListener { e ->
           Log.e("ProfilesRepositoryFirestore", "Error getting profiles", e)
           if (e is com.google.firebase.firestore.FirebaseFirestoreException) {
             if (!_isWaiting.value && !_waitingDone.value) {
@@ -160,8 +172,6 @@ class ProfilesRepositoryFirestore(private val db: FirebaseFirestore) : ProfilesR
             onFailure(e)
           }
         }
-      }
-    }
   }
 
   /**
@@ -281,21 +291,22 @@ class ProfilesRepositoryFirestore(private val db: FirebaseFirestore) : ProfilesR
       val name = document.getString("name") ?: return null
       val genderString = document.getString("gender") ?: return null
 
-      // Fallback to null if gender is not a valid enum value
       val gender =
           try {
             Gender.valueOf(genderString)
           } catch (e: IllegalArgumentException) {
-            return null // Return null if the gender does not match any enum
+            return null
           }
+
       val birthDate = document.getTimestamp("birthDate") ?: return null
       val catchPhrase = document.getString("catchPhrase") ?: return null
       val description = document.getString("description") ?: return null
       val tags = (document.get("tags") as? List<*>)?.filterIsInstance<String>() ?: listOf()
-      val profilePictureUrl = document.getString("profilePictureUrl") // Nullable field
+      val profilePictureUrl = document.getString("profilePictureUrl")
       val fcmToken = document.getString("fcmToken")
+      val location = document.getGeoPoint("location")
+      val geohash = document.getString("geohash")
 
-      // Create and return the Profile object
       Profile(
           uid = uid,
           name = name,
@@ -305,10 +316,40 @@ class ProfilesRepositoryFirestore(private val db: FirebaseFirestore) : ProfilesR
           description = description,
           tags = tags,
           profilePictureUrl = profilePictureUrl,
-          fcmToken = fcmToken)
+          fcmToken = fcmToken,
+          location = location,
+          geohash = geohash)
     } catch (e: Exception) {
       Log.e("ProfileRepositoryFirestore", "Error converting document to Profile", e)
       null
     }
+  }
+
+  /**
+   * Converts degrees to radians.
+   *
+   * @param deg Angle in degrees.
+   * @return Angle in radians.
+   */
+  private fun deg2rad(deg: Double): Double = deg * Math.PI / 180.0
+
+  /**
+   * Calculates the distance between two geographic points using the Haversine formula.
+   *
+   * @param point1 First geographic point.
+   * @param point2 Second geographic point.
+   * @return Distance between the points in meters.
+   */
+  private fun calculateDistance(point1: GeoPoint, point2: GeoPoint): Double {
+    val earthRadius = 6371000.0 // meters
+    val dLat = deg2rad(point2.latitude - point1.latitude)
+    val dLon = deg2rad(point2.longitude - point1.longitude)
+    val lat1 = deg2rad(point1.latitude)
+    val lat2 = deg2rad(point2.latitude)
+
+    val a = sin(dLat / 2) * sin(dLat / 2) + cos(lat1) * cos(lat2) * sin(dLon / 2) * sin(dLon / 2)
+    val c = 2 * atan2(sqrt(a), sqrt(1 - a))
+
+    return earthRadius * c
   }
 }
