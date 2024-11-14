@@ -50,6 +50,7 @@ import com.github.se.icebreakrr.R
 import com.github.se.icebreakrr.config.LocalIsTesting
 import com.github.se.icebreakrr.data.AppDataStore
 import com.github.se.icebreakrr.model.filter.FilterViewModel
+import com.github.se.icebreakrr.model.message.MeetingRequestManager
 import com.github.se.icebreakrr.model.message.MeetingRequestViewModel
 import com.github.se.icebreakrr.model.profile.Gender
 import com.github.se.icebreakrr.model.profile.Profile
@@ -145,6 +146,8 @@ fun SignInScreen(
                   if (task.isSuccessful) {
                     val fcmToken = task.result
                     meetingRequestViewModel.onLocalTokenChange(token)
+                    MeetingRequestManager.ourUid = firebaseUser.uid
+                    MeetingRequestManager.ourName = firebaseUser.displayName ?: "Unknown"
                     if (profile == null) { // if doesn't exist create new user
 
                       val newProfile =
@@ -156,7 +159,6 @@ fun SignInScreen(
                               catchPhrase = "",
                               description = "",
                               fcmToken = fcmToken)
-
                       profilesViewModel.addNewProfile(newProfile)
                     } else {
                       val updatedProfile = profile.copy(fcmToken = fcmToken)

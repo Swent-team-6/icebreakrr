@@ -42,6 +42,7 @@ import com.github.se.icebreakrr.utils.NetworkUtils
 import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.functions.FirebaseFunctions
+import kotlinx.coroutines.tasks.await
 
 class MainActivity : ComponentActivity() {
   private lateinit var auth: FirebaseAuth
@@ -105,13 +106,6 @@ fun IcebreakrrApp(auth: FirebaseAuth, functions: FirebaseFunctions, appDataStore
   val filterViewModel: FilterViewModel = viewModel(factory = FilterViewModel.Factory)
   var userName: String? = "null"
   var userUid: String? = "null"
-  auth.currentUser?.reload()?.addOnCompleteListener { task ->
-    userName = auth.currentUser?.displayName
-    userUid = auth.currentUser?.uid
-  }
-  Log.d("USER ID", userUid ?: "null")
-  Log.d("DISPLAY NAME", userName ?: "null")
-
   MeetingRequestManager.meetingRequestViewModel =
       viewModel(
           factory =
