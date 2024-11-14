@@ -148,6 +148,8 @@ dependencies {
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.auth.ktx)
 
+    //Utils
+    implementation(libs.geohashJava)
 
     implementation(libs.play.services.location)
     implementation(libs.coil.compose)
@@ -168,7 +170,6 @@ dependencies {
     implementation(libs.firebase.ui.auth)
     implementation(libs.firebase.auth.ktx)
     implementation(libs.firebase.auth)
-    implementation(libs.geofirestore)
     implementation(libs.firebase.common.ktx)
 
 
