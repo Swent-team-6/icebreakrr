@@ -1,6 +1,5 @@
 package com.github.se.icebreakrr.ui.navigation
 
-import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 
 open class NavigationActions(
@@ -15,7 +14,7 @@ open class NavigationActions(
    */
   open fun navigateTo(destination: TopLevelDestination) {
     navController.navigate(destination.route) {
-      popUpTo(navController.graph.findStartDestination().id) {
+      popUpTo(0) {
         saveState = true
         inclusive = true
       }

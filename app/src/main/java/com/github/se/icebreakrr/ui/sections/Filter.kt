@@ -1,6 +1,7 @@
 package com.github.se.icebreakrr.ui.sections
 
 import android.widget.Toast
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -59,6 +60,7 @@ import com.github.se.icebreakrr.model.profile.ProfilesViewModel
 import com.github.se.icebreakrr.model.tags.TagsViewModel
 import com.github.se.icebreakrr.ui.navigation.NavigationActions
 import com.github.se.icebreakrr.ui.sections.shared.UnsavedChangesDialog
+import com.github.se.icebreakrr.ui.sections.shared.handleSafeBackNavigation
 import com.github.se.icebreakrr.ui.tags.TagSelector
 import com.github.se.icebreakrr.ui.theme.Grey
 import com.github.se.icebreakrr.ui.theme.IceBreakrrBlue
@@ -245,6 +247,14 @@ fun FilterScreen(
     }
   }
 
+  BackHandler {
+    handleSafeBackNavigation(
+        isModified = isModified,
+        setShowDialog = { showDialog = it },
+        tagsViewModel = tagsViewModel,
+        navigationActions = navigationActions)
+  }
+
   Scaffold(
       topBar = {
         TopAppBar(
@@ -255,12 +265,11 @@ fun FilterScreen(
             navigationIcon = {
               IconButton(
                   onClick = {
-                    if (isModified) {
-                      showDialog = true
-                    } else {
-                      tagsViewModel.leaveUI()
-                      navigationActions.goBack()
-                    }
+                    handleSafeBackNavigation(
+                        isModified = isModified,
+                        setShowDialog = { showDialog = it },
+                        tagsViewModel = tagsViewModel,
+                        navigationActions = navigationActions)
                   },
                   modifier = Modifier.testTag("Back Button")) {
                     Icon(
