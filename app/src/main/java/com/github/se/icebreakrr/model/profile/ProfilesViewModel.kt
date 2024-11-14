@@ -116,7 +116,7 @@ open class ProfilesViewModel(
         onSuccess = { profileList ->
           val filteredProfiles =
               profileList.filter { profile ->
-                val selfUid = Firebase.auth.uid
+
 
                 // Filter by genders if specified
                 (genders == null || profile.gender in genders || genders.isEmpty()) &&
@@ -133,7 +133,7 @@ open class ProfilesViewModel(
                     !(_selfProfile.value?.hasBlocked?.contains(profile.uid) ?: false) &&
 
                     // Filter by isBlocked
-                    !(selfUid != null && profile.hasBlocked.contains(selfUid))
+                    !(profile.hasBlocked.contains(_selfProfile.value?.uid ?: ""))
               }
           _profiles.value = profileList
           _filteredProfiles.value = filteredProfiles
