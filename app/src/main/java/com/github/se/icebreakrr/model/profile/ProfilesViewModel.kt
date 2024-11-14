@@ -12,6 +12,7 @@ import com.github.se.icebreakrr.ui.sections.DEFAULT_LATITUDE
 import com.github.se.icebreakrr.ui.sections.DEFAULT_LONGITUDE
 import com.github.se.icebreakrr.ui.sections.DEFAULT_RADIUS
 import com.google.firebase.Firebase
+import com.google.firebase.auth.auth
 import com.google.firebase.firestore.GeoPoint
 import com.google.firebase.firestore.firestore
 import com.google.firebase.storage.storage
@@ -35,8 +36,14 @@ open class ProfilesViewModel(
   private val _selectedProfile = MutableStateFlow<Profile?>(null)
   open val selectedProfile: StateFlow<Profile?> = _selectedProfile
 
+  private val _selfProfile = MutableStateFlow<Profile?>(null)
+  open val selfProfile: StateFlow<Profile?> = _selfProfile
+
   private val _loading = MutableStateFlow(false)
   open val loading: StateFlow<Boolean> = _loading
+
+  private val _loadingSelf = MutableStateFlow(false)
+  open val loadingSelf: StateFlow<Boolean> = _loadingSelf
 
   private val _error = MutableStateFlow<Exception?>(null)
   val error: StateFlow<Exception?> = _error
@@ -82,6 +89,7 @@ open class ProfilesViewModel(
     repository.init {
       // Fetch profiles on initialization
       getFilteredProfilesInRadius(GeoPoint(DEFAULT_LATITUDE, DEFAULT_LONGITUDE), DEFAULT_RADIUS)
+      getSelfProfile()
     }
   }
 
@@ -118,7 +126,13 @@ open class ProfilesViewModel(
                     // Filter by tags if specified
                     (tags == null ||
                         profile.tags.any { it.lowercase() in tags.map { it.lowercase() } } ||
-                        tags.isEmpty())
+                        tags.isEmpty()) &&
+
+                    // Filter by hasBlocked
+                    !(_selfProfile.value?.hasBlocked?.contains(profile.uid) ?: false) &&
+
+                    // Filter by isBlocked
+                    !(profile.hasBlocked.contains(_selfProfile.value?.uid ?: ""))
               }
           _profiles.value = profileList
           _filteredProfiles.value = filteredProfiles
@@ -256,6 +270,27 @@ open class ProfilesViewModel(
             currentProfile?.copy(profilePictureUrl = null)
           }
           updateProfile(selectedProfile.value!!)
+        },
+        onFailure = { e -> handleError(e) })
+  }
+
+  /**
+   * Blocks a user by updating the blocking relationship in the repository.
+   *
+   * @param uid The unique ID of the user being blocked.
+   */
+  fun blockUser(uid: String) {
+    updateProfile(selfProfile.value!!.copy(hasBlocked = selfProfile.value!!.hasBlocked + uid))
+  }
+
+  /** Fetches the current user's profile from the repository. */
+  fun getSelfProfile() {
+    _loadingSelf.value = true
+    repository.getProfileByUid(
+        Firebase.auth.uid ?: "null",
+        onSuccess = { profile ->
+          _selfProfile.value = profile
+          _loadingSelf.value = false
         },
         onFailure = { e -> handleError(e) })
   }

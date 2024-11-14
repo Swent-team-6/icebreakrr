@@ -294,6 +294,8 @@ class ProfilesRepositoryFirestore(private val db: FirebaseFirestore) : ProfilesR
       val tags = (document.get("tags") as? List<*>)?.filterIsInstance<String>() ?: listOf()
       val profilePictureUrl = document.getString("profilePictureUrl") // Nullable field
       val fcmToken = document.getString("fcmToken")
+      val hasBlocked =
+          (document.get("hasBlocked") as? List<*>)?.filterIsInstance<String>() ?: listOf()
 
       // Create and return the Profile object
       Profile(
@@ -305,7 +307,8 @@ class ProfilesRepositoryFirestore(private val db: FirebaseFirestore) : ProfilesR
           description = description,
           tags = tags,
           profilePictureUrl = profilePictureUrl,
-          fcmToken = fcmToken)
+          fcmToken = fcmToken,
+          hasBlocked = hasBlocked)
     } catch (e: Exception) {
       Log.e("ProfileRepositoryFirestore", "Error converting document to Profile", e)
       null

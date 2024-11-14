@@ -79,7 +79,9 @@ fun OtherProfileView(
 
             // 2 sections one for the profile image with overlay and
             // one for the information section
-            ProfileHeader(profile, navigationActions, false) { sendRequest = true }
+            ProfileHeader(profile, navigationActions, false, profilesViewModel) {
+              sendRequest = true
+            }
             InfoSection(profile, tagsViewModel)
           }
 

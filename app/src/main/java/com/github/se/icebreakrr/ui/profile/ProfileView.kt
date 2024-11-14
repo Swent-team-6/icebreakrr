@@ -66,7 +66,7 @@ fun ProfileView(
 
                 // 2 sections one for the profile image with overlay and
                 // one for the information section
-                ProfileHeader(profile, navigationActions, true) {
+                ProfileHeader(profile, navigationActions, true, profilesViewModel) {
                   navigationActions.navigateTo(Screen.PROFILE_EDIT)
                 }
                 InfoSection(profile, tagsViewModel)

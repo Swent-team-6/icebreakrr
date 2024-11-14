@@ -104,6 +104,12 @@ open class MockProfileViewModel :
   private val _loading = MutableStateFlow(false)
   override val loading: StateFlow<Boolean> = _loading.asStateFlow()
 
+  private val _selfProfile = MutableStateFlow<Profile?>(null)
+  override val selfProfile: StateFlow<Profile?> = _selfProfile.asStateFlow()
+
+  private val _loadingSelf = MutableStateFlow(false)
+  override val loadingSelf: StateFlow<Boolean> = _loadingSelf.asStateFlow()
+
   init {
     getProfiles()
   }
@@ -118,6 +124,10 @@ open class MockProfileViewModel :
 
   fun setSelectedProfile(profile: Profile?) {
     _selectedProfile.value = profile
+  }
+
+  fun setSelfProfile(profile: Profile?) {
+    _selfProfile.value = profile
   }
 
   /** Sets the loading state directly for testing purposes */
@@ -210,6 +220,21 @@ fun Profile.Companion.getMockedProfiles(): List<Profile> {
           listOf("entertainment", "singing", "frog"),
           listOf("adventure", "archaeology", "action"))
 
+  val hasBlockedList =
+      listOf(
+          listOf("2", "3"),
+          listOf(),
+          listOf(),
+          listOf(),
+          listOf(),
+          listOf(),
+          listOf(),
+          listOf(),
+          listOf(),
+          listOf(),
+          listOf(),
+          listOf())
+
   val profiles = mutableListOf<Profile>()
   for (i in uids.indices) {
     profiles.add(
@@ -221,7 +246,8 @@ fun Profile.Companion.getMockedProfiles(): List<Profile> {
             catchPhrase = catchPhrases[i],
             description = descriptions[i],
             tags = tagsList[i],
-            profilePictureUrl = null))
+            profilePictureUrl = null,
+            hasBlocked = hasBlockedList[i]))
   }
   return profiles
 }
