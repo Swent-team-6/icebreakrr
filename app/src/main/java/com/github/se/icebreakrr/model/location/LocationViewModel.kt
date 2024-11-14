@@ -2,7 +2,6 @@ package com.github.se.icebreakrr.model.location
 
 import android.Manifest
 import android.content.pm.PackageManager
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -15,7 +14,7 @@ import kotlinx.coroutines.launch
 
 class LocationViewModel(
     private val locationService: LocationService,
-    private val geoFirestoreRepository: GeoFirestoreRepository,
+    private val locationRepositoryFirestore: LocationRepositoryFirestore,
     private val permissionManager: PermissionManager
 ) : ViewModel() {
 
@@ -28,14 +27,15 @@ class LocationViewModel(
   companion object {
     fun provideFactory(
         locationService: LocationService,
-        geoFirestoreRepository: GeoFirestoreRepository,
+        locationRepositoryFirestore: LocationRepositoryFirestore,
         permissionManager: PermissionManager
     ): ViewModelProvider.Factory =
         object : ViewModelProvider.Factory {
           @Suppress("UNCHECKED_CAST")
           override fun <T : ViewModel> create(modelClass: Class<T>): T {
             if (modelClass.isAssignableFrom(LocationViewModel::class.java)) {
-              return LocationViewModel(locationService, geoFirestoreRepository, permissionManager)
+              return LocationViewModel(
+                  locationService, locationRepositoryFirestore, permissionManager)
                   as T
             }
             throw IllegalArgumentException("Unknown ViewModel class")
@@ -84,16 +84,14 @@ class LocationViewModel(
         locationService.startLocationUpdates(
             onLocationUpdate = { location ->
               val geoPoint = GeoPoint(location.latitude, location.longitude)
-              geoFirestoreRepository.setUserPosition(
+              locationRepositoryFirestore.setUserPosition(
                   geoPoint) // Call Firestore update on location change
             })
 
     if (locationUpdatesStarted) {
-      Log.d("LocationViewModel", "isUpdatingLocation set to true")
       _isUpdatingLocation.value = true
     } else {
       locationService.stopLocationUpdates()
-      Log.d("LocationViewModel", "isUpdatingLocation set to false")
       _isUpdatingLocation.value = false
     }
   }
