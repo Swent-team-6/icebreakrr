@@ -73,8 +73,8 @@ class AroundYouScreenTest {
           profilesViewModel,
           viewModel(factory = TagsViewModel.Factory),
           viewModel(factory = FilterViewModel.Factory),
-        mockPermissionManager,
-        mockAppDataStore)
+          mockPermissionManager,
+          mockAppDataStore)
     }
 
     // Trigger initial connection check
