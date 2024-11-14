@@ -130,8 +130,6 @@ fun SignInScreen(
       rememberFirebaseAuthLauncher(
           onAuthComplete = { result ->
             user = result.user
-            Log.d("USER SIGN-IN NAME", user?.displayName ?: "null") // never null here
-            Log.d("USER SIGN-IN UID", user?.uid ?: "null")
             user?.let { firebaseUser ->
               coroutineScope.launch {
 
