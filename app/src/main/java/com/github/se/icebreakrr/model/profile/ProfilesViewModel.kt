@@ -105,6 +105,7 @@ open class ProfilesViewModel(
         onSuccess = { profileList ->
           val filteredProfiles =
               profileList.filter { profile ->
+                  val selfUid = selectedProfile.value?.uid;
 
                 // Filter by genders if specified
                 (genders == null || profile.gender in genders || genders.isEmpty()) &&
@@ -118,7 +119,10 @@ open class ProfilesViewModel(
                         tags.isEmpty()) &&
 
                     // Filter by hasBlocked
-                    !(_selfProfile.value?.hasBlocked?.contains(profile.uid) ?: false)
+                    !(_selfProfile.value?.hasBlocked?.contains(profile.uid) ?: false) &&
+
+                    // Filter by isBlocked
+                    !(selfUid != null && profile.hasBlocked.contains(selfUid))
               }
           _profiles.value = profileList
           _filteredProfiles.value = filteredProfiles
