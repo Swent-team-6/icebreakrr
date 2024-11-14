@@ -377,6 +377,8 @@ fun ProfileHeader(
                                               R.string.block_success_message,
                                               Toast.LENGTH_SHORT)
                                           .show()
+                                        profilesViewModel.getSelfProfile()
+                                        navigationActions.goBack()
                                     } else {
                                       showNoInternetToast(context = context)
                                     }
