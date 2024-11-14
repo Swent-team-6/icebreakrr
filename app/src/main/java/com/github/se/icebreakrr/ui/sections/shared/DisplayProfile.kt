@@ -44,6 +44,7 @@ import com.github.se.icebreakrr.ui.tags.RowOfTags
 import com.github.se.icebreakrr.ui.tags.TagStyle
 import com.github.se.icebreakrr.ui.theme.IceBreakrrBlue
 import com.github.se.icebreakrr.utils.NetworkUtils.isNetworkAvailable
+import com.github.se.icebreakrr.utils.NetworkUtils.isNetworkAvailableWithContext
 import com.github.se.icebreakrr.utils.NetworkUtils.showNoInternetToast
 
 // Constants
@@ -338,7 +339,7 @@ fun ProfileHeader(
                                   }
                               TextButton(
                                   onClick = {
-                                    if (isNetworkAvailable(context = context)) {
+                                    if (isNetworkAvailableWithContext(context)) {
                                       profilesViewModel.blockUser(profile.uid)
                                       Toast.makeText(
                                               context,
