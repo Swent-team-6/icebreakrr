@@ -15,7 +15,7 @@ open class NavigationActions(
    */
   open fun navigateTo(destination: TopLevelDestination) {
     navController.navigate(destination.route) {
-      popUpTo(navController.graph.findStartDestination().id) {
+      popUpTo(0) {
         saveState = true
         inclusive = true
       }
