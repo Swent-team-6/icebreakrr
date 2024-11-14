@@ -79,11 +79,9 @@ fun ProfileCreationScreen(
   val catchphrase = remember { mutableStateOf("") }
   val description = remember { mutableStateOf("") }
 
-  val tempBitmap = profilesViewModel.tempProfilePictureBitmap.collectAsState().value
-
   val selectedTags = tagsViewModel.filteringTags.collectAsState().value
   val tagsSuggestions = tagsViewModel.tagsSuggestions.collectAsState()
-  val stringQuery = tagsViewModel.query.collectAsState()
+  val stringQuery = remember { mutableStateOf("") }
 
   val expanded = remember { mutableStateOf(false) }
 
@@ -265,7 +263,7 @@ fun ProfileCreationScreen(
               selectedTag = selectedTags.map { tag -> Pair(tag, tagsViewModel.tagToColor(tag)) },
               outputTag =
                   tagsSuggestions.value.map { tag -> Pair(tag, tagsViewModel.tagToColor(tag)) },
-              stringQuery = stringQuery.value,
+              stringQuery = stringQuery,
               expanded = expanded,
               onTagClick = { tag ->
                 tagsViewModel.removeFilter(tag)

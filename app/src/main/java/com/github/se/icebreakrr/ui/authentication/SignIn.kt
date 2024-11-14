@@ -86,147 +86,147 @@ fun SignInScreen(
     appDataStore: AppDataStore
 ) {
 
-    // State to hold the current Firebase user
-    var user by remember { mutableStateOf(Firebase.auth.currentUser) }
-    // Retrieve the token from resources (needed for Google Sign-In)
-    val token = stringResource(R.string.default_web_client_id)
-    // Get the context to use within the composable
-    val context = LocalContext.current
+  // State to hold the current Firebase user
+  var user by remember { mutableStateOf(Firebase.auth.currentUser) }
+  // Retrieve the token from resources (needed for Google Sign-In)
+  val token = stringResource(R.string.default_web_client_id)
+  // Get the context to use within the composable
+  val context = LocalContext.current
 
-    // Check if the app is running in test mode
-    val isTesting = LocalIsTesting.current
+  // Check if the app is running in test mode
+  val isTesting = LocalIsTesting.current
 
-    // Get screen configuration to dynamically adjust layout
-    val configuration = LocalConfiguration.current
-    val screenHeight = configuration.screenHeightDp
+  // Get screen configuration to dynamically adjust layout
+  val configuration = LocalConfiguration.current
+  val screenHeight = configuration.screenHeightDp
 
-    // Define padding and spacing as percentages of the screen height
-    val verticalPadding = (screenHeight * 0.2).dp // 20%
+  // Define padding and spacing as percentages of the screen height
+  val verticalPadding = (screenHeight * 0.2).dp // 20%
 
-    val coroutineScope = rememberCoroutineScope()
+  val coroutineScope = rememberCoroutineScope()
 
-    val launcher =
-        rememberFirebaseAuthLauncher(
-            onAuthComplete = { result ->
-                user = result.user
-                user?.let { firebaseUser ->
-                    coroutineScope.launch {
+  val launcher =
+      rememberFirebaseAuthLauncher(
+          onAuthComplete = { result ->
+            user = result.user
+            user?.let { firebaseUser ->
+              coroutineScope.launch {
 
-                        // Get the token from Firebase
-                        user?.getIdToken(false)?.await()?.token?.let { token ->
-                            // Save the token to DataStore
-                            appDataStore.saveAuthToken(token)
-                        }
-
-                        // Checking if user already exists
-                        profilesViewModel.getProfileByUid(firebaseUser.uid)
-
-                        // Wait until loading becomes false which means that we got the user
-                        profilesViewModel.loading.first { !it }
-
-                        // Check selectedProfile after loading completes
-                        val profile = profilesViewModel.selectedProfile.value
-
-                        // checking if profile already exists and add it its fcmToken
-                        FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
-                            if (task.isSuccessful) {
-                                val fcmToken = task.result
-                                meetingRequestViewModel.onLocalTokenChange(token)
-                                if (profile == null) {
-                                    // If profile doesn't exist, navigate to profile creation
-                                    navigationActions.navigateTo(Screen.PROFILE_CREATION)
-                                } else {
-                                    val updatedProfile = profile.copy(fcmToken = fcmToken)
-                                    profilesViewModel.updateProfile(updatedProfile)
-                                    navigationActions.navigateTo(TopLevelDestinations.AROUND_YOU)
-                                }
-                            }
-                        }
-
-                        // Navigate to sign in screen after completion
-                        navigationActions.navigateTo(TopLevelDestinations.AROUND_YOU)
-                    }
+                // Get the token from Firebase
+                user?.getIdToken(false)?.await()?.token?.let { token ->
+                  // Save the token to DataStore
+                  appDataStore.saveAuthToken(token)
                 }
-            },
-            onAuthError = { user = null })
 
-    // Define a linear gradient with the provided colors
-    val gradientBrush =
-        Brush.linearGradient(
-            colors =
-            listOf(
-                Color(0xFF1FAEF0), // Light blue
-                Color(0xFF1C9EDA), // Mid blue
-                Color(0xFF12648A) // Dark blue
-            ))
+                // Checking if user already exists
+                profilesViewModel.getProfileByUid(firebaseUser.uid)
 
-    // Add this to collect the auth token state
-    val hasAuthToken = appDataStore.hasAuthToken.collectAsState(initial = false)
+                // Wait until loading becomes false which means that we got the user
+                profilesViewModel.loading.first { !it }
 
-    Scaffold(
-        modifier = Modifier.fillMaxSize().testTag("loginScreen"),
-        content = { paddingValues ->
-            Column(
-                modifier =
+                // Check selectedProfile after loading completes
+                val profile = profilesViewModel.selectedProfile.value
+
+                // checking if profile already exists and add it its fcmToken
+                FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
+                  if (task.isSuccessful) {
+                    val fcmToken = task.result
+                    meetingRequestViewModel.onLocalTokenChange(token)
+                    if (profile == null) {
+                      // If profile doesn't exist, navigate to profile creation
+                      navigationActions.navigateTo(Screen.PROFILE_CREATION)
+                    } else {
+                      val updatedProfile = profile.copy(fcmToken = fcmToken)
+                      profilesViewModel.updateProfile(updatedProfile)
+                      navigationActions.navigateTo(TopLevelDestinations.AROUND_YOU)
+                    }
+                  }
+                }
+
+                // Navigate to sign in screen after completion
+                navigationActions.navigateTo(TopLevelDestinations.AROUND_YOU)
+              }
+            }
+          },
+          onAuthError = { user = null })
+
+  // Define a linear gradient with the provided colors
+  val gradientBrush =
+      Brush.linearGradient(
+          colors =
+              listOf(
+                  Color(0xFF1FAEF0), // Light blue
+                  Color(0xFF1C9EDA), // Mid blue
+                  Color(0xFF12648A) // Dark blue
+                  ))
+
+  // Add this to collect the auth token state
+  val hasAuthToken = appDataStore.hasAuthToken.collectAsState(initial = false)
+
+  Scaffold(
+      modifier = Modifier.fillMaxSize().testTag("loginScreen"),
+      content = { paddingValues ->
+        Column(
+            modifier =
                 Modifier.background(brush = gradientBrush)
                     .fillMaxSize()
                     .padding(vertical = verticalPadding)
                     .padding(paddingValues),
-                verticalArrangement = Arrangement.SpaceBetween,
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
-                Text(
-                    modifier = Modifier.testTag("loginTitle"),
-                    text = "IceBreakrr",
-                    style =
-                    TextStyle(
-                        fontSize = 64.sp,
-                        lineHeight = 25.07.sp,
-                        fontWeight = FontWeight(500),
-                        color = Color(0xFFFFFFFF),
-                        textAlign = TextAlign.Center,
-                        letterSpacing = 0.37.sp,
-                    ))
+            verticalArrangement = Arrangement.SpaceBetween,
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+          Text(
+              modifier = Modifier.testTag("loginTitle"),
+              text = "IceBreakrr",
+              style =
+                  TextStyle(
+                      fontSize = 64.sp,
+                      lineHeight = 25.07.sp,
+                      fontWeight = FontWeight(500),
+                      color = Color(0xFFFFFFFF),
+                      textAlign = TextAlign.Center,
+                      letterSpacing = 0.37.sp,
+                  ))
 
-                // Authenticate With Google Button
-                GoogleSignInButton(
-                    onClick = {
-                        if (isTesting) {
-                            navigationActions.navigateTo(TopLevelDestinations.AROUND_YOU)
-                        } else {
-                            if (!NetworkUtils.isNetworkAvailable()) {
-                                if (hasAuthToken.value) {
-                                    // If offline but has token, allow access
-                                    navigationActions.navigateTo(TopLevelDestinations.AROUND_YOU)
-                                    profilesViewModel.getFilteredProfilesInRadius(
-                                        GeoPoint(0.0, 0.0),
-                                        300.0,
-                                        filterViewModel.selectedGenders.value,
-                                        filterViewModel.ageRange.value,
-                                        tagsViewModel.filteredTags.value)
-                                } else {
-                                    NetworkUtils.showNoInternetToast(context)
-                                }
-                            } else {
-                                val gso =
-                                    GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                                        .requestIdToken(token)
-                                        .requestEmail()
-                                        .build()
-                                val googleSignInClient = GoogleSignIn.getClient(context, gso)
-                                launcher.launch(googleSignInClient.signInIntent)
+          // Authenticate With Google Button
+          GoogleSignInButton(
+              onClick = {
+                if (isTesting) {
+                  navigationActions.navigateTo(TopLevelDestinations.AROUND_YOU)
+                } else {
+                  if (!NetworkUtils.isNetworkAvailable()) {
+                    if (hasAuthToken.value) {
+                      // If offline but has token, allow access
+                      navigationActions.navigateTo(TopLevelDestinations.AROUND_YOU)
+                      profilesViewModel.getFilteredProfilesInRadius(
+                          GeoPoint(0.0, 0.0),
+                          300.0,
+                          filterViewModel.selectedGenders.value,
+                          filterViewModel.ageRange.value,
+                          tagsViewModel.filteredTags.value)
+                    } else {
+                      NetworkUtils.showNoInternetToast(context)
+                    }
+                  } else {
+                    val gso =
+                        GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                            .requestIdToken(token)
+                            .requestEmail()
+                            .build()
+                    val googleSignInClient = GoogleSignIn.getClient(context, gso)
+                    launcher.launch(googleSignInClient.signInIntent)
 
-                                profilesViewModel.getFilteredProfilesInRadius(
-                                    GeoPoint(0.0, 0.0),
-                                    300.0,
-                                    filterViewModel.selectedGenders.value,
-                                    filterViewModel.ageRange.value,
-                                    tagsViewModel.filteredTags.value)
-                            }
-                        }
-                    })
-            }
-        })
+                    profilesViewModel.getFilteredProfilesInRadius(
+                        GeoPoint(0.0, 0.0),
+                        300.0,
+                        filterViewModel.selectedGenders.value,
+                        filterViewModel.ageRange.value,
+                        tagsViewModel.filteredTags.value)
+                  }
+                }
+              })
+        }
+      })
 }
 
 /**
@@ -237,36 +237,36 @@ fun SignInScreen(
  */
 @Composable
 fun GoogleSignInButton(onClick: () -> Unit) {
-    Button(
-        onClick = onClick,
-        colors = ButtonDefaults.buttonColors(containerColor = Color.White), // Button color
-        shape = RoundedCornerShape(50), // Circular edges for the button
-        border = BorderStroke(1.dp, Color.LightGray),
-        modifier =
-        Modifier.padding(8.dp)
-            .height(48.dp) // Adjust height as needed
-            .testTag("loginButton")) {
+  Button(
+      onClick = onClick,
+      colors = ButtonDefaults.buttonColors(containerColor = Color.White), // Button color
+      shape = RoundedCornerShape(50), // Circular edges for the button
+      border = BorderStroke(1.dp, Color.LightGray),
+      modifier =
+          Modifier.padding(8.dp)
+              .height(48.dp) // Adjust height as needed
+              .testTag("loginButton")) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center,
             modifier = Modifier.fillMaxWidth()) {
-            // Load the Google logo from resources
-            Image(
-                painter =
-                painterResource(id = R.drawable.google_logo), // Ensure this drawable exists
-                contentDescription = "Google Logo",
-                modifier =
-                Modifier.size(30.dp) // Size of the Google logo
-                    .padding(end = 8.dp))
+              // Load the Google logo from resources
+              Image(
+                  painter =
+                      painterResource(id = R.drawable.google_logo), // Ensure this drawable exists
+                  contentDescription = "Google Logo",
+                  modifier =
+                      Modifier.size(30.dp) // Size of the Google logo
+                          .padding(end = 8.dp))
 
-            // Text for the button
-            Text(
-                text = "Sign in with Google",
-                color = Color.Gray, // Text color
-                fontSize = 16.sp, // Font size
-                fontWeight = FontWeight.Medium)
-        }
-    }
+              // Text for the button
+              Text(
+                  text = "Sign in with Google",
+                  color = Color.Gray, // Text color
+                  fontSize = 16.sp, // Font size
+                  fontWeight = FontWeight.Medium)
+            }
+      }
 }
 
 /**
@@ -282,21 +282,21 @@ fun rememberFirebaseAuthLauncher(
     onAuthComplete: (AuthResult) -> Unit,
     onAuthError: (ApiException) -> Unit
 ): ManagedActivityResultLauncher<Intent, ActivityResult> {
-    // Coroutine scope for handling asynchronous tasks
-    val scope = rememberCoroutineScope()
+  // Coroutine scope for handling asynchronous tasks
+  val scope = rememberCoroutineScope()
 
-    return rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-            result ->
-        val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
-        try {
-            val account = task.getResult(ApiException::class.java)!!
-            val credential = GoogleAuthProvider.getCredential(account.idToken!!, null)
-            scope.launch {
-                val authResult = Firebase.auth.signInWithCredential(credential).await()
-                onAuthComplete(authResult)
-            }
-        } catch (e: ApiException) {
-            onAuthError(e)
-        }
+  return rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+      result ->
+    val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
+    try {
+      val account = task.getResult(ApiException::class.java)!!
+      val credential = GoogleAuthProvider.getCredential(account.idToken!!, null)
+      scope.launch {
+        val authResult = Firebase.auth.signInWithCredential(credential).await()
+        onAuthComplete(authResult)
+      }
+    } catch (e: ApiException) {
+      onAuthError(e)
     }
+  }
 }
