@@ -116,7 +116,7 @@ open class ProfilesViewModel(
         onSuccess = { profileList ->
           val filteredProfiles =
               profileList.filter { profile ->
-                val selfUid = selectedProfile.value?.uid
+                val selfUid = Firebase.auth.uid
 
                 // Filter by genders if specified
                 (genders == null || profile.gender in genders || genders.isEmpty()) &&
