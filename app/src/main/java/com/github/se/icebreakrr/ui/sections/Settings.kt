@@ -131,18 +131,17 @@ fun SettingsScreen(
               })
           Spacer(modifier = Modifier.height(SPACER_HEIGHT_LARGE))
 
-        // this button is temporary and not tested
+          // this button is temporary and not tested
           Button(
               onClick = {
-                  profilesViewModel.updateProfile(profilesViewModel.selfProfile.value!!.copy(hasBlocked = emptyList()))
-                  Toast.makeText(context, "All users unblocked", Toast.LENGTH_SHORT).show()
-                },
+                profilesViewModel.updateProfile(
+                    profilesViewModel.selfProfile.value!!.copy(hasBlocked = emptyList()))
+                Toast.makeText(context, "All users unblocked", Toast.LENGTH_SHORT).show()
+              },
               colors = ButtonDefaults.buttonColors(containerColor = Color.Blue),
-              modifier = Modifier
-                  .fillMaxWidth()
-          ) {
-              Text("Unblock All", color = Color.White)
-          }
+              modifier = Modifier.fillMaxWidth()) {
+                Text("Unblock All", color = Color.White)
+              }
 
           Spacer(modifier = Modifier.padding(vertical = 8.dp))
 
@@ -194,5 +193,5 @@ fun ToggleOptionBox(
                   modifier = Modifier.testTag("switch$label"),
                   onCheckedChange = onCheckedChange)
             }
-      }    
+      }
 }

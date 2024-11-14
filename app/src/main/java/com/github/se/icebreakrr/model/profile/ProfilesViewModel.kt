@@ -89,7 +89,7 @@ open class ProfilesViewModel(
     repository.init {
       // Fetch profiles on initialization
       getFilteredProfilesInRadius(GeoPoint(DEFAULT_LATITUDE, DEFAULT_LONGITUDE), DEFAULT_RADIUS)
-            getSelfProfile()
+      getSelfProfile()
     }
   }
 
@@ -116,7 +116,7 @@ open class ProfilesViewModel(
         onSuccess = { profileList ->
           val filteredProfiles =
               profileList.filter { profile ->
-                  val selfUid = selectedProfile.value?.uid;
+                val selfUid = selectedProfile.value?.uid
 
                 // Filter by genders if specified
                 (genders == null || profile.gender in genders || genders.isEmpty()) &&
