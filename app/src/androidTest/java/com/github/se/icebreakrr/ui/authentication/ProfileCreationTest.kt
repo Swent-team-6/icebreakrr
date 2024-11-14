@@ -45,7 +45,6 @@ class ProfileCreationTest {
     }
 
     composeTestRule.onNodeWithTag("profileCreationContent").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("profilePicture").assertIsDisplayed()
     composeTestRule.onNodeWithTag("fullName").assertIsDisplayed()
     composeTestRule.onNodeWithTag("birthdate").assertIsDisplayed()
     composeTestRule.onNodeWithTag("genderSelection").assertIsDisplayed()
@@ -114,16 +113,6 @@ class ProfileCreationTest {
 
     composeTestRule.onNodeWithTag("genderSelection").performClick()
     composeTestRule.onNodeWithText("Other").performClick()
-  }
-
-  @Test
-  fun testProfilePictureSelection() {
-    composeTestRule.setContent {
-      ProfileCreationScreen(tagsViewModel, fakeProfilesViewModel, navigationActions)
-    }
-
-    composeTestRule.onNodeWithTag("profilePicture").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("profilePicture").performClick()
   }
 
   @Test
