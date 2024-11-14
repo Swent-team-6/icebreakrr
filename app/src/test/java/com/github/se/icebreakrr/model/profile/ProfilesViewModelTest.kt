@@ -19,7 +19,6 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.test.setMain
 import org.hamcrest.CoreMatchers.`is`
 import org.hamcrest.CoreMatchers.nullValue
 import org.hamcrest.MatcherAssert.assertThat
@@ -88,7 +87,6 @@ class ProfilesViewModelTest {
     profilesRepository = mock(ProfilesRepository::class.java)
     ppRepository = mock(ProfilePicRepository::class.java)
     profilesViewModel = ProfilesViewModel(profilesRepository, ppRepository)
-    Dispatchers.setMain(testDispatcher) // Set main dispatcher first
     mockProfileViewModel = mock(ProfilesViewModel::class.java)
 
     bitmapFactoryMock = mockStatic(BitmapFactory::class.java)
