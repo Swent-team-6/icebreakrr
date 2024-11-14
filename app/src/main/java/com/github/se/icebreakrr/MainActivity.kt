@@ -113,7 +113,7 @@ class MainActivity : ComponentActivity() {
       CompositionLocalProvider(LocalIsTesting provides isTesting) {
         SampleAppTheme {
           Surface(modifier = Modifier.fillMaxSize()) {
-            IcebreakrrApp(auth, functions, appDataStore)
+            IcebreakrrApp(auth, functions,appDataStore, locationViewModel, permissionManager)
           }
         }
       }
@@ -164,10 +164,11 @@ class MainActivity : ComponentActivity() {
  * @see NotificationScreen
  */
 @Composable
-fun IcebreakrrApp(auth: FirebaseAuth, functions: FirebaseFunctions, appDataStore: AppDataStore) {
+fun IcebreakrrApp(auth: FirebaseAuth, functions: FirebaseFunctions, appDataStore: AppDataStore, locationViewModel: LocationViewModel, permissionManager : PermissionManager) {
   val profileViewModel: ProfilesViewModel = viewModel(factory = ProfilesViewModel.Factory)
   val tagsViewModel: TagsViewModel = viewModel(factory = TagsViewModel.Factory)
   val filterViewModel: FilterViewModel = viewModel(factory = FilterViewModel.Factory)
+
   var userName: String? = "null"
   var userUid: String? = "null"
   MeetingRequestManager.meetingRequestViewModel =
@@ -183,7 +184,9 @@ fun IcebreakrrApp(auth: FirebaseAuth, functions: FirebaseFunctions, appDataStore
       filterViewModel,
       meetingRequestViewModel,
       appDataStore,
-      Route.AUTH)
+      Route.AUTH,
+      locationViewModel,
+      permissionManager)
 }
 
 @Composable
@@ -193,7 +196,9 @@ fun IcebreakrrNavHost(
     filterViewModel: FilterViewModel,
     meetingRequestViewModel: MeetingRequestViewModel?,
     appDataStore: AppDataStore,
-    startDestination: String
+    startDestination: String,
+    locationViewModel: LocationViewModel,
+    permissionManager: PermissionManager
 ) {
   val navController = rememberNavController()
   val navigationActions = NavigationActions(navController)
@@ -226,7 +231,8 @@ fun IcebreakrrNavHost(
         route = Route.AROUND_YOU,
     ) {
       composable(Screen.AROUND_YOU) {
-        AroundYouScreen(navigationActions, profileViewModel, tagsViewModel, filterViewModel)
+        AroundYouScreen(
+            navigationActions, profileViewModel, tagsViewModel, filterViewModel, permissionManager, appDataStore)
       }
       composable(Screen.OTHER_PROFILE_VIEW + "?userId={userId}") { navBackStackEntry ->
         if (meetingRequestViewModel != null) {
@@ -248,7 +254,7 @@ fun IcebreakrrNavHost(
         route = Route.SETTINGS,
     ) {
       composable(Screen.SETTINGS) {
-        SettingsScreen(profileViewModel, navigationActions, appDataStore = appDataStore)
+        SettingsScreen(profileViewModel, navigationActions, locationViewModel, appDataStore)
       }
       composable(Screen.PROFILE) { ProfileView(profileViewModel, tagsViewModel, navigationActions) }
     }
