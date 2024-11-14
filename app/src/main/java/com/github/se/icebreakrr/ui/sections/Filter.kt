@@ -31,6 +31,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -127,6 +128,10 @@ fun FilterScreen(
   // Read the selected genders from the ViewModel
   val selectedGenders by filterViewModel.selectedGenders.collectAsState()
 
+  LaunchedEffect(Unit) {
+    filterViewModel.filteredTags.value.forEach { tag -> tagsViewModel.addFilter(tag) }
+  }
+
   // Store the new inputs
   val currentSelectedGenders = mutableListOf<Gender>()
 
@@ -155,7 +160,6 @@ fun FilterScreen(
   val tagsSuggestions = tagsViewModel.tagsSuggestions.collectAsState()
   val stringQuery = remember { mutableStateOf("") }
   val savedFilteredTags = filterViewModel.filteredTags.collectAsState()
-  savedFilteredTags.value.forEach { tag -> tagsViewModel.addFilter(tag) }
   val expanded = remember { mutableStateOf(false) }
 
   var ageRangeError by remember { mutableStateOf(false) }

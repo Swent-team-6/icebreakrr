@@ -36,6 +36,7 @@ import androidx.compose.ui.window.Dialog
 import coil.compose.AsyncImage
 import com.github.se.icebreakrr.R
 import com.github.se.icebreakrr.model.profile.Profile
+import com.github.se.icebreakrr.model.profile.ProfilesViewModel
 import com.github.se.icebreakrr.model.profile.reportType
 import com.github.se.icebreakrr.model.tags.TagsViewModel
 import com.github.se.icebreakrr.ui.navigation.NavigationActions
@@ -43,6 +44,7 @@ import com.github.se.icebreakrr.ui.tags.RowOfTags
 import com.github.se.icebreakrr.ui.tags.TagStyle
 import com.github.se.icebreakrr.ui.theme.IceBreakrrBlue
 import com.github.se.icebreakrr.utils.NetworkUtils.isNetworkAvailable
+import com.github.se.icebreakrr.utils.NetworkUtils.isNetworkAvailableWithContext
 import com.github.se.icebreakrr.utils.NetworkUtils.showNoInternetToast
 
 // Constants
@@ -144,6 +146,7 @@ fun ProfileHeader(
     profile: Profile,
     navigationActions: NavigationActions,
     myProfile: Boolean,
+    profilesViewModel: ProfilesViewModel,
     onEditClick: () -> Unit
 ) {
 
@@ -336,13 +339,20 @@ fun ProfileHeader(
                                   }
                               TextButton(
                                   onClick = {
+                                    if (isNetworkAvailableWithContext(context)) {
+                                      profilesViewModel.blockUser(profile.uid)
+                                      Toast.makeText(
+                                              context,
+                                              R.string.block_success_message,
+                                              Toast.LENGTH_SHORT)
+                                          .show()
+                                      profilesViewModel.getSelfProfile()
+                                      navigationActions.goBack()
+                                    } else {
+                                      showNoInternetToast(context = context)
+                                    }
                                     showBlockConfirmation = false
                                     blockReportModal = false
-                                    Toast.makeText(
-                                            context,
-                                            context.getString(R.string.block_success_message),
-                                            Toast.LENGTH_SHORT)
-                                        .show()
                                   }) {
                                     Text(stringResource(R.string.block))
                                   }
@@ -396,10 +406,11 @@ fun ProfileCatchPhrase(catchPhrase: String) {
  */
 @Composable
 fun TagsSection(listOfTags: List<Pair<String, Color>>) {
+  val listHeight = (listOfTags.size + 1) / 2
   Box(
       modifier =
           Modifier.fillMaxWidth()
-              .height((listOfTags.size / 2 * TAG_HEIGHT_DP.value).dp)
+              .height((listHeight * TAG_HEIGHT_DP.value).dp)
               .testTag("tagSection")) {
         RowOfTags(listOfTags, TagStyle())
       }

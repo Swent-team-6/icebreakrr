@@ -157,6 +157,7 @@ dependencies {
     implementation(libs.firebase.firestore.ktx)
     implementation(libs.firebase.functions.ktx)
     implementation(libs.firebase.storage.ktx)
+    implementation(libs.androidx.datastore.preferences.core.jvm)
     implementation(libs.androidx.datastore.core.android)
     testImplementation(libs.junit)
     globalTestImplementation(libs.androidx.junit)

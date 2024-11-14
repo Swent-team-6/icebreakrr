@@ -55,6 +55,7 @@ sonar = "4.4.1.3373"
 ktfmt = "0.17.0"
 firebaseFunctionsKtx = "21.0.0"
 firebaseStorageKtx = "21.0.1"
+datastorePreferencesCoreJvm = "1.1.1"
 datastoreCoreAndroid = "1.1.1"
 
 #Utils
@@ -120,6 +121,7 @@ mockito-kotlin = { group = "org.mockito.kotlin", name = "mockito-kotlin", versio
 androidx-navigation-testing = { group = "androidx.navigation", name = "navigation-testing", version.ref = "navigationTesting" }
 firebase-functions-ktx = { group = "com.google.firebase", name = "firebase-functions-ktx", version.ref = "firebaseFunctionsKtx" }
 firebase-storage-ktx = { group = "com.google.firebase", name = "firebase-storage-ktx", version.ref = "firebaseStorageKtx" }
+androidx-datastore-preferences-core-jvm = { group = "androidx.datastore", name = "datastore-preferences-core-jvm", version.ref = "datastorePreferencesCoreJvm" }
 androidx-datastore-core-android = { group = "androidx.datastore", name = "datastore-core-android", version.ref = "datastoreCoreAndroid" }
 
 #Utils

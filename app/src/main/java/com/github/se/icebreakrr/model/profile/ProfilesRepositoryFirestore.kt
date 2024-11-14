@@ -306,6 +306,8 @@ class ProfilesRepositoryFirestore(private val db: FirebaseFirestore) : ProfilesR
       val fcmToken = document.getString("fcmToken")
       val location = document.getGeoPoint("location")
       val geohash = document.getString("geohash")
+      val hasBlocked =
+          (document.get("hasBlocked") as? List<*>)?.filterIsInstance<String>() ?: listOf()
 
       Profile(
           uid = uid,
@@ -318,7 +320,8 @@ class ProfilesRepositoryFirestore(private val db: FirebaseFirestore) : ProfilesR
           profilePictureUrl = profilePictureUrl,
           fcmToken = fcmToken,
           location = location,
-          geohash = geohash)
+          geohash = geohash),
+          hasBlocked = hasBlocked)
     } catch (e: Exception) {
       Log.e("ProfileRepositoryFirestore", "Error converting document to Profile", e)
       null

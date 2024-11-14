@@ -27,7 +27,8 @@ data class Profile(
     val profilePictureUrl: String? = null,
     val fcmToken: String? = null,
     val location: GeoPoint? = null,
-    val geohash: String? = null
+    val geohash: String? = null,
+    var hasBlocked: List<String> = listOf(),
 ) {
   /**
    * Calculates the user's age based on their birth date.
