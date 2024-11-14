@@ -60,6 +60,9 @@ private val EMPTY_PROFILE_TEXT_COLOR = messageTextColor
  * It includes a bottom navigation bar and displays the main content of the screen.
  *
  * @param navigationActions The actions used for navigating between screens.
+ * @param profilesViewModel The view model of the profiles
+ * @param tagsViewModel The view model of the tags
+ * @param filterViewModel The view model of the filters
  */
 fun AroundYouScreen(
     navigationActions: NavigationActions,
@@ -73,18 +76,14 @@ fun AroundYouScreen(
   val context = LocalContext.current
   val isConnected = profilesViewModel.isConnected.collectAsState()
 
-  // Define constants for magic numbers
-  val defaultGeoPoint = GeoPoint(0.0, 0.0)
-  val searchRadius = 300.0
-
   // Check network state when screen loads
   LaunchedEffect(Unit) {
     if (!isNetworkAvailable()) {
       profilesViewModel.updateIsConnected(false)
     } else {
       profilesViewModel.getFilteredProfilesInRadius(
-          defaultGeoPoint,
-          searchRadius,
+          GeoPoint(DEFAULT_LATITUDE, DEFAULT_LONGITUDE),
+          DEFAULT_RADIUS,
           filterViewModel.selectedGenders.value,
           filterViewModel.ageRange.value,
           tagsViewModel.filteredTags.value)

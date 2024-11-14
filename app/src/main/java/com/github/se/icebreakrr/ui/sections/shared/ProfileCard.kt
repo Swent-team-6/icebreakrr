@@ -47,6 +47,15 @@ private val GREYED_OUT_COLOR = grayedOut
 // Define math constants
 private val TAKE_TAGS = 5
 
+/**
+ * Displays the ProfileCard, a summarized version of the profiles, that are used in the AroundYou
+ * screen and Notification screen
+ *
+ * @param profile the profile to be displayed
+ * @param isSettings determines if it is the profile in the Setting's menu or not
+ * @param greyedOut sets if the card needs to be grayed out or not
+ * @param onclick the on click action
+ */
 @Composable
 fun ProfileCard(
     profile: Profile,

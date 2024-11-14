@@ -45,10 +45,11 @@ private val DEFAULT_TAG_FONT_SIZE = 12.sp
 private val DROP_DOWN_MENU_HEIGHT = 60.dp
 private val DROP_DOWN_MENU_MAX_ITEMS = 5
 private val TAG_BOX_PADDING = 8.dp
-private val DROPDOWN_PADDING = 8.dp
 private val SELECTED_TAG_COLOR = Color.Red
 private val DEFAULT_TAG_BACKGROUND_COLOR = Color.Cyan
 private val EXTEND_TAG_COLOR = extendedTagsColor
+private val TAG_HORIZONTAL_PADDING = 12.dp
+private val TAG_VERTICAL_PADDING = 6.dp
 
 private val TAGS_SHOWN_DEFAULT = 3
 
@@ -72,7 +73,7 @@ fun Tag(text: String, tagStyle: TagStyle) {
               .background(
                   color = tagStyle.backGroundColor, shape = RoundedCornerShape(TAG_CORNER_RADIUS))
               .wrapContentSize()
-              .padding(horizontal = 12.dp, vertical = 6.dp)) {
+              .padding(horizontal = TAG_HORIZONTAL_PADDING, vertical = TAG_VERTICAL_PADDING)) {
         Text(
             text = "#$text",
             color = tagStyle.textColor,
@@ -133,7 +134,7 @@ fun ExtendTag(tagStyle: TagStyle, onClick: () -> Unit) {
 /**
  * This Composable is a row of tags that are that adapts dynamically to the space it has available
  *
- * @param l: The list of tags to show
+ * @param tags: The list of tags to show
  * @param tagStyle: the style of your tags
  */
 @OptIn(ExperimentalLayoutApi::class)
@@ -146,11 +147,11 @@ fun RowOfTags(tags: List<Pair<String, Color>>, tagStyle: TagStyle) {
           modifier = Modifier.padding(TAG_PADDING),
           horizontalArrangement = Arrangement.Start,
           verticalArrangement = Arrangement.Top) {
-            val tagsToShow = if (isExtended.value) tags else tags.take(3)
+            val tagsToShow = if (isExtended.value) tags else tags.take(TAGS_SHOWN_DEFAULT)
             tagsToShow.forEach { (text, color) ->
               Tag(text, TagStyle(tagStyle.textColor, color, tagStyle.fontSize))
             }
-            if (!isExtended.value && tags.size > 3) {
+            if (!isExtended.value && tags.size > TAGS_SHOWN_DEFAULT) {
               ExtendTag(tagStyle) { isExtended.value = true }
             }
           }

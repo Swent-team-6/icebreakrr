@@ -24,6 +24,11 @@ private val TOP_BAR_TEXT_SIZE = 40.sp
 private val TOP_BAR_TEXT_COLOR = Color.White
 private val TOP_BAR_BACKGROUND_COLOR = IceBreakrrBlue
 
+/**
+ * Displays the TopBar of each screen, used to show to the user in which screen he is
+ *
+ * @param s the string to be displayed in the TopBar
+ */
 @Composable
 fun TopBar(s: String) {
   Box(

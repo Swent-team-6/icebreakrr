@@ -49,13 +49,15 @@ import kotlinx.coroutines.launch
 private val SCREEN_PADDING = 16.dp
 private val SPACER_HEIGHT_SMALL = 8.dp
 private val SPACER_HEIGHT_LARGE = 16.dp
-private val CARD_CORNER_RADIUS = 16.dp
+private val CARD_SHAPE = RoundedCornerShape(16.dp)
 private val CARD_HEIGHT = 55.dp
 private val CARD_ELEVATION = 4.dp
 private val BUTTON_COLOR = Color.Red
 private val BUTTON_TEXT_COLOR = Color.White
 private const val LOGOUT_BUTTON_TAG = "logOutButton"
 private val TOGGLE_BOX_HEIGHT = 55.dp
+private val TOGGLE_OPTION_BUTTON_PADDING = 8.dp
+private val CARD_PADDING = 16.dp
 
 /**
  * Composable function for displaying the Setting screen.
@@ -156,17 +158,18 @@ fun ToggleOptionBox(
     modifier: Modifier = Modifier
 ) {
   // Constants for card styling
-  val cardShape = RoundedCornerShape(16.dp)
-  val cardElevation = 4.dp
-  val cardHeight = 55.dp
-  val cardPadding = 16.dp
 
   Card(
-      shape = cardShape,
-      modifier = modifier.fillMaxWidth().padding(vertical = 8.dp).height(cardHeight).testTag(label),
-      elevation = CardDefaults.cardElevation(defaultElevation = cardElevation)) {
+      shape = CARD_SHAPE,
+      modifier =
+          modifier
+              .fillMaxWidth()
+              .padding(vertical = TOGGLE_OPTION_BUTTON_PADDING)
+              .height(TOGGLE_BOX_HEIGHT)
+              .testTag(label),
+      elevation = CardDefaults.cardElevation(defaultElevation = CARD_ELEVATION)) {
         Row(
-            modifier = Modifier.fillMaxWidth().padding(cardPadding),
+            modifier = Modifier.fillMaxWidth().padding(CARD_PADDING),
             verticalAlignment = Alignment.CenterVertically) {
               Text(label)
               Spacer(modifier = Modifier.weight(1f))

@@ -372,6 +372,11 @@ fun ProfileHeader(
   }
 }
 
+/**
+ * Displays the profile's catchphrase
+ *
+ * @param catchPhrase the catchphrase of the profile
+ */
 @Composable
 fun ProfileCatchPhrase(catchPhrase: String) {
   Text(
@@ -384,6 +389,11 @@ fun ProfileCatchPhrase(catchPhrase: String) {
       modifier = Modifier.testTag("catchPhrase"))
 }
 
+/**
+ * Displays the profile's tags
+ *
+ * @param listOfTags the list of the profile's tags
+ */
 @Composable
 fun TagsSection(listOfTags: List<Pair<String, Color>>) {
   Box(
@@ -395,6 +405,11 @@ fun TagsSection(listOfTags: List<Pair<String, Color>>) {
       }
 }
 
+/**
+ * Displays the profile's description
+ *
+ * @param description the description of the profile
+ */
 @Composable
 fun ProfileDescription(description: String) {
   Text(
