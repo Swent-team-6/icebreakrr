@@ -1,6 +1,5 @@
 package com.github.se.icebreakrr.ui.navigation
 
-import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 
 open class NavigationActions(
