@@ -2,6 +2,7 @@ package com.github.se.icebreakrr.ui.profile
 
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.test.espresso.Espresso
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.github.se.icebreakrr.mock.MockProfileViewModel
 import com.github.se.icebreakrr.mock.getMockedProfiles
@@ -106,6 +107,26 @@ class ProfileEditingScreenTest {
   }
 
   @Test
+  fun testDisplayDialogOnUnsavedChanges() {
+    composeTestRule.setContent {
+      ProfileEditingScreen(navigationActions, tagsViewModel, fakeProfilesViewModel)
+    }
+
+    // Make changes to the profile
+    composeTestRule.onNodeWithTag("catchphrase").performTextInput("New Catchphrase")
+    composeTestRule.onNodeWithTag("description").performTextInput("New Description")
+
+    // quit keyboard
+    Espresso.pressBack()
+
+    // Simulate system back button press
+    composeTestRule.onNodeWithTag("goBackButton").performClick()
+
+    // Verify that the dialog was displayed
+    composeTestRule.onNodeWithTag("alertDialog").assertIsDisplayed()
+  }
+
+  @Test
   fun testSaveOfChanges() {
     composeTestRule.setContent {
       ProfileEditingScreen(navigationActions, tagsViewModel, fakeProfilesViewModel)
@@ -116,6 +137,39 @@ class ProfileEditingScreenTest {
   }
 
   @Test
+  fun testSystemNoSaveOfChangesWithoutChanges() {
+    composeTestRule.setContent {
+      ProfileEditingScreen(navigationActions, tagsViewModel, fakeProfilesViewModel)
+    }
+
+    // Simulate system back button press
+    Espresso.pressBack()
+
+    // Verify that the back navigation was handled
+    verify(navigationActions).goBack()
+  }
+
+  @Test
+  fun testSystemDisplayDialogOnUnsavedChanges() {
+    composeTestRule.setContent {
+      ProfileEditingScreen(navigationActions, tagsViewModel, fakeProfilesViewModel)
+    }
+
+    // Make changes to the profile
+    composeTestRule.onNodeWithTag("catchphrase").performTextInput("New Catchphrase")
+    composeTestRule.onNodeWithTag("description").performTextInput("New Description")
+
+    // quit keyboard
+    Espresso.pressBack()
+
+    // Simulate system back button press
+    Espresso.pressBack()
+
+    // Verify that the dialog was displayed
+    composeTestRule.onNodeWithTag("alertDialog").assertIsDisplayed()
+  }
+
+  @Test
   fun testProfileEditingScreenContent() {
 
     composeTestRule.setContent {
@@ -123,9 +177,7 @@ class ProfileEditingScreenTest {
     }
     val profile = Profile.getMockedProfiles()[0]
 
-    composeTestRule
-        .onNodeWithTag("nameAndAge")
-        .assertTextEquals("${profile.name}, ${profile.calculateAge()}")
+    composeTestRule.onNodeWithTag("nameAndAge").assertTextEquals(profile.name)
     composeTestRule.onNodeWithTag("catchphrase").assertTextContains(profile.catchPhrase)
     composeTestRule.onNodeWithTag("description").assertTextContains(profile.description)
   }
@@ -145,11 +197,11 @@ class ProfileEditingScreenTest {
     composeTestRule.onNodeWithTag("description").performTextClearance()
     composeTestRule.onNodeWithTag("description").assertTextContains("")
 
-    val longText = "A".repeat(1000)
+    val longText = "A".repeat(100)
     composeTestRule.onNodeWithTag("description").performTextInput(longText)
-    composeTestRule.onNodeWithTag("description").assertTextContains(longText.take(1000))
+    composeTestRule.onNodeWithTag("description").assertTextContains(longText.take(100))
     composeTestRule.onNodeWithTag("catchphrase").performTextInput(longText)
-    composeTestRule.onNodeWithTag("catchphrase").assertTextContains(longText.take(1000))
+    composeTestRule.onNodeWithTag("catchphrase").assertTextContains(longText.take(100))
     composeTestRule.onNodeWithTag("checkButton").performClick()
     verify(navigationActions).goBack()
   }

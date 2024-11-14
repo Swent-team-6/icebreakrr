@@ -37,6 +37,8 @@ import com.github.se.icebreakrr.ui.theme.IceBreakrrBlue
  *   selected.
  * @param onSelectionFailure A callback function that is invoked when image selection fails.
  */
+private val ICON_PADDING = 5.dp
+
 @Composable
 fun ProfilePictureSelector(
     url: String?,
@@ -85,7 +87,7 @@ fun ProfilePictureSelector(
                 Modifier.size(size / 3)
                     .clip(CircleShape)
                     .background(IceBreakrrBlue)
-                    .padding(5.dp)
+                    .padding(ICON_PADDING)
                     .align(Alignment.BottomEnd)
                     .testTag("addPhotoIcon"))
       }

@@ -51,16 +51,18 @@ import com.github.se.icebreakrr.config.LocalIsTesting
 import com.github.se.icebreakrr.data.AppDataStore
 import com.github.se.icebreakrr.model.filter.FilterViewModel
 import com.github.se.icebreakrr.model.message.MeetingRequestViewModel
+import com.github.se.icebreakrr.model.profile.Gender
+import com.github.se.icebreakrr.model.profile.Profile
 import com.github.se.icebreakrr.model.profile.ProfilesViewModel
 import com.github.se.icebreakrr.model.tags.TagsViewModel
 import com.github.se.icebreakrr.ui.navigation.NavigationActions
-import com.github.se.icebreakrr.ui.navigation.Screen
 import com.github.se.icebreakrr.ui.navigation.TopLevelDestinations
 import com.github.se.icebreakrr.utils.NetworkUtils
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
 import com.google.firebase.Firebase
+import com.google.firebase.Timestamp
 import com.google.firebase.auth.AuthResult
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.auth.auth
@@ -132,13 +134,22 @@ fun SignInScreen(
                   if (task.isSuccessful) {
                     val fcmToken = task.result
                     meetingRequestViewModel.onLocalTokenChange(token)
-                    if (profile == null) {
-                      // If profile doesn't exist, navigate to profile creation
-                      navigationActions.navigateTo(Screen.PROFILE_CREATION)
+                    if (profile == null) { // if doesn't exist create new user
+
+                      val newProfile =
+                          Profile(
+                              uid = firebaseUser.uid,
+                              name = firebaseUser.displayName ?: "Unknown",
+                              gender = Gender.OTHER,
+                              birthDate = Timestamp.now(),
+                              catchPhrase = "",
+                              description = "",
+                              fcmToken = fcmToken)
+
+                      profilesViewModel.addNewProfile(newProfile)
                     } else {
                       val updatedProfile = profile.copy(fcmToken = fcmToken)
                       profilesViewModel.updateProfile(updatedProfile)
-                      navigationActions.navigateTo(TopLevelDestinations.AROUND_YOU)
                     }
                   }
                 }

@@ -11,6 +11,11 @@ import com.github.se.icebreakrr.ui.navigation.Screen
 import com.github.se.icebreakrr.ui.theme.FilterIcon
 import com.github.se.icebreakrr.ui.theme.IceBreakrrBlue
 
+/**
+ * Displays the filter action button used in the Around You screen
+ *
+ * @param navigationActions used to navigate between screens
+ */
 @Composable
 fun FilterFloatingActionButton(navigationActions: NavigationActions) {
   FloatingActionButton(
