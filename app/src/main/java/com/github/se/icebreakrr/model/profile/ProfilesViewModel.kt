@@ -117,7 +117,6 @@ open class ProfilesViewModel(
           val filteredProfiles =
               profileList.filter { profile ->
 
-
                 // Filter by genders if specified
                 (genders == null || profile.gender in genders || genders.isEmpty()) &&
 
