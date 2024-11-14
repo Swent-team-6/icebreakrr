@@ -177,7 +177,9 @@ class MeetingRequestViewModelTest {
 
     assert(capturedData["targetToken"] == meetingRequestState.targetToken)
     assert(capturedData["senderUID"] == meetingRequestState.senderUID)
-    assert(capturedData["body"] == mockMeetingRequestManager.ourName + " : " + meetingRequestState.message)
+    assert(
+        capturedData["body"] ==
+            mockMeetingRequestManager.ourName + " : " + meetingRequestState.message)
     assert(capturedData["picture"] == meetingRequestState.picture)
     assert(capturedData["location"] == meetingRequestState.location)
   }
