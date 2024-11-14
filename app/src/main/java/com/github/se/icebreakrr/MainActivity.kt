@@ -20,6 +20,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
 import com.github.se.icebreakrr.config.LocalIsTesting
+import com.github.se.icebreakrr.data.AppDataStore
 import com.github.se.icebreakrr.model.filter.FilterViewModel
 import com.github.se.icebreakrr.model.message.MeetingRequestManager
 import com.github.se.icebreakrr.model.message.MeetingRequestViewModel
@@ -37,6 +38,7 @@ import com.github.se.icebreakrr.ui.sections.FilterScreen
 import com.github.se.icebreakrr.ui.sections.NotificationScreen
 import com.github.se.icebreakrr.ui.sections.SettingsScreen
 import com.github.se.icebreakrr.ui.theme.SampleAppTheme
+import com.github.se.icebreakrr.utils.NetworkUtils
 import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.functions.FirebaseFunctions
@@ -44,22 +46,30 @@ import com.google.firebase.functions.FirebaseFunctions
 class MainActivity : ComponentActivity() {
   private lateinit var auth: FirebaseAuth
   private lateinit var functions: FirebaseFunctions
+  private lateinit var appDataStore: AppDataStore
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     // Retrieve the testing flag from the Intent
     val isTesting = intent?.getBooleanExtra("IS_TESTING", false) ?: false
 
+    NetworkUtils.init(this)
+
     requestNotificationPermission()
     FirebaseApp.initializeApp(this)
     auth = FirebaseAuth.getInstance()
     functions = FirebaseFunctions.getInstance()
 
+    // Initialize DataStore
+    appDataStore = AppDataStore(this)
+
     setContent {
       // Provide the `isTesting` flag to the entire composable tree
       CompositionLocalProvider(LocalIsTesting provides isTesting) {
         SampleAppTheme {
-          Surface(modifier = Modifier.fillMaxSize()) { IcebreakrrApp(auth, functions) }
+          Surface(modifier = Modifier.fillMaxSize()) {
+            IcebreakrrApp(auth, functions, appDataStore)
+          }
         }
       }
     }
@@ -89,7 +99,7 @@ class MainActivity : ComponentActivity() {
  * @see NotificationScreen
  */
 @Composable
-fun IcebreakrrApp(auth: FirebaseAuth, functions: FirebaseFunctions) {
+fun IcebreakrrApp(auth: FirebaseAuth, functions: FirebaseFunctions, appDataStore: AppDataStore) {
   val profileViewModel: ProfilesViewModel = viewModel(factory = ProfilesViewModel.Factory)
   val tagsViewModel: TagsViewModel = viewModel(factory = TagsViewModel.Factory)
   val filterViewModel: FilterViewModel = viewModel(factory = FilterViewModel.Factory)
@@ -110,7 +120,12 @@ fun IcebreakrrApp(auth: FirebaseAuth, functions: FirebaseFunctions) {
   val meetingRequestViewModel = MeetingRequestManager.meetingRequestViewModel
 
   IcebreakrrNavHost(
-      profileViewModel, tagsViewModel, filterViewModel, meetingRequestViewModel, Route.AUTH)
+      profileViewModel,
+      tagsViewModel,
+      filterViewModel,
+      meetingRequestViewModel,
+      appDataStore,
+      Route.AUTH)
 }
 
 @Composable
@@ -119,6 +134,7 @@ fun IcebreakrrNavHost(
     tagsViewModel: TagsViewModel,
     filterViewModel: FilterViewModel,
     meetingRequestViewModel: MeetingRequestViewModel?,
+    appDataStore: AppDataStore,
     startDestination: String
 ) {
   val navController = rememberNavController()
@@ -135,7 +151,8 @@ fun IcebreakrrNavHost(
               meetingRequestViewModel,
               navigationActions,
               filterViewModel = filterViewModel,
-              tagsViewModel = tagsViewModel)
+              tagsViewModel = tagsViewModel,
+              appDataStore = appDataStore)
         } else {
           throw IllegalStateException(
               "The Meeting Request View Model shouldn't be null : Bad initialization")
@@ -169,7 +186,9 @@ fun IcebreakrrNavHost(
         startDestination = Screen.SETTINGS,
         route = Route.SETTINGS,
     ) {
-      composable(Screen.SETTINGS) { SettingsScreen(profileViewModel, navigationActions) }
+      composable(Screen.SETTINGS) {
+        SettingsScreen(profileViewModel, navigationActions, appDataStore = appDataStore)
+      }
       composable(Screen.PROFILE) { ProfileView(profileViewModel, tagsViewModel, navigationActions) }
     }
 

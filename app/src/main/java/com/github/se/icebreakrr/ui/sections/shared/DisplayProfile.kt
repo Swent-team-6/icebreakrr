@@ -1,5 +1,6 @@
 package com.github.se.icebreakrr.ui.sections.shared
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -11,23 +12,31 @@ import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.Create
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import coil.compose.AsyncImage
 import com.github.se.icebreakrr.R
 import com.github.se.icebreakrr.model.profile.Profile
+import com.github.se.icebreakrr.model.profile.reportType
 import com.github.se.icebreakrr.model.tags.TagsViewModel
 import com.github.se.icebreakrr.ui.navigation.NavigationActions
 import com.github.se.icebreakrr.ui.tags.RowOfTags
@@ -129,12 +138,21 @@ fun ProfileHeader(
     myProfile: Boolean,
     onEditClick: () -> Unit
 ) {
+
+  val context = LocalContext.current
+
+  var blockReportModal by remember { mutableStateOf(false) }
+  var showReportOptions by remember { mutableStateOf(false) }
+  var selectedReportType by remember { mutableStateOf<reportType?>(null) }
+  var showBlockConfirmation by remember { mutableStateOf(false) }
+
   Box(
       modifier =
           Modifier.fillMaxWidth()
               .aspectRatio(PROFILE_IMAGE_ASPECT_RATIO)
               .background(Color.LightGray)
               .testTag("profileHeader")) {
+
         // Profile image
         AsyncImage(
             model = profile.profilePictureUrl,
@@ -160,6 +178,26 @@ fun ProfileHeader(
                   tint = Color.White)
             }
 
+        // Flag button
+        if (!myProfile) {
+          Box(
+              modifier =
+                  Modifier.align(Alignment.TopEnd)
+                      .padding(PADDING_STANDARD)
+                      .size(requestButtonSize),
+              contentAlignment = Alignment.Center) {
+                IconButton(
+                    onClick = { blockReportModal = true },
+                    modifier = Modifier.testTag("flagButton")) {
+                      Icon(
+                          painter = painterResource(id = R.drawable.flag),
+                          contentDescription = "report/block user",
+                          tint = Color.Red,
+                          modifier = Modifier.fillMaxSize(FLAG_BUTTON_WRAP))
+                    }
+              }
+        }
+
         // Overlay with username and edit button
         Row(
             modifier =
@@ -172,7 +210,6 @@ fun ProfileHeader(
                   style = USERNAME_TEXT_STYLE,
                   modifier = Modifier.testTag("username"))
 
-              val context = LocalContext.current
               // Edit Button or message button
               val buttonIcon =
                   if (myProfile) Icons.Filled.Create else Icons.AutoMirrored.Filled.Send
@@ -202,6 +239,129 @@ fun ProfileHeader(
                   }
             }
       }
+
+  if (blockReportModal) {
+    val configuration = LocalConfiguration.current
+    val screenWidth = configuration.screenWidthDp.dp
+    val maxWidth = screenWidth * MAX_DIALOG_WIDTH_FACTOR
+
+    Dialog(
+        onDismissRequest = {
+          blockReportModal = false
+          showReportOptions = false
+          showBlockConfirmation = false
+        }) {
+          Card(
+              modifier =
+                  Modifier.widthIn(max = maxWidth)
+                      .padding(PADDING_STANDARD)
+                      .testTag("alertDialogReportBlock")) {
+                Column(
+                    modifier = Modifier.padding(PADDING_LARGE),
+                    verticalArrangement = Arrangement.spacedBy(PADDING_SMALL)) {
+                      Text(
+                          text = stringResource(R.string.block_report_modal_title),
+                          style = MaterialTheme.typography.titleLarge,
+                          fontSize = modalTitleSize,
+                          modifier = Modifier.padding(bottom = PADDING_SMALL))
+                      // Content
+                      if (showReportOptions) {
+                        Column {
+                          Text(stringResource(R.string.report_reason_prompt))
+                          reportType.values().forEach { reportType ->
+                            TextButton(
+                                onClick = { selectedReportType = reportType },
+                                modifier = Modifier.fillMaxWidth()) {
+                                  Text(
+                                      reportType.displayName,
+                                      color =
+                                          if (selectedReportType == reportType) IceBreakrrBlue
+                                          else Color.Black)
+                                }
+                          }
+                        }
+                      } else if (showBlockConfirmation) {
+                        Text(stringResource(R.string.block_confirmation_message))
+                      }
+                      // Buttons
+                      if (showReportOptions) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically) {
+                              TextButton(
+                                  onClick = {
+                                    blockReportModal = false
+                                    showReportOptions = false
+                                    selectedReportType = null
+                                  }) {
+                                    Text(stringResource(R.string.cancel))
+                                  }
+                              TextButton(
+                                  onClick = {
+                                    blockReportModal = false
+                                    showReportOptions = false
+                                    Toast.makeText(
+                                            context,
+                                            context.getString(
+                                                R.string.report_success_message,
+                                                selectedReportType?.displayName),
+                                            Toast.LENGTH_SHORT)
+                                        .show()
+                                    selectedReportType = null
+                                  },
+                                  enabled = selectedReportType != null) {
+                                    Text("Report")
+                                  }
+                            }
+                      } else if (showBlockConfirmation) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically) {
+                              TextButton(
+                                  onClick = {
+                                    showBlockConfirmation = false
+                                    blockReportModal = false
+                                  }) {
+                                    Text(stringResource(R.string.cancel))
+                                  }
+                              TextButton(
+                                  onClick = {
+                                    showBlockConfirmation = false
+                                    blockReportModal = false
+                                    Toast.makeText(
+                                            context,
+                                            context.getString(R.string.block_success_message),
+                                            Toast.LENGTH_SHORT)
+                                        .show()
+                                  }) {
+                                    Text(stringResource(R.string.block))
+                                  }
+                            }
+                      } else {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically) {
+                              TextButton(onClick = { blockReportModal = false }) {
+                                Text(stringResource(R.string.cancel))
+                              }
+
+                              Row {
+                                TextButton(onClick = { showBlockConfirmation = true }) {
+                                  Text(stringResource(R.string.block))
+                                }
+                                TextButton(onClick = { showReportOptions = true }) {
+                                  Text(stringResource(R.string.report))
+                                }
+                              }
+                            }
+                      }
+                    }
+              }
+        }
+  }
 }
 
 @Composable

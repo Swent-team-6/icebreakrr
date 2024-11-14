@@ -3,6 +3,7 @@ package com.github.se.icebreakrr.authentication
 import android.content.Context
 import android.util.Log
 import com.github.se.icebreakrr.R
+import com.github.se.icebreakrr.data.AppDataStore
 import com.github.se.icebreakrr.ui.navigation.NavigationActions
 import com.github.se.icebreakrr.ui.navigation.Screen
 import com.google.android.gms.auth.api.signin.GoogleSignIn
@@ -22,7 +23,7 @@ import com.google.firebase.auth.FirebaseAuth
  * @param context Used to initialize GoogleSignInClient.
  * @param navigationActions Handles navigation to the authentication screen.
  */
-fun logout(context: Context, navigationActions: NavigationActions) {
+fun logout(context: Context, navigationActions: NavigationActions, appDataStore: AppDataStore) {
 
   // Initialize FirebaseAuth
   val auth = FirebaseAuth.getInstance()
@@ -36,6 +37,9 @@ fun logout(context: Context, navigationActions: NavigationActions) {
           .build()
 
   val googleSignInClient: GoogleSignInClient = GoogleSignIn.getClient(context, gso)
+
+  // Clear stored auth token
+  kotlinx.coroutines.runBlocking { appDataStore.clearAuthToken() }
 
   // Sign out from Firebase
   auth.signOut()

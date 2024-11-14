@@ -44,8 +44,13 @@ open class ProfilesViewModel(
   private val _tempProfilePictureBitmap = MutableStateFlow<Bitmap?>(null)
   val tempProfilePictureBitmap: StateFlow<Bitmap?> = _tempProfilePictureBitmap
 
-  private var _isConnected = MutableStateFlow(true)
-  var isConnected: StateFlow<Boolean> = _isConnected
+  private val _isConnected = MutableStateFlow(true)
+  open var isConnected: StateFlow<Boolean> = _isConnected
+
+  fun updateIsConnected(boolean: Boolean) {
+    _isConnected.value = boolean
+    repository.checkConnectionPeriodically({})
+  }
 
   private val MAX_RESOLUTION = 600
   private val DEFAULT_QUALITY = 100

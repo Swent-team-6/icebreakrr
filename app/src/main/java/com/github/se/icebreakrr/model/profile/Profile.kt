@@ -54,3 +54,14 @@ enum class Gender(val displayName: String) {
   MEN("Men"),
   OTHER("Other")
 }
+
+/**
+ * Enum class representing reports types.
+ *
+ * @property displayName The display name for each report type.
+ */
+enum class reportType(val displayName: String) {
+  INAPPROPRIATE_CONTENT("Inappropriate content"),
+  SPAM("Spam"),
+  OTHER("Other")
+}

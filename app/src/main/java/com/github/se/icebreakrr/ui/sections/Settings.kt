@@ -21,8 +21,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -31,6 +31,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import com.github.se.icebreakrr.authentication.logout
 import com.github.se.icebreakrr.config.LocalIsTesting
+import com.github.se.icebreakrr.data.AppDataStore
 import com.github.se.icebreakrr.mock.getMockedProfiles
 import com.github.se.icebreakrr.model.profile.Profile
 import com.github.se.icebreakrr.model.profile.ProfilesViewModel
@@ -56,10 +57,24 @@ private const val LOGOUT_BUTTON_TAG = "logOutButton"
 private val TOGGLE_BOX_HEIGHT = 55.dp
 
 @Composable
-fun SettingsScreen(profilesViewModel: ProfilesViewModel, navigationActions: NavigationActions) {
+fun SettingsScreen(
+    profilesViewModel: ProfilesViewModel,
+    navigationActions: NavigationActions,
+    appDataStore: AppDataStore
+) {
   val context = LocalContext.current
   val scrollState = rememberScrollState()
+  val coroutineScope = rememberCoroutineScope()
+
+  // Collect the discoverability state from DataStore
+  val isDiscoverable by appDataStore.isDiscoverable.collectAsState(initial = true)
+
   lateinit var auth: FirebaseAuth
+
+  // Constants for padding and spacing
+  val screenPadding = 16.dp
+  val verticalSpacing = 8.dp
+  val buttonVerticalSpacing = 16.dp
 
   LaunchedEffect(Unit) {
     FirebaseAuth.getInstance().currentUser?.let { profilesViewModel.getProfileByUid(it.uid) }
@@ -105,14 +120,16 @@ fun SettingsScreen(profilesViewModel: ProfilesViewModel, navigationActions: Navi
 
           Spacer(modifier = Modifier.height(SPACER_HEIGHT_LARGE))
 
-          // Log Out Button
           Button(
               onClick = {
                 if (isTesting) {
                   navigationActions.navigateTo(Screen.AUTH)
                 } else {
                   auth = FirebaseAuth.getInstance()
-                  auth.currentUser?.let { logout(context, navigationActions) }
+                  auth.currentUser?.let {
+                    logout(context, navigationActions, appDataStore = appDataStore)
+                  }
+                  logout(context, navigationActions, appDataStore)
                 }
               },
               colors = ButtonDefaults.buttonColors(containerColor = BUTTON_COLOR),
@@ -124,8 +141,17 @@ fun SettingsScreen(profilesViewModel: ProfilesViewModel, navigationActions: Navi
 }
 
 @Composable
-fun ToggleOptionBox(label: String) {
-  val toggleState = remember { mutableStateOf(false) }
+fun ToggleOptionBox(
+    label: String,
+    isChecked: Boolean,
+    onCheckedChange: (Boolean) -> Unit,
+    modifier: Modifier = Modifier
+) {
+  // Constants for card styling
+  val cardShape = RoundedCornerShape(16.dp)
+  val cardElevation = 4.dp
+  val cardHeight = 55.dp
+  val cardPadding = 16.dp
 
   Card(
       shape = RoundedCornerShape(CARD_CORNER_RADIUS),
@@ -141,9 +167,9 @@ fun ToggleOptionBox(label: String) {
               Text(label)
               Spacer(modifier = Modifier.weight(1f))
               Switch(
-                  checked = toggleState.value,
+                  checked = isChecked,
                   modifier = Modifier.testTag("switch$label"),
-                  onCheckedChange = { toggleState.value = it })
+                  onCheckedChange = onCheckedChange)
             }
       }
 }

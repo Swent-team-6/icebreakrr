@@ -3,12 +3,14 @@ package com.github.se.icebreakrr.model.profile
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
+import com.github.se.icebreakrr.utils.NetworkUtils
 import com.google.android.gms.tasks.Task
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.GeoPoint
+import com.google.firebase.firestore.Source
 import kotlinx.coroutines.flow.MutableStateFlow
 
 class ProfilesRepositoryFirestore(private val db: FirebaseFirestore) : ProfilesRepository {
@@ -207,8 +209,14 @@ class ProfilesRepositoryFirestore(private val db: FirebaseFirestore) : ProfilesR
       onSuccess: (Profile?) -> Unit,
       onFailure: (Exception) -> Unit
   ) {
+    val source =
+        if (NetworkUtils.isNetworkAvailable()) {
+          Source.SERVER
+        } else {
+          Source.CACHE
+        }
     Log.d("ProfilesRepositoryFirestore", "getProfileByUid")
-    db.collection("profiles").document(uid).get().addOnCompleteListener { task ->
+    db.collection("profiles").document(uid).get(source).addOnCompleteListener { task ->
       if (task.isSuccessful) {
         val profile = task.result?.let { document -> documentToProfile(document) }
         onSuccess(profile)
