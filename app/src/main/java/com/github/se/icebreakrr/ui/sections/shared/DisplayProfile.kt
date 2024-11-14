@@ -406,10 +406,11 @@ fun ProfileCatchPhrase(catchPhrase: String) {
  */
 @Composable
 fun TagsSection(listOfTags: List<Pair<String, Color>>) {
+  val listHeight = (listOfTags.size + 1) / 2
   Box(
       modifier =
           Modifier.fillMaxWidth()
-              .height((listOfTags.size / 2 * TAG_HEIGHT_DP.value).dp)
+              .height((listHeight * TAG_HEIGHT_DP.value).dp)
               .testTag("tagSection")) {
         RowOfTags(listOfTags, TagStyle())
       }

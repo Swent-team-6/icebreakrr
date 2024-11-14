@@ -5,7 +5,6 @@ package com.github.se.icebreakrr.ui.authentication
 // The code has been highly inspired by the bootcamp examples and modified for this project.
 
 import android.content.Intent
-import android.util.Log
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResult
@@ -146,8 +145,6 @@ fun SignInScreen(
 
                   // Check selectedProfile after loading completes
                   val profile = profilesViewModel.selectedProfile.value
-                  Log.d("PROFILE NAME IN SIGN IN", profile?.name ?: "null") // sometimes null here
-                  Log.d("PROFILE UID IN SIGN IN", profile?.uid ?: "null")
 
                   // checking if profile already exists and add it its fcmToken
                   FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
