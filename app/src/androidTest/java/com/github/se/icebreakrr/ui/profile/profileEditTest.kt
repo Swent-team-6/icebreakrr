@@ -2,6 +2,7 @@ package com.github.se.icebreakrr.ui.profile
 
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.test.espresso.Espresso
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.github.se.icebreakrr.mock.MockProfileViewModel
 import com.github.se.icebreakrr.mock.getMockedProfiles
@@ -106,6 +107,26 @@ class ProfileEditingScreenTest {
   }
 
   @Test
+  fun testDisplayDialogOnUnsavedChanges() {
+    composeTestRule.setContent {
+      ProfileEditingScreen(navigationActions, tagsViewModel, fakeProfilesViewModel)
+    }
+
+    // Make changes to the profile
+    composeTestRule.onNodeWithTag("catchphrase").performTextInput("New Catchphrase")
+    composeTestRule.onNodeWithTag("description").performTextInput("New Description")
+
+    // quit keyboard
+    Espresso.pressBack()
+
+    // Simulate system back button press
+    composeTestRule.onNodeWithTag("goBackButton").performClick()
+
+    // Verify that the dialog was displayed
+    composeTestRule.onNodeWithTag("alertDialog").assertIsDisplayed()
+  }
+
+  @Test
   fun testSaveOfChanges() {
     composeTestRule.setContent {
       ProfileEditingScreen(navigationActions, tagsViewModel, fakeProfilesViewModel)
@@ -113,6 +134,39 @@ class ProfileEditingScreenTest {
 
     composeTestRule.onNodeWithTag("checkButton").performClick()
     verify(navigationActions).goBack()
+  }
+
+  @Test
+  fun testSystemNoSaveOfChangesWithoutChanges() {
+    composeTestRule.setContent {
+      ProfileEditingScreen(navigationActions, tagsViewModel, fakeProfilesViewModel)
+    }
+
+    // Simulate system back button press
+    Espresso.pressBack()
+
+    // Verify that the back navigation was handled
+    verify(navigationActions).goBack()
+  }
+
+  @Test
+  fun testSystemDisplayDialogOnUnsavedChanges() {
+    composeTestRule.setContent {
+      ProfileEditingScreen(navigationActions, tagsViewModel, fakeProfilesViewModel)
+    }
+
+    // Make changes to the profile
+    composeTestRule.onNodeWithTag("catchphrase").performTextInput("New Catchphrase")
+    composeTestRule.onNodeWithTag("description").performTextInput("New Description")
+
+    // quit keyboard
+    Espresso.pressBack()
+
+    // Simulate system back button press
+    Espresso.pressBack()
+
+    // Verify that the dialog was displayed
+    composeTestRule.onNodeWithTag("alertDialog").assertIsDisplayed()
   }
 
   @Test
