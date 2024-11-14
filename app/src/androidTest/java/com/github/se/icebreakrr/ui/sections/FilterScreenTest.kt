@@ -16,6 +16,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
+import androidx.test.espresso.Espresso
 import com.github.se.icebreakrr.model.filter.FilterViewModel
 import com.github.se.icebreakrr.model.profile.ProfilePicRepositoryStorage
 import com.github.se.icebreakrr.model.profile.ProfilesRepository
@@ -467,6 +468,32 @@ class FilterScreenTest {
 
     // Test confirm button (Discard changes)
     composeTestRule.onNodeWithText("Discard changes").performClick()
+    composeTestRule.onNodeWithTag("alertDialog").assertDoesNotExist()
+    verify(navigationActionsMock).goBack()
+  }
+
+  @Test
+  fun testSystemBackButtonShowsDialogOnUnsavedChanges() {
+    composeTestRule.setContent { FilterScreen(navigationActionsMock) }
+
+    // Make some changes to trigger the dialog
+    composeTestRule.onNodeWithTag("GenderButtonMen").performClick()
+
+    // Simulate system back button press
+    Espresso.pressBack()
+
+    // Verify dialog is shown
+    composeTestRule.onNodeWithTag("alertDialog").assertExists().assertIsDisplayed()
+  }
+
+  @Test
+  fun testSystemBackButtonDoesNotShowDialogWithoutUnsavedChanges() {
+    composeTestRule.setContent { FilterScreen(navigationActionsMock) }
+
+    // Simulate system back button press without making any changes
+    Espresso.pressBack()
+
+    // Verify dialog is not shown and navigation action is called
     composeTestRule.onNodeWithTag("alertDialog").assertDoesNotExist()
     verify(navigationActionsMock).goBack()
   }
