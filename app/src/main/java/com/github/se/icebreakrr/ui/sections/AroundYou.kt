@@ -2,6 +2,7 @@ package com.github.se.icebreakrr.ui.sections
 
 import android.annotation.SuppressLint
 import android.content.pm.PackageManager
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -30,6 +31,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.github.se.icebreakrr.data.AppDataStore
 import com.github.se.icebreakrr.model.filter.FilterViewModel
+import com.github.se.icebreakrr.model.location.LocationViewModel
 import com.github.se.icebreakrr.model.profile.Gender
 import com.github.se.icebreakrr.model.profile.ProfilesViewModel
 import com.github.se.icebreakrr.model.tags.TagsViewModel
@@ -47,6 +49,7 @@ import com.github.se.icebreakrr.utils.NetworkUtils.isNetworkAvailableWithContext
 import com.github.se.icebreakrr.utils.NetworkUtils.showNoInternetToast
 import com.github.se.icebreakrr.utils.PermissionManager
 import com.google.firebase.firestore.GeoPoint
+import kotlinx.coroutines.delay
 
 // Constants for layout dimensions
 private val COLUMN_VERTICAL_PADDING = 16.dp
@@ -75,7 +78,9 @@ fun AroundYouScreen(
     tagsViewModel: TagsViewModel,
     filterViewModel: FilterViewModel,
     permissionManager: PermissionManager,
-    appDataStore: AppDataStore
+    appDataStore: AppDataStore,
+    locationViewModel: LocationViewModel,
+    isTestMode: Boolean = false
 ) {
 
   val permissionStatuses = permissionManager.permissionStatuses.collectAsState()
@@ -86,20 +91,31 @@ fun AroundYouScreen(
   val isLoading = profilesViewModel.loading.collectAsState()
   val context = LocalContext.current
   val isConnected = profilesViewModel.isConnected.collectAsState()
+  val userLocation = locationViewModel.lastKnownLocation.collectAsState()
   // Collect the discoverability state from DataStore
   val isDiscoverable by appDataStore.isDiscoverable.collectAsState(initial = false)
 
-  // Check network state when screen loads
-  LaunchedEffect(Unit) {
-    if (!isNetworkAvailable()) {
+  // Initial check and start of periodic update every 10 seconds
+  LaunchedEffect(isConnected.value, userLocation.value) {
+    if (!isTestMode && !isNetworkAvailable()) {
       profilesViewModel.updateIsConnected(false)
     } else if (hasLocationPermission) {
-      profilesViewModel.getFilteredProfilesInRadius(
-          GeoPoint(DEFAULT_LATITUDE, DEFAULT_LONGITUDE),
-          DEFAULT_RADIUS,
-          filterViewModel.selectedGenders.value,
-          filterViewModel.ageRange.value,
-          tagsViewModel.filteredTags.value)
+      while (true) {
+        // Use the last known position or a default position
+        val centerLocation = userLocation.value ?: GeoPoint(DEFAULT_LATITUDE, DEFAULT_LONGITUDE)
+        Log.d("AroundYou", "Current user location: $centerLocation")
+
+        // Call the profile fetch function
+        profilesViewModel.getFilteredProfilesInRadius(
+            centerLocation,
+            DEFAULT_RADIUS,
+            filterViewModel.selectedGenders.value,
+            filterViewModel.ageRange.value,
+            tagsViewModel.filteredTags.value)
+
+        // Wait 10 seconds before the next update
+        delay(10_000L)
+      }
     }
   }
 
@@ -121,9 +137,13 @@ fun AroundYouScreen(
             filterViewModel = filterViewModel,
             tagsViewModel = tagsViewModel,
             isRefreshing = isLoading.value,
-            onRefresh = { center, radius, genders, ageRange, tags ->
-              profilesViewModel.getSelfProfile()
-              profilesViewModel.getFilteredProfilesInRadius(center, radius, genders, ageRange, tags)
+            onRefresh = { _, radiusInMeters, genders, ageRange, tags ->
+              profilesViewModel.getFilteredProfilesInRadius(
+                  userLocation.value ?: GeoPoint(DEFAULT_LATITUDE, DEFAULT_LONGITUDE),
+                  radiusInMeters,
+                  genders,
+                  ageRange,
+                  tags)
             },
             modifier = Modifier.padding(innerPadding),
             content = {

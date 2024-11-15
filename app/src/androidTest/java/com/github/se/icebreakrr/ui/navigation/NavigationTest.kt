@@ -13,6 +13,8 @@ import com.github.se.icebreakrr.R
 import com.github.se.icebreakrr.data.AppDataStore
 import com.github.se.icebreakrr.mock.MockProfileViewModel
 import com.github.se.icebreakrr.model.filter.FilterViewModel
+import com.github.se.icebreakrr.model.location.ILocationService
+import com.github.se.icebreakrr.model.location.LocationRepository
 import com.github.se.icebreakrr.model.location.LocationViewModel
 import com.github.se.icebreakrr.model.message.MeetingRequestViewModel
 import com.github.se.icebreakrr.model.profile.ProfilePicRepositoryStorage
@@ -20,7 +22,7 @@ import com.github.se.icebreakrr.model.profile.ProfilesRepository
 import com.github.se.icebreakrr.model.profile.ProfilesViewModel
 import com.github.se.icebreakrr.model.tags.TagsRepository
 import com.github.se.icebreakrr.model.tags.TagsViewModel
-import com.github.se.icebreakrr.utils.PermissionManager
+import com.github.se.icebreakrr.utils.IPermissionManager
 import com.google.firebase.functions.FirebaseFunctions
 import com.google.firebase.storage.FirebaseStorage
 import java.io.File
@@ -55,8 +57,12 @@ class NavigationTest {
   private lateinit var mockFilterViewModel: FilterViewModel
   private lateinit var testDataStore: DataStore<Preferences>
   private lateinit var appDataStore: AppDataStore
-  private lateinit var mockLocationViewModel: LocationViewModel
-  private lateinit var mockPermissionManager: PermissionManager
+
+  private lateinit var mockLocationService: ILocationService
+  private lateinit var mockLocationRepository: LocationRepository
+  private lateinit var mockPermissionManager: IPermissionManager
+
+  private lateinit var locationViewModel: LocationViewModel
 
   @Before
   fun setup() {
@@ -79,8 +85,13 @@ class NavigationTest {
     tagsViewModel = TagsViewModel(mockTagsRepository)
     profilesViewModel =
         ProfilesViewModel(mockProfilesRepository, ProfilePicRepositoryStorage(mockFirebaseStorage))
-    mockLocationViewModel = mock(LocationViewModel::class.java)
-    mockPermissionManager = mock(PermissionManager::class.java)
+
+    mockLocationService = mock(ILocationService::class.java)
+    mockLocationRepository = mock(LocationRepository::class.java)
+    mockPermissionManager = mock(IPermissionManager::class.java)
+
+    locationViewModel =
+        LocationViewModel(mockLocationService, mockLocationRepository, mockPermissionManager)
   }
 
   @Test
@@ -92,9 +103,8 @@ class NavigationTest {
           mockFilterViewModel,
           mockMeetingRequestViewModel,
           appDataStore,
-          Route.AUTH,
-          mockLocationViewModel,
-          mockPermissionManager)
+          locationViewModel,
+          Route.AUTH)
     }
 
     // Assert that the login screen is shown on launch
@@ -110,9 +120,8 @@ class NavigationTest {
           mockFilterViewModel,
           mockMeetingRequestViewModel,
           appDataStore,
-          Route.AROUND_YOU,
-          mockLocationViewModel,
-          mockPermissionManager)
+          locationViewModel,
+          Route.AROUND_YOU)
     }
 
     // Check that the "Around You" screen is displayed after login
