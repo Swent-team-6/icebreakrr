@@ -42,6 +42,7 @@ import com.github.se.icebreakrr.ui.sections.FilterScreen
 import com.github.se.icebreakrr.ui.sections.NotificationScreen
 import com.github.se.icebreakrr.ui.sections.SettingsScreen
 import com.github.se.icebreakrr.ui.theme.SampleAppTheme
+import com.github.se.icebreakrr.utils.IPermissionManager
 import com.github.se.icebreakrr.utils.NetworkUtils
 import com.github.se.icebreakrr.utils.PermissionManager
 import com.google.android.gms.location.FusedLocationProviderClient
@@ -204,7 +205,7 @@ fun IcebreakrrNavHost(
     appDataStore: AppDataStore,
     startDestination: String,
     locationViewModel: LocationViewModel,
-    permissionManager: PermissionManager
+    permissionManager: IPermissionManager
 ) {
   val navController = rememberNavController()
   val navigationActions = NavigationActions(navController)

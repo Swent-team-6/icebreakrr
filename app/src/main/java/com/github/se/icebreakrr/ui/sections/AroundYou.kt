@@ -44,10 +44,10 @@ import com.github.se.icebreakrr.ui.sections.shared.FilterFloatingActionButton
 import com.github.se.icebreakrr.ui.sections.shared.ProfileCard
 import com.github.se.icebreakrr.ui.sections.shared.TopBar
 import com.github.se.icebreakrr.ui.theme.messageTextColor
+import com.github.se.icebreakrr.utils.IPermissionManager
 import com.github.se.icebreakrr.utils.NetworkUtils.isNetworkAvailable
 import com.github.se.icebreakrr.utils.NetworkUtils.isNetworkAvailableWithContext
 import com.github.se.icebreakrr.utils.NetworkUtils.showNoInternetToast
-import com.github.se.icebreakrr.utils.PermissionManager
 import com.google.firebase.firestore.GeoPoint
 import kotlinx.coroutines.delay
 
@@ -77,7 +77,7 @@ fun AroundYouScreen(
     profilesViewModel: ProfilesViewModel,
     tagsViewModel: TagsViewModel,
     filterViewModel: FilterViewModel,
-    permissionManager: PermissionManager,
+    permissionManager: IPermissionManager,
     appDataStore: AppDataStore,
     locationViewModel: LocationViewModel,
     isTestMode: Boolean = false

@@ -97,14 +97,15 @@ class NavigationTest {
   @Test
   fun testNavigationLogin() = runTest {
     composeTestRule.setContent {
-      IcebreakrrNavHost(
-          mockProfileViewModel,
-          tagsViewModel,
-          mockFilterViewModel,
-          mockMeetingRequestViewModel,
-          appDataStore,
-          locationViewModel,
-          Route.AUTH)
+        IcebreakrrNavHost(
+            mockProfileViewModel,
+            tagsViewModel,
+            mockFilterViewModel,
+            mockMeetingRequestViewModel,
+            appDataStore,
+            Route.AUTH,
+            locationViewModel,
+            mockPermissionManager)
     }
 
     // Assert that the login screen is shown on launch
@@ -120,8 +121,9 @@ class NavigationTest {
           mockFilterViewModel,
           mockMeetingRequestViewModel,
           appDataStore,
+            Route.AUTH,
           locationViewModel,
-          Route.AROUND_YOU)
+          mockPermissionManager)
     }
 
     // Check that the "Around You" screen is displayed after login
