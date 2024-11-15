@@ -5,6 +5,7 @@ import android.content.pm.PackageManager
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.github.se.icebreakrr.utils.IPermissionManager
 import com.github.se.icebreakrr.utils.PermissionManager
 import com.google.firebase.firestore.GeoPoint
 import kotlinx.coroutines.Job
@@ -13,14 +14,18 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 class LocationViewModel(
-    private val locationService: LocationService,
-    private val locationRepositoryFirestore: LocationRepositoryFirestore,
-    private val permissionManager: PermissionManager
+    private val locationService: ILocationService,
+    private val locationRepositoryFirestore: LocationRepository,
+    private val permissionManager: IPermissionManager
 ) : ViewModel() {
 
   private val _isUpdatingLocation = MutableStateFlow(false)
   val isUpdatingLocation: StateFlow<Boolean>
     get() = _isUpdatingLocation
+
+  private val _lastKnownLocation = MutableStateFlow<GeoPoint?>(null)
+  val lastKnownLocation: StateFlow<GeoPoint?>
+    get() = _lastKnownLocation
 
   private var permissionObserverJob: Job? = null
 
@@ -84,8 +89,8 @@ class LocationViewModel(
         locationService.startLocationUpdates(
             onLocationUpdate = { location ->
               val geoPoint = GeoPoint(location.latitude, location.longitude)
-              locationRepositoryFirestore.setUserPosition(
-                  geoPoint) // Call Firestore update on location change
+              locationRepositoryFirestore.setUserPosition(geoPoint)
+              _lastKnownLocation.value = geoPoint
             })
 
     if (locationUpdatesStarted) {

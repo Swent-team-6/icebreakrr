@@ -9,7 +9,7 @@ import com.google.firebase.firestore.GeoPoint
 class LocationRepositoryFirestore(
     private val db: FirebaseFirestore,
     private val auth: FirebaseAuth
-) {
+) : LocationRepository {
 
   private val collectionPath = "profiles"
 
@@ -18,7 +18,7 @@ class LocationRepositoryFirestore(
    *
    * @param newLocation The new geographic location of the user as a `GeoPoint`.
    */
-  fun setUserPosition(newLocation: GeoPoint) {
+  override fun setUserPosition(newLocation: GeoPoint) {
     val userId = auth.currentUser?.uid
     if (userId == null) {
       Log.w("LocationRepositoryFirestore", "User is not authenticated. Cannot set location.")

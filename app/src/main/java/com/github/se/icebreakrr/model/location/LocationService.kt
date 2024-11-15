@@ -11,7 +11,8 @@ import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.Priority
 
-class LocationService(private val fusedLocationProviderClient: FusedLocationProviderClient) {
+class LocationService(private val fusedLocationProviderClient: FusedLocationProviderClient) :
+    ILocationService {
 
   companion object {
     // Distance in meters for triggering a location update
@@ -64,9 +65,9 @@ class LocationService(private val fusedLocationProviderClient: FusedLocationProv
    * @return `true` if updates started, `false` if an error occurred.
    */
   @SuppressLint("MissingPermission")
-  fun startLocationUpdates(
+  override fun startLocationUpdates(
       onLocationUpdate: (Location) -> Unit,
-      onError: ((String) -> Unit)? = null
+      onError: ((String) -> Unit)?
   ): Boolean {
 
     this.onLocationUpdate = onLocationUpdate
@@ -92,7 +93,7 @@ class LocationService(private val fusedLocationProviderClient: FusedLocationProv
   }
 
   /** Stops location updates to conserve resources. */
-  fun stopLocationUpdates() {
+  override fun stopLocationUpdates() {
     // Remove the location callback to stop receiving updates
     fusedLocationProviderClient.removeLocationUpdates(locationCallback)
     onLocationUpdate = null

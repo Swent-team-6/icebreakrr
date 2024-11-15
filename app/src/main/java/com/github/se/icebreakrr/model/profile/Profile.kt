@@ -1,6 +1,7 @@
 package com.github.se.icebreakrr.model.profile
 
 import com.google.firebase.Timestamp
+import com.google.firebase.firestore.GeoPoint
 import java.util.Calendar
 
 /**
@@ -25,6 +26,8 @@ data class Profile(
     val tags: List<String> = listOf(),
     val profilePictureUrl: String? = null,
     val fcmToken: String? = null,
+    val location: GeoPoint? = null,
+    val geohash: String? = null,
     var hasBlocked: List<String> = listOf(),
 ) {
   /**
