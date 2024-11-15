@@ -157,6 +157,8 @@ dependencies {
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.auth.ktx)
 
+    //Utils
+    implementation(libs.geohashJava)
 
     implementation(libs.play.services.location)
     implementation(libs.coil.compose)
@@ -164,6 +166,8 @@ dependencies {
     implementation(libs.firebase.firestore.ktx)
     implementation(libs.firebase.functions.ktx)
     implementation(libs.firebase.storage.ktx)
+    implementation(libs.androidx.datastore.preferences.core.jvm)
+    implementation(libs.androidx.datastore.core.android)
     implementation(libs.androidx.monitor)
     testImplementation(libs.junit)
     globalTestImplementation(libs.androidx.junit)
@@ -176,7 +180,6 @@ dependencies {
     implementation(libs.firebase.ui.auth)
     implementation(libs.firebase.auth.ktx)
     implementation(libs.firebase.auth)
-    implementation(libs.geofirestore)
     implementation(libs.firebase.common.ktx)
 
 
@@ -235,6 +238,10 @@ dependencies {
 
     implementation(platform(libs.firebase.bom))
 
+    // Add these under the dependencies block
+    implementation(libs.androidx.datastore.preferences)
+    implementation(libs.androidx.datastore.preferences.core)
+
     //Dagger - hilt :
     implementation(libs.hilt.android)
     kapt(libs.hilt.android.compiler)
@@ -268,7 +275,7 @@ tasks.register("jacocoTestReport", JacocoReport::class) {
         "**/R$*.class",
         "**/BuildConfig.*",
         "**/Manifest*.*",
-        "**/*Test*.*",
+          "**/*Test*.*",
         "android/**/*.*",
     )
 

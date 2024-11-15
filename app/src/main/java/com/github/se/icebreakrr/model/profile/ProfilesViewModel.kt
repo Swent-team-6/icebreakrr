@@ -8,7 +8,11 @@ import android.util.Log
 import android.widget.Toast
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import com.github.se.icebreakrr.ui.sections.DEFAULT_LATITUDE
+import com.github.se.icebreakrr.ui.sections.DEFAULT_LONGITUDE
+import com.github.se.icebreakrr.ui.sections.DEFAULT_RADIUS
 import com.google.firebase.Firebase
+import com.google.firebase.auth.auth
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.GeoPoint
@@ -34,8 +38,14 @@ open class ProfilesViewModel(
   private val _selectedProfile = MutableStateFlow<Profile?>(null)
   open val selectedProfile: StateFlow<Profile?> = _selectedProfile
 
+  private val _selfProfile = MutableStateFlow<Profile?>(null)
+  open val selfProfile: StateFlow<Profile?> = _selfProfile
+
   private val _loading = MutableStateFlow(false)
   open val loading: StateFlow<Boolean> = _loading
+
+  private val _loadingSelf = MutableStateFlow(false)
+  open val loadingSelf: StateFlow<Boolean> = _loadingSelf
 
   private val _error = MutableStateFlow<Exception?>(null)
   val error: StateFlow<Exception?> = _error
@@ -43,8 +53,16 @@ open class ProfilesViewModel(
   private val _tempProfilePictureBitmap = MutableStateFlow<Bitmap?>(null)
   val tempProfilePictureBitmap: StateFlow<Bitmap?> = _tempProfilePictureBitmap
 
-  private var _isConnected = MutableStateFlow(true)
-  var isConnected: StateFlow<Boolean> = _isConnected
+  private val _isConnected = MutableStateFlow(true)
+  open var isConnected: StateFlow<Boolean> = _isConnected
+
+  fun updateIsConnected(boolean: Boolean) {
+    _isConnected.value = boolean
+    repository.checkConnectionPeriodically({})
+  }
+
+  private val MAX_RESOLUTION = 600
+  private val DEFAULT_QUALITY = 100
 
   companion object {
     class Factory(private val auth: FirebaseAuth, private val firestore: FirebaseFirestore) :
@@ -76,7 +94,8 @@ open class ProfilesViewModel(
   init {
     repository.init {
       // Fetch profiles on initialization
-      getFilteredProfilesInRadius(GeoPoint(0.0, 0.0), 300.0)
+      getFilteredProfilesInRadius(GeoPoint(DEFAULT_LATITUDE, DEFAULT_LONGITUDE), DEFAULT_RADIUS)
+      getSelfProfile()
     }
   }
 
@@ -101,11 +120,15 @@ open class ProfilesViewModel(
         center = center,
         radiusInMeters = radiusInMeters,
         onSuccess = { profileList ->
+          val currentUserId = _selfProfile.value?.uid
           val filteredProfiles =
               profileList.filter { profile ->
 
-                // Filter by genders if specified
-                (genders == null || profile.gender in genders || genders.isEmpty()) &&
+                // Exclude the currently logged-in user's profile
+                profile.uid != currentUserId &&
+
+                    // Filter by genders if specified
+                    (genders == null || profile.gender in genders || genders.isEmpty()) &&
 
                     // Filter by age range if specified
                     (ageRange == null || profile.calculateAge() in ageRange) &&
@@ -113,7 +136,13 @@ open class ProfilesViewModel(
                     // Filter by tags if specified
                     (tags == null ||
                         profile.tags.any { it.lowercase() in tags.map { it.lowercase() } } ||
-                        tags.isEmpty())
+                        tags.isEmpty()) &&
+
+                    // Filter by hasBlocked
+                    !(_selfProfile.value?.hasBlocked?.contains(profile.uid) ?: false) &&
+
+                    // Filter by isBlocked
+                    !(profile.hasBlocked.contains(_selfProfile.value?.uid ?: ""))
               }
           _profiles.value = profileList
           _filteredProfiles.value = filteredProfiles
@@ -167,6 +196,24 @@ open class ProfilesViewModel(
         onSuccess = { profile ->
           _selectedProfile.value = profile
           _loading.value = false
+        },
+        onFailure = { e -> handleError(e) })
+  }
+
+  /**
+   * Fetches a profile by its user ID (UID), and then runs the rest
+   *
+   * @param uid The unique ID of the user whose profile is being retrieved.
+   * @param andThen The rest of the code to run
+   */
+  fun getProfileByUidAndThen(uid: String, andThen: () -> Unit) {
+    _loading.value = true
+    repository.getProfileByUid(
+        uid,
+        onSuccess = { profile ->
+          _selectedProfile.value = profile
+          _loading.value = false
+          andThen()
         },
         onFailure = { e -> handleError(e) })
   }
@@ -256,6 +303,27 @@ open class ProfilesViewModel(
   }
 
   /**
+   * Blocks a user by updating the blocking relationship in the repository.
+   *
+   * @param uid The unique ID of the user being blocked.
+   */
+  fun blockUser(uid: String) {
+    updateProfile(selfProfile.value!!.copy(hasBlocked = selfProfile.value!!.hasBlocked + uid))
+  }
+
+  /** Fetches the current user's profile from the repository. */
+  fun getSelfProfile() {
+    _loadingSelf.value = true
+    repository.getProfileByUid(
+        Firebase.auth.uid ?: "null",
+        onSuccess = { profile ->
+          _selfProfile.value = profile
+          _loadingSelf.value = false
+        },
+        onFailure = { e -> handleError(e) })
+  }
+
+  /**
    * Converts an image URI to a processed Bitmap, cropping the image to a square at the center.
    *
    * @param context The context used to access the content resolver.
@@ -263,7 +331,11 @@ open class ProfilesViewModel(
    * @param maxResolution The maximum resolution for the output Bitmap. Default is 600.
    * @return A Bitmap representing the processed image, or null if an error occurs.
    */
-  private fun imageUriToBitmap(context: Context, imageUri: Uri, maxResolution: Int = 600): Bitmap? {
+  private fun imageUriToBitmap(
+      context: Context,
+      imageUri: Uri,
+      maxResolution: Int = MAX_RESOLUTION
+  ): Bitmap? {
     return try {
       // Open an InputStream from the URI
       val inputStream: InputStream? = context.contentResolver.openInputStream(imageUri)
@@ -304,7 +376,7 @@ open class ProfilesViewModel(
    * @param quality The quality of the JPEG compression (0-100). Default is 100.
    * @return A byte array representing the JPEG image, or null if an error occurs.
    */
-  private fun bitmapToJpgByteArray(bitmap: Bitmap, quality: Int = 100): ByteArray? {
+  private fun bitmapToJpgByteArray(bitmap: Bitmap, quality: Int = DEFAULT_QUALITY): ByteArray? {
     return try {
       // Compress Bitmap to JPEG format and store in ByteArrayOutputStream
       val byteArrayOutputStream = ByteArrayOutputStream()

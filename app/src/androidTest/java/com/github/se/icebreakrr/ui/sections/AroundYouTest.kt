@@ -10,6 +10,9 @@ import androidx.compose.ui.test.performTouchInput
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.test.espresso.action.ViewActions.swipeDown
 import com.github.se.icebreakrr.model.filter.FilterViewModel
+import com.github.se.icebreakrr.model.location.ILocationService
+import com.github.se.icebreakrr.model.location.LocationRepository
+import com.github.se.icebreakrr.model.location.LocationViewModel
 import com.github.se.icebreakrr.model.profile.Gender
 import com.github.se.icebreakrr.model.profile.Profile
 import com.github.se.icebreakrr.model.profile.ProfilePicRepository
@@ -19,11 +22,14 @@ import com.github.se.icebreakrr.model.tags.TagsViewModel
 import com.github.se.icebreakrr.ui.navigation.NavigationActions
 import com.github.se.icebreakrr.ui.navigation.Route
 import com.github.se.icebreakrr.ui.navigation.Screen
+import com.github.se.icebreakrr.utils.IPermissionManager
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.GeoPoint
 import java.util.Calendar
+import kotlinx.coroutines.flow.MutableStateFlow
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -39,6 +45,12 @@ class AroundYouScreenTest {
   private lateinit var mockPPRepository: ProfilePicRepository
   private lateinit var profilesViewModel: ProfilesViewModel
 
+  private lateinit var mockLocationService: ILocationService
+  private lateinit var mockLocationRepository: LocationRepository
+  private lateinit var mockPermissionManager: IPermissionManager
+
+  private lateinit var locationViewModel: LocationViewModel
+
   @get:Rule val composeTestRule = createComposeRule()
 
   @Before
@@ -47,6 +59,25 @@ class AroundYouScreenTest {
     mockProfilesRepository = mock(ProfilesRepository::class.java)
     mockPPRepository = mock(ProfilePicRepository::class.java)
     profilesViewModel = ProfilesViewModel(mockProfilesRepository, mockPPRepository)
+
+    mockLocationService = mock(ILocationService::class.java)
+    mockLocationRepository = mock(LocationRepository::class.java)
+    mockPermissionManager = mock(IPermissionManager::class.java)
+
+    locationViewModel =
+        LocationViewModel(mockLocationService, mockLocationRepository, mockPermissionManager)
+
+    // Mock repository state flows
+    `when`(mockProfilesRepository.isWaiting).thenReturn(MutableStateFlow(false))
+    `when`(mockProfilesRepository.waitingDone).thenReturn(MutableStateFlow(false))
+
+    // Mock successful connection check
+    `when`(mockProfilesRepository.getProfilesInRadius(any(), any(), any(), any())).thenAnswer {
+        invocation ->
+      val onSuccessCallback = invocation.getArgument<(List<Profile>) -> Unit>(2)
+      onSuccessCallback(emptyList())
+      null
+    }
 
     // Mock initial behavior of repository
     `when`(navigationActions.currentRoute()).thenReturn(Route.AROUND_YOU)
@@ -57,18 +88,35 @@ class AroundYouScreenTest {
           profilesViewModel,
           viewModel(
               factory =
-                  TagsViewModel.Companion.Factory(
-                      FirebaseAuth.getInstance(), FirebaseFirestore.getInstance())),
-          viewModel(factory = FilterViewModel.Factory))
+              TagsViewModel.Companion.Factory(
+                  FirebaseAuth.getInstance(), FirebaseFirestore.getInstance())),
+          viewModel(factory = FilterViewModel.Factory),
+          locationViewModel,
+          true)
     }
+
+    // Trigger initial connection check
+    profilesViewModel.getFilteredProfilesInRadius(GeoPoint(0.0, 0.0), 300.0)
   }
 
   @Test
   fun displayTextWhenEmpty() {
-    // Simulate an empty profile list
-    profilesViewModel.getFilteredProfilesInRadius(
-        center = GeoPoint(0.0, 0.0), radiusInMeters = 300.0)
-    composeTestRule.onNodeWithTag("emptyProfilePrompt").assertIsDisplayed()
+    // Mock the repository behavior
+    `when`(mockProfilesRepository.getProfilesInRadius(any(), any(), any(), any())).thenAnswer {
+        invocation ->
+      val onSuccessCallback = invocation.getArgument<(List<Profile>) -> Unit>(2)
+      onSuccessCallback(emptyList())
+      null
+    }
+
+    // Trigger the fetch
+    profilesViewModel.getFilteredProfilesInRadius(GeoPoint(0.0, 0.0), 300.0)
+
+    // Wait for the UI to update
+    composeTestRule.waitForIdle()
+
+    // Assert the empty state text is displayed
+    composeTestRule.onNodeWithTag("emptyProfilePrompt").assertExists().assertIsDisplayed()
   }
 
   @Test
@@ -81,18 +129,20 @@ class AroundYouScreenTest {
 
   @Test
   fun navigationOnCardClick() {
-    // Simulate the repository returning a list with one profile
+    // Create a mock profile
     val profile = mockProfile()
 
-    // Stub the behavior for the callback with matchers for all parameters
+    assertTrue(profilesViewModel.isConnected.value)
+
+    // Mock the repository behavior
     `when`(mockProfilesRepository.getProfilesInRadius(any(), any(), any(), any())).thenAnswer {
         invocation ->
-      // Capture the onSuccess callback and invoke it with a list containing the mock profile
       val onSuccessCallback = invocation.getArgument<(List<Profile>) -> Unit>(2)
       onSuccessCallback(listOf(profile))
       null
     }
 
+    // Trigger the fetch
     profilesViewModel.getFilteredProfilesInRadius(GeoPoint(0.0, 0.0), 300.0)
 
     composeTestRule.onAllNodesWithTag("profileCard").onFirst().assertIsDisplayed()
@@ -102,7 +152,7 @@ class AroundYouScreenTest {
 
   @Test
   fun testRefreshMechanism() {
-    // Step 1: Simulate the initial state with one profile
+    // Step 1: Set up initial state with one profile
     val profile = mockProfile()
     `when`(mockProfilesRepository.getProfilesInRadius(any(), any(), any(), any())).thenAnswer {
         invocation ->
@@ -111,11 +161,12 @@ class AroundYouScreenTest {
       null
     }
 
-    // Step 2: Fetch profiles initially and verify the profile card is displayed
+    // Step 2: Fetch profiles initially and verify profile card is displayed
     profilesViewModel.getFilteredProfilesInRadius(GeoPoint(0.0, 0.0), 300.0)
+    composeTestRule.waitForIdle()
     composeTestRule.onAllNodesWithTag("profileCard").onFirst().assertIsDisplayed()
 
-    // Step 3: Simulate the repository returning an empty list after deletion
+    // Step 3: Simulate empty list response from repository
     `when`(mockProfilesRepository.getProfilesInRadius(any(), any(), any(), any())).thenAnswer {
         invocation ->
       val onSuccessCallback = invocation.getArgument<(List<Profile>) -> Unit>(2)
@@ -123,14 +174,16 @@ class AroundYouScreenTest {
       null
     }
 
-    // Step 4: Perform a swipe down gesture to trigger the refresh
+    // Step 4: Perform swipe down to trigger refresh
     composeTestRule.onNodeWithTag("aroundYouScreen").performTouchInput { swipeDown() }
 
-    // Step 5: Check if refresh indicator is displayed
+    // Step 5: Wait and check if refresh indicator is displayed
+    composeTestRule.waitForIdle()
     composeTestRule.onNodeWithTag("refreshIndicator").assertIsDisplayed()
 
-    // Step 6: Verify that emptyProfilePrompt is displayed after the refresh completes
+    // Step 6: Verify empty profile prompt after refresh completes
     profilesViewModel.getFilteredProfilesInRadius(GeoPoint(0.0, 0.0), 300.0)
+    composeTestRule.waitForIdle()
     composeTestRule.onNodeWithTag("emptyProfilePrompt").assertIsDisplayed()
   }
 

@@ -1,5 +1,6 @@
 package com.github.se.icebreakrr
 
+import ProfileCreationScreen
 import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Build
@@ -14,13 +15,18 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
 import com.github.se.icebreakrr.config.LocalIsTesting
+import com.github.se.icebreakrr.data.AppDataStore
 import com.github.se.icebreakrr.model.filter.FilterViewModel
+import com.github.se.icebreakrr.model.location.LocationRepositoryFirestore
+import com.github.se.icebreakrr.model.location.LocationService
+import com.github.se.icebreakrr.model.location.LocationViewModel
 import com.github.se.icebreakrr.model.message.MeetingRequestManager
 import com.github.se.icebreakrr.model.message.MeetingRequestViewModel
 import com.github.se.icebreakrr.model.profile.ProfilesViewModel
@@ -37,8 +43,14 @@ import com.github.se.icebreakrr.ui.sections.FilterScreen
 import com.github.se.icebreakrr.ui.sections.NotificationScreen
 import com.github.se.icebreakrr.ui.sections.SettingsScreen
 import com.github.se.icebreakrr.ui.theme.SampleAppTheme
+import com.github.se.icebreakrr.utils.NetworkUtils
+import com.github.se.icebreakrr.utils.PermissionManager
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
+import com.google.firebase.Firebase
 import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.firestore
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.firestore
 import com.google.firebase.functions.FirebaseFunctions
@@ -47,31 +59,93 @@ import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
-  @Inject lateinit var auth: FirebaseAuth
-  @Inject lateinit var firestore: FirebaseFirestore
+  @Inject private lateinit var auth: FirebaseAuth
+  @Inject private lateinit var firestore: FirebaseFirestore
   private lateinit var functions: FirebaseFunctions
+  private lateinit var locationViewModel: LocationViewModel
+  private lateinit var locationService: LocationService
+  private lateinit var locationRepositoryFirestore: LocationRepositoryFirestore
+  private lateinit var permissionManager: PermissionManager
+  private lateinit var authStateListener: FirebaseAuth.AuthStateListener
+  private lateinit var fusedLocationClient: FusedLocationProviderClient
+  private lateinit var appDataStore: AppDataStore
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
+
     // Retrieve the testing flag from the Intent
     val isTesting = intent?.getBooleanExtra("IS_TESTING", false) ?: false
+
+    // Initialize Firebase Auth
     FirebaseApp.initializeApp(this)
-    requestNotificationPermission()
     functions = FirebaseFunctions.getInstance()
-    Log.d("COmposeHierarchy", "auth uid : ${auth.currentUser?.uid}")
+
+    // Initialize Utils
+    NetworkUtils.init(this)
+
+    // Create and initialize the PermissionManager with the list of permissions required
+    requestNotificationPermission() // TODO remove this and use the PermissionManager instead
+    permissionManager = PermissionManager(this)
+    permissionManager.initializeLauncher(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION))
+
+    // Create required dependencies for the LocationViewModel
+    fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+    locationService = LocationService(fusedLocationClient)
+    locationRepositoryFirestore = LocationRepositoryFirestore(Firebase.firestore, auth)
+
+    // Initialize the LocationViewModel with dependencies
+    locationViewModel =
+        ViewModelProvider(
+            this,
+            LocationViewModel.provideFactory(
+                locationService, locationRepositoryFirestore, permissionManager))[
+            LocationViewModel::class.java]
+
+    // Monitor login/logout events and perform the necessary actions.
+    authStateListener =
+        FirebaseAuth.AuthStateListener { firebaseAuth ->
+          if (firebaseAuth.currentUser != null) {
+            locationViewModel.tryToStartLocationUpdates()
+          } else {
+            locationViewModel.stopLocationUpdates()
+          }
+        }
+
+    // Initialize DataStore
+    appDataStore = AppDataStore(context = this)
 
     setContent {
       // Provide the `isTesting` flag to the entire composable tree
       CompositionLocalProvider(LocalIsTesting provides isTesting) {
         SampleAppTheme {
           Surface(modifier = Modifier.fillMaxSize()) {
-            IcebreakrrApp(auth, functions, isTesting, firestore)
+            IcebreakrrApp(auth, functions, appDataStore, locationViewModel, firestore, isTesting)
           }
         }
       }
     }
   }
 
+  override fun onStart() {
+    super.onStart()
+    // Add the AuthStateListener when the activity starts
+    auth.addAuthStateListener(authStateListener)
+  }
+
+  override fun onResume() {
+    super.onResume()
+    // Update permissions when the activity resumes to ensure they are up-to-date
+    permissionManager.updateAllPermissions()
+  }
+
+  override fun onStop() {
+    super.onStop()
+    // Remove the AuthStateListener when the activity stops
+    auth.removeAuthStateListener(authStateListener)
+  }
+
+  // TODO remove this and use the PermissionManager instead
+  // TODO the permissions must be asked by the class requiring it
   private fun requestNotificationPermission() {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
       val hasPermission =
@@ -99,23 +173,21 @@ class MainActivity : ComponentActivity() {
 fun IcebreakrrApp(
     auth: FirebaseAuth,
     functions: FirebaseFunctions,
-    isTesting: Boolean,
-    firestore: FirebaseFirestore
+    appDataStore: AppDataStore,
+    locationViewModel: LocationViewModel,
+    firestore: FirebaseFirestore,
+    isTesting: Boolean
 ) {
-  Log.d("COmposeHierarchy", "auth uid : ${auth.currentUser?.uid}")
-  val profileViewModel: ProfilesViewModel =
-      viewModel(factory = ProfilesViewModel.Companion.Factory(auth, firestore))
-  val tagsViewModel: TagsViewModel =
-      viewModel(factory = TagsViewModel.Companion.Factory(auth, firestore))
+  val profileViewModel: ProfilesViewModel = viewModel(factory = ProfilesViewModel.Companion.Factory(auth, firestore))
+  val tagsViewModel: TagsViewModel = viewModel(factory = TagsViewModel.Companion.Factory(auth, firestore))
   val filterViewModel: FilterViewModel = viewModel(factory = FilterViewModel.Factory)
-  val ourUserUid = auth.currentUser?.uid ?: "null"
-  val ourName = auth.currentUser?.displayName ?: "null"
-
+  var userName: String? = "null"
+  var userUid: String? = "null"
   MeetingRequestManager.meetingRequestViewModel =
       viewModel(
           factory =
               MeetingRequestViewModel.Companion.Factory(
-                  profileViewModel, functions, ourUserUid, ourName))
+                  profileViewModel, functions, userUid, userName))
   val meetingRequestViewModel = MeetingRequestManager.meetingRequestViewModel
   val startDestination = if (isTesting) Route.AROUND_YOU else Route.AUTH
 
@@ -124,6 +196,8 @@ fun IcebreakrrApp(
       tagsViewModel,
       filterViewModel,
       meetingRequestViewModel,
+      appDataStore,
+      locationViewModel,
       startDestination,
       auth)
 }
@@ -134,12 +208,13 @@ fun IcebreakrrNavHost(
     tagsViewModel: TagsViewModel,
     filterViewModel: FilterViewModel,
     meetingRequestViewModel: MeetingRequestViewModel?,
+    appDataStore: AppDataStore,
+    locationViewModel: LocationViewModel,
     startDestination: String,
     auth: FirebaseAuth
 ) {
   val navController = rememberNavController()
   val navigationActions = NavigationActions(navController)
-  Log.d("COmposeHierarchy", "auth uid : ${auth.currentUser?.uid}")
   NavHost(navController = navController, startDestination = startDestination) {
     navigation(
         startDestination = Screen.AUTH,
@@ -152,11 +227,15 @@ fun IcebreakrrNavHost(
               meetingRequestViewModel,
               navigationActions,
               filterViewModel = filterViewModel,
-              tagsViewModel = tagsViewModel)
+              tagsViewModel = tagsViewModel,
+              appDataStore = appDataStore)
         } else {
           throw IllegalStateException(
               "The Meeting Request View Model shouldn't be null : Bad initialization")
         }
+      }
+      composable(Screen.PROFILE_CREATION) {
+        ProfileCreationScreen(tagsViewModel, profileViewModel, navigationActions)
       }
     }
 
@@ -165,7 +244,8 @@ fun IcebreakrrNavHost(
         route = Route.AROUND_YOU,
     ) {
       composable(Screen.AROUND_YOU) {
-        AroundYouScreen(navigationActions, profileViewModel, tagsViewModel, filterViewModel)
+        AroundYouScreen(
+            navigationActions, profileViewModel, tagsViewModel, filterViewModel, locationViewModel)
       }
       composable(Screen.OTHER_PROFILE_VIEW + "?userId={userId}") { navBackStackEntry ->
         if (meetingRequestViewModel != null) {
@@ -186,10 +266,10 @@ fun IcebreakrrNavHost(
         startDestination = Screen.SETTINGS,
         route = Route.SETTINGS,
     ) {
-      composable(Screen.SETTINGS) { SettingsScreen(profileViewModel, navigationActions, auth) }
-      composable(Screen.PROFILE) {
-        ProfileView(profileViewModel, tagsViewModel, navigationActions, auth)
+      composable(Screen.SETTINGS) {
+        SettingsScreen(profileViewModel, navigationActions, appDataStore = appDataStore, auth)
       }
+      composable(Screen.PROFILE) { ProfileView(profileViewModel, tagsViewModel, navigationActions, auth) }
     }
 
     navigation(

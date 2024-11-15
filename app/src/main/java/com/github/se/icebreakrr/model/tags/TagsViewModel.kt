@@ -32,6 +32,8 @@ data class TagsViewModel(private val repository: TagsRepository) : ViewModel() {
   private var filteringTags_ = MutableStateFlow(emptyList<String>())
   val filteringTags: StateFlow<List<String>> = filteringTags_
 
+  private val RADIX = 16
+
   init {
     repository.init {
       repository.getAllTags(
@@ -79,7 +81,7 @@ data class TagsViewModel(private val repository: TagsRepository) : ViewModel() {
    * @return the Color of this tag or Color("0xFFFFFFFF") if this tag is not present in the firebase
    */
   fun tagToColor(tag: String): Color {
-    return Color(tagToCategory(tag).color.removePrefix("0x").toLong(16))
+    return Color(tagToCategory(tag).color.removePrefix("0x").toLong(RADIX))
   }
 
   /**

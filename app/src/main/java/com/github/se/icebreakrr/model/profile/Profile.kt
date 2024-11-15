@@ -1,6 +1,7 @@
 package com.github.se.icebreakrr.model.profile
 
 import com.google.firebase.Timestamp
+import com.google.firebase.firestore.GeoPoint
 import java.util.Calendar
 
 /**
@@ -24,7 +25,10 @@ data class Profile(
     val description: String,
     val tags: List<String> = listOf(),
     val profilePictureUrl: String? = null,
-    val fcmToken: String? = null
+    val fcmToken: String? = null,
+    val location: GeoPoint? = null,
+    val geohash: String? = null,
+    var hasBlocked: List<String> = listOf(),
 ) {
   /**
    * Calculates the user's age based on their birth date.
@@ -52,5 +56,16 @@ data class Profile(
 enum class Gender(val displayName: String) {
   WOMEN("Women"),
   MEN("Men"),
+  OTHER("Other")
+}
+
+/**
+ * Enum class representing reports types.
+ *
+ * @property displayName The display name for each report type.
+ */
+enum class reportType(val displayName: String) {
+  INAPPROPRIATE_CONTENT("Inappropriate content"),
+  SPAM("Spam"),
   OTHER("Other")
 }

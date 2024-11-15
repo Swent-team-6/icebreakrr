@@ -39,6 +39,7 @@ class MeetingRequestViewModelTest {
 
   private val testDispatcher: TestDispatcher = UnconfinedTestDispatcher()
   private lateinit var meetingRequestViewModel: MeetingRequestViewModel
+  private lateinit var mockMeetingRequestManager: MeetingRequestManager
   private val callableReference: HttpsCallableReference = mock()
 
   private val birthDate2005 =
@@ -92,10 +93,12 @@ class MeetingRequestViewModelTest {
     // Mock the dependencies
     profilesViewModel = mock(ProfilesViewModel::class.java)
     functions = mock(FirebaseFunctions::class.java)
+    mockMeetingRequestManager = mock(MeetingRequestManager::class.java)
 
     // Initialize the ViewModel with mocks
     meetingRequestViewModel = MeetingRequestViewModel(profilesViewModel, functions, "1", "John Doe")
     `when`(functions.getHttpsCallable("sendMessage")).thenReturn(callableReference)
+    `when`(mockMeetingRequestManager.ourName).thenReturn("John Doe")
   }
 
   @Test
@@ -151,6 +154,7 @@ class MeetingRequestViewModelTest {
     val callableMock: HttpsCallableResult = mock(HttpsCallableResult::class.java)
     val callableTask: Task<HttpsCallableResult> = Tasks.forResult(callableMock)
     val callable = mock<HttpsCallableReference>()
+    val mockMeetingRequestManager = mock(MeetingRequestManager::class.java)
 
     // Setup the function mock to return the task when called
     `when`(callable.call(any())).thenReturn(callableTask) // This makes it chainable
@@ -169,9 +173,12 @@ class MeetingRequestViewModelTest {
     verify(callableReference).call(argumentCaptor.capture())
 
     val capturedData = argumentCaptor.value as Map<String, Any>
+
     assert(capturedData["targetToken"] == meetingRequestState.targetToken)
     assert(capturedData["senderUID"] == meetingRequestState.senderUID)
-    assert(capturedData["body"] == "John Doe : " + meetingRequestState.message)
+    assert(
+        capturedData["body"] ==
+            mockMeetingRequestManager.ourName + " : " + meetingRequestState.message)
     assert(capturedData["picture"] == meetingRequestState.picture)
     assert(capturedData["location"] == meetingRequestState.location)
   }

@@ -35,6 +35,8 @@ import com.github.se.icebreakrr.ui.sections.shared.ProfileHeader
  *
  * @param navigationActions Actions to navigate between screens.
  */
+private val ALPHA = 0.5f
+
 @Composable
 fun OtherProfileView(
     profilesViewModel: ProfilesViewModel,
@@ -77,7 +79,9 @@ fun OtherProfileView(
 
             // 2 sections one for the profile image with overlay and
             // one for the information section
-            ProfileHeader(profile, navigationActions, false) { sendRequest = true }
+            ProfileHeader(profile, navigationActions, false, profilesViewModel) {
+              sendRequest = true
+            }
             InfoSection(profile, tagsViewModel)
           }
 
@@ -86,7 +90,7 @@ fun OtherProfileView(
         Box(
             modifier =
                 Modifier.fillMaxSize()
-                    .background(Color.Black.copy(alpha = 0.5f))
+                    .background(Color.Black.copy(alpha = ALPHA))
                     .clickable {}
                     .testTag("bluredBackground"),
             contentAlignment = Alignment.Center) {

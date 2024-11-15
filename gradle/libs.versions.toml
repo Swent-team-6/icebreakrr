@@ -1,10 +1,9 @@
 [versions]
 #Google
 activityCompose = "1.7.0"
-converterMoshi = "2.9.0"
 core = "1.6.1"
 coreTesting = "2.2.0"
-googleHiltAndroidCompilerVersion = "2.51"
+datastorePreferences = "1.1.1"
 googleServices = "4.4.2"
 gradle = "7.4.2"
 hiltAndroid = "2.51.1"
@@ -56,13 +55,17 @@ junitVersion = "1.2.1"
 espressoCore = "3.6.1"
 retrofit = "2.9.0"
 robolectric = "4.11.1"
-hilt = "2.51.1"  # Use the appropriate version for Hilt
 
 #CI
 sonar = "4.4.1.3373"
 ktfmt = "0.17.0"
 firebaseFunctionsKtx = "21.0.0"
 firebaseStorageKtx = "21.0.1"
+datastorePreferencesCoreJvm = "1.1.1"
+datastoreCoreAndroid = "1.1.1"
+
+#Utils
+geohashJava = "1.4.0"
 monitor = "1.7.1"
 
 [libraries]
@@ -70,15 +73,13 @@ monitor = "1.7.1"
 androidx-activity-compose-v170 = { module = "androidx.activity:activity-compose", version.ref = "activityCompose" }
 androidx-core = { module = "androidx.test:core", version.ref = "core" }
 androidx-core-testing = { module = "androidx.arch.core:core-testing", version.ref = "coreTesting" }
+androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastorePreferences" }
 androidx-lifecycle-viewmodel-ktx = { module = "androidx.lifecycle:lifecycle-viewmodel-ktx", version.ref = "lifecycleViewmodelKtx" }
-converter-moshi = { module = "com.squareup.retrofit2:converter-moshi", version.ref = "converterMoshi" }
+androidx-datastore-preferences-core = { module = "androidx.datastore:datastore-preferences-core", version.ref = "datastorePreferences" }
 firebase-messaging-ktx = { module = "com.google.firebase:firebase-messaging-ktx" }
-gradle = { module = "com.android.tools.build:gradle", version.ref = "gradle" }
-hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hiltAndroid" }
-hilt-android-compiler = { module = "com.google.dagger:hilt-android-compiler", version.ref = "hiltAndroidCompiler" }
-hilt-android-testing = { module = "com.google.dagger:hilt-android-testing", version.ref = "hiltAndroidTesting" }
-kotlin-gradle-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlinGradlePlugin" }
 mockito-inline = { module = "org.mockito:mockito-inline", version.ref = "mockitoInline" }
+gradle = { module = "com.android.tools.build:gradle", version.ref = "gradle" }
+kotlin-gradle-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlinGradlePlugin" }
 mockito-mockito-core-v520 = { module = "org.mockito:mockito-core", version.ref = "mockitoMockitoCore" }
 play-services-auth = { module = "com.google.android.gms:play-services-auth", version.ref = "playServicesAuth" }
 play-services-location = { module = "com.google.android.gms:play-services-location", version.ref = "playServicesLocation" }
@@ -114,7 +115,6 @@ firebase-auth = { module = "com.google.firebase:firebase-auth", version.ref = "f
 firebase-database-ktx = { module = "com.google.firebase:firebase-database-ktx", version.ref = "firebaseDatabaseKtx" }
 firebase-firestore = { module = "com.google.firebase:firebase-firestore", version.ref = "firebaseFirestore" }
 firebase-ui-auth = { module = "com.firebaseui:firebase-ui-auth", version.ref = "firebaseUiAuth" }
-geofirestore = { module = "com.github.imperiumlabs:GeoFirestore-Android", version = "v1.5.0" }
 firebase-common-ktx = { group = "com.google.firebase", name = "firebase-common-ktx", version.ref = "firebaseCommonKtx" }
 
 #Testing
@@ -131,8 +131,15 @@ mockito-kotlin = { group = "org.mockito.kotlin", name = "mockito-kotlin", versio
 androidx-navigation-testing = { group = "androidx.navigation", name = "navigation-testing", version.ref = "navigationTesting" }
 firebase-functions-ktx = { group = "com.google.firebase", name = "firebase-functions-ktx", version.ref = "firebaseFunctionsKtx" }
 firebase-storage-ktx = { group = "com.google.firebase", name = "firebase-storage-ktx", version.ref = "firebaseStorageKtx" }
+androidx-datastore-preferences-core-jvm = { group = "androidx.datastore", name = "datastore-preferences-core-jvm", version.ref = "datastorePreferencesCoreJvm" }
+androidx-datastore-core-android = { group = "androidx.datastore", name = "datastore-core-android", version.ref = "datastoreCoreAndroid" }
 androidx-monitor = { group = "androidx.test", name = "monitor", version.ref = "monitor" }
+hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hiltAndroid" }
+hilt-android-compiler = { module = "com.google.dagger:hilt-android-compiler", version.ref = "hiltAndroidCompiler" }
+hilt-android-testing = { module = "com.google.dagger:hilt-android-testing", version.ref = "hiltAndroidTesting" }
 
+#Utils
+geohashJava = { module = "ch.hsr:geohash", version.ref = "geohashJava" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

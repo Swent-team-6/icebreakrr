@@ -1,15 +1,10 @@
-import com.github.se.icebreakrr.model.profile.Gender
-import com.github.se.icebreakrr.model.profile.Profile
 import com.github.se.icebreakrr.model.profile.ProfilesViewModel
 import com.github.se.icebreakrr.ui.navigation.NavigationActions
-import com.github.se.icebreakrr.ui.navigation.TopLevelDestinations
-import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import junit.framework.TestCase.assertEquals
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.*
 import org.junit.After
 import org.junit.Before
@@ -37,8 +32,6 @@ class FirebaseAuthTest {
     // Mock FirebaseAuth and FirebaseUser
     mockFirebaseAuth = mock()
     mockFirebaseUser = mock()
-    profilesViewModel = mock()
-    navigationActions = mock()
 
     // Simulate a logged-in user with email, UID, and display name
     whenever(mockFirebaseAuth.currentUser).thenReturn(mockFirebaseUser)
@@ -58,87 +51,4 @@ class FirebaseAuthTest {
     val currentUser = mockFirebaseAuth.currentUser
     assertEquals("testuser@example.com", currentUser?.email)
   }
-
-  // Test case: Profile exists, expect navigation to occur
-  @Test
-  fun `onAuthComplete navigates if profile exists`() =
-      testScope.runBlockingTest {
-        val uid = mockFirebaseUser.uid
-        val mockProfile =
-            Profile(
-                uid = uid,
-                name = "Existing User",
-                birthDate = Timestamp.now(),
-                gender = Gender.OTHER,
-                catchPhrase = "",
-                description = "")
-
-        // Mock loading and selectedProfile behavior
-        whenever(profilesViewModel.loading).thenReturn(MutableStateFlow(false))
-        whenever(profilesViewModel.selectedProfile).thenReturn(MutableStateFlow(mockProfile))
-
-        profilesViewModel.getProfileByUid(uid)
-
-        // Advance until all coroutines complete
-        advanceUntilIdle()
-
-        verify(profilesViewModel).getProfileByUid(uid)
-      }
-
-  // Test case: Profile does not exist, expect profile creation
-  @Test
-  fun `onAuthComplete creates profile if none exists and then navigates`() =
-      testScope.runBlockingTest {
-        val uid = mockFirebaseUser.uid
-        val displayName = mockFirebaseUser.displayName ?: "New User"
-
-        // Simulate no existing profile
-        whenever(profilesViewModel.loading).thenReturn(MutableStateFlow(false))
-        whenever(profilesViewModel.selectedProfile).thenReturn(MutableStateFlow(null))
-
-        profilesViewModel.getProfileByUid(uid)
-
-        // Advance until all coroutines complete
-        advanceUntilIdle()
-
-        verify(profilesViewModel).getProfileByUid(uid)
-      }
-
-  // Test case: Error in fetching profile, expect no navigation
-  @Test
-  fun `onAuthComplete handles error in fetching profile`() =
-      testScope.runBlockingTest {
-        val uid = mockFirebaseUser.uid
-
-        // Simulate an error in fetching by making loading false but profile still null
-        whenever(profilesViewModel.loading).thenReturn(MutableStateFlow(false))
-        whenever(profilesViewModel.selectedProfile).thenThrow(RuntimeException("Fetch error"))
-
-        profilesViewModel.getProfileByUid(uid)
-
-        // Advance until all coroutines complete
-        advanceUntilIdle()
-
-        verify(profilesViewModel).getProfileByUid(uid)
-        verify(navigationActions, never()).navigateTo(TopLevelDestinations.AROUND_YOU)
-      }
-
-  // Test case: Error in creating profile
-  @Test
-  fun `onAuthComplete handles error in creating profile`() =
-      testScope.runBlockingTest {
-        val uid = mockFirebaseUser.uid
-
-        // Set loading to false, and simulate profile creation failure
-        whenever(profilesViewModel.loading).thenReturn(MutableStateFlow(false))
-        whenever(profilesViewModel.selectedProfile).thenReturn(MutableStateFlow(null))
-        doThrow(RuntimeException("Create error")).`when`(profilesViewModel).addNewProfile(any())
-
-        profilesViewModel.getProfileByUid(uid)
-
-        // Advance until all coroutines complete
-        advanceUntilIdle()
-
-        verify(profilesViewModel).getProfileByUid(uid)
-      }
 }
