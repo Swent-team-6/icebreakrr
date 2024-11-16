@@ -13,7 +13,7 @@ import com.github.se.icebreakrr.ui.sections.DEFAULT_LONGITUDE
 import com.github.se.icebreakrr.ui.sections.DEFAULT_RADIUS
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.auth.auth
 import com.google.firebase.firestore.GeoPoint
 import com.google.firebase.firestore.firestore
 import com.google.firebase.storage.storage
@@ -316,7 +316,7 @@ open class ProfilesViewModel(
   fun getSelfProfile() {
     _loadingSelf.value = true
     repository.getProfileByUid(
-        auth.currentUser?.uid ?: "null",
+        Firebase.auth.uid ?: "null",
         onSuccess = { profile ->
           _selfProfile.value = profile
           _loadingSelf.value = false

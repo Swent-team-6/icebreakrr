@@ -44,8 +44,7 @@ class NotificationTest {
     navigationActions = Mockito.mock(NavigationActions::class.java)
     mockProfilesRepository = Mockito.mock(ProfilesRepository::class.java)
     mockPPRepository = Mockito.mock(ProfilePicRepository::class.java)
-    profilesViewModel =
-        ProfilesViewModel(mockProfilesRepository, mockPPRepository, FirebaseAuth.getInstance())
+    profilesViewModel = ProfilesViewModel(mockProfilesRepository, mockPPRepository, FirebaseAuth.getInstance())
 
     `when`(navigationActions.currentRoute()).thenReturn(Route.NOTIFICATIONS)
   }

@@ -44,7 +44,6 @@ import com.github.se.icebreakrr.ui.navigation.Screen
 import com.github.se.icebreakrr.ui.sections.shared.ProfileCard
 import com.github.se.icebreakrr.ui.sections.shared.TopBar
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.auth
 import kotlinx.coroutines.launch
 
 // Constants for dimensions and other settings
@@ -84,7 +83,11 @@ fun SettingsScreen(
   // Collect the discoverability state from DataStore
   val isDiscoverable by appDataStore.isDiscoverable.collectAsState(initial = true)
 
-  LaunchedEffect(Unit) { auth.currentUser?.let { profilesViewModel.getProfileByUid(it.uid) } }
+  lateinit var auth: FirebaseAuth
+
+  LaunchedEffect(Unit) {
+    auth.currentUser?.let { profilesViewModel.getProfileByUid(it.uid) }
+  }
 
   val isLoading = profilesViewModel.loading.collectAsState(initial = true).value
   val profile = profilesViewModel.selectedProfile.collectAsState().value

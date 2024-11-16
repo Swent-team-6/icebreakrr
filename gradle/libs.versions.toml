@@ -16,6 +16,7 @@ mockitoInline = "5.2.0"
 mockitoMockitoCore = "5.2.0"
 playServicesAuth = "21.2.0"
 playServicesLocation = "21.3.0"
+converterMoshi = "2.9.0"
 
 #Android
 agp = "8.3.2"
@@ -67,17 +68,14 @@ datastoreCoreAndroid = "1.1.1"
 
 #Utils
 geohashJava = "1.4.0"
-monitor = "1.7.1"
 
 [libraries]
 #Google
 androidx-activity-compose-v170 = { module = "androidx.activity:activity-compose", version.ref = "activityCompose" }
 androidx-core = { module = "androidx.test:core", version.ref = "core" }
 androidx-core-testing = { module = "androidx.arch.core:core-testing", version.ref = "coreTesting" }
-androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastorePreferences" }
 androidx-junit-v115 = { module = "androidx.test.ext:junit", version.ref = "androidxJunit" }
 androidx-lifecycle-viewmodel-ktx = { module = "androidx.lifecycle:lifecycle-viewmodel-ktx", version.ref = "lifecycleViewmodelKtx" }
-androidx-datastore-preferences-core = { module = "androidx.datastore:datastore-preferences-core", version.ref = "datastorePreferences" }
 firebase-messaging-ktx = { module = "com.google.firebase:firebase-messaging-ktx" }
 mockito-inline = { module = "org.mockito:mockito-inline", version.ref = "mockitoInline" }
 gradle = { module = "com.android.tools.build:gradle", version.ref = "gradle" }
@@ -86,6 +84,9 @@ mockito-mockito-core-v520 = { module = "org.mockito:mockito-core", version.ref =
 play-services-auth = { module = "com.google.android.gms:play-services-auth", version.ref = "playServicesAuth" }
 play-services-location = { module = "com.google.android.gms:play-services-location", version.ref = "playServicesLocation" }
 google-services = { module = "com.google.gms:google-services", version.ref = "googleServices" }
+androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastorePreferences" }
+androidx-datastore-preferences-core = { module = "androidx.datastore:datastore-preferences-core", version.ref = "datastorePreferences" }
+converter-moshi = { module = "com.squareup.retrofit2:converter-moshi", version.ref = "converterMoshi" }
 
 #Android
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -133,12 +134,11 @@ mockito-kotlin = { group = "org.mockito.kotlin", name = "mockito-kotlin", versio
 androidx-navigation-testing = { group = "androidx.navigation", name = "navigation-testing", version.ref = "navigationTesting" }
 firebase-functions-ktx = { group = "com.google.firebase", name = "firebase-functions-ktx", version.ref = "firebaseFunctionsKtx" }
 firebase-storage-ktx = { group = "com.google.firebase", name = "firebase-storage-ktx", version.ref = "firebaseStorageKtx" }
-androidx-datastore-preferences-core-jvm = { group = "androidx.datastore", name = "datastore-preferences-core-jvm", version.ref = "datastorePreferencesCoreJvm" }
-androidx-datastore-core-android = { group = "androidx.datastore", name = "datastore-core-android", version.ref = "datastoreCoreAndroid" }
-androidx-monitor = { group = "androidx.test", name = "monitor", version.ref = "monitor" }
 hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hiltAndroid" }
 hilt-android-compiler = { module = "com.google.dagger:hilt-android-compiler", version.ref = "hiltAndroidCompiler" }
 hilt-android-testing = { module = "com.google.dagger:hilt-android-testing", version.ref = "hiltAndroidTesting" }
+androidx-datastore-preferences-core-jvm = { group = "androidx.datastore", name = "datastore-preferences-core-jvm", version.ref = "datastorePreferencesCoreJvm" }
+androidx-datastore-core-android = { group = "androidx.datastore", name = "datastore-core-android", version.ref = "datastoreCoreAndroid" }
 
 #Utils
 geohashJava = { module = "ch.hsr:geohash", version.ref = "geohashJava" }

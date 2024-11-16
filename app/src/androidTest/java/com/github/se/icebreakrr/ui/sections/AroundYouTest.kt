@@ -24,8 +24,6 @@ import com.github.se.icebreakrr.ui.navigation.Route
 import com.github.se.icebreakrr.ui.navigation.Screen
 import com.github.se.icebreakrr.utils.IPermissionManager
 import com.google.firebase.Timestamp
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.GeoPoint
 import java.util.Calendar
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -58,8 +56,7 @@ class AroundYouScreenTest {
     navigationActions = mock(NavigationActions::class.java)
     mockProfilesRepository = mock(ProfilesRepository::class.java)
     mockPPRepository = mock(ProfilePicRepository::class.java)
-    profilesViewModel =
-        ProfilesViewModel(mockProfilesRepository, mockPPRepository, FirebaseAuth.getInstance())
+    profilesViewModel = ProfilesViewModel(mockProfilesRepository, mockPPRepository)
 
     mockLocationService = mock(ILocationService::class.java)
     mockLocationRepository = mock(LocationRepository::class.java)
@@ -87,10 +84,7 @@ class AroundYouScreenTest {
       AroundYouScreen(
           navigationActions,
           profilesViewModel,
-          viewModel(
-              factory =
-                  TagsViewModel.Companion.Factory(
-                      FirebaseAuth.getInstance(), FirebaseFirestore.getInstance())),
+          viewModel(factory = TagsViewModel.Factory),
           viewModel(factory = FilterViewModel.Factory),
           locationViewModel,
           true)

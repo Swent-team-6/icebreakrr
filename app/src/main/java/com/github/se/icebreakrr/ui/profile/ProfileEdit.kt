@@ -48,8 +48,8 @@ import com.github.se.icebreakrr.ui.sections.shared.UnsavedChangesDialog
 import com.github.se.icebreakrr.ui.sections.shared.handleSafeBackNavigation
 import com.github.se.icebreakrr.ui.tags.TagSelector
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.auth
 import com.google.firebase.auth.ktx.auth
+import com.google.firebase.ktx.Firebase
 
 @SuppressLint("UnrememberedMutableState", "CoroutineCreationDuringComposition")
 @OptIn(ExperimentalMaterial3Api::class)
@@ -77,7 +77,7 @@ fun ProfileEditingScreen(
   val DESSCRIPTION_MAX = 400
 
   LaunchedEffect(Unit) {
-    auth.currentUser?.let { profilesViewModel.getProfileByUid(it.uid) }
+    Firebase.auth.currentUser?.let { profilesViewModel.getProfileByUid(it.uid) }
     profilesViewModel.selectedProfile.value?.tags?.forEach { tag -> tagsViewModel.addFilter(tag) }
   }
 

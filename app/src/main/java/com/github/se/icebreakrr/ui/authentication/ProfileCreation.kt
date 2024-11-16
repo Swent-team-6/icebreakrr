@@ -60,6 +60,13 @@ private object ProfileCreationConstants {
   const val DEFAULT_AGE_YEARS = -20
 }
 
+/**
+ * Displays the page of profile creation
+ *
+ * @param tagsViewModel : the view model of the tags
+ * @param profilesViewModel : the view model of the profiles
+ * @param navigationActions : the navigation action to navigate between screens
+ */
 @Composable
 fun ProfileCreationScreen(
     tagsViewModel: TagsViewModel,

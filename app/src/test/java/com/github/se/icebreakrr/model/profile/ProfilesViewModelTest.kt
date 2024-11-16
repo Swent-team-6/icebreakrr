@@ -88,8 +88,7 @@ class ProfilesViewModelTest {
     context = mock(Context::class.java)
     profilesRepository = mock(ProfilesRepository::class.java)
     ppRepository = mock(ProfilePicRepository::class.java)
-    profilesViewModel =
-        ProfilesViewModel(profilesRepository, ppRepository, mock(FirebaseAuth::class.java))
+    profilesViewModel = ProfilesViewModel(profilesRepository, ppRepository, mock(FirebaseAuth::class.java))
     mockProfileViewModel = mock(ProfilesViewModel::class.java)
     mockAndThen = mock()
 

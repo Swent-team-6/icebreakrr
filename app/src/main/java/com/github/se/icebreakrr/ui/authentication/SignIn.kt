@@ -103,7 +103,7 @@ fun SignInScreen(
     navigationActions: NavigationActions,
     filterViewModel: FilterViewModel,
     tagsViewModel: TagsViewModel,
-    appDataStore: AppDataStore,
+    appDataStore: AppDataStore
 ) {
 
   // State to hold the current Firebase user
