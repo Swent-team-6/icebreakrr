@@ -47,11 +47,9 @@ import com.github.se.icebreakrr.utils.NetworkUtils
 import com.github.se.icebreakrr.utils.PermissionManager
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
-import com.google.firebase.Firebase
 import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuth.AuthStateListener
-import com.google.firebase.firestore.firestore
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.firestore
 import com.google.firebase.functions.FirebaseFunctions
@@ -73,7 +71,7 @@ class MainActivity : ComponentActivity() {
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
-      Log.d("TESTEST", "${auth.currentUser?.uid}")
+    Log.d("TESTEST", "${auth.currentUser?.uid}")
 
     // Retrieve the testing flag from the Intent
     val isTesting = intent?.getBooleanExtra("IS_TESTING", false) ?: false
@@ -104,15 +102,15 @@ class MainActivity : ComponentActivity() {
             LocationViewModel::class.java]
 
     // Monitor login/logout events and perform the necessary actions.
-    if (!isTesting){
-        authStateListener =
-            FirebaseAuth.AuthStateListener { firebaseAuth ->
-                if (firebaseAuth.currentUser != null) {
-                    locationViewModel.tryToStartLocationUpdates()
-                } else {
-                    locationViewModel.stopLocationUpdates()
-                }
+    if (!isTesting) {
+      authStateListener =
+          FirebaseAuth.AuthStateListener { firebaseAuth ->
+            if (firebaseAuth.currentUser != null) {
+              locationViewModel.tryToStartLocationUpdates()
+            } else {
+              locationViewModel.stopLocationUpdates()
             }
+          }
     }
 
     // Initialize DataStore
@@ -182,8 +180,10 @@ fun IcebreakrrApp(
     firestore: FirebaseFirestore,
     isTesting: Boolean
 ) {
-  val profileViewModel: ProfilesViewModel = viewModel(factory = ProfilesViewModel.Companion.Factory(auth, firestore))
-  val tagsViewModel: TagsViewModel = viewModel(factory = TagsViewModel.Companion.Factory(auth, firestore))
+  val profileViewModel: ProfilesViewModel =
+      viewModel(factory = ProfilesViewModel.Companion.Factory(auth, firestore))
+  val tagsViewModel: TagsViewModel =
+      viewModel(factory = TagsViewModel.Companion.Factory(auth, firestore))
   val filterViewModel: FilterViewModel = viewModel(factory = FilterViewModel.Factory)
   var userName: String? = "null"
   var userUid: String? = "null"
@@ -273,7 +273,9 @@ fun IcebreakrrNavHost(
       composable(Screen.SETTINGS) {
         SettingsScreen(profileViewModel, navigationActions, appDataStore = appDataStore, auth)
       }
-      composable(Screen.PROFILE) { ProfileView(profileViewModel, tagsViewModel, navigationActions, auth) }
+      composable(Screen.PROFILE) {
+        ProfileView(profileViewModel, tagsViewModel, navigationActions, auth)
+      }
     }
 
     navigation(

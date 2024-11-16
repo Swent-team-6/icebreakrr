@@ -1,6 +1,5 @@
 package com.github.se.icebreakrr.ui.sections
 
-import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -17,7 +16,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -86,9 +84,7 @@ fun SettingsScreen(
   // Collect the discoverability state from DataStore
   val isDiscoverable by appDataStore.isDiscoverable.collectAsState(initial = true)
 
-  LaunchedEffect(Unit) {
-    auth.currentUser?.let { profilesViewModel.getProfileByUid(it.uid) }
-  }
+  LaunchedEffect(Unit) { auth.currentUser?.let { profilesViewModel.getProfileByUid(it.uid) } }
 
   val isLoading = profilesViewModel.loading.collectAsState(initial = true).value
   val profile = profilesViewModel.selectedProfile.collectAsState().value

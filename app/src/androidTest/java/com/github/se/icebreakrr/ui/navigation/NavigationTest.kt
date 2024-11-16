@@ -23,6 +23,7 @@ import com.github.se.icebreakrr.model.tags.TagsRepository
 import com.github.se.icebreakrr.model.tags.TagsViewModel
 import com.github.se.icebreakrr.utils.IPermissionManager
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.functions.FirebaseFunctions
 import com.google.firebase.storage.FirebaseStorage
 import java.io.File
@@ -41,128 +42,127 @@ import org.mockito.Mockito.mock
 @OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(AndroidJUnit4::class)
 class NavigationTest {
-    private val testScope = TestScope(UnconfinedTestDispatcher() + Job())
+  private val testScope = TestScope(UnconfinedTestDispatcher() + Job())
 
-    @get:Rule
-    val composeTestRule = createComposeRule()
-    @get:Rule
-    val tempFolder = TemporaryFolder()
+  @get:Rule val composeTestRule = createComposeRule()
+  @get:Rule val tempFolder = TemporaryFolder()
 
-    private lateinit var profilesViewModel: ProfilesViewModel
-    private lateinit var mockProfileViewModel: MockProfileViewModel
-    private lateinit var tagsViewModel: TagsViewModel
-    private lateinit var mockProfilesRepository: ProfilesRepository
-    private lateinit var mockTagsRepository: TagsRepository
-    private lateinit var mockFirebaseStorage: FirebaseStorage
-    private lateinit var mockMeetingRequestViewModel: MeetingRequestViewModel
-    private lateinit var mockFunction: FirebaseFunctions
-    private lateinit var mockFilterViewModel: FilterViewModel
-    private lateinit var testDataStore: DataStore<androidx.datastore.preferences.core.Preferences>
-    private lateinit var appDataStore: AppDataStore
+  private lateinit var profilesViewModel: ProfilesViewModel
+  private lateinit var mockProfileViewModel: MockProfileViewModel
+  private lateinit var tagsViewModel: TagsViewModel
+  private lateinit var mockProfilesRepository: ProfilesRepository
+  private lateinit var mockTagsRepository: TagsRepository
+  private lateinit var mockFirebaseStorage: FirebaseStorage
+  private lateinit var mockMeetingRequestViewModel: MeetingRequestViewModel
+  private lateinit var mockFunction: FirebaseFunctions
+  private lateinit var mockFilterViewModel: FilterViewModel
+  private lateinit var testDataStore: DataStore<androidx.datastore.preferences.core.Preferences>
+  private lateinit var appDataStore: AppDataStore
 
-    private lateinit var mockLocationService: ILocationService
-    private lateinit var mockLocationRepository: LocationRepository
-    private lateinit var mockPermissionManager: IPermissionManager
+  private lateinit var mockLocationService: ILocationService
+  private lateinit var mockLocationRepository: LocationRepository
+  private lateinit var mockPermissionManager: IPermissionManager
 
-    private lateinit var locationViewModel: LocationViewModel
+  private lateinit var locationViewModel: LocationViewModel
+
+  @Before
+  fun setup() {
+    // Set up real DataStore with test scope
+    testDataStore =
+        PreferenceDataStoreFactory.create(
+            scope = testScope,
+            produceFile = { File(tempFolder.newFolder(), "test_preferences.preferences_pb") })
+    appDataStore = AppDataStore(testDataStore)
+
+    // Initialize mocks and view models
+    mockProfileViewModel = MockProfileViewModel()
+    mockProfilesRepository = mock(ProfilesRepository::class.java)
+    mockFirebaseStorage = mock(FirebaseStorage::class.java)
+    mockFunction = mock(FirebaseFunctions::class.java)
+    mockMeetingRequestViewModel =
+        MeetingRequestViewModel(mockProfileViewModel, mockFunction, "1", "John Doe")
+    mockFilterViewModel = FilterViewModel()
+    TagsViewModel(
+        TagsRepository(mock(FirebaseFirestore::class.java), mock(FirebaseAuth::class.java)))
+    profilesViewModel =
+        ProfilesViewModel(
+            mockProfilesRepository,
+            ProfilePicRepositoryStorage(mockFirebaseStorage),
+            FirebaseAuth.getInstance())
+
+    mockLocationService = mock(ILocationService::class.java)
+    mockLocationRepository = mock(LocationRepository::class.java)
+    mockPermissionManager = mock(IPermissionManager::class.java)
+    tagsViewModel =
+        TagsViewModel(
+            TagsRepository(mock(FirebaseFirestore::class.java), mock(FirebaseAuth::class.java)))
+
+    locationViewModel =
+        LocationViewModel(mockLocationService, mockLocationRepository, mockPermissionManager)
+  }
+
+  @Test
+  fun testNavigationLogin() = runTest {
+    composeTestRule.setContent {
+      IcebreakrrNavHost(
+          mockProfileViewModel,
+          tagsViewModel,
+          mockFilterViewModel,
+          mockMeetingRequestViewModel,
+          appDataStore,
+          locationViewModel,
+          Route.AUTH,
+          FirebaseAuth.getInstance())
+    }
+
+    // Assert that the login screen is shown on launch
+    composeTestRule.onNodeWithTag("loginScreen").assertIsDisplayed()
+  }
+
+  @Test
+  fun testBottomNavigationBar() = runTest {
+    composeTestRule.setContent {
+      IcebreakrrNavHost(
+          mockProfileViewModel,
+          tagsViewModel,
+          mockFilterViewModel,
+          mockMeetingRequestViewModel,
+          appDataStore,
+          locationViewModel,
+          Route.AROUND_YOU,
+          FirebaseAuth.getInstance())
+    }
+
+    // Check that the "Around You" screen is displayed after login
+    composeTestRule.onNodeWithTag("aroundYouScreen").assertIsDisplayed()
+    lateinit var mockFirebaseStorage: FirebaseStorage
+    lateinit var mockMeetingRequestViewModel: MeetingRequestViewModel
+    lateinit var mockFunction: FirebaseFunctions
+    lateinit var mockFilterViewModel: FilterViewModel
 
     @Before
     fun setup() {
-        // Set up real DataStore with test scope
-        testDataStore =
-            PreferenceDataStoreFactory.create(
-                scope = testScope,
-                produceFile = { File(tempFolder.newFolder(), "test_preferences.preferences_pb") })
-        appDataStore = AppDataStore(testDataStore)
+      // Initialize mocks and view models
+      mockProfileViewModel = MockProfileViewModel()
+      mockProfilesRepository = mock(ProfilesRepository::class.java)
+      mockTagsRepository = mock(TagsRepository::class.java)
+      mockFirebaseStorage = mock(FirebaseStorage::class.java)
+      mockFunction = mock(FirebaseFunctions::class.java)
+      mockMeetingRequestViewModel =
+          MeetingRequestViewModel(mockProfileViewModel, mockFunction, "1", "John Doe")
+      mockFilterViewModel = FilterViewModel()
 
-        // Initialize mocks and view models
-        mockProfileViewModel = MockProfileViewModel()
-        mockProfilesRepository = mock(ProfilesRepository::class.java)
-        mockTagsRepository = mock(TagsRepository::class.java)
-        mockFirebaseStorage = mock(FirebaseStorage::class.java)
-        mockFunction = mock(FirebaseFunctions::class.java)
-        mockMeetingRequestViewModel =
-            MeetingRequestViewModel(mockProfileViewModel, mockFunction, "1", "John Doe")
-        mockFilterViewModel = FilterViewModel()
-        tagsViewModel = TagsViewModel(mockTagsRepository)
-        profilesViewModel =
-            ProfilesViewModel(
-                mockProfilesRepository,
-                ProfilePicRepositoryStorage(mockFirebaseStorage),
-                FirebaseAuth.getInstance())
+      // Test navigation to the Settings screen
+      composeTestRule.onNodeWithTag("navItem_${R.string.settings}").performClick()
+      composeTestRule.onNodeWithTag("settingsScreen").assertIsDisplayed()
 
-        mockLocationService = mock(ILocationService::class.java)
-        mockLocationRepository = mock(LocationRepository::class.java)
-        mockPermissionManager = mock(IPermissionManager::class.java)
+      // Test navigation to the Notifications screen
+      composeTestRule.onNodeWithTag("navItem_${R.string.notifications}").performClick()
+      composeTestRule.onNodeWithTag("notificationScreen").assertIsDisplayed()
 
-        locationViewModel =
-            LocationViewModel(mockLocationService, mockLocationRepository, mockPermissionManager)
+      // Test navigation to the AroundYou screen
+      composeTestRule.onNodeWithTag("navItem_${R.string.around_you}").performClick()
+      composeTestRule.onNodeWithTag("aroundYouScreen").assertIsDisplayed()
     }
-
-    @Test
-    fun testNavigationLogin() = runTest {
-        composeTestRule.setContent {
-            IcebreakrrNavHost(
-                mockProfileViewModel,
-                tagsViewModel,
-                mockFilterViewModel,
-                mockMeetingRequestViewModel,
-                appDataStore,
-                locationViewModel,
-                Route.AUTH,
-                FirebaseAuth.getInstance()
-            )
-        }
-
-        // Assert that the login screen is shown on launch
-        composeTestRule.onNodeWithTag("loginScreen").assertIsDisplayed()
-    }
-
-    @Test
-    fun testBottomNavigationBar() = runTest {
-        composeTestRule.setContent {
-            IcebreakrrNavHost(
-                mockProfileViewModel,
-                tagsViewModel,
-                mockFilterViewModel,
-                mockMeetingRequestViewModel,
-                appDataStore,
-                locationViewModel,
-                Route.AROUND_YOU,
-                FirebaseAuth.getInstance()
-            )
-        }
-
-        // Check that the "Around You" screen is displayed after login
-        composeTestRule.onNodeWithTag("aroundYouScreen").assertIsDisplayed()
-        lateinit var mockFirebaseStorage: FirebaseStorage
-        lateinit var mockMeetingRequestViewModel: MeetingRequestViewModel
-        lateinit var mockFunction: FirebaseFunctions
-        lateinit var mockFilterViewModel: FilterViewModel
-
-        @Before
-        fun setup() {
-            // Initialize mocks and view models
-            mockProfileViewModel = MockProfileViewModel()
-            mockProfilesRepository = mock(ProfilesRepository::class.java)
-            mockTagsRepository = mock(TagsRepository::class.java)
-            mockFirebaseStorage = mock(FirebaseStorage::class.java)
-            mockFunction = mock(FirebaseFunctions::class.java)
-            mockMeetingRequestViewModel =
-                MeetingRequestViewModel(mockProfileViewModel, mockFunction, "1", "John Doe")
-            mockFilterViewModel = FilterViewModel()
-
-            // Test navigation to the Settings screen
-            composeTestRule.onNodeWithTag("navItem_${R.string.settings}").performClick()
-            composeTestRule.onNodeWithTag("settingsScreen").assertIsDisplayed()
-
-            // Test navigation to the Notifications screen
-            composeTestRule.onNodeWithTag("navItem_${R.string.notifications}").performClick()
-            composeTestRule.onNodeWithTag("notificationScreen").assertIsDisplayed()
-
-            // Test navigation to the AroundYou screen
-            composeTestRule.onNodeWithTag("navItem_${R.string.around_you}").performClick()
-            composeTestRule.onNodeWithTag("aroundYouScreen").assertIsDisplayed()
-        }
-    }
+  }
 }

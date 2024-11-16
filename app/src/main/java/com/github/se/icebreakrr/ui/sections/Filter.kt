@@ -1,6 +1,5 @@
 package com.github.se.icebreakrr.ui.sections
 
-import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.clickable
@@ -119,14 +118,13 @@ fun FilterScreen(
     tagsViewModel: TagsViewModel =
         viewModel(
             factory =
-            TagsViewModel.Companion.Factory(
-                FirebaseAuth.getInstance(), FirebaseFirestore.getInstance())),
+                TagsViewModel.Companion.Factory(
+                    FirebaseAuth.getInstance(), FirebaseFirestore.getInstance())),
     filterViewModel: FilterViewModel = viewModel(factory = FilterViewModel.Factory),
     profilesViewModel: ProfilesViewModel =
         viewModel(
             factory =
-            ProfilesViewModel.Companion.Factory(FirebaseAuth.getInstance(), Firebase.firestore))
-
+                ProfilesViewModel.Companion.Factory(FirebaseAuth.getInstance(), Firebase.firestore))
 ) {
   val context = LocalContext.current
   val currentFocusManager = LocalFocusManager.current

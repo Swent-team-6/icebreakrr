@@ -71,7 +71,10 @@ class SettingsTest {
 
     // Initialize profilesViewModel with proper mocks
     profilesViewModel =
-        ProfilesViewModel(mockProfilesRepository, ProfilePicRepositoryStorage(mockStorage), FirebaseAuth.getInstance())
+        ProfilesViewModel(
+            mockProfilesRepository,
+            ProfilePicRepositoryStorage(mockStorage),
+            FirebaseAuth.getInstance())
 
     // Mock necessary repository Flow returns
     `when`(mockProfilesRepository.isWaiting).thenReturn(MutableStateFlow(false))
@@ -83,7 +86,8 @@ class SettingsTest {
   @Test
   fun testProfileSettingsScreenDisplaysCorrectly() = runTest {
     composeTestRule.setContent {
-      SettingsScreen(profilesViewModel, navigationActionsMock, appDataStore, FirebaseAuth.getInstance())
+      SettingsScreen(
+          profilesViewModel, navigationActionsMock, appDataStore, FirebaseAuth.getInstance())
     }
 
     // Assert that the top bar is displayed
@@ -106,7 +110,8 @@ class SettingsTest {
   @Test
   fun testNavigationActionsOnProfileCardClick() = runTest {
     composeTestRule.setContent {
-      SettingsScreen(profilesViewModel, navigationActionsMock, appDataStore, FirebaseAuth.getInstance())
+      SettingsScreen(
+          profilesViewModel, navigationActionsMock, appDataStore, FirebaseAuth.getInstance())
     }
 
     composeTestRule.onNodeWithTag("profileCard").performClick()
@@ -119,7 +124,8 @@ class SettingsTest {
     appDataStore.saveDiscoverableStatus(false)
 
     composeTestRule.setContent {
-      SettingsScreen(profilesViewModel, navigationActionsMock, appDataStore, FirebaseAuth.getInstance())
+      SettingsScreen(
+          profilesViewModel, navigationActionsMock, appDataStore, FirebaseAuth.getInstance())
     }
 
     // Initial state check

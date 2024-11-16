@@ -95,7 +95,10 @@ open class MockProfileRepository : ProfilesRepository {
 }
 
 open class MockProfileViewModel :
-    ProfilesViewModel(MockProfileRepository(), ProfilePicRepositoryStorage(Firebase.storage), FirebaseAuth.getInstance()) {
+    ProfilesViewModel(
+        MockProfileRepository(),
+        ProfilePicRepositoryStorage(Firebase.storage),
+        FirebaseAuth.getInstance()) {
   private val _profiles = MutableStateFlow<List<Profile>>(emptyList())
   override val profiles: StateFlow<List<Profile>> = _profiles.asStateFlow()
 

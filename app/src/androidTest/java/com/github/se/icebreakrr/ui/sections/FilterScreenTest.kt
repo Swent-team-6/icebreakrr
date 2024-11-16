@@ -49,7 +49,10 @@ class FilterScreenTest {
     navigationActionsMock = mock()
     profilesRepositoryMock = mock()
     profilesViewModelMock =
-        ProfilesViewModel(profilesRepositoryMock, ProfilePicRepositoryStorage(Firebase.storage), FirebaseAuth.getInstance())
+        ProfilesViewModel(
+            profilesRepositoryMock,
+            ProfilePicRepositoryStorage(Firebase.storage),
+            FirebaseAuth.getInstance())
     filterViewModel = FilterViewModel()
   }
 

@@ -3,7 +3,6 @@ package com.github.se.icebreakrr.ui.profile
 import android.annotation.SuppressLint
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -48,10 +47,9 @@ import com.github.se.icebreakrr.ui.navigation.NavigationActions
 import com.github.se.icebreakrr.ui.sections.shared.UnsavedChangesDialog
 import com.github.se.icebreakrr.ui.sections.shared.handleSafeBackNavigation
 import com.github.se.icebreakrr.ui.tags.TagSelector
-import com.google.firebase.auth.ktx.auth
-import com.google.firebase.ktx.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.auth
+import com.google.firebase.auth.ktx.auth
 
 @SuppressLint("UnrememberedMutableState", "CoroutineCreationDuringComposition")
 @OptIn(ExperimentalMaterial3Api::class)

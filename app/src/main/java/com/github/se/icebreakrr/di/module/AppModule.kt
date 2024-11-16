@@ -9,9 +9,7 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
-/**
- * FirebaseAuth object that Hilt will inject into the MainActivity when launching MainActivity
- */
+/** FirebaseAuth object that Hilt will inject into the MainActivity when launching MainActivity */
 @Module
 @InstallIn(SingletonComponent::class) // Install in the application-wide Hilt component
 object FirebaseAuthModule {
@@ -40,10 +38,10 @@ object FirestoreModule {
  */
 @Module
 @InstallIn(SingletonComponent::class)
-object AuthStateListenerModule{
+object AuthStateListenerModule {
   @Provides
   @Singleton
-  fun provideAuthStateListener(): AuthStateListener{
-    return AuthStateListener {  }
+  fun provideAuthStateListener(): AuthStateListener {
+    return AuthStateListener {}
   }
 }

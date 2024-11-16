@@ -68,8 +68,9 @@ class SignInScreenTest {
     navigationActions = NavigationActions(navHostController)
     profileViewModel = mock(ProfilesViewModel::class.java)
     filterViewModel = FilterViewModel()
-    mockTagsRepository = mock(TagsRepository::class.java)
-    tagsViewModel = TagsViewModel(mockTagsRepository)
+    tagsViewModel =
+        TagsViewModel(
+            TagsRepository(mock(FirebaseFirestore::class.java), mock(FirebaseAuth::class.java)))
     functions = mock(FirebaseFunctions::class.java)
     ourUid = "UserId1"
     meetingRequestViewModel =
@@ -84,7 +85,11 @@ class SignInScreenTest {
           meetingRequestViewModel,
           navigationActions,
           filterViewModel = filterViewModel,
-          tagsViewModel = viewModel(factory = TagsViewModel.Companion.Factory(FirebaseAuth.getInstance(), FirebaseFirestore.getInstance())),
+          tagsViewModel =
+              viewModel(
+                  factory =
+                      TagsViewModel.Companion.Factory(
+                          FirebaseAuth.getInstance(), FirebaseFirestore.getInstance())),
           appDataStore = appDataStore)
     }
 

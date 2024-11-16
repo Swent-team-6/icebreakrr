@@ -4,8 +4,6 @@ package com.github.se.endToEnd
 
 import android.app.Activity
 import android.content.Intent
-import android.util.Log
-import android.view.View
 import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotDisplayed
@@ -20,8 +18,6 @@ import androidx.compose.ui.test.performTextInput
 import androidx.core.app.ActivityCompat
 import androidx.test.core.app.ActivityScenario
 import androidx.test.espresso.Espresso.onIdle
-import androidx.test.espresso.Espresso.onView
-import androidx.test.espresso.util.HumanReadables
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.github.se.icebreakrr.MainActivity
@@ -30,7 +26,6 @@ import com.google.firebase.firestore.FirebaseFirestore
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
 import javax.inject.Inject
-import org.hamcrest.Matcher
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test

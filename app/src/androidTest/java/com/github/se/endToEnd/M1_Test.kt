@@ -1,7 +1,6 @@
 package com.github.se.endToEnd
 
 import android.content.Intent
-import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotSelected
 import androidx.compose.ui.test.assertIsSelected

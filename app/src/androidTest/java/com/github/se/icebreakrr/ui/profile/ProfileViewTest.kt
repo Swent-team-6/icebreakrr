@@ -19,6 +19,7 @@ import com.github.se.icebreakrr.model.tags.TagsViewModel
 import com.github.se.icebreakrr.ui.navigation.NavigationActions
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.storage
 import org.junit.Before
 import org.junit.Rule
@@ -44,12 +45,17 @@ class ProfileViewTest {
   fun setUp() {
     navigationActions = Mockito.mock(NavigationActions::class.java)
     mockProfilesRepository = Mockito.mock(ProfilesRepository::class.java)
-    mockTagsRepository = Mockito.mock(TagsRepository::class.java)
-
-    tagsViewModel = TagsViewModel(mockTagsRepository)
+    tagsViewModel =
+        TagsViewModel(
+            TagsRepository(
+                Mockito.mock(FirebaseFirestore::class.java),
+                Mockito.mock(FirebaseAuth::class.java)))
 
     profilesViewModel =
-        ProfilesViewModel(mockProfilesRepository, ProfilePicRepositoryStorage(Firebase.storage), FirebaseAuth.getInstance())
+        ProfilesViewModel(
+            mockProfilesRepository,
+            ProfilePicRepositoryStorage(Firebase.storage),
+            FirebaseAuth.getInstance())
     fakeProfilesViewModel = MockProfileViewModel()
   }
 

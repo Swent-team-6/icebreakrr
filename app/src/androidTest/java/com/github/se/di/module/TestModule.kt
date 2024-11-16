@@ -10,7 +10,6 @@ import com.google.android.gms.tasks.OnCompleteListener
 import com.google.android.gms.tasks.OnSuccessListener
 import com.google.android.gms.tasks.Task
 import com.google.firebase.Timestamp
-import com.google.firebase.auth.AuthResult
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuth.AuthStateListener
 import com.google.firebase.auth.FirebaseUser
@@ -34,12 +33,8 @@ import org.mockito.Mockito.mock
 import org.mockito.Mockito.`when`
 import org.mockito.invocation.InvocationOnMock
 import org.mockito.kotlin.any
-import org.mockito.kotlin.anyArray
-import org.w3c.dom.Document
 
-/**
- * FirebaseAuth object that Hilt will inject into the MainActivity when testing
- */
+/** FirebaseAuth object that Hilt will inject into the MainActivity when testing */
 @Module
 @TestInstallIn(components = [SingletonComponent::class], replaces = [FirebaseAuthModule::class])
 object MockFirebaseAuthModule {
@@ -64,38 +59,38 @@ object MockFirebaseAuthModule {
     `when`(mockAuth.currentUser).thenReturn(mockUser)
     doNothing().`when`(mockAuth).addAuthStateListener(mockListener)
     doNothing().`when`(mockAuth).removeAuthStateListener(mockListener)
-    doAnswer{invocation ->
-        val listener = invocation.arguments[0] as AuthStateListener
-        listener.onAuthStateChanged(mockAuth)
-    }.`when`(mockAuth).addAuthStateListener(any())
-
+    doAnswer { invocation ->
+          val listener = invocation.arguments[0] as AuthStateListener
+          listener.onAuthStateChanged(mockAuth)
+        }
+        .`when`(mockAuth)
+        .addAuthStateListener(any())
 
     // Mock signInWithEmailAndPassword method
-    //val mockTaskSignIn = mock(Task::class.java) as Task<AuthResult>
-    //`when`(mockAuth.signInWithEmailAndPassword(anyString(), anyString())).thenReturn(mockTaskSignIn)
+    // val mockTaskSignIn = mock(Task::class.java) as Task<AuthResult>
+    // `when`(mockAuth.signInWithEmailAndPassword(anyString(),
+    // anyString())).thenReturn(mockTaskSignIn)
 
     // Mock signOut method
-    //doNothing().`when`(mockAuth).signOut()
+    // doNothing().`when`(mockAuth).signOut()
 
     // Mock sendPasswordResetEmail method
-    //val mockTaskResetPassword = mock(Task::class.java) as Task<Void>
-    //`when`(mockAuth.sendPasswordResetEmail(anyString())).thenReturn(mockTaskResetPassword)
+    // val mockTaskResetPassword = mock(Task::class.java) as Task<Void>
+    // `when`(mockAuth.sendPasswordResetEmail(anyString())).thenReturn(mockTaskResetPassword)
 
     // Mock createUserWithEmailAndPassword method
-    //val mockTaskCreateUser = mock(Task::class.java) as Task<AuthResult>
-    //`when`(mockAuth.createUserWithEmailAndPassword(anyString(), anyString()))
+    // val mockTaskCreateUser = mock(Task::class.java) as Task<AuthResult>
+    // `when`(mockAuth.createUserWithEmailAndPassword(anyString(), anyString()))
     //    .thenReturn(mockTaskCreateUser)
 
     // Mock the signInAnonymously method
-    //val mockTaskSignInAnonymously = mock(Task::class.java) as Task<AuthResult>
-    //`when`(mockAuth.signInAnonymously()).thenReturn(mockTaskSignInAnonymously)
+    // val mockTaskSignInAnonymously = mock(Task::class.java) as Task<AuthResult>
+    // `when`(mockAuth.signInAnonymously()).thenReturn(mockTaskSignInAnonymously)
     return mockAuth
   }
 }
 
-/**
- * FirebaseFirestore object that Hilt will inject into the MainActivity when testing
- */
+/** FirebaseFirestore object that Hilt will inject into the MainActivity when testing */
 @Module
 @TestInstallIn(components = [SingletonComponent::class], replaces = [FirestoreModule::class])
 object MockFirebaseFirestoreModule {
@@ -108,8 +103,8 @@ object MockFirebaseFirestoreModule {
 
   private fun provideMockFirebasefirestore(): FirebaseFirestore {
     val globalMockGeopoint = mock(GeoPoint::class.java)
-      `when`(globalMockGeopoint.latitude).thenReturn(46.51827)
-      `when`(globalMockGeopoint.longitude).thenReturn(6.619265)
+    `when`(globalMockGeopoint.latitude).thenReturn(46.51827)
+    `when`(globalMockGeopoint.longitude).thenReturn(6.619265)
     // mock firebasefirestore for porfileRepositoryFirestore
     var myProfile =
         Profile(
@@ -165,7 +160,7 @@ object MockFirebaseFirestoreModule {
             mock(Task::class.java) as Task<DocumentSnapshot>,
             mock(Task::class.java) as Task<DocumentSnapshot>)
     val profiles = Profile.Companion.getMockedProfiles()
-      //set the profilesDocumentSnapshot to return the mock profiles informations :
+    // set the profilesDocumentSnapshot to return the mock profiles informations :
     for (i in 0 until 12) {
       `when`(profilesDocumentSnapshots[i].id).thenReturn(profiles[i].uid)
       `when`(profilesDocumentSnapshots[i].getString("name")).thenReturn(profiles[i].name)
@@ -187,91 +182,92 @@ object MockFirebaseFirestoreModule {
     val mockFirestore = mock(FirebaseFirestore::class.java)
     val mockProfilesCollectionReference = mock(CollectionReference::class.java)
 
-    //actions in getProfilesByRadius :
+    // actions in getProfilesByRadius :
     val mockTaskQuerySnapshotProfiles = mock(Task::class.java) as Task<QuerySnapshot>
     val mockQuerySnapshotProfiles = mock(QuerySnapshot::class.java)
     val mockProfilesQuery = mock(Query::class.java)
     `when`(mockFirestore.collection("profiles")).thenReturn(mockProfilesCollectionReference)
-    `when`(mockProfilesCollectionReference.whereGreaterThanOrEqualTo(anyString(), anyString())).thenReturn(mockProfilesQuery)
-    `when`(mockProfilesQuery.whereLessThanOrEqualTo(anyString(), anyString())).thenReturn(mockProfilesQuery)
+    `when`(mockProfilesCollectionReference.whereGreaterThanOrEqualTo(anyString(), anyString()))
+        .thenReturn(mockProfilesQuery)
+    `when`(mockProfilesQuery.whereLessThanOrEqualTo(anyString(), anyString()))
+        .thenReturn(mockProfilesQuery)
     `when`(mockProfilesQuery.get()).thenReturn(mockTaskQuerySnapshotProfiles)
-      doAnswer{invocation ->
+    doAnswer { invocation ->
           val listener = invocation.arguments[0] as OnSuccessListener<QuerySnapshot>
           listener.onSuccess(mockQuerySnapshotProfiles)
           mockTaskQuerySnapshotProfiles
-      }.`when`(mockTaskQuerySnapshotProfiles).addOnSuccessListener(any())
-      `when`(mockQuerySnapshotProfiles.documents).thenReturn(profilesDocumentSnapshots)
-      `when`(mockTaskQuerySnapshotProfiles.isSuccessful).thenReturn(true)
+        }
+        .`when`(mockTaskQuerySnapshotProfiles)
+        .addOnSuccessListener(any())
+    `when`(mockQuerySnapshotProfiles.documents).thenReturn(profilesDocumentSnapshots)
+    `when`(mockTaskQuerySnapshotProfiles.isSuccessful).thenReturn(true)
 
-      //actions when getProfileByUid when uid is our uid :
-      val mockMyTaskDocumentSnapshot = mock(Task::class.java) as Task<DocumentSnapshot>
-      val mockMyDocumentSnapshot = mock(DocumentSnapshot::class.java)
-      val mockMyDocumentReference = mock(DocumentReference::class.java)
-      `when`(mockProfilesCollectionReference.document("12345")).thenReturn(mockMyDocumentReference)
-      `when`(mockMyDocumentReference.get(any())).thenReturn(mockMyTaskDocumentSnapshot)
-      doAnswer{invocation ->
+    // actions when getProfileByUid when uid is our uid :
+    val mockMyTaskDocumentSnapshot = mock(Task::class.java) as Task<DocumentSnapshot>
+    val mockMyDocumentSnapshot = mock(DocumentSnapshot::class.java)
+    val mockMyDocumentReference = mock(DocumentReference::class.java)
+    `when`(mockProfilesCollectionReference.document("12345")).thenReturn(mockMyDocumentReference)
+    `when`(mockMyDocumentReference.get(any())).thenReturn(mockMyTaskDocumentSnapshot)
+    doAnswer { invocation ->
           val listener = invocation.arguments[0] as OnCompleteListener<DocumentSnapshot>
           listener.onComplete(mockMyTaskDocumentSnapshot)
           mockMyTaskDocumentSnapshot
-      }.`when`(mockMyTaskDocumentSnapshot).addOnCompleteListener(any())
-      //populates my profile's information
-      `when`(mockMyTaskDocumentSnapshot.isSuccessful).thenReturn(true)
-      `when`(mockMyTaskDocumentSnapshot.result).thenReturn(mockMyDocumentSnapshot)
-      `when`(mockMyDocumentSnapshot.id).thenReturn(myProfile.uid)
-      `when`(mockMyDocumentSnapshot.getString("name")).thenReturn(myProfile.name)
-      `when`(mockMyDocumentSnapshot.getString("gender"))
-          .thenReturn(myProfile.gender.toString())
-      `when`(mockMyDocumentSnapshot.getTimestamp("birthDate"))
-          .thenReturn(myProfile.birthDate)
-      `when`(mockMyDocumentSnapshot.getString("catchPhrase"))
-          .thenReturn(myProfile.catchPhrase)
-      `when`(mockMyDocumentSnapshot.getString("description"))
-          .thenReturn(myProfile.description)
-      `when`(mockMyDocumentSnapshot.get("tags")).thenReturn(myProfile.tags)
-      `when`(mockMyDocumentSnapshot.getString("profilePictureUrl"))
-          .thenReturn(myProfile.profilePictureUrl)
-      `when`(mockMyDocumentSnapshot.getString("fcmToken")).thenReturn(myProfile.fcmToken)
-      `when`(mockMyDocumentSnapshot.getGeoPoint("location")).thenReturn(globalMockGeopoint)
+        }
+        .`when`(mockMyTaskDocumentSnapshot)
+        .addOnCompleteListener(any())
+    // populates my profile's information
+    `when`(mockMyTaskDocumentSnapshot.isSuccessful).thenReturn(true)
+    `when`(mockMyTaskDocumentSnapshot.result).thenReturn(mockMyDocumentSnapshot)
+    `when`(mockMyDocumentSnapshot.id).thenReturn(myProfile.uid)
+    `when`(mockMyDocumentSnapshot.getString("name")).thenReturn(myProfile.name)
+    `when`(mockMyDocumentSnapshot.getString("gender")).thenReturn(myProfile.gender.toString())
+    `when`(mockMyDocumentSnapshot.getTimestamp("birthDate")).thenReturn(myProfile.birthDate)
+    `when`(mockMyDocumentSnapshot.getString("catchPhrase")).thenReturn(myProfile.catchPhrase)
+    `when`(mockMyDocumentSnapshot.getString("description")).thenReturn(myProfile.description)
+    `when`(mockMyDocumentSnapshot.get("tags")).thenReturn(myProfile.tags)
+    `when`(mockMyDocumentSnapshot.getString("profilePictureUrl"))
+        .thenReturn(myProfile.profilePictureUrl)
+    `when`(mockMyDocumentSnapshot.getString("fcmToken")).thenReturn(myProfile.fcmToken)
+    `when`(mockMyDocumentSnapshot.getGeoPoint("location")).thenReturn(globalMockGeopoint)
 
-      //actions in updateProfile when uid is our uid :
-      val mockMyTask = mock(Task::class.java) as Task<Void>
-      doAnswer { invocation ->
+    // actions in updateProfile when uid is our uid :
+    val mockMyTask = mock(Task::class.java) as Task<Void>
+    doAnswer { invocation ->
           val capturedProfile = invocation.arguments[0] as Profile
           myProfile = capturedProfile
-          //update behavior of mock when we get profile after changing it :
+          // update behavior of mock when we get profile after changing it :
           `when`(mockMyDocumentSnapshot.id).thenReturn(myProfile.uid)
           `when`(mockMyDocumentSnapshot.getString("name")).thenReturn(myProfile.name)
-          `when`(mockMyDocumentSnapshot.getString("gender"))
-              .thenReturn(myProfile.gender.toString())
-          `when`(mockMyDocumentSnapshot.getTimestamp("birthDate"))
-              .thenReturn(myProfile.birthDate)
-          `when`(mockMyDocumentSnapshot.getString("catchPhrase"))
-              .thenReturn(myProfile.catchPhrase)
-          `when`(mockMyDocumentSnapshot.getString("description"))
-              .thenReturn(myProfile.description)
+          `when`(mockMyDocumentSnapshot.getString("gender")).thenReturn(myProfile.gender.toString())
+          `when`(mockMyDocumentSnapshot.getTimestamp("birthDate")).thenReturn(myProfile.birthDate)
+          `when`(mockMyDocumentSnapshot.getString("catchPhrase")).thenReturn(myProfile.catchPhrase)
+          `when`(mockMyDocumentSnapshot.getString("description")).thenReturn(myProfile.description)
           `when`(mockMyDocumentSnapshot.get("tags")).thenReturn(myProfile.tags)
           `when`(mockMyDocumentSnapshot.getString("profilePictureUrl"))
               .thenReturn(myProfile.profilePictureUrl)
           `when`(mockMyDocumentSnapshot.getString("fcmToken")).thenReturn(myProfile.fcmToken)
           `when`(mockMyDocumentSnapshot.getGeoPoint("location")).thenReturn(globalMockGeopoint)
           mockMyTask
-      }.`when`(mockMyDocumentReference).set(any())
-      `when`(mockMyTask.isSuccessful).thenReturn(true)
+        }
+        .`when`(mockMyDocumentReference)
+        .set(any())
+    `when`(mockMyTask.isSuccessful).thenReturn(true)
 
-      //actions when get profile by uid of around you :
-      for (i in 0 until 12){
-          `when`(mockProfilesCollectionReference.document(i.toString())).thenReturn(profilesDocumentReference[i])
-          `when`(profilesDocumentReference[i].get(any())).thenReturn(profilesTaskDocumentSnapshot[i])
-          doAnswer{invocation ->
-              val listener = invocation.arguments[0] as OnCompleteListener<DocumentSnapshot>
-              listener.onComplete(profilesTaskDocumentSnapshot[i])
-              profilesTaskDocumentSnapshot[i]
-          }.`when`(profilesTaskDocumentSnapshot[i]).addOnCompleteListener(any())
-          `when`(profilesTaskDocumentSnapshot[i].isSuccessful).thenReturn(true)
-          `when`(profilesTaskDocumentSnapshot[i].result).thenReturn(profilesDocumentSnapshots[i])
-
-      }
-
+    // actions when get profile by uid of around you :
+    for (i in 0 until 12) {
+      `when`(mockProfilesCollectionReference.document(i.toString()))
+          .thenReturn(profilesDocumentReference[i])
+      `when`(profilesDocumentReference[i].get(any())).thenReturn(profilesTaskDocumentSnapshot[i])
+      doAnswer { invocation ->
+            val listener = invocation.arguments[0] as OnCompleteListener<DocumentSnapshot>
+            listener.onComplete(profilesTaskDocumentSnapshot[i])
+            profilesTaskDocumentSnapshot[i]
+          }
+          .`when`(profilesTaskDocumentSnapshot[i])
+          .addOnCompleteListener(any())
+      `when`(profilesTaskDocumentSnapshot[i].isSuccessful).thenReturn(true)
+      `when`(profilesTaskDocumentSnapshot[i].result).thenReturn(profilesDocumentSnapshots[i])
+    }
 
     // mock firebasefirestore for TagsRepository :
     val mockCollectionReferenceTags = mock(CollectionReference::class.java)
@@ -324,12 +320,16 @@ object MockFirebaseFirestoreModule {
     `when`(mockCollectionReferenceTags.get()).thenReturn(mockTaskQuerySnapshotTags)
     `when`(mockTaskQuerySnapshotTags.isSuccessful).thenReturn(true)
     `when`(mockQuerySnapshotTags.documents).thenReturn(allTags)
-  `when`(mockTaskQuerySnapshotTags.addOnSuccessListener(ArgumentMatchers.any())).thenAnswer { invocation: InvocationOnMock ->
+    `when`(mockTaskQuerySnapshotTags.addOnSuccessListener(ArgumentMatchers.any())).thenAnswer {
+        invocation: InvocationOnMock ->
       val listener = invocation.arguments[0] as OnSuccessListener<QuerySnapshot>
       listener.onSuccess(mockQuerySnapshotTags)
       mockTaskQuerySnapshotTags
-  }
-    `when`(mockTaskQuerySnapshotTags.addOnFailureListener(ArgumentMatchers.any())).thenAnswer { invocation: InvocationOnMock -> mockTaskQuerySnapshotTags }
+    }
+    `when`(mockTaskQuerySnapshotTags.addOnFailureListener(ArgumentMatchers.any())).thenAnswer {
+        invocation: InvocationOnMock ->
+      mockTaskQuerySnapshotTags
+    }
 
     var i = 0
     for (mock in allTags) {
@@ -344,17 +344,15 @@ object MockFirebaseFirestoreModule {
   }
 }
 
-/**
- * AuthStateListener object that Hilt will inject into the MainActivity when testing
- */
+/** AuthStateListener object that Hilt will inject into the MainActivity when testing */
 @Module
-@TestInstallIn(components = [SingletonComponent::class], replaces = [AuthStateListenerModule::class])
+@TestInstallIn(
+    components = [SingletonComponent::class], replaces = [AuthStateListenerModule::class])
 object MockAuthStateListenerModule {
 
-    @Provides
-    @Singleton
-    fun provideAuthStateListener(): AuthStateListener {
-        return mock(AuthStateListener::class.java)
-    }
+  @Provides
+  @Singleton
+  fun provideAuthStateListener(): AuthStateListener {
+    return mock(AuthStateListener::class.java)
+  }
 }
-

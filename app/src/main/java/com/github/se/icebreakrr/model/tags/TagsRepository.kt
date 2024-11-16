@@ -7,7 +7,10 @@ import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.QuerySnapshot
 
-open class TagsRepository(private val db: FirebaseFirestore, private val auth: FirebaseAuth) {
+open class TagsRepository(
+    private val db: FirebaseFirestore,
+    private val auth: FirebaseAuth = FirebaseAuth.getInstance()
+) {
   private val collectionPath = "Tags"
 
   fun init(onSuccess: () -> Unit) {

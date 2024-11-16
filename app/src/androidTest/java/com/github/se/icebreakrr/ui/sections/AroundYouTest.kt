@@ -58,7 +58,8 @@ class AroundYouScreenTest {
     navigationActions = mock(NavigationActions::class.java)
     mockProfilesRepository = mock(ProfilesRepository::class.java)
     mockPPRepository = mock(ProfilePicRepository::class.java)
-    profilesViewModel = ProfilesViewModel(mockProfilesRepository, mockPPRepository, FirebaseAuth.getInstance())
+    profilesViewModel =
+        ProfilesViewModel(mockProfilesRepository, mockPPRepository, FirebaseAuth.getInstance())
 
     mockLocationService = mock(ILocationService::class.java)
     mockLocationRepository = mock(LocationRepository::class.java)
@@ -88,8 +89,8 @@ class AroundYouScreenTest {
           profilesViewModel,
           viewModel(
               factory =
-              TagsViewModel.Companion.Factory(
-                  FirebaseAuth.getInstance(), FirebaseFirestore.getInstance())),
+                  TagsViewModel.Companion.Factory(
+                      FirebaseAuth.getInstance(), FirebaseFirestore.getInstance())),
           viewModel(factory = FilterViewModel.Factory),
           locationViewModel,
           true)
