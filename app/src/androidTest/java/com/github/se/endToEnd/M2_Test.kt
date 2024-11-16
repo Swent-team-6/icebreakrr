@@ -43,6 +43,7 @@ class M2Test {
       Intent(InstrumentationRegistry.getInstrumentation().targetContext, MainActivity::class.java)
   @Inject lateinit var authInjected: FirebaseAuth
   @Inject lateinit var firestoreInjected: FirebaseFirestore
+  @Inject lateinit var authStateListener: FirebaseAuth.AuthStateListener
 
   @get:Rule var hiltRule = HiltAndroidRule(this)
 
@@ -154,15 +155,12 @@ class M2Test {
       composeTestRule.onNodeWithText("Bob Marley").assertIsDisplayed()
       composeTestRule.onNodeWithText("Indiana Jones").assertIsDisplayed()
       // go to settings :
-      composeTestRule.onNodeWithTag("navItem_2131755372").performClick()
+      composeTestRule.onNodeWithText("Settings").performClick()
       // check if everything is displayed :
       composeTestRule.onNodeWithTag("profileCard").assertIsDisplayed()
       composeTestRule.onNodeWithTag("settingsScreen").assertIsDisplayed()
-      composeTestRule.onNodeWithTag("logOutButton").assertIsDisplayed()
-      composeTestRule.onNodeWithTag("Toggle Location").assertIsDisplayed()
-      composeTestRule.onNodeWithTag("Option 1").assertIsDisplayed()
-      composeTestRule.onNodeWithTag("switchToggle Location").assertIsDisplayed()
-      composeTestRule.onNodeWithTag("switchOption 1").assertIsDisplayed()
+      composeTestRule.onNodeWithTag("logOutButton").assertIsDisplayed().assertHasClickAction()
+      composeTestRule.onNodeWithTag("Toggle Discoverability").assertIsDisplayed()
       // click on your profile :
       composeTestRule.onNodeWithTag("profileCard").performClick()
       // test if everything is displayed
@@ -237,12 +235,7 @@ class M2Test {
       composeTestRule.onNodeWithTag("notificationScroll").assertIsDisplayed()
       composeTestRule.onNodeWithTag("notificationFirstText").assertIsDisplayed()
       composeTestRule.onNodeWithTag("notificationSecondText").assertIsDisplayed()
-    }
-  }
-
-  fun logViewHierarchy(viewMatcher: Matcher<View>) {
-    onView(viewMatcher).check { view, _ ->
-      Log.d("ViewHierarchyBite", HumanReadables.describe(view))
+      scenario.close()
     }
   }
 }

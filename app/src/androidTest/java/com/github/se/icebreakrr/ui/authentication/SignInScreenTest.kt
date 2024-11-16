@@ -18,6 +18,8 @@ import com.github.se.icebreakrr.model.profile.ProfilesViewModel
 import com.github.se.icebreakrr.model.tags.TagsRepository
 import com.github.se.icebreakrr.model.tags.TagsViewModel
 import com.github.se.icebreakrr.ui.navigation.NavigationActions
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.functions.FirebaseFunctions
 import java.io.File
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -82,7 +84,7 @@ class SignInScreenTest {
           meetingRequestViewModel,
           navigationActions,
           filterViewModel = filterViewModel,
-          tagsViewModel = viewModel(factory = TagsViewModel.Factory),
+          tagsViewModel = viewModel(factory = TagsViewModel.Companion.Factory(FirebaseAuth.getInstance(), FirebaseFirestore.getInstance())),
           appDataStore = appDataStore)
     }
 

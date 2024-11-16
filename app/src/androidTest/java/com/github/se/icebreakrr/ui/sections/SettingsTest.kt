@@ -16,6 +16,7 @@ import com.github.se.icebreakrr.model.profile.ProfilesViewModel
 import com.github.se.icebreakrr.ui.navigation.NavigationActions
 import com.github.se.icebreakrr.ui.navigation.Route
 import com.github.se.icebreakrr.ui.navigation.Screen
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
 import java.io.File
@@ -70,7 +71,7 @@ class SettingsTest {
 
     // Initialize profilesViewModel with proper mocks
     profilesViewModel =
-        ProfilesViewModel(mockProfilesRepository, ProfilePicRepositoryStorage(mockStorage))
+        ProfilesViewModel(mockProfilesRepository, ProfilePicRepositoryStorage(mockStorage), FirebaseAuth.getInstance())
 
     // Mock necessary repository Flow returns
     `when`(mockProfilesRepository.isWaiting).thenReturn(MutableStateFlow(false))
@@ -82,7 +83,7 @@ class SettingsTest {
   @Test
   fun testProfileSettingsScreenDisplaysCorrectly() = runTest {
     composeTestRule.setContent {
-      SettingsScreen(profilesViewModel, navigationActionsMock, appDataStore)
+      SettingsScreen(profilesViewModel, navigationActionsMock, appDataStore, FirebaseAuth.getInstance())
     }
 
     // Assert that the top bar is displayed
@@ -105,7 +106,7 @@ class SettingsTest {
   @Test
   fun testNavigationActionsOnProfileCardClick() = runTest {
     composeTestRule.setContent {
-      SettingsScreen(profilesViewModel, navigationActionsMock, appDataStore)
+      SettingsScreen(profilesViewModel, navigationActionsMock, appDataStore, FirebaseAuth.getInstance())
     }
 
     composeTestRule.onNodeWithTag("profileCard").performClick()
@@ -118,7 +119,7 @@ class SettingsTest {
     appDataStore.saveDiscoverableStatus(false)
 
     composeTestRule.setContent {
-      SettingsScreen(profilesViewModel, navigationActionsMock, appDataStore)
+      SettingsScreen(profilesViewModel, navigationActionsMock, appDataStore, FirebaseAuth.getInstance())
     }
 
     // Initial state check

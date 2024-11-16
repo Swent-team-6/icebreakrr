@@ -1,6 +1,7 @@
 [versions]
 #Google
 activityCompose = "1.7.0"
+androidxJunit = "1.1.5"
 core = "1.6.1"
 coreTesting = "2.2.0"
 datastorePreferences = "1.1.1"
@@ -74,6 +75,7 @@ androidx-activity-compose-v170 = { module = "androidx.activity:activity-compose"
 androidx-core = { module = "androidx.test:core", version.ref = "core" }
 androidx-core-testing = { module = "androidx.arch.core:core-testing", version.ref = "coreTesting" }
 androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastorePreferences" }
+androidx-junit-v115 = { module = "androidx.test.ext:junit", version.ref = "androidxJunit" }
 androidx-lifecycle-viewmodel-ktx = { module = "androidx.lifecycle:lifecycle-viewmodel-ktx", version.ref = "lifecycleViewmodelKtx" }
 androidx-datastore-preferences-core = { module = "androidx.datastore:datastore-preferences-core", version.ref = "datastorePreferences" }
 firebase-messaging-ktx = { module = "com.google.firebase:firebase-messaging-ktx" }

@@ -50,6 +50,7 @@ import com.google.android.gms.location.LocationServices
 import com.google.firebase.Firebase
 import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseAuth.AuthStateListener
 import com.google.firebase.firestore.firestore
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.firestore
@@ -59,19 +60,20 @@ import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
-  @Inject private lateinit var auth: FirebaseAuth
-  @Inject private lateinit var firestore: FirebaseFirestore
+  @Inject lateinit var auth: FirebaseAuth
+  @Inject lateinit var firestore: FirebaseFirestore
+  @Inject lateinit var authStateListener: AuthStateListener
   private lateinit var functions: FirebaseFunctions
   private lateinit var locationViewModel: LocationViewModel
   private lateinit var locationService: LocationService
   private lateinit var locationRepositoryFirestore: LocationRepositoryFirestore
   private lateinit var permissionManager: PermissionManager
-  private lateinit var authStateListener: FirebaseAuth.AuthStateListener
   private lateinit var fusedLocationClient: FusedLocationProviderClient
   private lateinit var appDataStore: AppDataStore
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
+      Log.d("TESTEST", "${auth.currentUser?.uid}")
 
     // Retrieve the testing flag from the Intent
     val isTesting = intent?.getBooleanExtra("IS_TESTING", false) ?: false
@@ -91,7 +93,7 @@ class MainActivity : ComponentActivity() {
     // Create required dependencies for the LocationViewModel
     fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
     locationService = LocationService(fusedLocationClient)
-    locationRepositoryFirestore = LocationRepositoryFirestore(Firebase.firestore, auth)
+    locationRepositoryFirestore = LocationRepositoryFirestore(firestore, auth)
 
     // Initialize the LocationViewModel with dependencies
     locationViewModel =
@@ -102,14 +104,16 @@ class MainActivity : ComponentActivity() {
             LocationViewModel::class.java]
 
     // Monitor login/logout events and perform the necessary actions.
-    authStateListener =
-        FirebaseAuth.AuthStateListener { firebaseAuth ->
-          if (firebaseAuth.currentUser != null) {
-            locationViewModel.tryToStartLocationUpdates()
-          } else {
-            locationViewModel.stopLocationUpdates()
-          }
-        }
+    if (!isTesting){
+        authStateListener =
+            FirebaseAuth.AuthStateListener { firebaseAuth ->
+                if (firebaseAuth.currentUser != null) {
+                    locationViewModel.tryToStartLocationUpdates()
+                } else {
+                    locationViewModel.stopLocationUpdates()
+                }
+            }
+    }
 
     // Initialize DataStore
     appDataStore = AppDataStore(context = this)

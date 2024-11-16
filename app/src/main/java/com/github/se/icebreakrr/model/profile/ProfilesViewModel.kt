@@ -12,7 +12,6 @@ import com.github.se.icebreakrr.ui.sections.DEFAULT_LATITUDE
 import com.github.se.icebreakrr.ui.sections.DEFAULT_LONGITUDE
 import com.github.se.icebreakrr.ui.sections.DEFAULT_RADIUS
 import com.google.firebase.Firebase
-import com.google.firebase.auth.auth
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.GeoPoint
@@ -26,7 +25,8 @@ import kotlinx.coroutines.flow.update
 
 open class ProfilesViewModel(
     private val repository: ProfilesRepository,
-    private val ppRepository: ProfilePicRepository
+    private val ppRepository: ProfilePicRepository,
+    private val auth: FirebaseAuth
 ) : ViewModel() {
 
   private val _profiles = MutableStateFlow<List<Profile>>(emptyList())
@@ -73,7 +73,8 @@ open class ProfilesViewModel(
         if (modelClass.isAssignableFrom(ProfilesViewModel::class.java)) {
           return ProfilesViewModel(
               ProfilesRepositoryFirestore(firestore, auth),
-              ProfilePicRepositoryStorage(Firebase.storage))
+              ProfilePicRepositoryStorage(Firebase.storage),
+              auth)
               as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
@@ -315,7 +316,7 @@ open class ProfilesViewModel(
   fun getSelfProfile() {
     _loadingSelf.value = true
     repository.getProfileByUid(
-        Firebase.auth.uid ?: "null",
+        auth.currentUser?.uid ?: "null",
         onSuccess = { profile ->
           _selfProfile.value = profile
           _loadingSelf.value = false

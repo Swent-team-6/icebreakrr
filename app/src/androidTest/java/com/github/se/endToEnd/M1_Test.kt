@@ -1,6 +1,7 @@
 package com.github.se.endToEnd
 
 import android.content.Intent
+import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotSelected
 import androidx.compose.ui.test.assertIsSelected
@@ -37,6 +38,7 @@ class M1_Test {
 
   @Inject lateinit var authInjected: FirebaseAuth
   @Inject lateinit var firestoreInjected: FirebaseFirestore
+  @Inject lateinit var authStateListener: FirebaseAuth.AuthStateListener
 
   @get:Rule var hiltRule = HiltAndroidRule(this)
 
@@ -112,13 +114,11 @@ class M1_Test {
       // Screen 7 : Setting Screen
       composeTestRule.onNodeWithTag("topBar").assertIsDisplayed()
       composeTestRule.onNodeWithTag("profileCard").assertIsDisplayed()
-      composeTestRule.onNodeWithTag("Toggle Location").assertIsDisplayed()
-      composeTestRule.onNodeWithTag("Toggle Location").performClick()
-      composeTestRule.onNodeWithTag("Option 1").assertIsDisplayed()
-      composeTestRule.onNodeWithTag("Option 1").performClick()
+      composeTestRule.onNodeWithTag("Toggle Discoverability").assertIsDisplayed()
       composeTestRule.onNodeWithTag("logOutButton").assertIsDisplayed()
       composeTestRule.onNodeWithTag("logOutButton").performClick()
-      composeTestRule.onNodeWithTag("bottomNavigationMenu").assertIsDisplayed()
+
+      scenario.close()
     }
   }
 }

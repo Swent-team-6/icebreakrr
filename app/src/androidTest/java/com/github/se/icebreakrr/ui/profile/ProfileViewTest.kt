@@ -18,6 +18,7 @@ import com.github.se.icebreakrr.model.tags.TagsRepository
 import com.github.se.icebreakrr.model.tags.TagsViewModel
 import com.github.se.icebreakrr.ui.navigation.NavigationActions
 import com.google.firebase.Firebase
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.storage.storage
 import org.junit.Before
 import org.junit.Rule
@@ -48,7 +49,7 @@ class ProfileViewTest {
     tagsViewModel = TagsViewModel(mockTagsRepository)
 
     profilesViewModel =
-        ProfilesViewModel(mockProfilesRepository, ProfilePicRepositoryStorage(Firebase.storage))
+        ProfilesViewModel(mockProfilesRepository, ProfilePicRepositoryStorage(Firebase.storage), FirebaseAuth.getInstance())
     fakeProfilesViewModel = MockProfileViewModel()
   }
 

@@ -58,7 +58,7 @@ class AroundYouScreenTest {
     navigationActions = mock(NavigationActions::class.java)
     mockProfilesRepository = mock(ProfilesRepository::class.java)
     mockPPRepository = mock(ProfilePicRepository::class.java)
-    profilesViewModel = ProfilesViewModel(mockProfilesRepository, mockPPRepository)
+    profilesViewModel = ProfilesViewModel(mockProfilesRepository, mockPPRepository, FirebaseAuth.getInstance())
 
     mockLocationService = mock(ILocationService::class.java)
     mockLocationRepository = mock(LocationRepository::class.java)
