@@ -54,8 +54,6 @@ class M2Test {
   @Test
   fun endToEnd2() {
     ActivityScenario.launch<MainActivity>(intent).use { scenario ->
-      onIdle()
-
       // check if everything is displayed in the around you
       composeTestRule.onNodeWithTag("aroundYouScreen").assertIsDisplayed()
       composeTestRule.onNodeWithTag("topBar").assertIsDisplayed()
