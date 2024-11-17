@@ -85,10 +85,11 @@ class SignInScreenTest {
           meetingRequestViewModel,
           navigationActions,
           filterViewModel = filterViewModel,
-          tagsViewModel = viewModel(
-              factory =
-              TagsViewModel.Companion.Factory(
-                  FirebaseAuth.getInstance(), FirebaseFirestore.getInstance())),
+          tagsViewModel =
+              viewModel(
+                  factory =
+                      TagsViewModel.Companion.Factory(
+                          FirebaseAuth.getInstance(), FirebaseFirestore.getInstance())),
           appDataStore = appDataStore)
     }
 

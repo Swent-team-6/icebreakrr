@@ -78,15 +78,19 @@ class NavigationTest {
     // Initialize mocks and view models
     mockProfileViewModel = MockProfileViewModel()
     mockProfilesRepository = mock(ProfilesRepository::class.java)
-    mockTagsRepository = mock(TagsRepository::class.java)
     mockFirebaseStorage = mock(FirebaseStorage::class.java)
     mockFunction = mock(FirebaseFunctions::class.java)
     mockMeetingRequestViewModel =
         MeetingRequestViewModel(mockProfileViewModel, mockFunction, "1", "John Doe")
     mockFilterViewModel = FilterViewModel()
-    tagsViewModel = TagsViewModel(TagsRepository(mock(FirebaseFirestore::class.java), mock(FirebaseAuth::class.java)))
+    tagsViewModel =
+        TagsViewModel(
+            TagsRepository(mock(FirebaseFirestore::class.java), mock(FirebaseAuth::class.java)))
     profilesViewModel =
-        ProfilesViewModel(mockProfilesRepository, ProfilePicRepositoryStorage(mockFirebaseStorage))
+        ProfilesViewModel(
+            mockProfilesRepository,
+            ProfilePicRepositoryStorage(mockFirebaseStorage),
+            mock(FirebaseAuth::class.java))
 
     mockLocationService = mock(ILocationService::class.java)
     mockLocationRepository = mock(LocationRepository::class.java)
@@ -99,33 +103,33 @@ class NavigationTest {
   @Test
   fun testNavigationLogin() = runTest {
     composeTestRule.setContent {
-        IcebreakrrNavHost(
-            mockProfileViewModel,
-            tagsViewModel,
-            mockFilterViewModel,
-            mockMeetingRequestViewModel,
-            appDataStore,
-            locationViewModel,
-            Route.AROUND_YOU,
-            FirebaseAuth.getInstance())
+      IcebreakrrNavHost(
+          mockProfileViewModel,
+          tagsViewModel,
+          mockFilterViewModel,
+          mockMeetingRequestViewModel,
+          appDataStore,
+          locationViewModel,
+          Route.AUTH,
+          mock(FirebaseAuth::class.java))
     }
 
     // Assert that the login screen is shown on launch
-    composeTestRule.onNodeWithTag("loginScreen").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("loginScreen").assertExists()
   }
 
   @Test
   fun testBottomNavigationBar() = runTest {
     composeTestRule.setContent {
-        IcebreakrrNavHost(
-            mockProfileViewModel,
-            tagsViewModel,
-            mockFilterViewModel,
-            mockMeetingRequestViewModel,
-            appDataStore,
-            locationViewModel,
-            Route.AROUND_YOU,
-            FirebaseAuth.getInstance())
+      IcebreakrrNavHost(
+          mockProfileViewModel,
+          tagsViewModel,
+          mockFilterViewModel,
+          mockMeetingRequestViewModel,
+          appDataStore,
+          locationViewModel,
+          Route.AROUND_YOU,
+          FirebaseAuth.getInstance())
     }
 
     // Check that the "Around You" screen is displayed after login

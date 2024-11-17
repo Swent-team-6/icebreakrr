@@ -91,6 +91,7 @@ object MockFirebaseAuthModule {
 }
 
 /** FirebaseFirestore object that Hilt will inject into the MainActivity when testing */
+@Suppress("UNCHECKED_CAST")
 @Module
 @TestInstallIn(components = [SingletonComponent::class], replaces = [FirestoreModule::class])
 object MockFirebaseFirestoreModule {

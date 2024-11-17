@@ -83,11 +83,7 @@ fun SettingsScreen(
   // Collect the discoverability state from DataStore
   val isDiscoverable by appDataStore.isDiscoverable.collectAsState(initial = true)
 
-  lateinit var auth: FirebaseAuth
-
-  LaunchedEffect(Unit) {
-    auth.currentUser?.let { profilesViewModel.getProfileByUid(it.uid) }
-  }
+  LaunchedEffect(Unit) { auth.currentUser?.let { profilesViewModel.getProfileByUid(it.uid) } }
 
   val isLoading = profilesViewModel.loading.collectAsState(initial = true).value
   val profile = profilesViewModel.selectedProfile.collectAsState().value

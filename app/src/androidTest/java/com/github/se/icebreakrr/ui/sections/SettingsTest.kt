@@ -71,7 +71,8 @@ class SettingsTest {
 
     // Initialize profilesViewModel with proper mocks
     profilesViewModel =
-        ProfilesViewModel(mockProfilesRepository, ProfilePicRepositoryStorage(mockStorage), mock<FirebaseAuth>())
+        ProfilesViewModel(
+            mockProfilesRepository, ProfilePicRepositoryStorage(mockStorage), mock<FirebaseAuth>())
 
     // Mock necessary repository Flow returns
     `when`(mockProfilesRepository.isWaiting).thenReturn(MutableStateFlow(false))

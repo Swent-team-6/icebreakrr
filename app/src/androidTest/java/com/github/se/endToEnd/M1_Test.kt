@@ -32,7 +32,7 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 @HiltAndroidTest
 class M1_Test {
-  val intent =
+  private val intent =
       Intent(InstrumentationRegistry.getInstrumentation().targetContext, MainActivity::class.java)
 
   @Inject lateinit var authInjected: FirebaseAuth
