@@ -23,7 +23,6 @@ import com.github.se.icebreakrr.model.profile.ProfilesRepository
 import com.github.se.icebreakrr.model.profile.ProfilesViewModel
 import com.github.se.icebreakrr.ui.navigation.NavigationActions
 import com.google.firebase.Firebase
-import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.storage.storage
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
@@ -50,9 +49,7 @@ class FilterScreenTest {
     profilesRepositoryMock = mock()
     profilesViewModelMock =
         ProfilesViewModel(
-            profilesRepositoryMock,
-            ProfilePicRepositoryStorage(Firebase.storage),
-            FirebaseAuth.getInstance())
+            profilesRepositoryMock, ProfilePicRepositoryStorage(Firebase.storage), mock())
     filterViewModel = FilterViewModel()
   }
 

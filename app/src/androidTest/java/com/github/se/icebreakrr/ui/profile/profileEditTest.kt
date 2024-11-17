@@ -35,7 +35,6 @@ class ProfileEditingScreenTest {
   private lateinit var fakeProfilesViewModel: MockProfileViewModel
   private lateinit var tagsViewModel: TagsViewModel
   private lateinit var mockProfilesRepository: ProfilesRepository
-  private lateinit var mockTagsRepository: TagsRepository
 
   @Before
   fun setUp() {
@@ -49,7 +48,7 @@ class ProfileEditingScreenTest {
         ProfilesViewModel(
             mockProfilesRepository,
             ProfilePicRepositoryStorage(Firebase.storage),
-            FirebaseAuth.getInstance())
+            mock(FirebaseAuth::class.java))
     fakeProfilesViewModel = MockProfileViewModel()
 
     var mockProfile = Profile.getMockedProfiles()[0]
@@ -116,7 +115,7 @@ class ProfileEditingScreenTest {
   @Test
   fun testDisplayDialogOnUnsavedChanges() {
     composeTestRule.setContent {
-      ProfileEditingScreen(navigationActions, tagsViewModel, fakeProfilesViewModel)
+      ProfileEditingScreen(navigationActions, tagsViewModel, fakeProfilesViewModel, mock())
     }
 
     // Make changes to the profile
@@ -124,7 +123,7 @@ class ProfileEditingScreenTest {
     composeTestRule.onNodeWithTag("description").performTextInput("New Description")
 
     // quit keyboard
-    Espresso.pressBack()
+    Espresso.closeSoftKeyboard()
 
     // Simulate system back button press
     composeTestRule.onNodeWithTag("goBackButton").performClick()
@@ -146,7 +145,7 @@ class ProfileEditingScreenTest {
   @Test
   fun testSystemNoSaveOfChangesWithoutChanges() {
     composeTestRule.setContent {
-      ProfileEditingScreen(navigationActions, tagsViewModel, fakeProfilesViewModel)
+      ProfileEditingScreen(navigationActions, tagsViewModel, fakeProfilesViewModel, mock())
     }
 
     // Simulate system back button press
@@ -159,7 +158,7 @@ class ProfileEditingScreenTest {
   @Test
   fun testSystemDisplayDialogOnUnsavedChanges() {
     composeTestRule.setContent {
-      ProfileEditingScreen(navigationActions, tagsViewModel, fakeProfilesViewModel)
+      ProfileEditingScreen(navigationActions, tagsViewModel, fakeProfilesViewModel, mock())
     }
 
     // Make changes to the profile
@@ -167,7 +166,7 @@ class ProfileEditingScreenTest {
     composeTestRule.onNodeWithTag("description").performTextInput("New Description")
 
     // quit keyboard
-    Espresso.pressBack()
+    Espresso.closeSoftKeyboard()
 
     // Simulate system back button press
     Espresso.pressBack()
