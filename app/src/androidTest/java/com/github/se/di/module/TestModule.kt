@@ -65,27 +65,6 @@ object MockFirebaseAuthModule {
         }
         .`when`(mockAuth)
         .addAuthStateListener(any())
-
-    // Mock signInWithEmailAndPassword method
-    // val mockTaskSignIn = mock(Task::class.java) as Task<AuthResult>
-    // `when`(mockAuth.signInWithEmailAndPassword(anyString(),
-    // anyString())).thenReturn(mockTaskSignIn)
-
-    // Mock signOut method
-    // doNothing().`when`(mockAuth).signOut()
-
-    // Mock sendPasswordResetEmail method
-    // val mockTaskResetPassword = mock(Task::class.java) as Task<Void>
-    // `when`(mockAuth.sendPasswordResetEmail(anyString())).thenReturn(mockTaskResetPassword)
-
-    // Mock createUserWithEmailAndPassword method
-    // val mockTaskCreateUser = mock(Task::class.java) as Task<AuthResult>
-    // `when`(mockAuth.createUserWithEmailAndPassword(anyString(), anyString()))
-    //    .thenReturn(mockTaskCreateUser)
-
-    // Mock the signInAnonymously method
-    // val mockTaskSignInAnonymously = mock(Task::class.java) as Task<AuthResult>
-    // `when`(mockAuth.signInAnonymously()).thenReturn(mockTaskSignInAnonymously)
     return mockAuth
   }
 }
