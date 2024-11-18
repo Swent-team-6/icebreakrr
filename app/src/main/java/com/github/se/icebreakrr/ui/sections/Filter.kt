@@ -65,7 +65,11 @@ import com.github.se.icebreakrr.ui.sections.shared.handleSafeBackNavigation
 import com.github.se.icebreakrr.ui.tags.TagSelector
 import com.github.se.icebreakrr.ui.theme.Grey
 import com.github.se.icebreakrr.ui.theme.IceBreakrrBlue
+import com.google.firebase.Firebase
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.GeoPoint
+import com.google.firebase.firestore.firestore
 
 // This file was written with the help of Cursor, Claude, ChatGPT
 
@@ -111,9 +115,16 @@ val IcebreakrrGrey: Color = Grey
 @Composable
 fun FilterScreen(
     navigationActions: NavigationActions,
-    tagsViewModel: TagsViewModel = viewModel(factory = TagsViewModel.Factory),
+    tagsViewModel: TagsViewModel =
+        viewModel(
+            factory =
+                TagsViewModel.Companion.Factory(
+                    FirebaseAuth.getInstance(), FirebaseFirestore.getInstance())),
     filterViewModel: FilterViewModel = viewModel(factory = FilterViewModel.Factory),
-    profilesViewModel: ProfilesViewModel = viewModel(factory = ProfilesViewModel.Factory)
+    profilesViewModel: ProfilesViewModel =
+        viewModel(
+            factory =
+                ProfilesViewModel.Companion.Factory(FirebaseAuth.getInstance(), Firebase.firestore))
 ) {
   val context = LocalContext.current
   val currentFocusManager = LocalFocusManager.current

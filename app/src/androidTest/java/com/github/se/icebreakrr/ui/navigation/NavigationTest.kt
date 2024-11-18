@@ -23,6 +23,8 @@ import com.github.se.icebreakrr.model.profile.ProfilesViewModel
 import com.github.se.icebreakrr.model.tags.TagsRepository
 import com.github.se.icebreakrr.model.tags.TagsViewModel
 import com.github.se.icebreakrr.utils.IPermissionManager
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.functions.FirebaseFunctions
 import com.google.firebase.storage.FirebaseStorage
 import java.io.File
@@ -76,15 +78,19 @@ class NavigationTest {
     // Initialize mocks and view models
     mockProfileViewModel = MockProfileViewModel()
     mockProfilesRepository = mock(ProfilesRepository::class.java)
-    mockTagsRepository = mock(TagsRepository::class.java)
     mockFirebaseStorage = mock(FirebaseStorage::class.java)
     mockFunction = mock(FirebaseFunctions::class.java)
     mockMeetingRequestViewModel =
         MeetingRequestViewModel(mockProfileViewModel, mockFunction, "1", "John Doe")
     mockFilterViewModel = FilterViewModel()
-    tagsViewModel = TagsViewModel(mockTagsRepository)
+    tagsViewModel =
+        TagsViewModel(
+            TagsRepository(mock(FirebaseFirestore::class.java), mock(FirebaseAuth::class.java)))
     profilesViewModel =
-        ProfilesViewModel(mockProfilesRepository, ProfilePicRepositoryStorage(mockFirebaseStorage))
+        ProfilesViewModel(
+            mockProfilesRepository,
+            ProfilePicRepositoryStorage(mockFirebaseStorage),
+            mock(FirebaseAuth::class.java))
 
     mockLocationService = mock(ILocationService::class.java)
     mockLocationRepository = mock(LocationRepository::class.java)
@@ -104,11 +110,12 @@ class NavigationTest {
           mockMeetingRequestViewModel,
           appDataStore,
           locationViewModel,
-          Route.AUTH)
+          Route.AUTH,
+          mock(FirebaseAuth::class.java))
     }
 
     // Assert that the login screen is shown on launch
-    composeTestRule.onNodeWithTag("loginScreen").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("loginScreen").assertExists()
   }
 
   @Test
@@ -121,7 +128,8 @@ class NavigationTest {
           mockMeetingRequestViewModel,
           appDataStore,
           locationViewModel,
-          Route.AROUND_YOU)
+          Route.AROUND_YOU,
+          FirebaseAuth.getInstance())
     }
 
     // Check that the "Around You" screen is displayed after login

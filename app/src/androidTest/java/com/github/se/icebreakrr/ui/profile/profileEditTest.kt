@@ -14,12 +14,15 @@ import com.github.se.icebreakrr.model.tags.TagsRepository
 import com.github.se.icebreakrr.model.tags.TagsViewModel
 import com.github.se.icebreakrr.ui.navigation.NavigationActions
 import com.google.firebase.Firebase
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.storage
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito
+import org.mockito.Mockito.mock
 import org.mockito.kotlin.verify
 
 @RunWith(AndroidJUnit4::class)
@@ -32,17 +35,20 @@ class ProfileEditingScreenTest {
   private lateinit var fakeProfilesViewModel: MockProfileViewModel
   private lateinit var tagsViewModel: TagsViewModel
   private lateinit var mockProfilesRepository: ProfilesRepository
-  private lateinit var mockTagsRepository: TagsRepository
 
   @Before
   fun setUp() {
     navigationActions = Mockito.mock(NavigationActions::class.java)
     mockProfilesRepository = Mockito.mock(ProfilesRepository::class.java)
-    mockTagsRepository = Mockito.mock(TagsRepository::class.java)
 
-    tagsViewModel = TagsViewModel(mockTagsRepository)
+    tagsViewModel =
+        TagsViewModel(
+            TagsRepository(mock(FirebaseFirestore::class.java), mock(FirebaseAuth::class.java)))
     profilesViewModel =
-        ProfilesViewModel(mockProfilesRepository, ProfilePicRepositoryStorage(Firebase.storage))
+        ProfilesViewModel(
+            mockProfilesRepository,
+            ProfilePicRepositoryStorage(Firebase.storage),
+            mock(FirebaseAuth::class.java))
     fakeProfilesViewModel = MockProfileViewModel()
 
     var mockProfile = Profile.getMockedProfiles()[0]
@@ -109,7 +115,7 @@ class ProfileEditingScreenTest {
   @Test
   fun testDisplayDialogOnUnsavedChanges() {
     composeTestRule.setContent {
-      ProfileEditingScreen(navigationActions, tagsViewModel, fakeProfilesViewModel)
+      ProfileEditingScreen(navigationActions, tagsViewModel, fakeProfilesViewModel, mock())
     }
 
     // Make changes to the profile
@@ -117,7 +123,7 @@ class ProfileEditingScreenTest {
     composeTestRule.onNodeWithTag("description").performTextInput("New Description")
 
     // quit keyboard
-    Espresso.pressBack()
+    Espresso.closeSoftKeyboard()
 
     // Simulate system back button press
     composeTestRule.onNodeWithTag("goBackButton").performClick()
@@ -139,7 +145,7 @@ class ProfileEditingScreenTest {
   @Test
   fun testSystemNoSaveOfChangesWithoutChanges() {
     composeTestRule.setContent {
-      ProfileEditingScreen(navigationActions, tagsViewModel, fakeProfilesViewModel)
+      ProfileEditingScreen(navigationActions, tagsViewModel, fakeProfilesViewModel, mock())
     }
 
     // Simulate system back button press
@@ -152,7 +158,7 @@ class ProfileEditingScreenTest {
   @Test
   fun testSystemDisplayDialogOnUnsavedChanges() {
     composeTestRule.setContent {
-      ProfileEditingScreen(navigationActions, tagsViewModel, fakeProfilesViewModel)
+      ProfileEditingScreen(navigationActions, tagsViewModel, fakeProfilesViewModel, mock())
     }
 
     // Make changes to the profile
@@ -160,7 +166,7 @@ class ProfileEditingScreenTest {
     composeTestRule.onNodeWithTag("description").performTextInput("New Description")
 
     // quit keyboard
-    Espresso.pressBack()
+    Espresso.closeSoftKeyboard()
 
     // Simulate system back button press
     Espresso.pressBack()

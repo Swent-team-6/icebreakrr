@@ -1,5 +1,6 @@
 package com.github.se.icebreakrr.ui.profile
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -22,7 +23,7 @@ import com.github.se.icebreakrr.ui.navigation.NavigationActions
 import com.github.se.icebreakrr.ui.navigation.Screen
 import com.github.se.icebreakrr.ui.sections.shared.InfoSection
 import com.github.se.icebreakrr.ui.sections.shared.ProfileHeader
-import com.google.firebase.Firebase
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.auth
 
 /**
@@ -37,12 +38,14 @@ import com.google.firebase.auth.auth
 fun ProfileView(
     profilesViewModel: ProfilesViewModel,
     tagsViewModel: TagsViewModel,
-    navigationActions: NavigationActions
+    navigationActions: NavigationActions,
+    auth: FirebaseAuth = FirebaseAuth.getInstance()
 ) {
 
   // Launch a coroutine to fetch the profile when this composable is first displayed
   LaunchedEffect(Unit) {
-    Firebase.auth.currentUser?.let { profilesViewModel.getProfileByUid(it.uid) }
+    Log.d("TAGSDEBUG", "[ProfileView] current uid : ${auth.currentUser?.uid}")
+    auth.currentUser?.let { profilesViewModel.getProfileByUid(it.uid) }
   }
 
   val isLoading = profilesViewModel.loading.collectAsState(initial = true).value

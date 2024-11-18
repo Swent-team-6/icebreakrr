@@ -10,11 +10,14 @@ import com.github.se.icebreakrr.model.tags.TagsRepository
 import com.github.se.icebreakrr.model.tags.TagsViewModel
 import com.github.se.icebreakrr.ui.navigation.NavigationActions
 import com.github.se.icebreakrr.ui.navigation.TopLevelDestinations
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito
+import org.mockito.Mockito.mock
 import org.mockito.kotlin.verify
 
 @RunWith(AndroidJUnit4::class)
@@ -32,9 +35,10 @@ class ProfileCreationTest {
   fun setUp() {
     navigationActions = Mockito.mock(NavigationActions::class.java)
     mockProfilesRepository = Mockito.mock(ProfilesRepository::class.java)
-    mockTagsRepository = Mockito.mock(TagsRepository::class.java)
 
-    tagsViewModel = TagsViewModel(mockTagsRepository)
+    tagsViewModel =
+        TagsViewModel(
+            TagsRepository(mock(FirebaseFirestore::class.java), mock(FirebaseAuth::class.java)))
     fakeProfilesViewModel = MockProfileViewModel()
   }
 

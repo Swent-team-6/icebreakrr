@@ -9,6 +9,7 @@ import com.github.se.icebreakrr.model.profile.ProfilesRepository
 import com.github.se.icebreakrr.model.profile.ProfilesViewModel
 import com.google.firebase.Firebase
 import com.google.firebase.Timestamp
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.GeoPoint
 import com.google.firebase.storage.storage
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -94,7 +95,10 @@ open class MockProfileRepository : ProfilesRepository {
 }
 
 open class MockProfileViewModel :
-    ProfilesViewModel(MockProfileRepository(), ProfilePicRepositoryStorage(Firebase.storage)) {
+    ProfilesViewModel(
+        MockProfileRepository(),
+        ProfilePicRepositoryStorage(Firebase.storage),
+        FirebaseAuth.getInstance()) {
   private val _profiles = MutableStateFlow<List<Profile>>(emptyList())
   override val profiles: StateFlow<List<Profile>> = _profiles.asStateFlow()
 
@@ -207,18 +211,18 @@ fun Profile.Companion.getMockedProfiles(): List<Profile> {
           "I am an adventurer and archaeologist.")
   val tagsList =
       listOf(
-          listOf("travel", "software", "music"),
-          listOf("food", "cooking", "travel"),
-          listOf("cartoon", "kites", "dog"),
-          listOf("superhero", "justice", "truth"),
-          listOf("detective", "thriller", "mystery"),
-          listOf("politics", "power", "drama"),
-          listOf("science", "aliens", "action"),
-          listOf("music", "pop", "secret"),
-          listOf("adventure", "archaeology", "history"),
-          listOf("investigator", "superhero", "strength"),
-          listOf("entertainment", "singing", "frog"),
-          listOf("adventure", "archaeology", "action"))
+          listOf("Travel", "Software", "Music"),
+          listOf("Food", "Cooking", "Travel"),
+          listOf("Cartoon", "Kites", "Dog"),
+          listOf("Superhero", "Justice", "Truth"),
+          listOf("Detective", "Thriller", "Mystery"),
+          listOf("Politics", "Power", "Drama"),
+          listOf("Science", "Aliens", "Action"),
+          listOf("Music", "Pop", "Secret"),
+          listOf("Adventure", "Archaeology", "History"),
+          listOf("Investigator", "Superhero", "Strength"),
+          listOf("Entertainment", "Singing", "Frog"),
+          listOf("Adventure", "Archaeology", "Action"))
 
   val hasBlockedList =
       listOf(

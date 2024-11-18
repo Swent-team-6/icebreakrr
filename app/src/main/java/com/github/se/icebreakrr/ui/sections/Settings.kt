@@ -73,7 +73,8 @@ private val CARD_PADDING = 16.dp
 fun SettingsScreen(
     profilesViewModel: ProfilesViewModel,
     navigationActions: NavigationActions,
-    appDataStore: AppDataStore
+    appDataStore: AppDataStore,
+    auth: FirebaseAuth
 ) {
   val context = LocalContext.current
   val scrollState = rememberScrollState()
@@ -82,11 +83,7 @@ fun SettingsScreen(
   // Collect the discoverability state from DataStore
   val isDiscoverable by appDataStore.isDiscoverable.collectAsState(initial = true)
 
-  lateinit var auth: FirebaseAuth
-
-  LaunchedEffect(Unit) {
-    FirebaseAuth.getInstance().currentUser?.let { profilesViewModel.getProfileByUid(it.uid) }
-  }
+  LaunchedEffect(Unit) { auth.currentUser?.let { profilesViewModel.getProfileByUid(it.uid) } }
 
   val isLoading = profilesViewModel.loading.collectAsState(initial = true).value
   val profile = profilesViewModel.selectedProfile.collectAsState().value
@@ -150,7 +147,6 @@ fun SettingsScreen(
                 if (isTesting) {
                   navigationActions.navigateTo(Screen.AUTH)
                 } else {
-                  auth = FirebaseAuth.getInstance()
                   auth.currentUser?.let {
                     logout(context, navigationActions, appDataStore = appDataStore)
                   }
