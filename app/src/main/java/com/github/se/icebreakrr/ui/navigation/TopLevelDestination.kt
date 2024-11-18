@@ -23,6 +23,7 @@ object Route {
   const val PROFILE_EDIT = "ProfileEdit"
   const val FILTER = "Filter"
   const val PROFILE_CREATION = "ProfileCreation"
+  const val UNBLOCK_PROFILE = "UnblockProfile"
 }
 
 object Screen {
@@ -35,6 +36,7 @@ object Screen {
   const val PROFILE = "Profile Screen"
   const val OTHER_PROFILE_VIEW = "Around You Profile Screen"
   const val PROFILE_CREATION = "Profile Creation Screen"
+  const val UNBLOCK_PROFILE = "Unblock Profile Screen"
 }
 
 object TopLevelDestinations {

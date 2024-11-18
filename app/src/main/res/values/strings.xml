@@ -18,4 +18,5 @@
     <string name="block">Block</string>
     <string name="report">Report</string>
     <string name="cancel">Cancel</string>
+    <string name="no_blocked_users">You have not blocked any users!</string>
 </resources>

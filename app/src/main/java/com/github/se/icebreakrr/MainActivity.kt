@@ -38,6 +38,7 @@ import com.github.se.icebreakrr.ui.navigation.Screen
 import com.github.se.icebreakrr.ui.profile.OtherProfileView
 import com.github.se.icebreakrr.ui.profile.ProfileEditingScreen
 import com.github.se.icebreakrr.ui.profile.ProfileView
+import com.github.se.icebreakrr.ui.profile.UnblockProfileScreen
 import com.github.se.icebreakrr.ui.sections.AroundYouScreen
 import com.github.se.icebreakrr.ui.sections.FilterScreen
 import com.github.se.icebreakrr.ui.sections.NotificationScreen
@@ -285,6 +286,29 @@ fun IcebreakrrNavHost(
     ) {
       composable(Screen.FILTER) {
         FilterScreen(navigationActions, tagsViewModel, filterViewModel, profileViewModel)
+      }
+    }
+
+    navigation(
+        startDestination = Screen.UNBLOCK_PROFILE,
+        route = Route.UNBLOCK_PROFILE,
+    ) {
+      composable(Screen.UNBLOCK_PROFILE) {
+        UnblockProfileScreen(
+            navigationActions, profileViewModel)
+      }
+      composable(Screen.OTHER_PROFILE_VIEW + "?userId={userId}") { navBackStackEntry ->
+        if (meetingRequestViewModel != null) {
+          OtherProfileView(
+              profileViewModel,
+              tagsViewModel,
+              meetingRequestViewModel,
+              navigationActions,
+              navBackStackEntry)
+        } else {
+          throw IllegalStateException(
+              "The Meeting Request View Model shouldn't be null : Bad initialization")
+        }
       }
     }
   }

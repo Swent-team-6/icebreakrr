@@ -143,6 +143,15 @@ fun SettingsScreen(
                 Text("Unblock All", color = Color.White)
               }
 
+        Button(
+            onClick = {
+                navigationActions.navigateTo(Screen.UNBLOCK_PROFILE)
+            },
+            colors = ButtonDefaults.buttonColors(containerColor = Color.Blue),
+            modifier = Modifier.fillMaxWidth()) {
+            Text("See unblock", color = Color.White)
+        }
+
           Spacer(modifier = Modifier.padding(vertical = 8.dp))
 
           Button(
