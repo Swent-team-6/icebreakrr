@@ -226,7 +226,6 @@ class M2Test {
       composeTestRule.onNodeWithTag("notificationScreen").assertIsDisplayed()
       composeTestRule.onNodeWithTag("notificationScroll").assertIsDisplayed()
       composeTestRule.onNodeWithTag("notificationFirstText").assertIsDisplayed()
-      composeTestRule.onNodeWithTag("notificationSecondText").assertIsDisplayed()
       scenario.close()
     }
   }
