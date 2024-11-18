@@ -302,8 +302,36 @@ open class ProfilesViewModel(
    * @param uid The unique ID of the user being blocked.
    */
   fun blockUser(uid: String) {
-    updateProfile(selfProfile.value!!.copy(hasBlocked = selfProfile.value!!.hasBlocked + uid))
+      _selfProfile.update { currentProfile ->
+          currentProfile?.copy(hasBlocked = currentProfile.hasBlocked + uid)
+      }
+    updateProfile(selfProfile.value!!)
   }
+
+   /**
+   * Unblocks a user by updating the blocking relationship in the repository.
+   *
+   * @param uid The unique ID of the user being unblocked.
+   */
+  fun unblockUser(uid: String) {
+       _selfProfile.update { currentProfile ->
+           currentProfile?.copy(hasBlocked = currentProfile.hasBlocked.filter { it != uid })
+       }
+    updateProfile(selfProfile.value!!)
+       getBlockedUsers()
+  }
+
+    fun getBlockedUsers() {
+        _loading.value = true
+        repository.getBlockedProfiles(
+            selfProfile.value?.hasBlocked ?: emptyList(),
+            onSuccess = { profileList ->
+                _profiles.value = profileList
+                _loading.value = false
+            },
+            onFailure = { e -> handleError(e) }
+        )
+    }
 
   /** Fetches the current user's profile from the repository. */
   fun getSelfProfile() {
