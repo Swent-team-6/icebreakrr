@@ -47,15 +47,9 @@ object MockFirebaseAuthModule {
 
   private fun provideMockFirebaseAuth(): FirebaseAuth {
     val mockUser = mock(FirebaseUser::class.java)
-    `when`(mockUser.uid).thenReturn("12345")
-    `when`(mockUser.displayName).thenReturn("IceBreakrr end-to-end")
-    `when`(mockUser.email).thenReturn("icebreakrr.team@gmail.com")
-    `when`(mockUser.isEmailVerified).thenReturn(true)
-    `when`(mockUser.isAnonymous).thenReturn(false)
-    `when`(mockUser.isEmailVerified).thenReturn(true)
-
     val mockAuth = mock(FirebaseAuth::class.java)
     val mockListener = mock(AuthStateListener::class.java)
+    `when`(mockUser.uid).thenReturn("12345")
     `when`(mockAuth.currentUser).thenReturn(mockUser)
     doNothing().`when`(mockAuth).addAuthStateListener(mockListener)
     doNothing().`when`(mockAuth).removeAuthStateListener(mockListener)
@@ -74,6 +68,36 @@ object MockFirebaseAuthModule {
 @Module
 @TestInstallIn(components = [SingletonComponent::class], replaces = [FirestoreModule::class])
 object MockFirebaseFirestoreModule {
+  private const val NUMBER_PROFILE = 12
+  private const val TRAVEL_TAG_COLOR = "0xffccf4b4"
+  private const val TECHNOLOGY_TAG_COLOR = "0xffedf4a5"
+  private const val ART_TAG_COLOR = "0xffe69de8"
+  private const val FOOD_TAG_COLOR = "0xfff2c479"
+  private const val SPORT_TAG_COLOR = "0xfffb939b"
+  private const val ANIMALS_TAG_COLOR = "0xffd4b4eb"
+  private const val ACTIVITY_TAG_COLOR = "0xffccd0cc"
+  private const val OTHER_TAG_COLOR = "0xff8077e4"
+  private val TRAVEL_LIST = listOf("Travel", "Adventure")
+  private val TECHNOLOGY_LIST = listOf("Technology", "Software")
+  private val ART_LIST =
+      listOf("Art", "Music", "Cartoon", "Thriller", "Drama", "Action", "Pop", "Singing")
+  private val FOOD_LIST = listOf("Food", "Cooking")
+  private val SPORT_LIST = listOf("Sport", "Kites")
+  private val ANIMALS_LIST = listOf("Animals", "Dog", "Aliens", "Frog")
+  private val ACTIVITY_LIST =
+      listOf(
+          "Activity",
+          "Cooking",
+          "Superhero",
+          "Justice",
+          "Detective",
+          "Politics",
+          "Science",
+          "Archaeology",
+          "History",
+          "Investigator",
+          "Entertainment")
+  private val OTHER_LIST = listOf("Other", "Truth", "Mystery", "Power", "Secret", "Strength")
 
   @Provides
   @Singleton
@@ -97,51 +121,13 @@ object MockFirebaseFirestoreModule {
             emptyList(),
             null,
             null)
-    val profilesDocumentSnapshots =
-        listOf(
-            mock(DocumentSnapshot::class.java),
-            mock(DocumentSnapshot::class.java),
-            mock(DocumentSnapshot::class.java),
-            mock(DocumentSnapshot::class.java),
-            mock(DocumentSnapshot::class.java),
-            mock(DocumentSnapshot::class.java),
-            mock(DocumentSnapshot::class.java),
-            mock(DocumentSnapshot::class.java),
-            mock(DocumentSnapshot::class.java),
-            mock(DocumentSnapshot::class.java),
-            mock(DocumentSnapshot::class.java),
-            mock(DocumentSnapshot::class.java))
-    val profilesDocumentReference =
-        listOf(
-            mock(DocumentReference::class.java),
-            mock(DocumentReference::class.java),
-            mock(DocumentReference::class.java),
-            mock(DocumentReference::class.java),
-            mock(DocumentReference::class.java),
-            mock(DocumentReference::class.java),
-            mock(DocumentReference::class.java),
-            mock(DocumentReference::class.java),
-            mock(DocumentReference::class.java),
-            mock(DocumentReference::class.java),
-            mock(DocumentReference::class.java),
-            mock(DocumentReference::class.java))
+    val profilesDocumentSnapshots = List(NUMBER_PROFILE) { mock(DocumentSnapshot::class.java) }
+    val profilesDocumentReference = List(NUMBER_PROFILE) { mock(DocumentReference::class.java) }
     val profilesTaskDocumentSnapshot =
-        listOf(
-            mock(Task::class.java) as Task<DocumentSnapshot>,
-            mock(Task::class.java) as Task<DocumentSnapshot>,
-            mock(Task::class.java) as Task<DocumentSnapshot>,
-            mock(Task::class.java) as Task<DocumentSnapshot>,
-            mock(Task::class.java) as Task<DocumentSnapshot>,
-            mock(Task::class.java) as Task<DocumentSnapshot>,
-            mock(Task::class.java) as Task<DocumentSnapshot>,
-            mock(Task::class.java) as Task<DocumentSnapshot>,
-            mock(Task::class.java) as Task<DocumentSnapshot>,
-            mock(Task::class.java) as Task<DocumentSnapshot>,
-            mock(Task::class.java) as Task<DocumentSnapshot>,
-            mock(Task::class.java) as Task<DocumentSnapshot>)
+        List(NUMBER_PROFILE) { mock(Task::class.java) as Task<DocumentSnapshot> }
     val profiles = Profile.Companion.getMockedProfiles()
     // set the profilesDocumentSnapshot to return the mock profiles informations :
-    for (i in 0 until 12) {
+    for (i in 0..12) {
       `when`(profilesDocumentSnapshots[i].id).thenReturn(profiles[i].uid)
       `when`(profilesDocumentSnapshots[i].getString("name")).thenReturn(profiles[i].name)
       `when`(profilesDocumentSnapshots[i].getString("gender"))
@@ -234,7 +220,7 @@ object MockFirebaseFirestoreModule {
     `when`(mockMyTask.isSuccessful).thenReturn(true)
 
     // actions when get profile by uid of around you :
-    for (i in 0 until 12) {
+    for (i in 0..12) {
       `when`(mockProfilesCollectionReference.document(i.toString()))
           .thenReturn(profilesDocumentReference[i])
       `when`(profilesDocumentReference[i].get(any())).thenReturn(profilesTaskDocumentSnapshot[i])
@@ -257,45 +243,26 @@ object MockFirebaseFirestoreModule {
         listOf("Travel", "Technology", "Art", "Food", "Sport", "Animals", "Activity", "Other")
     val tagColors =
         listOf(
-            "0xffccf4b4",
-            "0xffedf4a5",
-            "0xffe69de8",
-            "0xfff2c479",
-            "0xfffb939b",
-            "0xffd4b4eb",
-            "0xffccd0cc",
-            "0xff8077e4")
+            TRAVEL_TAG_COLOR,
+            TECHNOLOGY_TAG_COLOR,
+            ART_TAG_COLOR,
+            FOOD_TAG_COLOR,
+            SPORT_TAG_COLOR,
+            ANIMALS_TAG_COLOR,
+            ACTIVITY_TAG_COLOR,
+            OTHER_TAG_COLOR)
     val tagSubtags =
         listOf(
-            listOf("Travel", "Adventure"),
-            listOf("Technology", "Software"),
-            listOf("Art", "Music", "Cartoon", "Thriller", "Drama", "Action", "Pop", "Singing"),
-            listOf("Food", "Cooking"),
-            listOf("Sport", "Kites"),
-            listOf("Animals", "Dog", "Aliens", "Frog"),
-            listOf(
-                "Activity",
-                "Cooking",
-                "Superhero",
-                "Justice",
-                "Detective",
-                "Politics",
-                "Science",
-                "Archaeology",
-                "History",
-                "Investigator",
-                "Entertainment"),
-            listOf("Other", "Truth", "Mystery", "Power", "Secret", "Strength"))
-    val allTags =
-        listOf(
-            mock(DocumentSnapshot::class.java),
-            mock(DocumentSnapshot::class.java),
-            mock(DocumentSnapshot::class.java),
-            mock(DocumentSnapshot::class.java),
-            mock(DocumentSnapshot::class.java),
-            mock(DocumentSnapshot::class.java),
-            mock(DocumentSnapshot::class.java),
-            mock(DocumentSnapshot::class.java))
+            TRAVEL_LIST,
+            TECHNOLOGY_LIST,
+            ART_LIST,
+            FOOD_LIST,
+            SPORT_LIST,
+            ANIMALS_LIST,
+            ACTIVITY_LIST,
+            OTHER_LIST)
+    val allTags = List(tagSubtags.size) { mock(DocumentSnapshot::class.java) }
+
     `when`(mockFirestore.collection("Tags")).thenReturn(mockCollectionReferenceTags)
     `when`(mockCollectionReferenceTags.get()).thenReturn(mockTaskQuerySnapshotTags)
     `when`(mockTaskQuerySnapshotTags.isSuccessful).thenReturn(true)
