@@ -9,8 +9,6 @@ import androidx.compose.ui.unit.dp
 import com.github.se.icebreakrr.model.profile.ProfilesViewModel
 import com.github.se.icebreakrr.ui.navigation.NavigationActions
 import android.annotation.SuppressLint
-import android.util.Log
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -19,7 +17,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -41,7 +39,7 @@ import com.github.se.icebreakrr.model.profile.Profile
 import com.github.se.icebreakrr.ui.navigation.BottomNavigationMenu
 import com.github.se.icebreakrr.ui.navigation.LIST_TOP_LEVEL_DESTINATIONS
 import com.github.se.icebreakrr.ui.navigation.Route
-import com.github.se.icebreakrr.ui.sections.shared.FilterFloatingActionButton
+import com.github.se.icebreakrr.ui.sections.IcebreakrrBlue
 import com.github.se.icebreakrr.ui.sections.shared.ProfileCard
 import com.github.se.icebreakrr.ui.theme.messageTextColor
 import com.github.se.icebreakrr.utils.NetworkUtils.isNetworkAvailable
@@ -79,26 +77,25 @@ fun UnblockProfileScreen(
   val context = LocalContext.current
   val isConnected = profilesViewModel.isConnected.collectAsState()
 
-  var showDialog by remember { mutableStateOf(false) }
   var profileToUnblock by remember { mutableStateOf<Profile?>(null) }
-    var profileIndex by remember { mutableStateOf<Int?>(null) }
 
-  if (showDialog && profileToUnblock != null) {
+  if (profileToUnblock != null) {
       AlertDialog(
-          onDismissRequest = { showDialog = false },
+          modifier = Modifier.testTag("unblockDialog"),
+          onDismissRequest = { profileToUnblock = null },
           title = { Text("Confirm Unblock") },
           text = { Text("Are you sure you want to unblock ${profileToUnblock!!.name}?") },
           confirmButton = {
               TextButton(onClick = {
                   profilesViewModel.unblockUser(profileToUnblock!!.uid)
                   profilesViewModel.getBlockedUsers()
-                  showDialog = false
+                  profileToUnblock = null
               }) {
                   Text("Yes")
               }
           },
           dismissButton = {
-              TextButton(onClick = { showDialog = false }) {
+              TextButton(onClick = { profileToUnblock = null }) {
                   Text("No")
               }
           }
@@ -121,12 +118,15 @@ fun UnblockProfileScreen(
   }
 
   Scaffold(
-      modifier = Modifier.testTag("aroundYouScreen"),
+      modifier = Modifier.testTag("unblockScreen"),
       bottomBar = {
           BottomNavigationMenu(
-              onTabSelect = {
-                  if (navigationActions.currentRoute() != Route.SETTINGS ) {
+              onTabSelect = { route ->
+                  if (navigationActions.currentRoute() != Route.SETTINGS && route.route == Route.SETTINGS) {
                       navigationActions.navigateTo(Route.SETTINGS)
+                  }
+                  else {
+                      navigationActions.navigateTo(route.route)
                   }
               },
               tabList = LIST_TOP_LEVEL_DESTINATIONS,
@@ -134,19 +134,21 @@ fun UnblockProfileScreen(
       },
       topBar = {
           TopAppBar(
-              modifier = Modifier.background(Color.Cyan)
-                  .fillMaxWidth()
-                  .heightIn(60.dp),
-              title = { Text("Blocked Users",color= Color.Black) },
+              modifier = Modifier.testTag("unblockTopBar"),
+              title = { Text("Blocked Users",color= Color.White, modifier = Modifier.testTag("UnblockTopBarTitle")) },
               navigationIcon = {
                   IconButton(
                       modifier = Modifier.testTag("goBackButton"),
                       onClick = {
                           navigationActions.goBack()
                       }) {
-                      Icon(Icons.Default.ArrowBack, contentDescription = "Back")
-                  }
-              })
+                      Icon(
+                          Icons.AutoMirrored.Filled.ArrowBack,
+                          contentDescription = "Back",
+                          tint = Color.White)
+                    }
+              },
+              colors = TopAppBarDefaults.topAppBarColors(containerColor = IcebreakrrBlue))
       },
       content = { innerPadding ->
         PullToRefreshBox(
@@ -177,10 +179,7 @@ fun UnblockProfileScreen(
                             profile = blockedProfiles.value[index],
                             onclick = {
                               if (isNetworkAvailableWithContext(context)) {
-
-                                showDialog = true
                                 profileToUnblock = blockedProfiles.value[index]
-                                  profileIndex = index
                               } else {
                                 showNoInternetToast(context)
                               }
