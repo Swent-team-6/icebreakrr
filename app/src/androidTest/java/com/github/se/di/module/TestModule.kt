@@ -127,7 +127,7 @@ object MockFirebaseFirestoreModule {
         List(NUMBER_PROFILE) { mock(Task::class.java) as Task<DocumentSnapshot> }
     val profiles = Profile.Companion.getMockedProfiles()
     // set the profilesDocumentSnapshot to return the mock profiles informations :
-    for (i in 0..12) {
+    for (i in 0..11) {
       `when`(profilesDocumentSnapshots[i].id).thenReturn(profiles[i].uid)
       `when`(profilesDocumentSnapshots[i].getString("name")).thenReturn(profiles[i].name)
       `when`(profilesDocumentSnapshots[i].getString("gender"))
@@ -220,7 +220,7 @@ object MockFirebaseFirestoreModule {
     `when`(mockMyTask.isSuccessful).thenReturn(true)
 
     // actions when get profile by uid of around you :
-    for (i in 0..12) {
+    for (i in 0..11) {
       `when`(mockProfilesCollectionReference.document(i.toString()))
           .thenReturn(profilesDocumentReference[i])
       `when`(profilesDocumentReference[i].get(any())).thenReturn(profilesTaskDocumentSnapshot[i])
