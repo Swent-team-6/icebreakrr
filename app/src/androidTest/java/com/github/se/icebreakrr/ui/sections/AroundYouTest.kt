@@ -49,7 +49,7 @@ class AroundYouScreenTest {
   private lateinit var mockLocationService: ILocationService
   private lateinit var mockLocationRepository: LocationRepository
   private lateinit var mockPermissionManager: IPermissionManager
-    private lateinit var mockDataStore: AppDataStore
+  private lateinit var mockDataStore: AppDataStore
 
   private lateinit var locationViewModel: LocationViewModel
 
@@ -74,14 +74,12 @@ class AroundYouScreenTest {
     // Mock state flows
     `when`(mockProfilesRepository.isWaiting).thenReturn(MutableStateFlow(false))
     `when`(mockProfilesRepository.waitingDone).thenReturn(MutableStateFlow(false))
-    `when`(mockPermissionManager.permissionStatuses).thenReturn(
-      MutableStateFlow(
-        mapOf(
-          android.Manifest.permission.ACCESS_FINE_LOCATION to android.content.pm.PackageManager.PERMISSION_GRANTED
-        )
-      )
-    )
-
+    `when`(mockPermissionManager.permissionStatuses)
+        .thenReturn(
+            MutableStateFlow(
+                mapOf(
+                    android.Manifest.permission.ACCESS_FINE_LOCATION to
+                        android.content.pm.PackageManager.PERMISSION_GRANTED)))
 
     // Mock successful connection check
     `when`(mockProfilesRepository.getProfilesInRadius(any(), any(), any(), any())).thenAnswer {
@@ -105,9 +103,9 @@ class AroundYouScreenTest {
           viewModel(factory = FilterViewModel.Factory),
           locationViewModel,
           true,
-            mockPermissionManager,
-            mockDataStore,
-          )
+          mockPermissionManager,
+          mockDataStore,
+      )
     }
 
     // Trigger initial connection check

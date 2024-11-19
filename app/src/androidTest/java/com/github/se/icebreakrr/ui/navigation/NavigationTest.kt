@@ -101,14 +101,13 @@ class NavigationTest {
     locationViewModel =
         LocationViewModel(mockLocationService, mockLocationRepository, mockPermissionManager)
 
-      //mock state flow
-      `when`(mockPermissionManager.permissionStatuses).thenReturn(
-          MutableStateFlow(
-              mapOf(
-                  android.Manifest.permission.ACCESS_FINE_LOCATION to android.content.pm.PackageManager.PERMISSION_GRANTED
-              )
-          )
-      )
+    // mock state flow
+    `when`(mockPermissionManager.permissionStatuses)
+        .thenReturn(
+            MutableStateFlow(
+                mapOf(
+                    android.Manifest.permission.ACCESS_FINE_LOCATION to
+                        android.content.pm.PackageManager.PERMISSION_GRANTED)))
   }
 
   @Test

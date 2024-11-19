@@ -83,23 +83,23 @@ fun AroundYouScreen(
     appDataStore: AppDataStore
 ) {
 
-    val permissionStatuses = permissionManager.permissionStatuses.collectAsState()
-    val hasLocationPermission =
-        permissionStatuses.value[android.Manifest.permission.ACCESS_FINE_LOCATION] ==
-                PackageManager.PERMISSION_GRANTED
+  val permissionStatuses = permissionManager.permissionStatuses.collectAsState()
+  val hasLocationPermission =
+      permissionStatuses.value[android.Manifest.permission.ACCESS_FINE_LOCATION] ==
+          PackageManager.PERMISSION_GRANTED
   val filteredProfiles = profilesViewModel.filteredProfiles.collectAsState()
   val isLoading = profilesViewModel.loading.collectAsState()
   val context = LocalContext.current
   val isConnected = profilesViewModel.isConnected.collectAsState()
   val userLocation = locationViewModel.lastKnownLocation.collectAsState()
-    // Collect the discoverability state from DataStore
-    val isDiscoverable by appDataStore.isDiscoverable.collectAsState(initial = false)
+  // Collect the discoverability state from DataStore
+  val isDiscoverable by appDataStore.isDiscoverable.collectAsState(initial = false)
 
   // Initial check and start of periodic update every 10 seconds
   LaunchedEffect(isConnected.value, userLocation.value) {
     if (!isTestMode && !isNetworkAvailable()) {
       profilesViewModel.updateIsConnected(false)
-    } else if (hasLocationPermission){
+    } else if (hasLocationPermission) {
       while (true) {
         // Use the last known position or a default position
         val centerLocation = userLocation.value ?: GeoPoint(DEFAULT_LATITUDE, DEFAULT_LONGITUDE)
@@ -147,43 +147,41 @@ fun AroundYouScreen(
             },
             modifier = Modifier.padding(innerPadding),
             content = {
-                if (!isConnected.value){
-                    EmptyProfilePrompt(label = "No Internet Connection", testTag = "noConnectionPrompt")
-                } else if (!isDiscoverable) {
-                    EmptyProfilePrompt(
-                        label = "Activate location sharing in the app settings!",
-                        testTag = "activateLocationPrompt")
-                } else if (!isTestMode && !hasLocationPermission) {
-                    EmptyProfilePrompt(
-                        label =
+              if (!isConnected.value) {
+                EmptyProfilePrompt(label = "No Internet Connection", testTag = "noConnectionPrompt")
+              } else if (!isDiscoverable) {
+                EmptyProfilePrompt(
+                    label = "Activate location sharing in the app settings!",
+                    testTag = "activateLocationPrompt")
+              } else if (!isTestMode && !hasLocationPermission) {
+                EmptyProfilePrompt(
+                    label =
                         "Precise location permission is required to show profiles. Activate it in your phone settings",
-                        testTag = "noLocationPermissionPrompt")
-                } else if (filteredProfiles.value.isEmpty()) {
-                    EmptyProfilePrompt(
-                        label = "There is no one around. Try moving!",
-                        testTag = "emptyProfilePrompt"
-                    )
-                } else {
-                    LazyColumn(
-                        contentPadding = PaddingValues(vertical = COLUMN_VERTICAL_PADDING),
-                        verticalArrangement = Arrangement.spacedBy(COLUMN_VERTICAL_PADDING),
-                        modifier =
+                    testTag = "noLocationPermissionPrompt")
+              } else if (filteredProfiles.value.isEmpty()) {
+                EmptyProfilePrompt(
+                    label = "There is no one around. Try moving!", testTag = "emptyProfilePrompt")
+              } else {
+                LazyColumn(
+                    contentPadding = PaddingValues(vertical = COLUMN_VERTICAL_PADDING),
+                    verticalArrangement = Arrangement.spacedBy(COLUMN_VERTICAL_PADDING),
+                    modifier =
                         Modifier.fillMaxSize().padding(horizontal = COLUMN_HORIZONTAL_PADDING)) {
-                        items(filteredProfiles.value.size) { index ->
-                            ProfileCard(
-                                profile = filteredProfiles.value[index],
-                                onclick = {
-                                    if (isNetworkAvailableWithContext(context)) {
-                                        navigationActions.navigateTo(
-                                            Screen.OTHER_PROFILE_VIEW +
-                                                    "?userId=${filteredProfiles.value[index].uid}")
-                                    } else {
-                                        showNoInternetToast(context)
-                                    }
-                                })
-                        }
+                      items(filteredProfiles.value.size) { index ->
+                        ProfileCard(
+                            profile = filteredProfiles.value[index],
+                            onclick = {
+                              if (isNetworkAvailableWithContext(context)) {
+                                navigationActions.navigateTo(
+                                    Screen.OTHER_PROFILE_VIEW +
+                                        "?userId=${filteredProfiles.value[index].uid}")
+                              } else {
+                                showNoInternetToast(context)
+                              }
+                            })
+                      }
                     }
-                }
+              }
             })
       },
       floatingActionButton = { FilterFloatingActionButton(navigationActions) })
@@ -225,9 +223,7 @@ fun PullToRefreshBox(
     contentAlignment: Alignment = Alignment.TopStart,
     indicator: @Composable BoxScope.() -> Unit = {
       Indicator(
-          modifier = Modifier
-              .align(Alignment.TopCenter)
-              .testTag("refreshIndicator"),
+          modifier = Modifier.align(Alignment.TopCenter).testTag("refreshIndicator"),
           isRefreshing = isRefreshing,
           state = state)
     },
@@ -250,17 +246,14 @@ fun PullToRefreshBox(
       }
 }
 
-
 @Composable
 fun EmptyProfilePrompt(label: String, testTag: String) {
-    Box(contentAlignment = Alignment.Center, modifier = Modifier
-        .fillMaxSize()
-        .testTag(testTag)) {
-        Text(
-            text = label,
-            fontSize = TEXT_SIZE_LARGE,
-            fontWeight = FontWeight.Bold,
-            color = messageTextColor,
-            textAlign = TextAlign.Center)
-    }
+  Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize().testTag(testTag)) {
+    Text(
+        text = label,
+        fontSize = TEXT_SIZE_LARGE,
+        fontWeight = FontWeight.Bold,
+        color = messageTextColor,
+        textAlign = TextAlign.Center)
+  }
 }

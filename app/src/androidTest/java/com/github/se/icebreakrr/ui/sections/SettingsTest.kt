@@ -38,7 +38,6 @@ import org.junit.Test
 import org.junit.rules.TemporaryFolder
 import org.mockito.Mockito
 import org.mockito.Mockito.`when`
-import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 
@@ -53,13 +52,12 @@ class SettingsTest {
   private lateinit var navigationActionsMock: NavigationActions
   private lateinit var profilesViewModel: ProfilesViewModel
   private lateinit var mockProfilesRepository: ProfilesRepository
-    private lateinit var mockLocationService: ILocationService
-    private lateinit var mockLocationRepository: LocationRepository
-    private lateinit var mockPermissionManager: IPermissionManager
+  private lateinit var mockLocationService: ILocationService
+  private lateinit var mockLocationRepository: LocationRepository
+  private lateinit var mockPermissionManager: IPermissionManager
   private lateinit var testDataStore: DataStore<Preferences>
   private lateinit var appDataStore: AppDataStore
   private lateinit var locationViewModel: LocationViewModel
-
 
   @Before
   fun setUp() {
@@ -86,7 +84,8 @@ class SettingsTest {
     profilesViewModel =
         ProfilesViewModel(
             mockProfilesRepository, ProfilePicRepositoryStorage(mockStorage), mock<FirebaseAuth>())
-    locationViewModel = LocationViewModel(mockLocationService, mockLocationRepository, mockPermissionManager)
+    locationViewModel =
+        LocationViewModel(mockLocationService, mockLocationRepository, mockPermissionManager)
 
     // Mock necessary Flow returns
     `when`(mockProfilesRepository.isWaiting).thenReturn(MutableStateFlow(false))
@@ -94,19 +93,23 @@ class SettingsTest {
 
     `when`(navigationActionsMock.currentRoute()).thenReturn(Route.SETTINGS)
 
-    `when`(mockPermissionManager.permissionStatuses).thenReturn(
-        MutableStateFlow(
-            mapOf(
-                android.Manifest.permission.ACCESS_FINE_LOCATION to android.content.pm.PackageManager.PERMISSION_GRANTED
-            )
-        )
-    )
+    `when`(mockPermissionManager.permissionStatuses)
+        .thenReturn(
+            MutableStateFlow(
+                mapOf(
+                    android.Manifest.permission.ACCESS_FINE_LOCATION to
+                        android.content.pm.PackageManager.PERMISSION_GRANTED)))
   }
 
   @Test
   fun testProfileSettingsScreenDisplaysCorrectly() = runTest {
     composeTestRule.setContent {
-      SettingsScreen(profilesViewModel, navigationActionsMock, appDataStore, locationViewModel,  mock<FirebaseAuth>())
+      SettingsScreen(
+          profilesViewModel,
+          navigationActionsMock,
+          appDataStore,
+          locationViewModel,
+          mock<FirebaseAuth>())
     }
 
     // Assert that the top bar is displayed
@@ -129,7 +132,12 @@ class SettingsTest {
   @Test
   fun testNavigationActionsOnProfileCardClick() = runTest {
     composeTestRule.setContent {
-      SettingsScreen(profilesViewModel, navigationActionsMock, appDataStore,locationViewModel, mock<FirebaseAuth>())
+      SettingsScreen(
+          profilesViewModel,
+          navigationActionsMock,
+          appDataStore,
+          locationViewModel,
+          mock<FirebaseAuth>())
     }
 
     composeTestRule.onNodeWithTag("profileCard").performClick()
@@ -142,7 +150,12 @@ class SettingsTest {
     appDataStore.saveDiscoverableStatus(false)
 
     composeTestRule.setContent {
-      SettingsScreen(profilesViewModel, navigationActionsMock, appDataStore, locationViewModel, mock<FirebaseAuth>())
+      SettingsScreen(
+          profilesViewModel,
+          navigationActionsMock,
+          appDataStore,
+          locationViewModel,
+          mock<FirebaseAuth>())
     }
 
     // Initial state check

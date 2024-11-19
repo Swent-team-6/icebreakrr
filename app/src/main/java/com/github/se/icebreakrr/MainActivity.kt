@@ -119,7 +119,14 @@ class MainActivity : ComponentActivity() {
       CompositionLocalProvider(LocalIsTesting provides isTesting) {
         SampleAppTheme {
           Surface(modifier = Modifier.fillMaxSize()) {
-            IcebreakrrApp(auth, functions, appDataStore, locationViewModel, firestore, isTesting, permissionManager)
+            IcebreakrrApp(
+                auth,
+                functions,
+                appDataStore,
+                locationViewModel,
+                firestore,
+                isTesting,
+                permissionManager)
           }
         }
       }
