@@ -1,6 +1,7 @@
 package com.github.se.icebreakrr.ui.sections
 
 import android.annotation.SuppressLint
+import android.content.pm.PackageManager
 import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -19,13 +20,16 @@ import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.github.se.icebreakrr.data.AppDataStore
 import com.github.se.icebreakrr.model.filter.FilterViewModel
 import com.github.se.icebreakrr.model.location.LocationViewModel
 import com.github.se.icebreakrr.model.profile.Gender
@@ -40,6 +44,7 @@ import com.github.se.icebreakrr.ui.sections.shared.FilterFloatingActionButton
 import com.github.se.icebreakrr.ui.sections.shared.ProfileCard
 import com.github.se.icebreakrr.ui.sections.shared.TopBar
 import com.github.se.icebreakrr.ui.theme.messageTextColor
+import com.github.se.icebreakrr.utils.IPermissionManager
 import com.github.se.icebreakrr.utils.NetworkUtils.isNetworkAvailable
 import com.github.se.icebreakrr.utils.NetworkUtils.isNetworkAvailableWithContext
 import com.github.se.icebreakrr.utils.NetworkUtils.showNoInternetToast
@@ -73,20 +78,28 @@ fun AroundYouScreen(
     tagsViewModel: TagsViewModel,
     filterViewModel: FilterViewModel,
     locationViewModel: LocationViewModel,
-    isTestMode: Boolean = false
+    isTestMode: Boolean = false,
+    permissionManager: IPermissionManager,
+    appDataStore: AppDataStore
 ) {
 
+    val permissionStatuses = permissionManager.permissionStatuses.collectAsState()
+    val hasLocationPermission =
+        permissionStatuses.value[android.Manifest.permission.ACCESS_FINE_LOCATION] ==
+                PackageManager.PERMISSION_GRANTED
   val filteredProfiles = profilesViewModel.filteredProfiles.collectAsState()
   val isLoading = profilesViewModel.loading.collectAsState()
   val context = LocalContext.current
   val isConnected = profilesViewModel.isConnected.collectAsState()
   val userLocation = locationViewModel.lastKnownLocation.collectAsState()
+    // Collect the discoverability state from DataStore
+    val isDiscoverable by appDataStore.isDiscoverable.collectAsState(initial = false)
 
   // Initial check and start of periodic update every 10 seconds
   LaunchedEffect(isConnected.value, userLocation.value) {
     if (!isTestMode && !isNetworkAvailable()) {
       profilesViewModel.updateIsConnected(false)
-    } else {
+    } else if (hasLocationPermission){
       while (true) {
         // Use the last known position or a default position
         val centerLocation = userLocation.value ?: GeoPoint(DEFAULT_LATITUDE, DEFAULT_LONGITUDE)
@@ -132,53 +145,46 @@ fun AroundYouScreen(
                   ageRange,
                   tags)
             },
-            modifier = Modifier.padding(innerPadding)) {
-              LazyColumn(
-                  contentPadding = PaddingValues(vertical = COLUMN_VERTICAL_PADDING),
-                  verticalArrangement = Arrangement.spacedBy(COLUMN_VERTICAL_PADDING),
-                  modifier =
-                      Modifier.fillMaxSize().padding(horizontal = COLUMN_HORIZONTAL_PADDING)) {
-                    if (!isConnected.value) {
-                      item {
-                        Box(
-                            contentAlignment = Alignment.Center,
-                            modifier = Modifier.fillMaxSize().testTag("noConnectionPrompt")) {
-                              Text(
-                                  text = "No Internet Connection",
-                                  fontSize = TEXT_SIZE_LARGE,
-                                  fontWeight = FontWeight.Bold,
-                                  color = NO_CONNECTION_TEXT_COLOR)
-                            }
-                      }
-                    } else if (filteredProfiles.value.isNotEmpty()) {
-                      items(filteredProfiles.value.size) { index ->
-                        ProfileCard(
-                            profile = filteredProfiles.value[index],
-                            onclick = {
-                              if (isNetworkAvailableWithContext(context)) {
-                                navigationActions.navigateTo(
-                                    Screen.OTHER_PROFILE_VIEW +
-                                        "?userId=${filteredProfiles.value[index].uid}")
-                              } else {
-                                showNoInternetToast(context)
-                              }
-                            })
-                      }
-                    } else {
-                      item {
-                        Box(
-                            contentAlignment = Alignment.Center,
-                            modifier = Modifier.fillMaxSize().testTag("emptyProfilePrompt")) {
-                              Text(
-                                  text = "There is no one around. Try moving!",
-                                  fontSize = TEXT_SIZE_LARGE,
-                                  fontWeight = FontWeight.Bold,
-                                  color = EMPTY_PROFILE_TEXT_COLOR)
-                            }
-                      }
+            modifier = Modifier.padding(innerPadding),
+            content = {
+                if (!isConnected.value){
+                    EmptyProfilePrompt(label = "No Internet Connection", testTag = "noConnectionPrompt")
+                } else if (!isDiscoverable) {
+                    EmptyProfilePrompt(
+                        label = "Activate location sharing in the app settings!",
+                        testTag = "activateLocationPrompt")
+                } else if (!hasLocationPermission) {
+                    EmptyProfilePrompt(
+                        label =
+                        "Precise location permission is required to show profiles. Activate it in your phone settings",
+                        testTag = "noLocationPermissionPrompt")
+                } else if (filteredProfiles.value.isEmpty()) {
+                    EmptyProfilePrompt(
+                        label = "There is no one around. Try moving!",
+                        testTag = "emptyProfilePrompt"
+                    )
+                } else {
+                    LazyColumn(
+                        contentPadding = PaddingValues(vertical = COLUMN_VERTICAL_PADDING),
+                        verticalArrangement = Arrangement.spacedBy(COLUMN_VERTICAL_PADDING),
+                        modifier =
+                        Modifier.fillMaxSize().padding(horizontal = COLUMN_HORIZONTAL_PADDING)) {
+                        items(filteredProfiles.value.size) { index ->
+                            ProfileCard(
+                                profile = filteredProfiles.value[index],
+                                onclick = {
+                                    if (isNetworkAvailableWithContext(context)) {
+                                        navigationActions.navigateTo(
+                                            Screen.OTHER_PROFILE_VIEW +
+                                                    "?userId=${filteredProfiles.value[index].uid}")
+                                    } else {
+                                        showNoInternetToast(context)
+                                    }
+                                })
+                        }
                     }
-                  }
-            }
+                }
+            })
       },
       floatingActionButton = { FilterFloatingActionButton(navigationActions) })
 }
@@ -219,7 +225,9 @@ fun PullToRefreshBox(
     contentAlignment: Alignment = Alignment.TopStart,
     indicator: @Composable BoxScope.() -> Unit = {
       Indicator(
-          modifier = Modifier.align(Alignment.TopCenter).testTag("refreshIndicator"),
+          modifier = Modifier
+              .align(Alignment.TopCenter)
+              .testTag("refreshIndicator"),
           isRefreshing = isRefreshing,
           state = state)
     },
@@ -240,4 +248,19 @@ fun PullToRefreshBox(
         content()
         indicator()
       }
+}
+
+
+@Composable
+fun EmptyProfilePrompt(label: String, testTag: String) {
+    Box(contentAlignment = Alignment.Center, modifier = Modifier
+        .fillMaxSize()
+        .testTag(testTag)) {
+        Text(
+            text = label,
+            fontSize = TEXT_SIZE_LARGE,
+            fontWeight = FontWeight.Bold,
+            color = messageTextColor,
+            textAlign = TextAlign.Center)
+    }
 }
