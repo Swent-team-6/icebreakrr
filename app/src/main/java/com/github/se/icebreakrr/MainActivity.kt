@@ -43,6 +43,7 @@ import com.github.se.icebreakrr.ui.sections.FilterScreen
 import com.github.se.icebreakrr.ui.sections.NotificationScreen
 import com.github.se.icebreakrr.ui.sections.SettingsScreen
 import com.github.se.icebreakrr.ui.theme.SampleAppTheme
+import com.github.se.icebreakrr.utils.IPermissionManager
 import com.github.se.icebreakrr.utils.NetworkUtils
 import com.github.se.icebreakrr.utils.PermissionManager
 import com.google.android.gms.location.FusedLocationProviderClient
@@ -118,7 +119,7 @@ class MainActivity : ComponentActivity() {
       CompositionLocalProvider(LocalIsTesting provides isTesting) {
         SampleAppTheme {
           Surface(modifier = Modifier.fillMaxSize()) {
-            IcebreakrrApp(auth, functions, appDataStore, locationViewModel, firestore, isTesting)
+            IcebreakrrApp(auth, functions, appDataStore, locationViewModel, firestore, isTesting, permissionManager)
           }
         }
       }
@@ -175,7 +176,8 @@ fun IcebreakrrApp(
     appDataStore: AppDataStore,
     locationViewModel: LocationViewModel,
     firestore: FirebaseFirestore,
-    isTesting: Boolean
+    isTesting: Boolean,
+    permissionManager: IPermissionManager
 ) {
   val profileViewModel: ProfilesViewModel =
       viewModel(factory = ProfilesViewModel.Companion.Factory(auth, firestore))
@@ -200,7 +202,8 @@ fun IcebreakrrApp(
       appDataStore,
       locationViewModel,
       startDestination,
-      auth)
+      auth,
+      permissionManager)
 }
 
 @Composable
@@ -212,7 +215,8 @@ fun IcebreakrrNavHost(
     appDataStore: AppDataStore,
     locationViewModel: LocationViewModel,
     startDestination: String,
-    auth: FirebaseAuth
+    auth: FirebaseAuth,
+    permissionManager: IPermissionManager
 ) {
   val navController = rememberNavController()
   val navigationActions = NavigationActions(navController)
@@ -246,7 +250,13 @@ fun IcebreakrrNavHost(
     ) {
       composable(Screen.AROUND_YOU) {
         AroundYouScreen(
-            navigationActions, profileViewModel, tagsViewModel, filterViewModel, locationViewModel)
+            navigationActions = navigationActions,
+            profilesViewModel = profileViewModel,
+            tagsViewModel = tagsViewModel,
+            filterViewModel = filterViewModel,
+            locationViewModel = locationViewModel,
+            permissionManager = permissionManager,
+            appDataStore = appDataStore)
       }
       composable(Screen.OTHER_PROFILE_VIEW + "?userId={userId}") { navBackStackEntry ->
         if (meetingRequestViewModel != null) {
@@ -268,7 +278,12 @@ fun IcebreakrrNavHost(
         route = Route.SETTINGS,
     ) {
       composable(Screen.SETTINGS) {
-        SettingsScreen(profileViewModel, navigationActions, appDataStore = appDataStore, auth)
+        SettingsScreen(
+            profilesViewModel = profileViewModel,
+            navigationActions = navigationActions,
+            appDataStore = appDataStore,
+            locationViewModel = locationViewModel,
+            auth = auth)
       }
       composable(Screen.PROFILE) {
         ProfileView(profileViewModel, tagsViewModel, navigationActions, auth)
