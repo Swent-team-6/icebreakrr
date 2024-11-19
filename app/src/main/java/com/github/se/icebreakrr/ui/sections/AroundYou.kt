@@ -153,7 +153,7 @@ fun AroundYouScreen(
                     EmptyProfilePrompt(
                         label = "Activate location sharing in the app settings!",
                         testTag = "activateLocationPrompt")
-                } else if (!hasLocationPermission) {
+                } else if (!isTestMode && !hasLocationPermission) {
                     EmptyProfilePrompt(
                         label =
                         "Precise location permission is required to show profiles. Activate it in your phone settings",

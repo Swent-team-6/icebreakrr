@@ -10,12 +10,16 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.datastore.preferences.core.Preferences
 import com.github.se.icebreakrr.data.AppDataStore
+import com.github.se.icebreakrr.model.location.ILocationService
+import com.github.se.icebreakrr.model.location.LocationRepository
+import com.github.se.icebreakrr.model.location.LocationViewModel
 import com.github.se.icebreakrr.model.profile.ProfilePicRepositoryStorage
 import com.github.se.icebreakrr.model.profile.ProfilesRepository
 import com.github.se.icebreakrr.model.profile.ProfilesViewModel
 import com.github.se.icebreakrr.ui.navigation.NavigationActions
 import com.github.se.icebreakrr.ui.navigation.Route
 import com.github.se.icebreakrr.ui.navigation.Screen
+import com.github.se.icebreakrr.utils.IPermissionManager
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
@@ -34,6 +38,7 @@ import org.junit.Test
 import org.junit.rules.TemporaryFolder
 import org.mockito.Mockito
 import org.mockito.Mockito.`when`
+import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 
@@ -48,8 +53,13 @@ class SettingsTest {
   private lateinit var navigationActionsMock: NavigationActions
   private lateinit var profilesViewModel: ProfilesViewModel
   private lateinit var mockProfilesRepository: ProfilesRepository
+    private lateinit var mockLocationService: ILocationService
+    private lateinit var mockLocationRepository: LocationRepository
+    private lateinit var mockPermissionManager: IPermissionManager
   private lateinit var testDataStore: DataStore<Preferences>
   private lateinit var appDataStore: AppDataStore
+  private lateinit var locationViewModel: LocationViewModel
+
 
   @Before
   fun setUp() {
@@ -63,28 +73,40 @@ class SettingsTest {
     // Set up other mocks
     navigationActionsMock = mock()
     mockProfilesRepository = Mockito.mock(ProfilesRepository::class.java)
+    mockLocationService = Mockito.mock(ILocationService::class.java)
+    mockLocationRepository = Mockito.mock(LocationRepository::class.java)
+    mockPermissionManager = Mockito.mock(IPermissionManager::class.java)
 
     // Create a mock storage reference
     val mockStorage = mock<FirebaseStorage>()
     val mockStorageRef = mock<StorageReference>()
     `when`(mockStorage.reference).thenReturn(mockStorageRef)
 
-    // Initialize profilesViewModel with proper mocks
+    // Initialize profilesViewModel and locationViewmodel with proper mocks
     profilesViewModel =
         ProfilesViewModel(
             mockProfilesRepository, ProfilePicRepositoryStorage(mockStorage), mock<FirebaseAuth>())
+    locationViewModel = LocationViewModel(mockLocationService, mockLocationRepository, mockPermissionManager)
 
-    // Mock necessary repository Flow returns
+    // Mock necessary Flow returns
     `when`(mockProfilesRepository.isWaiting).thenReturn(MutableStateFlow(false))
     `when`(mockProfilesRepository.waitingDone).thenReturn(MutableStateFlow(false))
 
     `when`(navigationActionsMock.currentRoute()).thenReturn(Route.SETTINGS)
+
+    `when`(mockPermissionManager.permissionStatuses).thenReturn(
+        MutableStateFlow(
+            mapOf(
+                android.Manifest.permission.ACCESS_FINE_LOCATION to android.content.pm.PackageManager.PERMISSION_GRANTED
+            )
+        )
+    )
   }
 
   @Test
   fun testProfileSettingsScreenDisplaysCorrectly() = runTest {
     composeTestRule.setContent {
-      SettingsScreen(profilesViewModel, navigationActionsMock, appDataStore, mock<FirebaseAuth>())
+      SettingsScreen(profilesViewModel, navigationActionsMock, appDataStore, locationViewModel,  mock<FirebaseAuth>())
     }
 
     // Assert that the top bar is displayed
@@ -107,7 +129,7 @@ class SettingsTest {
   @Test
   fun testNavigationActionsOnProfileCardClick() = runTest {
     composeTestRule.setContent {
-      SettingsScreen(profilesViewModel, navigationActionsMock, appDataStore, mock<FirebaseAuth>())
+      SettingsScreen(profilesViewModel, navigationActionsMock, appDataStore,locationViewModel, mock<FirebaseAuth>())
     }
 
     composeTestRule.onNodeWithTag("profileCard").performClick()
@@ -120,7 +142,7 @@ class SettingsTest {
     appDataStore.saveDiscoverableStatus(false)
 
     composeTestRule.setContent {
-      SettingsScreen(profilesViewModel, navigationActionsMock, appDataStore, mock<FirebaseAuth>())
+      SettingsScreen(profilesViewModel, navigationActionsMock, appDataStore, locationViewModel, mock<FirebaseAuth>())
     }
 
     // Initial state check

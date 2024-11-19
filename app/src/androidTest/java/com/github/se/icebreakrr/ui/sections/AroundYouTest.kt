@@ -9,6 +9,7 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTouchInput
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.test.espresso.action.ViewActions.swipeDown
+import com.github.se.icebreakrr.data.AppDataStore
 import com.github.se.icebreakrr.model.filter.FilterViewModel
 import com.github.se.icebreakrr.model.location.ILocationService
 import com.github.se.icebreakrr.model.location.LocationRepository
@@ -48,6 +49,7 @@ class AroundYouScreenTest {
   private lateinit var mockLocationService: ILocationService
   private lateinit var mockLocationRepository: LocationRepository
   private lateinit var mockPermissionManager: IPermissionManager
+    private lateinit var mockDataStore: AppDataStore
 
   private lateinit var locationViewModel: LocationViewModel
 
@@ -64,13 +66,22 @@ class AroundYouScreenTest {
     mockLocationService = mock(ILocationService::class.java)
     mockLocationRepository = mock(LocationRepository::class.java)
     mockPermissionManager = mock(IPermissionManager::class.java)
+    mockDataStore = mock(AppDataStore::class.java)
 
     locationViewModel =
         LocationViewModel(mockLocationService, mockLocationRepository, mockPermissionManager)
 
-    // Mock repository state flows
+    // Mock state flows
     `when`(mockProfilesRepository.isWaiting).thenReturn(MutableStateFlow(false))
     `when`(mockProfilesRepository.waitingDone).thenReturn(MutableStateFlow(false))
+    `when`(mockPermissionManager.permissionStatuses).thenReturn(
+      MutableStateFlow(
+        mapOf(
+          android.Manifest.permission.ACCESS_FINE_LOCATION to android.content.pm.PackageManager.PERMISSION_GRANTED
+        )
+      )
+    )
+
 
     // Mock successful connection check
     `when`(mockProfilesRepository.getProfilesInRadius(any(), any(), any(), any())).thenAnswer {
@@ -93,7 +104,10 @@ class AroundYouScreenTest {
                       mock(FirebaseAuth::class.java), mock(FirebaseFirestore::class.java))),
           viewModel(factory = FilterViewModel.Factory),
           locationViewModel,
-          true)
+          true,
+            mockPermissionManager,
+            mockDataStore,
+          )
     }
 
     // Trigger initial connection check

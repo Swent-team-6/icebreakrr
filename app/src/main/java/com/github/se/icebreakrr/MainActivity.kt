@@ -203,7 +203,8 @@ fun IcebreakrrApp(
       locationViewModel,
       startDestination,
       auth,
-      permissionManager)
+      permissionManager,
+      isTesting)
 }
 
 @Composable
@@ -216,7 +217,8 @@ fun IcebreakrrNavHost(
     locationViewModel: LocationViewModel,
     startDestination: String,
     auth: FirebaseAuth,
-    permissionManager: IPermissionManager
+    permissionManager: IPermissionManager,
+    isTesting: Boolean
 ) {
   val navController = rememberNavController()
   val navigationActions = NavigationActions(navController)
@@ -255,6 +257,7 @@ fun IcebreakrrNavHost(
             tagsViewModel = tagsViewModel,
             filterViewModel = filterViewModel,
             locationViewModel = locationViewModel,
+            isTestMode = isTesting,
             permissionManager = permissionManager,
             appDataStore = appDataStore)
       }

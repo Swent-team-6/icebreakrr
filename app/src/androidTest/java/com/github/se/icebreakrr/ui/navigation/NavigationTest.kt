@@ -30,6 +30,7 @@ import com.google.firebase.storage.FirebaseStorage
 import java.io.File
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -39,6 +40,7 @@ import org.junit.Test
 import org.junit.rules.TemporaryFolder
 import org.junit.runner.RunWith
 import org.mockito.Mockito.mock
+import org.mockito.Mockito.`when`
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(AndroidJUnit4::class)
@@ -98,6 +100,15 @@ class NavigationTest {
 
     locationViewModel =
         LocationViewModel(mockLocationService, mockLocationRepository, mockPermissionManager)
+
+      //mock state flow
+      `when`(mockPermissionManager.permissionStatuses).thenReturn(
+          MutableStateFlow(
+              mapOf(
+                  android.Manifest.permission.ACCESS_FINE_LOCATION to android.content.pm.PackageManager.PERMISSION_GRANTED
+              )
+          )
+      )
   }
 
   @Test
@@ -111,7 +122,9 @@ class NavigationTest {
           appDataStore,
           locationViewModel,
           Route.AUTH,
-          mock(FirebaseAuth::class.java))
+          mock(FirebaseAuth::class.java),
+          mock(IPermissionManager::class.java),
+          true)
     }
 
     // Assert that the login screen is shown on launch
@@ -129,7 +142,9 @@ class NavigationTest {
           appDataStore,
           locationViewModel,
           Route.AROUND_YOU,
-          FirebaseAuth.getInstance())
+          FirebaseAuth.getInstance(),
+          mockPermissionManager,
+          true)
     }
 
     // Check that the "Around You" screen is displayed after login
