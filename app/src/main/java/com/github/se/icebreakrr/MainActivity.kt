@@ -38,6 +38,7 @@ import com.github.se.icebreakrr.ui.navigation.Screen
 import com.github.se.icebreakrr.ui.profile.OtherProfileView
 import com.github.se.icebreakrr.ui.profile.ProfileEditingScreen
 import com.github.se.icebreakrr.ui.profile.ProfileView
+import com.github.se.icebreakrr.ui.sections.AlreadyMetScreen
 import com.github.se.icebreakrr.ui.sections.AroundYouScreen
 import com.github.se.icebreakrr.ui.sections.FilterScreen
 import com.github.se.icebreakrr.ui.sections.NotificationScreen
@@ -273,6 +274,7 @@ fun IcebreakrrNavHost(
       composable(Screen.PROFILE) {
         ProfileView(profileViewModel, tagsViewModel, navigationActions, auth)
       }
+      composable(Screen.ALREADY_MET) { AlreadyMetScreen(navigationActions, profileViewModel) }
     }
 
     navigation(
