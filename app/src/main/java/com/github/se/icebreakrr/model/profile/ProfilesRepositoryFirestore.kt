@@ -318,8 +318,6 @@ class ProfilesRepositoryFirestore(
               ?.filter { (key, value) -> key is String && value is String }
               ?.map { (key, value) -> key as String to value as String }
               ?.toMap() ?: mapOf()
-      Log.d("DOCUMENT TO PROFILE : SENT", meetingRequestSent.toString())
-      Log.d("DOCUMENT TO PROFILE : INBOX", meetingRequestInbox.toString())
       Profile(
           uid = uid,
           name = name,

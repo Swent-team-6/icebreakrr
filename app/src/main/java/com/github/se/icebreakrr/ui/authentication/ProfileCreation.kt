@@ -311,7 +311,7 @@ fun ProfileCreationScreen(
                           description = description.value,
                           tags = selectedTags,
                           fcmToken = fcmToken,
-                          meetingRequestSent = mapOf(),
+                          meetingRequestSent = listOf(),
                           meetingRequestInbox = mapOf()
                       )
                   // Creates profile in DB
