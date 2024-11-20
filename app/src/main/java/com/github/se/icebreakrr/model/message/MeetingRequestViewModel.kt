@@ -7,8 +7,11 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.github.se.icebreakrr.model.profile.Profile
 import com.github.se.icebreakrr.model.profile.ProfilesViewModel
 import com.google.firebase.functions.FirebaseFunctions
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
@@ -18,28 +21,23 @@ import kotlinx.coroutines.tasks.await
 class MeetingRequestViewModel(
     private val profilesViewModel: ProfilesViewModel,
     private val functions: FirebaseFunctions,
-    private val ourUserId: String?,
-    private val ourName: String?
 ) : ViewModel() {
 
   var meetingRequestState by mutableStateOf(MeetingRequest())
-  private val SEND_MESSAGE_FUNCTION_NAME = "sendMessage"
 
-  private var name: String? = null
-  private var userUID: String? = null
+  private val SEND_MESSAGE_FUNCTION_NAME = "sendMessage"
+  private val SEND_MEETING_REQUEST = "sendMeetingRequest"
 
   companion object {
     class Factory(
         private val profilesViewModel: ProfilesViewModel,
         private val functions: FirebaseFunctions,
-        private val ourUserId: String?,
-        private val ourName: String?
     ) : ViewModelProvider.Factory {
 
       @Suppress("UNCHECKED_CAST")
       override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(MeetingRequestViewModel::class.java)) {
-          return MeetingRequestViewModel(profilesViewModel, functions, ourUserId, ourName) as T
+          return MeetingRequestViewModel(profilesViewModel, functions) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
       }
@@ -47,9 +45,7 @@ class MeetingRequestViewModel(
   }
 
   init {
-    viewModelScope.launch {
-      meetingRequestState = meetingRequestState.copy(senderUID = ourUserId ?: "null")
-    }
+    viewModelScope.launch {}
   }
 
   /**
@@ -59,7 +55,7 @@ class MeetingRequestViewModel(
    */
   fun onRemoteTokenChange(newToken: String) {
     meetingRequestState = meetingRequestState.copy(targetToken = newToken)
-    profilesViewModel.getProfileByUid(ourUserId ?: "null")
+    profilesViewModel.getProfileByUid(MeetingRequestManager.ourUid ?: "null")
     val currentProfile = profilesViewModel.selectedProfile.value
     if (currentProfile != null) {
       val updatedProfile = currentProfile.copy(fcmToken = newToken)
@@ -82,10 +78,7 @@ class MeetingRequestViewModel(
   fun onMeetingRequestChange(newMessage: String) {
     meetingRequestState = meetingRequestState.copy(message = newMessage)
   }
-  /** Sets the status of the message, shows that it is ready to be sent */
-  fun onSubmitMeetingRequest() {
-    meetingRequestState = meetingRequestState.copy(isEnteringMessage = false)
-  }
+
 
   /** Sends the message from our user to the target user */
   fun sendMessage() {
@@ -95,8 +88,7 @@ class MeetingRequestViewModel(
               "targetToken" to meetingRequestState.targetToken,
               "senderUID" to meetingRequestState.senderUID,
               "body" to MeetingRequestManager.ourName + " : " + meetingRequestState.message,
-              "picture" to meetingRequestState.picture,
-              "location" to meetingRequestState.location)
+              )
       try {
         val result =
             functions
@@ -104,10 +96,34 @@ class MeetingRequestViewModel(
                 .call(data)
                 .await()
 
-        meetingRequestState = meetingRequestState.copy(message = "", picture = null)
+        meetingRequestState = meetingRequestState.copy(message = "")
       } catch (e: Exception) {
         Log.e("FIREBASE ERROR", "Error sending message", e)
       }
     }
   }
+
+  fun sendMeetingRequest() {
+    viewModelScope.launch {
+      val data =
+          hashMapOf(
+              "targetToken" to meetingRequestState.targetToken,
+              "senderUID" to MeetingRequestManager.ourUid,
+              "message" to MeetingRequestManager.ourName + " : " + meetingRequestState.message,
+          )
+      try {
+        Log.d("SENDING MEETING REQUEST : ", data.toString())
+        val result =
+            functions
+                .getHttpsCallable(SEND_MEETING_REQUEST) // Cloud Function name
+                .call(data)
+                .await()
+
+        meetingRequestState = meetingRequestState.copy(message = "")
+      } catch (e: Exception) {
+        Log.e("FIREBASE ERROR", "Error sending message", e)
+      }
+    }
+  }
+
 }
