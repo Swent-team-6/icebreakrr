@@ -35,6 +35,7 @@ object Screen {
   const val PROFILE = "Profile Screen"
   const val OTHER_PROFILE_VIEW = "Around You Profile Screen"
   const val PROFILE_CREATION = "Profile Creation Screen"
+  const val ALREADY_MET = "Already Met Screen"
 }
 
 object TopLevelDestinations {
