@@ -1,6 +1,7 @@
 package com.github.se.icebreakrr.ui.sections
 
 import android.annotation.SuppressLint
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -15,6 +16,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.github.se.icebreakrr.model.message.MeetingRequestManager
 import com.github.se.icebreakrr.model.profile.ProfilesViewModel
 import com.github.se.icebreakrr.ui.navigation.BottomNavigationMenu
 import com.github.se.icebreakrr.ui.navigation.LIST_TOP_LEVEL_DESTINATIONS
@@ -43,7 +45,9 @@ private const val PASSED = "Passed"
 @Composable
 fun NotificationScreen(navigationActions: NavigationActions, profileViewModel: ProfilesViewModel) {
   val context = LocalContext.current
-  val cardList = profileViewModel.profiles.collectAsState()
+  MeetingRequestManager.meetingRequestViewModel?.getInbox()
+  val cardList = profileViewModel.inbox.collectAsState()
+  Log.d("CARDLIST", cardList.toString())
   val navFunction = { Toast.makeText(context, TOAST_MESSAGE, Toast.LENGTH_SHORT).show() }
 
   Scaffold(
@@ -74,7 +78,9 @@ fun NotificationScreen(navigationActions: NavigationActions, profileViewModel: P
                             .testTag("notificationFirstText"))
                 Column(verticalArrangement = Arrangement.spacedBy(CARD_SPACING)) {
                   cardList.value.take(MAX_PENDING_CARDS).forEach { p ->
-                    ProfileCard(p, onclick = navFunction)
+                      if (p != null) {
+                          ProfileCard(p, onclick = navFunction)
+                      }
                   }
                 }
                 Text(
@@ -85,7 +91,9 @@ fun NotificationScreen(navigationActions: NavigationActions, profileViewModel: P
                             .testTag("notificationSecondText"))
                 Column(verticalArrangement = Arrangement.spacedBy(CARD_SPACING)) {
                   cardList.value.drop(MAX_PENDING_CARDS).forEach { p ->
-                    ProfileCard(p, onclick = navFunction, greyedOut = true)
+                      if (p != null) {
+                          ProfileCard(p, onclick = navFunction, greyedOut = true)
+                      }
                   }
                 }
               }

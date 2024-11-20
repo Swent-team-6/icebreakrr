@@ -158,7 +158,13 @@ class MeetingRequestViewModel(
     }
   }
 
-//  fun getInbox() : Map<Profile, String> {
-//
-//  }
+  fun getInbox() {
+      val ourUid = MeetingRequestManager.ourUid
+      profilesViewModel.getProfileByUidAndThen(ourUid ?: "null"){
+          var uidMessageMap = profilesViewModel.selectedProfile.value?.meetingRequestInbox ?: mapOf()
+          val listUid = uidMessageMap.keys.toList()
+          profilesViewModel.getInboxByUidAndThen(listUid){}
+      }
+  }
+
 }
