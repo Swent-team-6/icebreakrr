@@ -8,7 +8,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.github.se.icebreakrr.R
 import com.github.se.icebreakrr.model.profile.ProfilesViewModel
 import com.github.se.icebreakrr.ui.navigation.NavigationActions
 import com.github.se.icebreakrr.ui.navigation.Screen
@@ -20,7 +22,16 @@ import com.github.se.icebreakrr.utils.NetworkUtils.showNoInternetToast
 private val COLUMN_VERTICAL_PADDING = 16.dp
 private val COLUMN_HORIZONTAL_PADDING = 8.dp
 
-@OptIn(ExperimentalMaterial3Api::class)
+/**
+ * Screen that displays a list of users that the current user has already met. This screen is
+ * accessible from the settings screen via "People You Already Met" button
+ *
+ * Currently implements only UI components and navigation. Backend integration for storing and
+ * retrieving already met profiles will be implemented later.
+ *
+ * @param navigationActions Navigation handler for screen transitions
+ * @param profilesViewModel ViewModel handling profile data operations
+ */
 @Composable
 fun AlreadyMetScreen(navigationActions: NavigationActions, profilesViewModel: ProfilesViewModel) {
   val cardList = profilesViewModel.profiles.collectAsState()
@@ -28,7 +39,9 @@ fun AlreadyMetScreen(navigationActions: NavigationActions, profilesViewModel: Pr
 
   Scaffold(
       modifier = Modifier.testTag("alreadyMetScreen"),
-      topBar = { TopBar("Already Met", true) { navigationActions.goBack() } },
+      topBar = {
+        TopBar(stringResource(R.string.already_met), true) { navigationActions.goBack() }
+      },
       content = { innerPadding ->
         Column(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
           Text(

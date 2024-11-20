@@ -27,9 +27,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavBackStackEntry
+import com.github.se.icebreakrr.R
 import com.github.se.icebreakrr.model.message.MeetingRequestViewModel
 import com.github.se.icebreakrr.model.profile.ProfilesViewModel
 import com.github.se.icebreakrr.model.tags.TagsViewModel
@@ -45,6 +47,7 @@ import com.github.se.icebreakrr.ui.sections.shared.ProfileHeader
  */
 private val ALPHA = 0.5f
 private val MET_BUTTON_HORIZTONAL_PADDING = 16.dp
+private val BUTTON_VERTICAL_PADDING = 16.dp
 
 @Composable
 fun OtherProfileView(
@@ -95,12 +98,12 @@ fun OtherProfileView(
             InfoSection(profile, tagsViewModel)
 
             // Add spacer for some padding
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(BUTTON_VERTICAL_PADDING))
 
             // Already met button
             Button(
                 onClick = {
-                  Toast.makeText(context, "Not yet implemented", Toast.LENGTH_SHORT).show()
+                  Toast.makeText(context, R.string.Not_Implemented_Toast, Toast.LENGTH_SHORT).show()
                 },
                 colors =
                     ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
@@ -109,11 +112,11 @@ fun OtherProfileView(
                         .padding(MET_BUTTON_HORIZTONAL_PADDING)
                         .align(Alignment.CenterHorizontally)
                         .testTag("alreadyMetButton")) {
-                  Text("I Already Met This Person", color = Color.White)
+                  Text(text = stringResource(R.string.Already_Met_Button_Text), color = Color.White)
                 }
 
             // Add bottom padding
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(BUTTON_VERTICAL_PADDING))
           }
 
       // this displays the request messaging system

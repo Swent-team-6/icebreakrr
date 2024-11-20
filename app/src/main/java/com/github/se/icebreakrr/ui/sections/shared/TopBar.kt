@@ -35,6 +35,7 @@ private val BACK_BUTTON_ICON_SIZE = 32.dp
 private val TOP_BAR_TEXT_SIZE = 40.sp
 private val TOP_BAR_TEXT_COLOR = Color.White
 private val TOP_BAR_BACKGROUND_COLOR = IceBreakrrBlue
+private val TITLE_TEXT_WEIGHT = 1f
 
 /**
  * Displays the TopBar of each screen, used to show to the user in which screen he is
@@ -73,7 +74,7 @@ fun TopBar(s: String, needBackButton: Boolean = false, backButtonOnClick: () -> 
               color = TOP_BAR_TEXT_COLOR,
               fontWeight = FontWeight.Bold,
               textAlign = TextAlign.Center,
-              modifier = Modifier.weight(1f))
+              modifier = Modifier.weight(TITLE_TEXT_WEIGHT))
 
           if (needBackButton) {
             Spacer(modifier = Modifier.width(BACK_BUTTON_SIZE))

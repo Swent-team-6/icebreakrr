@@ -30,7 +30,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.github.se.icebreakrr.R
 import com.github.se.icebreakrr.authentication.logout
 import com.github.se.icebreakrr.config.LocalIsTesting
 import com.github.se.icebreakrr.data.AppDataStore
@@ -148,7 +150,7 @@ fun SettingsScreen(
               colors =
                   ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary),
               modifier = Modifier.fillMaxWidth().testTag("alreadyMetButton")) {
-                Text("People You Already Met", color = Color.White)
+                Text(stringResource(R.string.Already_Met_Settings_Button), color = Color.White)
               }
 
           Spacer(modifier = Modifier.padding(vertical = BUTTON_PADDING))
