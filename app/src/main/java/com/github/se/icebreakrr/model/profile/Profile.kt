@@ -29,7 +29,7 @@ data class Profile(
     val location: GeoPoint? = null,
     val geohash: String? = null,
     var hasBlocked: List<String> = listOf(),
-    val meetingRequestSent: Map<String, String> = mapOf(),
+    val meetingRequestSent: List<String> = listOf(),
     val meetingRequestInbox: Map<String, String> = mapOf()
 ) {
   /**

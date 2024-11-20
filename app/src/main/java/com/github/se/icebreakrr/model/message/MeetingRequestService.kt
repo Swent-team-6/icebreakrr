@@ -1,11 +1,8 @@
 package com.github.se.icebreakrr.model.message
 
-import android.app.AlertDialog
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
-import android.os.Handler
-import android.os.Looper
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import com.github.se.icebreakrr.R
@@ -36,10 +33,10 @@ class MeetingRequestService : FirebaseMessagingService() {
       Log.d("MEETING REQUEST", "RECEIVED MEETING REQUEST")
       val meetingRequest = MeetingRequest(message = message, senderUID = senderUid)
       MeetingRequestManager.meetingRequestViewModel?.addToMeetingRequestInbox(meetingRequest)
-    } else if (title == "MEETING RESPONSE"){
-        Log.d("MEETING RESPONSE", "RECEIVED MEETING RESPONSE")
-    } else if(title == "MEETING CONFIRMATION"){
-        Log.d("MEETING CONFIRMATION", "RECEIVED MEETING CONFIRMATION")
+    } else if (title == "MEETING RESPONSE") {
+      Log.d("MEETING RESPONSE", "RECEIVED MEETING RESPONSE")
+    } else if (title == "MEETING CONFIRMATION") {
+      Log.d("MEETING CONFIRMATION", "RECEIVED MEETING CONFIRMATION")
     }
   }
 

@@ -185,10 +185,7 @@ fun IcebreakrrApp(
   var userName: String? = "null"
   var userUid: String? = "null"
   MeetingRequestManager.meetingRequestViewModel =
-      viewModel(
-          factory =
-              MeetingRequestViewModel.Companion.Factory(
-                  profileViewModel, functions))
+      viewModel(factory = MeetingRequestViewModel.Companion.Factory(profileViewModel, functions))
   val meetingRequestViewModel = MeetingRequestManager.meetingRequestViewModel
   val startDestination = if (isTesting) Route.AROUND_YOU else Route.AUTH
 

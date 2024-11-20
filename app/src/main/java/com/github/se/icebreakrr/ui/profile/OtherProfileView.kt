@@ -101,6 +101,7 @@ fun OtherProfileView(
                     meetingRequestViewModel.onMeetingRequestChange(writtenMessage)
                     meetingRequestViewModel.onLocalTokenChange(profile.fcmToken ?: "null")
                     meetingRequestViewModel.sendMeetingRequest()
+                    meetingRequestViewModel.addToMeetingRequestSent(profile.uid)
                     writtenMessage = ""
                     navigationActions.goBack()
                   },

@@ -7,11 +7,8 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.github.se.icebreakrr.model.profile.Profile
 import com.github.se.icebreakrr.model.profile.ProfilesViewModel
 import com.google.firebase.functions.FirebaseFunctions
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
@@ -79,7 +76,6 @@ class MeetingRequestViewModel(
     meetingRequestState = meetingRequestState.copy(message = newMessage)
   }
 
-
   /** Sends the message from our user to the target user */
   fun sendMessage() {
     viewModelScope.launch {
@@ -88,7 +84,7 @@ class MeetingRequestViewModel(
               "targetToken" to meetingRequestState.targetToken,
               "senderUID" to meetingRequestState.senderUID,
               "body" to MeetingRequestManager.ourName + " : " + meetingRequestState.message,
-              )
+          )
       try {
         val result =
             functions
@@ -119,7 +115,6 @@ class MeetingRequestViewModel(
                 .call(data)
                 .await()
 
-        addToMeetingRequestSent(meetingRequestState)
         meetingRequestState = meetingRequestState.copy(message = "")
       } catch (e: Exception) {
         Log.e("FIREBASE ERROR", "Error sending message", e)
@@ -127,30 +122,35 @@ class MeetingRequestViewModel(
     }
   }
 
-  private fun addToMeetingRequestSent(m : MeetingRequest){
-      val ourUid = MeetingRequestManager.ourUid ?: "null"
-      profilesViewModel.getProfileByUidAndThen(ourUid){
-          val currentMeetingRequestSent = profilesViewModel.selectedProfile.value?.meetingRequestSent ?: mapOf()
-          val updatedProfile = profilesViewModel.selectedProfile.value?.copy(meetingRequestSent = currentMeetingRequestSent + (m.senderUID to m.message))
-          if(updatedProfile != null) {
-              profilesViewModel.updateProfile(updatedProfile)
-          } else {
-              Log.e("SENT MEETING REQUEST", "Adding the new meeting request to our sent list failed")
-          }
+  fun addToMeetingRequestSent(receiverUID: String) {
+    val ourUid = MeetingRequestManager.ourUid ?: "null"
+    profilesViewModel.getProfileByUidAndThen(ourUid) {
+      val currentMeetingRequestSent =
+          profilesViewModel.selectedProfile.value?.meetingRequestSent ?: listOf()
+      val updatedProfile =
+          profilesViewModel.selectedProfile.value?.copy(
+              meetingRequestSent = currentMeetingRequestSent + receiverUID)
+      if (updatedProfile != null) {
+        profilesViewModel.updateProfile(updatedProfile)
+      } else {
+        Log.e("SENT MEETING REQUEST", "Adding the new meeting request to our sent list failed")
       }
+    }
   }
 
-   fun addToMeetingRequestInbox(m : MeetingRequest){
-        val ourUid = MeetingRequestManager.ourUid ?: "null"
-        profilesViewModel.getProfileByUidAndThen(ourUid){
-            val currentMeetingRequestSent = profilesViewModel.selectedProfile.value?.meetingRequestInbox ?: mapOf()
-            val updatedProfile = profilesViewModel.selectedProfile.value?.copy(meetingRequestInbox = currentMeetingRequestSent + (m.senderUID to m.message))
-            if(updatedProfile != null) {
-                profilesViewModel.updateProfile(updatedProfile)
-            } else {
-                Log.e("INBOX MEETING REQUEST", "Adding the new meeting request to our inbox list failed")
-            }
-        }
+  fun addToMeetingRequestInbox(m: MeetingRequest) {
+    val ourUid = MeetingRequestManager.ourUid ?: "null"
+    profilesViewModel.getProfileByUidAndThen(ourUid) {
+      val currentMeetingRequestInbox =
+          profilesViewModel.selectedProfile.value?.meetingRequestInbox ?: mapOf()
+      val updatedProfile =
+          profilesViewModel.selectedProfile.value?.copy(
+              meetingRequestInbox = currentMeetingRequestInbox + (m.senderUID to m.message))
+      if (updatedProfile != null) {
+        profilesViewModel.updateProfile(updatedProfile)
+      } else {
+        Log.e("INBOX MEETING REQUEST", "Adding the new meeting request to our inbox list failed")
+      }
     }
-
+  }
 }
