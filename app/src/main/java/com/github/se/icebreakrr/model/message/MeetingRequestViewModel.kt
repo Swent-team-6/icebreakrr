@@ -119,11 +119,38 @@ class MeetingRequestViewModel(
                 .call(data)
                 .await()
 
+        addToMeetingRequestSent(meetingRequestState)
         meetingRequestState = meetingRequestState.copy(message = "")
       } catch (e: Exception) {
         Log.e("FIREBASE ERROR", "Error sending message", e)
       }
     }
   }
+
+  private fun addToMeetingRequestSent(m : MeetingRequest){
+      val ourUid = MeetingRequestManager.ourUid ?: "null"
+      profilesViewModel.getProfileByUidAndThen(ourUid){
+          val currentMeetingRequestSent = profilesViewModel.selectedProfile.value?.meetingRequestSent ?: mapOf()
+          val updatedProfile = profilesViewModel.selectedProfile.value?.copy(meetingRequestSent = currentMeetingRequestSent + (m.senderUID to m.message))
+          if(updatedProfile != null) {
+              profilesViewModel.updateProfile(updatedProfile)
+          } else {
+              Log.e("SENT MEETING REQUEST", "Adding the new meeting request to our sent list failed")
+          }
+      }
+  }
+
+   fun addToMeetingRequestInbox(m : MeetingRequest){
+        val ourUid = MeetingRequestManager.ourUid ?: "null"
+        profilesViewModel.getProfileByUidAndThen(ourUid){
+            val currentMeetingRequestSent = profilesViewModel.selectedProfile.value?.meetingRequestInbox ?: mapOf()
+            val updatedProfile = profilesViewModel.selectedProfile.value?.copy(meetingRequestInbox = currentMeetingRequestSent + (m.senderUID to m.message))
+            if(updatedProfile != null) {
+                profilesViewModel.updateProfile(updatedProfile)
+            } else {
+                Log.e("INBOX MEETING REQUEST", "Adding the new meeting request to our inbox list failed")
+            }
+        }
+    }
 
 }

@@ -29,6 +29,8 @@ data class Profile(
     val location: GeoPoint? = null,
     val geohash: String? = null,
     var hasBlocked: List<String> = listOf(),
+    val meetingRequestSent: Map<String, String> = mapOf(),
+    val meetingRequestInbox: Map<String, String> = mapOf()
 ) {
   /**
    * Calculates the user's age based on their birth date.

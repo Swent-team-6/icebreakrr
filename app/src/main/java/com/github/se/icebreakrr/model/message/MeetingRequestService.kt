@@ -34,6 +34,8 @@ class MeetingRequestService : FirebaseMessagingService() {
     val title = remoteMessage.data["title"]
     if (title == "MEETING REQUEST") {
       Log.d("MEETING REQUEST", "RECEIVED MEETING REQUEST")
+      val meetingRequest = MeetingRequest(message = message, senderUID = senderUid)
+      MeetingRequestManager.meetingRequestViewModel?.addToMeetingRequestInbox(meetingRequest)
     } else if (title == "MEETING RESPONSE"){
         Log.d("MEETING RESPONSE", "RECEIVED MEETING RESPONSE")
     } else if(title == "MEETING CONFIRMATION"){
