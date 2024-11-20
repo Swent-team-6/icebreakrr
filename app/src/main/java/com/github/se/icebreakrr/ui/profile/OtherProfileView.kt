@@ -44,6 +44,7 @@ import com.github.se.icebreakrr.ui.sections.shared.ProfileHeader
  * @param navigationActions Actions to navigate between screens.
  */
 private val ALPHA = 0.5f
+private val MET_BUTTON_HORIZTONAL_PADDING = 16.dp
 
 @Composable
 fun OtherProfileView(
@@ -104,7 +105,9 @@ fun OtherProfileView(
                 colors =
                     ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
                 modifier =
-                    Modifier.fillMaxWidth().align(Alignment.CenterHorizontally)
+                    Modifier.fillMaxWidth()
+                        .padding(MET_BUTTON_HORIZTONAL_PADDING)
+                        .align(Alignment.CenterHorizontally)
                         .testTag("alreadyMetButton")) {
                   Text("I Already Met This Person", color = Color.White)
                 }
