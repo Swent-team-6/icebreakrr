@@ -3,6 +3,7 @@ package com.github.se.icebreakrr.model.filter
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.github.se.icebreakrr.model.profile.Gender
+import com.github.se.icebreakrr.ui.sections.DEFAULT_RADIUS
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
@@ -14,6 +15,9 @@ class FilterViewModel : ViewModel() {
 
   private val _ageRange = MutableStateFlow<IntRange?>(null)
   val ageRange: StateFlow<IntRange?> = _ageRange
+
+  private val _selectedRadius = MutableStateFlow(DEFAULT_RADIUS)
+  val selectedRadius: StateFlow<Int> = _selectedRadius
 
   private val _filteredTags = MutableStateFlow<List<String>>(emptyList())
   val filteredTags: StateFlow<List<String>> = _filteredTags
@@ -34,6 +38,15 @@ class FilterViewModel : ViewModel() {
    */
   fun setAgeRange(range: IntRange?) {
     _ageRange.value = range
+  }
+
+  /**
+   * Sets the selected radius.
+   *
+   * @param radius The radius to set in meters.
+   */
+  fun setSelectedRadius(radius: Int) {
+    _selectedRadius.value = radius
   }
 
   /**
