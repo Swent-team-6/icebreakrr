@@ -35,6 +35,7 @@ import com.github.se.icebreakrr.ui.authentication.SignInScreen
 import com.github.se.icebreakrr.ui.navigation.NavigationActions
 import com.github.se.icebreakrr.ui.navigation.Route
 import com.github.se.icebreakrr.ui.navigation.Screen
+import com.github.se.icebreakrr.ui.profile.HeatMap
 import com.github.se.icebreakrr.ui.profile.OtherProfileView
 import com.github.se.icebreakrr.ui.profile.ProfileEditingScreen
 import com.github.se.icebreakrr.ui.profile.ProfileView
@@ -297,6 +298,15 @@ fun IcebreakrrNavHost(
     ) {
       composable(Screen.FILTER) {
         FilterScreen(navigationActions, tagsViewModel, filterViewModel, profileViewModel)
+      }
+    }
+
+    navigation(
+        startDestination = Screen.HEAT_MAP,
+        route = Route.HEAT_MAP,
+    ) {
+      composable(Screen.HEAT_MAP) {
+        HeatMap(navigationActions, profileViewModel, locationViewModel)
       }
     }
   }

@@ -139,6 +139,10 @@ class NavigationTest {
     composeTestRule.onNodeWithTag("navItem_${R.string.settings}").performClick()
     composeTestRule.onNodeWithTag("settingsScreen").assertIsDisplayed()
 
+    // Test navigation to the AroundYou screen
+    composeTestRule.onNodeWithTag("navItem_${R.string.heatmap}").performClick()
+    composeTestRule.onNodeWithTag("heatMapScreen").assertIsDisplayed()
+
     // Test navigation to the Notifications screen
     composeTestRule.onNodeWithTag("navItem_${R.string.notifications}").performClick()
     composeTestRule.onNodeWithTag("notificationScreen").assertIsDisplayed()
