@@ -33,6 +33,9 @@ open class ProfilesViewModel(
   private val _profiles = MutableStateFlow<List<Profile>>(emptyList())
   open val profiles: StateFlow<List<Profile>> = _profiles
 
+  private val _inbox = MutableStateFlow<List<Profile?>>(emptyList())
+  open val inbox: StateFlow<List<Profile?>> = _inbox
+
   private val _filteredProfiles = MutableStateFlow<List<Profile>>(emptyList())
   val filteredProfiles: StateFlow<List<Profile>> = _filteredProfiles
 

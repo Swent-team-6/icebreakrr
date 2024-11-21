@@ -311,7 +311,14 @@ class ProfilesRepositoryFirestore(
       val geohash = document.getString("geohash")
       val hasBlocked =
           (document.get("hasBlocked") as? List<*>)?.filterIsInstance<String>() ?: listOf()
+      val meetingRequestSent =
+          (document.get("meetingRequestSent") as? List<*>)?.filterIsInstance<String>() ?: listOf()
 
+      val meetingRequestInbox =
+          (document.get("meetingRequestInbox") as? Map<*, *>)
+              ?.filter { (key, value) -> key is String && value is String }
+              ?.map { (key, value) -> key as String to value as String }
+              ?.toMap() ?: mapOf()
       Profile(
           uid = uid,
           name = name,
@@ -324,7 +331,9 @@ class ProfilesRepositoryFirestore(
           fcmToken = fcmToken,
           location = location,
           geohash = geohash,
-          hasBlocked = hasBlocked)
+          hasBlocked = hasBlocked,
+          meetingRequestSent = meetingRequestSent,
+          meetingRequestInbox = meetingRequestInbox)
     } catch (e: Exception) {
       Log.e("ProfileRepositoryFirestore", "Error converting document to Profile", e)
       null

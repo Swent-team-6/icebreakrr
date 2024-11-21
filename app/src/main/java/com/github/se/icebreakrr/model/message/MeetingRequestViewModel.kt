@@ -18,28 +18,23 @@ import kotlinx.coroutines.tasks.await
 class MeetingRequestViewModel(
     private val profilesViewModel: ProfilesViewModel,
     private val functions: FirebaseFunctions,
-    private val ourUserId: String?,
-    private val ourName: String?
 ) : ViewModel() {
 
   var meetingRequestState by mutableStateOf(MeetingRequest())
-  private val SEND_MESSAGE_FUNCTION_NAME = "sendMessage"
 
-  private var name: String? = null
-  private var userUID: String? = null
+  private val SEND_MESSAGE_FUNCTION_NAME = "sendMessage"
+  private val SEND_MEETING_REQUEST = "sendMeetingRequest"
 
   companion object {
     class Factory(
         private val profilesViewModel: ProfilesViewModel,
         private val functions: FirebaseFunctions,
-        private val ourUserId: String?,
-        private val ourName: String?
     ) : ViewModelProvider.Factory {
 
       @Suppress("UNCHECKED_CAST")
       override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(MeetingRequestViewModel::class.java)) {
-          return MeetingRequestViewModel(profilesViewModel, functions, ourUserId, ourName) as T
+          return MeetingRequestViewModel(profilesViewModel, functions) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
       }
@@ -47,9 +42,7 @@ class MeetingRequestViewModel(
   }
 
   init {
-    viewModelScope.launch {
-      meetingRequestState = meetingRequestState.copy(senderUID = ourUserId ?: "null")
-    }
+    viewModelScope.launch {}
   }
 
   /**
@@ -59,7 +52,7 @@ class MeetingRequestViewModel(
    */
   fun onRemoteTokenChange(newToken: String) {
     meetingRequestState = meetingRequestState.copy(targetToken = newToken)
-    profilesViewModel.getProfileByUid(ourUserId ?: "null")
+    profilesViewModel.getProfileByUid(MeetingRequestManager.ourUid ?: "null")
     val currentProfile = profilesViewModel.selectedProfile.value
     if (currentProfile != null) {
       val updatedProfile = currentProfile.copy(fcmToken = newToken)
@@ -82,32 +75,61 @@ class MeetingRequestViewModel(
   fun onMeetingRequestChange(newMessage: String) {
     meetingRequestState = meetingRequestState.copy(message = newMessage)
   }
-  /** Sets the status of the message, shows that it is ready to be sent */
-  fun onSubmitMeetingRequest() {
-    meetingRequestState = meetingRequestState.copy(isEnteringMessage = false)
-  }
 
-  /** Sends the message from our user to the target user */
-  fun sendMessage() {
+  fun sendMeetingRequest() {
     viewModelScope.launch {
       val data =
           hashMapOf(
               "targetToken" to meetingRequestState.targetToken,
               "senderUID" to meetingRequestState.senderUID,
-              "body" to MeetingRequestManager.ourName + " : " + meetingRequestState.message,
-              "picture" to meetingRequestState.picture,
-              "location" to meetingRequestState.location)
+              "message" to MeetingRequestManager.ourName + " : " + meetingRequestState.message,
+          )
       try {
         val result =
             functions
-                .getHttpsCallable(SEND_MESSAGE_FUNCTION_NAME) // Cloud Function name
+                .getHttpsCallable(SEND_MEETING_REQUEST) // Cloud Function name
                 .call(data)
                 .await()
 
-        meetingRequestState = meetingRequestState.copy(message = "", picture = null)
+        meetingRequestState = meetingRequestState.copy(message = "")
       } catch (e: Exception) {
         Log.e("FIREBASE ERROR", "Error sending message", e)
       }
     }
   }
+
+  fun addToMeetingRequestSent(receiverUID: String) {
+    val ourUid = MeetingRequestManager.ourUid ?: "null"
+    profilesViewModel.getProfileByUidAndThen(ourUid) {
+      val currentMeetingRequestSent =
+          profilesViewModel.selectedProfile.value?.meetingRequestSent ?: listOf()
+      val updatedProfile =
+          profilesViewModel.selectedProfile.value?.copy(
+              meetingRequestSent = currentMeetingRequestSent + receiverUID)
+      if (updatedProfile != null) {
+        profilesViewModel.updateProfile(updatedProfile)
+      } else {
+        Log.e("SENT MEETING REQUEST", "Adding the new meeting request to our sent list failed")
+      }
+    }
+  }
+
+  fun addToMeetingRequestInbox(m: MeetingRequest) {
+    val ourUid = MeetingRequestManager.ourUid ?: "null"
+    profilesViewModel.getProfileByUidAndThen(ourUid) {
+      val currentMeetingRequestInbox =
+          profilesViewModel.selectedProfile.value?.meetingRequestInbox ?: mapOf()
+      val updatedProfile =
+          profilesViewModel.selectedProfile.value?.copy(
+              meetingRequestInbox = currentMeetingRequestInbox + (m.senderUID to m.message))
+      if (updatedProfile != null) {
+        profilesViewModel.updateProfile(updatedProfile)
+      } else {
+        Log.e("INBOX MEETING REQUEST", "Adding the new meeting request to our inbox list failed")
+      }
+    }
+  }
+
+  fun getInbox() {} // TODO : make a Inbox call to refresh all the messages received, ll use the
+  // profileViewModel
 }

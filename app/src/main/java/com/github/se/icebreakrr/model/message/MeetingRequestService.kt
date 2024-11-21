@@ -3,6 +3,7 @@ package com.github.se.icebreakrr.model.message
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
+import android.util.Log
 import androidx.core.app.NotificationCompat
 import com.github.se.icebreakrr.R
 import com.google.firebase.messaging.FirebaseMessagingService
@@ -24,10 +25,21 @@ class MeetingRequestService : FirebaseMessagingService() {
    */
   override fun onMessageReceived(remoteMessage: RemoteMessage) {
     super.onMessageReceived(remoteMessage)
-    remoteMessage.notification?.let { notification ->
-      val title = notification.title ?: "Default Title"
-      val body = notification.body ?: "Default Body"
-      showNotification(title, body)
+    val senderUid = remoteMessage.data["senderUID"] ?: "null"
+    val message = remoteMessage.data["message"] ?: "null"
+    val title = remoteMessage.data["title"] ?: "null"
+    when (title) {
+      "MEETING REQUEST" -> {
+        Log.d("MEETING REQUEST", "RECEIVED MEETING REQUEST FROM : $senderUid")
+        val meetingRequest = MeetingRequest(message = message, senderUID = senderUid)
+        MeetingRequestManager.meetingRequestViewModel?.addToMeetingRequestInbox(meetingRequest)
+      }
+      "MEETING RESPONSE" -> {
+        Log.d("MEETING RESPONSE", "RECEIVED MEETING RESPONSE")
+      }
+      "MEETING CONFIRMATION" -> {
+        Log.d("MEETING CONFIRMATION", "RECEIVED MEETING CONFIRMATION")
+      }
     }
   }
 
