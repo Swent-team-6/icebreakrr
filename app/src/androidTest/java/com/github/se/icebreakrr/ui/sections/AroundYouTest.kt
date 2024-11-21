@@ -97,7 +97,7 @@ class AroundYouScreenTest {
     }
 
     // Trigger initial connection check
-    profilesViewModel.getFilteredProfilesInRadius(GeoPoint(0.0, 0.0), 300.0)
+    profilesViewModel.getFilteredProfilesInRadius(GeoPoint(0.0, 0.0), 300)
   }
 
   @Test
@@ -111,7 +111,7 @@ class AroundYouScreenTest {
     }
 
     // Trigger the fetch
-    profilesViewModel.getFilteredProfilesInRadius(GeoPoint(0.0, 0.0), 300.0)
+    profilesViewModel.getFilteredProfilesInRadius(GeoPoint(0.0, 0.0), 300)
 
     // Wait for the UI to update
     composeTestRule.waitForIdle()
@@ -144,7 +144,7 @@ class AroundYouScreenTest {
     }
 
     // Trigger the fetch
-    profilesViewModel.getFilteredProfilesInRadius(GeoPoint(0.0, 0.0), 300.0)
+    profilesViewModel.getFilteredProfilesInRadius(GeoPoint(0.0, 0.0), 300)
 
     composeTestRule.onAllNodesWithTag("profileCard").onFirst().assertIsDisplayed()
     composeTestRule.onAllNodesWithTag("profileCard").onFirst().performClick()
@@ -163,7 +163,7 @@ class AroundYouScreenTest {
     }
 
     // Step 2: Fetch profiles initially and verify profile card is displayed
-    profilesViewModel.getFilteredProfilesInRadius(GeoPoint(0.0, 0.0), 300.0)
+    profilesViewModel.getFilteredProfilesInRadius(GeoPoint(0.0, 0.0), 300)
     composeTestRule.waitForIdle()
     composeTestRule.onAllNodesWithTag("profileCard").onFirst().assertIsDisplayed()
 
@@ -183,7 +183,7 @@ class AroundYouScreenTest {
     composeTestRule.onNodeWithTag("refreshIndicator").assertIsDisplayed()
 
     // Step 6: Verify empty profile prompt after refresh completes
-    profilesViewModel.getFilteredProfilesInRadius(GeoPoint(0.0, 0.0), 300.0)
+    profilesViewModel.getFilteredProfilesInRadius(GeoPoint(0.0, 0.0), 300)
     composeTestRule.waitForIdle()
     composeTestRule.onNodeWithTag("emptyProfilePrompt").assertIsDisplayed()
   }
