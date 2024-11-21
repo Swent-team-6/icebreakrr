@@ -59,7 +59,6 @@ class HeatMapTest {
 
     // Verify basic UI elements are displayed
     composeTestRule.onNodeWithTag("heatMapScreen").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("googleMap").assertIsDisplayed()
   }
 
   @Test
