@@ -111,7 +111,7 @@ class UnblockProfileTest {
   }
 
   @Test
-  fun testUnblockButNo() = runTest {
+  fun testUnblockFlow() = runTest {
     composeTestRule.setContent {
       UnblockProfileScreen(
           navigationActions = navigationActions,
@@ -123,7 +123,22 @@ class UnblockProfileTest {
 
     composeTestRule.onNodeWithText(blockedProfiles[0].name).performClick()
     composeTestRule.onNodeWithTag("unblockDialog").assertIsDisplayed()
+    composeTestRule.onNodeWithText("Yes").assertIsDisplayed()
+    composeTestRule.onNodeWithText("No").assertIsDisplayed()
+  }
 
+  @Test
+  fun testUnblockFlowButNo() = runTest {
+    composeTestRule.setContent {
+      UnblockProfileScreen(
+          navigationActions = navigationActions,
+          profilesViewModel = profilesViewModel,
+          isTestMode = true)
+    }
+    profilesViewModel.getBlockedUsers()
+    composeTestRule.waitForIdle()
+
+    composeTestRule.onNodeWithText(blockedProfiles[0].name).performClick()
     composeTestRule.onNodeWithText("No").performClick()
     composeTestRule.onNodeWithTag("unblockDialog").assertIsNotDisplayed()
     composeTestRule.onNodeWithText(blockedProfiles[0].name).assertIsDisplayed()

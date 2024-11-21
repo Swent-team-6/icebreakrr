@@ -1,6 +1,5 @@
 package com.github.se.icebreakrr.ui.sections
 
-import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -131,22 +130,11 @@ fun SettingsScreen(
               })
           Spacer(modifier = Modifier.height(SPACER_HEIGHT_LARGE))
 
-          // this button is temporary and not tested
-          Button(
-              onClick = {
-                profilesViewModel.updateProfile(
-                    profilesViewModel.selfProfile.value!!.copy(hasBlocked = emptyList()))
-                Toast.makeText(context, "All users unblocked", Toast.LENGTH_SHORT).show()
-              },
-              colors = ButtonDefaults.buttonColors(containerColor = Color.Blue),
-              modifier = Modifier.fillMaxWidth()) {
-                Text("Unblock All", color = Color.White)
-              }
-
           Button(
               onClick = { navigationActions.navigateTo(Screen.UNBLOCK_PROFILE) },
-              colors = ButtonDefaults.buttonColors(containerColor = Color.Blue),
-              modifier = Modifier.fillMaxWidth()) {
+              colors =
+                  ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary),
+              modifier = Modifier.fillMaxWidth().testTag("blockedUsersButton")) {
                 Text(stringResource(R.string.unblock_button), color = Color.White)
               }
 
