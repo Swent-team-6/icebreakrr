@@ -230,7 +230,8 @@ fun IcebreakrrNavHost(
               navigationActions,
               filterViewModel = filterViewModel,
               tagsViewModel = tagsViewModel,
-              appDataStore = appDataStore)
+              appDataStore = appDataStore,
+              locationViewModel = locationViewModel)
         } else {
           throw IllegalStateException(
               "The Meeting Request View Model shouldn't be null : Bad initialization")
