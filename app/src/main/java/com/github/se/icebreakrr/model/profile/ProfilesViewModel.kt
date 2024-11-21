@@ -328,6 +328,7 @@ open class ProfilesViewModel(
             onSuccess = { profileList ->
                 _profiles.value = profileList
                 _loading.value = false
+                _isConnected.value = true
             },
             onFailure = { e -> handleError(e) }
         )
