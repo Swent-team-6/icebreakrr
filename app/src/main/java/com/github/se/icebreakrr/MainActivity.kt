@@ -308,8 +308,7 @@ fun IcebreakrrNavHost(
         route = Route.UNBLOCK_PROFILE,
     ) {
       composable(Screen.UNBLOCK_PROFILE) {
-        UnblockProfileScreen(
-            navigationActions, profileViewModel)
+        UnblockProfileScreen(navigationActions, profileViewModel)
       }
       composable(Screen.OTHER_PROFILE_VIEW + "?userId={userId}") { navBackStackEntry ->
         if (meetingRequestViewModel != null) {

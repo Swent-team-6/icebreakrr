@@ -56,13 +56,13 @@ open class MockProfileRepository : ProfilesRepository {
     onSuccess(Profile.getMockedProfiles())
   }
 
-    override fun getBlockedProfiles(
-        blockedProfiles: List<String>,
-        onSuccess: (List<Profile>) -> Unit,
-        onFailure: (Exception) -> Unit
-    ) {
-      onSuccess(Profile.getMockedProfiles().filter { it.uid in blockedProfiles })
-    }
+  override fun getBlockedProfiles(
+      blockedProfiles: List<String>,
+      onSuccess: (List<Profile>) -> Unit,
+      onFailure: (Exception) -> Unit
+  ) {
+    onSuccess(Profile.getMockedProfiles().filter { it.uid in blockedProfiles })
+  }
 
   // Simulates successful profile addition by calling onSuccess
   override fun addNewProfile(
