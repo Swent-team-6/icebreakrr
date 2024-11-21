@@ -22,7 +22,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -39,8 +38,6 @@ import com.github.se.icebreakrr.ui.sections.shared.ProfileCard
 import com.github.se.icebreakrr.ui.sections.shared.TopBar
 import com.github.se.icebreakrr.ui.theme.messageTextColor
 import com.github.se.icebreakrr.utils.NetworkUtils.isNetworkAvailable
-import com.github.se.icebreakrr.utils.NetworkUtils.isNetworkAvailableWithContext
-import com.github.se.icebreakrr.utils.NetworkUtils.showNoInternetToast
 import kotlinx.coroutines.delay
 
 // Constants for layout dimensions
@@ -148,9 +145,7 @@ fun UnblockProfileScreen(
                       items(blockedProfiles.value.size) { index ->
                         ProfileCard(
                             profile = blockedProfiles.value[index],
-                            onclick = {
-                                profileToUnblock = blockedProfiles.value[index]
-                            })
+                            onclick = { profileToUnblock = blockedProfiles.value[index] })
                       }
                     } else {
                       item {
