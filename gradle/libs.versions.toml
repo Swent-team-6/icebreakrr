@@ -68,6 +68,9 @@ datastoreCoreAndroid = "1.1.1"
 
 #Utils
 geohashJava = "1.4.0"
+playServicesMaps = "19.0.0"
+mapsCompose = "4.3.3"
+mapsComposeUtils = "4.3.0"
 
 [libraries]
 #Google
@@ -84,6 +87,8 @@ mockito-mockito-core-v520 = { module = "org.mockito:mockito-core", version.ref =
 play-services-auth = { module = "com.google.android.gms:play-services-auth", version.ref = "playServicesAuth" }
 play-services-location = { module = "com.google.android.gms:play-services-location", version.ref = "playServicesLocation" }
 google-services = { module = "com.google.gms:google-services", version.ref = "googleServices" }
+maps-compose = { module = "com.google.maps.android:maps-compose", version.ref = "mapsCompose" }
+maps-compose-utils = { module = "com.google.maps.android:maps-compose-utils", version.ref = "mapsComposeUtils" }
 androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastorePreferences" }
 androidx-datastore-preferences-core = { module = "androidx.datastore:datastore-preferences-core", version.ref = "datastorePreferences" }
 converter-moshi = { module = "com.squareup.retrofit2:converter-moshi", version.ref = "converterMoshi" }
@@ -142,6 +147,7 @@ androidx-datastore-core-android = { group = "androidx.datastore", name = "datast
 
 #Utils
 geohashJava = { module = "ch.hsr:geohash", version.ref = "geohashJava" }
+play-services-maps = { group = "com.google.android.gms", name = "play-services-maps", version.ref = "playServicesMaps" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
