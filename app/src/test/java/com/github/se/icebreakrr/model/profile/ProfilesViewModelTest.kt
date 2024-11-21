@@ -6,6 +6,7 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
 import com.google.firebase.Timestamp
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.GeoPoint
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
@@ -87,7 +88,8 @@ class ProfilesViewModelTest {
     context = mock(Context::class.java)
     profilesRepository = mock(ProfilesRepository::class.java)
     ppRepository = mock(ProfilePicRepository::class.java)
-    profilesViewModel = ProfilesViewModel(profilesRepository, ppRepository)
+    profilesViewModel =
+        ProfilesViewModel(profilesRepository, ppRepository, mock(FirebaseAuth::class.java))
     mockProfileViewModel = mock(ProfilesViewModel::class.java)
     mockAndThen = mock()
 

@@ -18,6 +18,8 @@ import com.github.se.icebreakrr.model.profile.ProfilesViewModel
 import com.github.se.icebreakrr.model.tags.TagsRepository
 import com.github.se.icebreakrr.model.tags.TagsViewModel
 import com.github.se.icebreakrr.ui.navigation.NavigationActions
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.functions.FirebaseFunctions
 import java.io.File
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -66,8 +68,9 @@ class SignInScreenTest {
     navigationActions = NavigationActions(navHostController)
     profileViewModel = mock(ProfilesViewModel::class.java)
     filterViewModel = FilterViewModel()
-    mockTagsRepository = mock(TagsRepository::class.java)
-    tagsViewModel = TagsViewModel(mockTagsRepository)
+    tagsViewModel =
+        TagsViewModel(
+            TagsRepository(mock(FirebaseFirestore::class.java), mock(FirebaseAuth::class.java)))
     functions = mock(FirebaseFunctions::class.java)
     ourUid = "UserId1"
     meetingRequestViewModel =
@@ -82,7 +85,11 @@ class SignInScreenTest {
           meetingRequestViewModel,
           navigationActions,
           filterViewModel = filterViewModel,
-          tagsViewModel = viewModel(factory = TagsViewModel.Factory),
+          tagsViewModel =
+              viewModel(
+                  factory =
+                      TagsViewModel.Companion.Factory(
+                          FirebaseAuth.getInstance(), FirebaseFirestore.getInstance())),
           appDataStore = appDataStore)
     }
 

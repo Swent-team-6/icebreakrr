@@ -18,6 +18,8 @@ import com.github.se.icebreakrr.model.profile.reportType
 import com.github.se.icebreakrr.model.tags.TagsRepository
 import com.github.se.icebreakrr.model.tags.TagsViewModel
 import com.github.se.icebreakrr.ui.navigation.NavigationActions
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.functions.FirebaseFunctions
 import org.junit.Before
 import org.junit.Rule
@@ -50,13 +52,16 @@ class OtherProfileViewTest {
     ourUserId = "UserId1"
     profilesRepository = mock(ProfilesRepository::class.java)
     ppRepository = mock(ProfilePicRepository::class.java)
-    profilesViewModel = ProfilesViewModel(profilesRepository, ppRepository)
+    profilesViewModel =
+        ProfilesViewModel(profilesRepository, ppRepository, FirebaseAuth.getInstance())
 
     functions = mock(FirebaseFunctions::class.java)
     meetingRequestViewModel =
         MeetingRequestViewModel(profilesViewModel, functions, ourUserId, "My Name")
 
-    tagsViewModel = TagsViewModel(mockTagsRepository)
+    tagsViewModel =
+        TagsViewModel(
+            TagsRepository(mock(FirebaseFirestore::class.java), mock(FirebaseAuth::class.java)))
 
     fakeProfilesViewModel = MockProfileViewModel()
   }

@@ -39,6 +39,7 @@ import com.github.se.icebreakrr.ui.profile.OtherProfileView
 import com.github.se.icebreakrr.ui.profile.ProfileEditingScreen
 import com.github.se.icebreakrr.ui.profile.ProfileView
 import com.github.se.icebreakrr.ui.profile.UnblockProfileScreen
+import com.github.se.icebreakrr.ui.sections.AlreadyMetScreen
 import com.github.se.icebreakrr.ui.sections.AroundYouScreen
 import com.github.se.icebreakrr.ui.sections.FilterScreen
 import com.github.se.icebreakrr.ui.sections.NotificationScreen
@@ -48,22 +49,26 @@ import com.github.se.icebreakrr.utils.NetworkUtils
 import com.github.se.icebreakrr.utils.PermissionManager
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
-import com.google.firebase.Firebase
 import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.firestore
 import com.google.firebase.functions.FirebaseFunctions
+import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
-  private lateinit var auth: FirebaseAuth
-  private lateinit var functions: FirebaseFunctions
+  @Inject lateinit var auth: FirebaseAuth
+  @Inject lateinit var firestore: FirebaseFirestore
+  @Inject lateinit var authStateListener: FirebaseAuth.AuthStateListener
   private lateinit var locationViewModel: LocationViewModel
   private lateinit var locationService: LocationService
   private lateinit var locationRepositoryFirestore: LocationRepositoryFirestore
   private lateinit var permissionManager: PermissionManager
-  private lateinit var authStateListener: FirebaseAuth.AuthStateListener
   private lateinit var fusedLocationClient: FusedLocationProviderClient
   private lateinit var appDataStore: AppDataStore
+  private lateinit var functions: FirebaseFunctions
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
@@ -74,7 +79,6 @@ class MainActivity : ComponentActivity() {
 
     // Initialize Firebase Auth
     FirebaseApp.initializeApp(this)
-    auth = FirebaseAuth.getInstance()
     functions = FirebaseFunctions.getInstance()
 
     // Initialize Utils
@@ -88,7 +92,7 @@ class MainActivity : ComponentActivity() {
     // Create required dependencies for the LocationViewModel
     fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
     locationService = LocationService(fusedLocationClient)
-    locationRepositoryFirestore = LocationRepositoryFirestore(Firebase.firestore, auth)
+    locationRepositoryFirestore = LocationRepositoryFirestore(firestore, auth)
 
     // Initialize the LocationViewModel with dependencies
     locationViewModel =
@@ -101,7 +105,7 @@ class MainActivity : ComponentActivity() {
     // Monitor login/logout events and perform the necessary actions.
     authStateListener =
         FirebaseAuth.AuthStateListener { firebaseAuth ->
-          if (firebaseAuth.currentUser != null) {
+          if (auth.currentUser != null) {
             locationViewModel.tryToStartLocationUpdates()
           } else {
             locationViewModel.stopLocationUpdates()
@@ -116,7 +120,7 @@ class MainActivity : ComponentActivity() {
       CompositionLocalProvider(LocalIsTesting provides isTesting) {
         SampleAppTheme {
           Surface(modifier = Modifier.fillMaxSize()) {
-            IcebreakrrApp(auth, functions, appDataStore, locationViewModel)
+            IcebreakrrApp(auth, functions, appDataStore, locationViewModel, firestore, isTesting)
           }
         }
       }
@@ -171,10 +175,14 @@ fun IcebreakrrApp(
     auth: FirebaseAuth,
     functions: FirebaseFunctions,
     appDataStore: AppDataStore,
-    locationViewModel: LocationViewModel
+    locationViewModel: LocationViewModel,
+    firestore: FirebaseFirestore,
+    isTesting: Boolean
 ) {
-  val profileViewModel: ProfilesViewModel = viewModel(factory = ProfilesViewModel.Factory)
-  val tagsViewModel: TagsViewModel = viewModel(factory = TagsViewModel.Factory)
+  val profileViewModel: ProfilesViewModel =
+      viewModel(factory = ProfilesViewModel.Companion.Factory(auth, firestore))
+  val tagsViewModel: TagsViewModel =
+      viewModel(factory = TagsViewModel.Companion.Factory(auth, firestore))
   val filterViewModel: FilterViewModel = viewModel(factory = FilterViewModel.Factory)
   var userName: String? = "null"
   var userUid: String? = "null"
@@ -184,6 +192,7 @@ fun IcebreakrrApp(
               MeetingRequestViewModel.Companion.Factory(
                   profileViewModel, functions, userUid, userName))
   val meetingRequestViewModel = MeetingRequestManager.meetingRequestViewModel
+  val startDestination = if (isTesting) Route.AROUND_YOU else Route.AUTH
 
   IcebreakrrNavHost(
       profileViewModel,
@@ -192,7 +201,8 @@ fun IcebreakrrApp(
       meetingRequestViewModel,
       appDataStore,
       locationViewModel,
-      Route.AUTH)
+      startDestination,
+      auth)
 }
 
 @Composable
@@ -203,7 +213,8 @@ fun IcebreakrrNavHost(
     meetingRequestViewModel: MeetingRequestViewModel?,
     appDataStore: AppDataStore,
     locationViewModel: LocationViewModel,
-    startDestination: String
+    startDestination: String,
+    auth: FirebaseAuth
 ) {
   val navController = rememberNavController()
   val navigationActions = NavigationActions(navController)
@@ -259,9 +270,12 @@ fun IcebreakrrNavHost(
         route = Route.SETTINGS,
     ) {
       composable(Screen.SETTINGS) {
-        SettingsScreen(profileViewModel, navigationActions, appDataStore = appDataStore)
+        SettingsScreen(profileViewModel, navigationActions, appDataStore = appDataStore, auth)
       }
-      composable(Screen.PROFILE) { ProfileView(profileViewModel, tagsViewModel, navigationActions) }
+      composable(Screen.PROFILE) {
+        ProfileView(profileViewModel, tagsViewModel, navigationActions, auth)
+      }
+      composable(Screen.ALREADY_MET) { AlreadyMetScreen(navigationActions, profileViewModel) }
     }
 
     navigation(
@@ -276,7 +290,7 @@ fun IcebreakrrNavHost(
         route = Route.PROFILE_EDIT,
     ) {
       composable(Screen.PROFILE_EDIT) {
-        ProfileEditingScreen(navigationActions, tagsViewModel, profileViewModel)
+        ProfileEditingScreen(navigationActions, tagsViewModel, profileViewModel, auth)
       }
     }
 

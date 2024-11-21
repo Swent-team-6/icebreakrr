@@ -20,6 +20,7 @@ import com.github.se.icebreakrr.ui.navigation.NavigationActions
 import com.github.se.icebreakrr.ui.navigation.Route
 import com.github.se.icebreakrr.ui.navigation.TopLevelDestinations
 import com.google.firebase.Timestamp
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.GeoPoint
 import java.util.Calendar
 import org.junit.Before
@@ -43,7 +44,8 @@ class NotificationTest {
     navigationActions = Mockito.mock(NavigationActions::class.java)
     mockProfilesRepository = Mockito.mock(ProfilesRepository::class.java)
     mockPPRepository = Mockito.mock(ProfilePicRepository::class.java)
-    profilesViewModel = ProfilesViewModel(mockProfilesRepository, mockPPRepository)
+    profilesViewModel =
+        ProfilesViewModel(mockProfilesRepository, mockPPRepository, FirebaseAuth.getInstance())
 
     `when`(navigationActions.currentRoute()).thenReturn(Route.NOTIFICATIONS)
   }

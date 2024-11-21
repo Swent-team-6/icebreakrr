@@ -37,6 +37,7 @@ object Screen {
   const val OTHER_PROFILE_VIEW = "Around You Profile Screen"
   const val PROFILE_CREATION = "Profile Creation Screen"
   const val UNBLOCK_PROFILE = "Unblock Profile Screen"
+  const val ALREADY_MET = "Already Met Screen"
 }
 
 object TopLevelDestinations {

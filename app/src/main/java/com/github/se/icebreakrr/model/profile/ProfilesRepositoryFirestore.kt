@@ -6,7 +6,7 @@ import android.util.Log
 import com.github.se.icebreakrr.utils.GeoHashUtils
 import com.github.se.icebreakrr.utils.NetworkUtils
 import com.google.android.gms.tasks.Task
-import com.google.firebase.Firebase
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.auth
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
@@ -18,7 +18,10 @@ import kotlin.math.sin
 import kotlin.math.sqrt
 import kotlinx.coroutines.flow.MutableStateFlow
 
-class ProfilesRepositoryFirestore(private val db: FirebaseFirestore) : ProfilesRepository {
+class ProfilesRepositoryFirestore(
+    private val db: FirebaseFirestore,
+    private val auth: FirebaseAuth
+) : ProfilesRepository {
 
   private val collectionPath = "profiles"
 
@@ -121,7 +124,7 @@ class ProfilesRepositoryFirestore(private val db: FirebaseFirestore) : ProfilesR
    * @param onSuccess A callback that is invoked when the user is authenticated.
    */
   override fun init(onSuccess: () -> Unit) {
-    Firebase.auth.addAuthStateListener {
+    auth.addAuthStateListener {
       if (it.currentUser != null) {
         onSuccess()
       }
