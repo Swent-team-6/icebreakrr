@@ -7,14 +7,10 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.github.se.icebreakrr.model.profile.Gender
-import com.github.se.icebreakrr.model.profile.Profile
 import com.github.se.icebreakrr.model.profile.ProfilesViewModel
-import com.google.firebase.Timestamp
 import com.google.firebase.functions.FirebaseFunctions
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
-import java.sql.Time
 
 /*
    Class that manages the interaction between messages, the Profile backend and the user of the app
@@ -158,8 +154,5 @@ class MeetingRequestViewModel(
     }
   }
 
-  fun getInbox() {
-
-  }
-
+  fun getInbox() {}
 }

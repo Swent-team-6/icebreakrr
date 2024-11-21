@@ -223,22 +223,21 @@ open class ProfilesViewModel(
         onFailure = { e -> handleError(e) })
   }
 
-
   fun getInboxByUidAndThen(uidList: List<String>, andThen: () -> Unit) {
-      _loading.value = true
-      _inbox.value = listOf()
-      for(uid in uidList) {
-          Log.d("GET UID", uid)
-          repository.getProfileByUid(
-              uid,
-              onSuccess = { profile ->
-                  _inbox.value += profile
-                  Log.d("GOT PROFILE", _inbox.value.toString())
-              },
-              onFailure = { e -> handleError(e) })
-          _loading.value = false
-          andThen()
-      }
+    _loading.value = true
+    _inbox.value = listOf()
+    for (uid in uidList) {
+      Log.d("GET UID", uid)
+      repository.getProfileByUid(
+          uid,
+          onSuccess = { profile ->
+            _inbox.value += profile
+            Log.d("GOT PROFILE", _inbox.value.toString())
+          },
+          onFailure = { e -> handleError(e) })
+      _loading.value = false
+      andThen()
+    }
   }
 
   /**

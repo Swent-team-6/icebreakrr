@@ -311,7 +311,8 @@ class ProfilesRepositoryFirestore(
       val geohash = document.getString("geohash")
       val hasBlocked =
           (document.get("hasBlocked") as? List<*>)?.filterIsInstance<String>() ?: listOf()
-      val meetingRequestSent = (document.get("meetingRequestSent") as? List<*>)?.filterIsInstance<String>() ?: listOf()
+      val meetingRequestSent =
+          (document.get("meetingRequestSent") as? List<*>)?.filterIsInstance<String>() ?: listOf()
 
       val meetingRequestInbox =
           (document.get("meetingRequestInbox") as? Map<*, *>)

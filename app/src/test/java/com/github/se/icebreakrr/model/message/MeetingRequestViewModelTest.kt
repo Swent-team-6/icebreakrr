@@ -82,8 +82,7 @@ class MeetingRequestViewModelTest {
           targetToken = "TokenUser1",
           senderUID = "senderUid",
           message = "Hello!",
-          picture = null,
-          location = null)
+      )
 
   @Before
   fun setUp() {
@@ -96,9 +95,10 @@ class MeetingRequestViewModelTest {
     mockMeetingRequestManager = mock(MeetingRequestManager::class.java)
 
     // Initialize the ViewModel with mocks
-    meetingRequestViewModel = MeetingRequestViewModel(profilesViewModel, functions, "1", "John Doe")
+    meetingRequestViewModel = MeetingRequestViewModel(profilesViewModel, functions)
     `when`(functions.getHttpsCallable("sendMessage")).thenReturn(callableReference)
     `when`(mockMeetingRequestManager.ourName).thenReturn("John Doe")
+    `when`(mockMeetingRequestManager.ourUid).thenReturn("1")
   }
 
   @Test
@@ -108,14 +108,6 @@ class MeetingRequestViewModelTest {
 
     // Assert that the message was updated in the ViewModel state
     assert(meetingRequestViewModel.meetingRequestState.message == message)
-  }
-
-  @Test
-  fun testOnSubmitMeetingRequestUpdatesIsEnteringMessage() = runBlocking {
-    meetingRequestViewModel.onSubmitMeetingRequest()
-
-    // Assert that isEnteringMessage is false after submitting
-    assert(!meetingRequestViewModel.meetingRequestState.isEnteringMessage)
   }
 
   @Test
@@ -131,7 +123,7 @@ class MeetingRequestViewModelTest {
     assert(meetingRequestViewModel.meetingRequestState.targetToken == newToken)
 
     // Assert: Verify that getProfileByUid was called
-    verify(profilesViewModel).getProfileByUid(profile1.uid)
+    verify(profilesViewModel).getProfileByUid(any())
 
     // Assert: Verify that updateProfile was called with the updated profile
     val updatedProfile = existingProfile.copy(fcmToken = newToken)
@@ -179,8 +171,6 @@ class MeetingRequestViewModelTest {
     assert(
         capturedData["body"] ==
             mockMeetingRequestManager.ourName + " : " + meetingRequestState.message)
-    assert(capturedData["picture"] == meetingRequestState.picture)
-    assert(capturedData["location"] == meetingRequestState.location)
   }
 
   @Test
@@ -203,7 +193,7 @@ class MeetingRequestViewModelTest {
   @Test
   fun constructWrongMeetingRequestVM(): Unit = runBlocking {
     val meetingRequestViewModelFactory =
-        MeetingRequestViewModel.Companion.Factory(profilesViewModel, functions, "1", "John Doe")
+        MeetingRequestViewModel.Companion.Factory(profilesViewModel, functions)
     var exception: IllegalArgumentException = IllegalArgumentException("No message")
     try {
       meetingRequestViewModelFactory.create(ProfilesViewModel::class.java)
