@@ -1,5 +1,6 @@
 package com.github.se.icebreakrr.ui.sections
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -45,6 +46,8 @@ import com.github.se.icebreakrr.ui.navigation.Route
 import com.github.se.icebreakrr.ui.navigation.Screen
 import com.github.se.icebreakrr.ui.sections.shared.ProfileCard
 import com.github.se.icebreakrr.ui.sections.shared.TopBar
+import com.github.se.icebreakrr.utils.NetworkUtils.isNetworkAvailable
+import com.github.se.icebreakrr.utils.NetworkUtils.isNetworkAvailableWithContext
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.launch
 
@@ -131,7 +134,13 @@ fun SettingsScreen(
           Spacer(modifier = Modifier.height(SPACER_HEIGHT_LARGE))
 
           Button(
-              onClick = { navigationActions.navigateTo(Screen.UNBLOCK_PROFILE) },
+              onClick = {
+                if (isNetworkAvailableWithContext(context) || isTesting) {
+                  navigationActions.navigateTo(Screen.UNBLOCK_PROFILE)
+                } else {
+                  Toast.makeText(context, R.string.No_Internet_Toast, Toast.LENGTH_SHORT).show()
+                }
+              },
               colors =
                   ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary),
               modifier = Modifier.fillMaxWidth().testTag("blockedUsersButton")) {

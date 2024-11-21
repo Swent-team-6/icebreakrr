@@ -1,7 +1,6 @@
-package com.github.se.icebreakrr.ui.profile
+package com.github.se.icebreakrr.ui.sections
 
 import android.annotation.SuppressLint
-import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -50,7 +49,7 @@ private val COLUMN_HORIZONTAL_PADDING = 8.dp
 private val TEXT_SIZE_LARGE = 20.sp
 private val NO_CONNECTION_TEXT_COLOR = messageTextColor
 private val EMPTY_PROFILE_TEXT_COLOR = messageTextColor
-private val REFRESH_INTERVAL = 10_000L
+private const val REFRESH_INTERVAL = 10_000L
 
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -72,7 +71,6 @@ fun UnblockProfileScreen(
 
   val blockedProfiles = profilesViewModel.profiles.collectAsState()
   val isLoading = profilesViewModel.loading.collectAsState()
-  val context = LocalContext.current
   val isConnected = profilesViewModel.isConnected.collectAsState()
 
   var profileToUnblock by remember { mutableStateOf<Profile?>(null) }
@@ -81,8 +79,8 @@ fun UnblockProfileScreen(
     AlertDialog(
         modifier = Modifier.testTag("unblockDialog"),
         onDismissRequest = { profileToUnblock = null },
-        title = { stringResource(R.string.unblock_confirm) },
-        text = { stringResource(R.string.unblock_confirm_message, profileToUnblock!!.name) },
+        title = { Text(stringResource(R.string.unblock_confirm)) },
+        text = { Text(stringResource(R.string.unblock_confirm_message, profileToUnblock!!.name)) },
         confirmButton = {
           TextButton(
               onClick = {
@@ -146,28 +144,12 @@ fun UnblockProfileScreen(
                   verticalArrangement = Arrangement.spacedBy(COLUMN_VERTICAL_PADDING),
                   modifier =
                       Modifier.fillMaxSize().padding(horizontal = COLUMN_HORIZONTAL_PADDING)) {
-                    if (!isConnected.value) {
-                      item {
-                        Box(
-                            contentAlignment = Alignment.Center,
-                            modifier = Modifier.fillMaxSize().testTag("noConnectionPrompt")) {
-                              Text(
-                                  text = stringResource(id = R.string.No_Internet_Toast),
-                                  fontSize = TEXT_SIZE_LARGE,
-                                  fontWeight = FontWeight.Bold,
-                                  color = NO_CONNECTION_TEXT_COLOR)
-                            }
-                      }
-                    } else if (blockedProfiles.value.isNotEmpty()) {
+                    if (blockedProfiles.value.isNotEmpty()) {
                       items(blockedProfiles.value.size) { index ->
                         ProfileCard(
                             profile = blockedProfiles.value[index],
                             onclick = {
-                              if (isNetworkAvailableWithContext(context)) {
                                 profileToUnblock = blockedProfiles.value[index]
-                              } else {
-                                showNoInternetToast(context)
-                              }
                             })
                       }
                     } else {
