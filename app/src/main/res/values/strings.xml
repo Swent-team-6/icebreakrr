@@ -24,7 +24,7 @@
     <string name="block_no">No</string>
 
     <string name="no_blocked_users">You have not blocked any users!</string>
-    <string name="unblock_button">See blocked user</string>
+    <string name="unblock_button">See blocked users</string>
     <string name="unblock_confirm">Unblock ?</string>
     <string name="unblock_confirm_message">Are you sure you want to unblock %1$s?</string>
 
