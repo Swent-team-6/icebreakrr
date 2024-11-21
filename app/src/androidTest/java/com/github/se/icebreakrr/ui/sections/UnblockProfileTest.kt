@@ -9,7 +9,6 @@ import com.github.se.icebreakrr.model.profile.ProfilePicRepositoryStorage
 import com.github.se.icebreakrr.model.profile.ProfilesRepository
 import com.github.se.icebreakrr.model.profile.ProfilesViewModel
 import com.github.se.icebreakrr.ui.navigation.NavigationActions
-import com.github.se.icebreakrr.ui.profile.UnblockProfileScreen
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -19,7 +18,6 @@ import org.mockito.Mockito
 import org.mockito.Mockito.`when`
 import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
-import org.mockito.kotlin.not
 import org.mockito.kotlin.verify
 
 class UnblockProfileTest {
@@ -125,6 +123,10 @@ class UnblockProfileTest {
     composeTestRule.onNodeWithTag("unblockDialog").assertIsDisplayed()
     composeTestRule.onNodeWithText("Yes").assertIsDisplayed()
     composeTestRule.onNodeWithText("No").assertIsDisplayed()
+    composeTestRule.onNodeWithText("Unblock ?").assertIsDisplayed()
+    composeTestRule
+        .onNodeWithText("Are you sure you want to unblock " + blockedProfiles[0].name + "?")
+        .assertIsDisplayed()
   }
 
   @Test
