@@ -76,29 +76,6 @@ class MeetingRequestViewModel(
     meetingRequestState = meetingRequestState.copy(message = newMessage)
   }
 
-  /** Sends the message from our user to the target user */
-  fun sendMessage() {
-    viewModelScope.launch {
-      val data =
-          hashMapOf(
-              "targetToken" to meetingRequestState.targetToken,
-              "senderUID" to meetingRequestState.senderUID,
-              "body" to MeetingRequestManager.ourName + " : " + meetingRequestState.message,
-          )
-      try {
-        val result =
-            functions
-                .getHttpsCallable(SEND_MESSAGE_FUNCTION_NAME) // Cloud Function name
-                .call(data)
-                .await()
-
-        meetingRequestState = meetingRequestState.copy(message = "")
-      } catch (e: Exception) {
-        Log.e("FIREBASE ERROR", "Error sending message", e)
-      }
-    }
-  }
-
   fun sendMeetingRequest() {
     viewModelScope.launch {
       val data =
@@ -153,5 +130,5 @@ class MeetingRequestViewModel(
     }
   }
 
-  fun getInbox() {}
+  fun getInbox() {} // TODO : make a Inbox call to refresh all the messages received, ll use the profileViewModel
 }

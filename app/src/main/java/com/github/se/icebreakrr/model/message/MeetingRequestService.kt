@@ -25,18 +25,21 @@ class MeetingRequestService : FirebaseMessagingService() {
    */
   override fun onMessageReceived(remoteMessage: RemoteMessage) {
     super.onMessageReceived(remoteMessage)
-    Log.d("MEETING REQUEST", "received stuff")
     val senderUid = remoteMessage.data["senderUID"] ?: "null"
     val message = remoteMessage.data["message"] ?: "null"
-    val title = remoteMessage.data["title"]
-    if (title == "MEETING REQUEST") {
-      Log.d("MEETING REQUEST", "RECEIVED MEETING REQUEST")
-      val meetingRequest = MeetingRequest(message = message, senderUID = senderUid)
-      MeetingRequestManager.meetingRequestViewModel?.addToMeetingRequestInbox(meetingRequest)
-    } else if (title == "MEETING RESPONSE") {
-      Log.d("MEETING RESPONSE", "RECEIVED MEETING RESPONSE")
-    } else if (title == "MEETING CONFIRMATION") {
-      Log.d("MEETING CONFIRMATION", "RECEIVED MEETING CONFIRMATION")
+    val title = remoteMessage.data["title"] ?: "null"
+    when(title){
+        "MEETING REQUEST" -> {
+            Log.d("MEETING REQUEST", "RECEIVED MEETING REQUEST FROM : $senderUid")
+            val meetingRequest = MeetingRequest(message = message, senderUID = senderUid)
+            MeetingRequestManager.meetingRequestViewModel?.addToMeetingRequestInbox(meetingRequest)
+        }
+        "MEETING RESPONSE" -> {
+            Log.d("MEETING RESPONSE", "RECEIVED MEETING RESPONSE")
+        }
+        "MEETING CONFIRMATION" -> {
+            Log.d("MEETING CONFIRMATION", "RECEIVED MEETING CONFIRMATION")
+        }
     }
   }
 

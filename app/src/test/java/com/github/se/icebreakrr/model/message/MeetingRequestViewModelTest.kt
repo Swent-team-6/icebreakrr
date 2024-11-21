@@ -142,56 +142,6 @@ class MeetingRequestViewModelTest {
   }
 
   @Test
-  fun testSendMessageCorrectData() = runBlocking {
-    // Mock the callable function
-    val callableMock: HttpsCallableResult = mock(HttpsCallableResult::class.java)
-    val callableTask: Task<HttpsCallableResult> = Tasks.forResult(callableMock)
-    val callable = mock<HttpsCallableReference>()
-    val mockMeetingRequestManager = mock(MeetingRequestManager::class.java)
-
-    // Setup the function mock to return the task when called
-    `when`(callable.call(any())).thenReturn(callableTask) // This makes it chainable
-
-    meetingRequestViewModel.meetingRequestState = meetingRequestState
-
-    // Act: Call the method under test
-    meetingRequestViewModel.sendMessage()
-
-    // Assert: Verify that the cloud function was called with the correct data
-    verify(functions).getHttpsCallable("sendMessage")
-
-    // Capture the argument passed to `call`
-    val argumentCaptor =
-        ArgumentCaptor.forClass(Map::class.java) as ArgumentCaptor<Map<String, Any>>
-    verify(callableReference).call(argumentCaptor.capture())
-
-    val capturedData = argumentCaptor.value as Map<String, Any>
-
-    assert(capturedData["targetToken"] == meetingRequestState.targetToken)
-    assert(capturedData["senderUID"] == meetingRequestState.senderUID)
-    assert(
-        capturedData["body"] ==
-            mockMeetingRequestManager.ourName + " : " + meetingRequestState.message)
-  }
-
-  @Test
-  fun testSendMessageErrorFound(): Unit = runBlocking {
-    // Arrange: Create a task that throws an exception
-    val callableTask: Task<HttpsCallableResult> =
-        Tasks.forException(RuntimeException("Firebase Error"))
-
-    // Mock the callable to return this task when `call` is invoked
-    `when`(callableReference.call(any())).thenReturn(callableTask)
-
-    // Act
-    meetingRequestViewModel.sendMessage()
-
-    // Verify: Ensure no unhandled exceptions and log output if needed
-    verify(functions).getHttpsCallable("sendMessage")
-    verify(callableReference).call(any())
-  }
-
-  @Test
   fun testSendMeetingRequestCorrectData() = runBlocking {
     // Mock the callable function
     val callableMock: HttpsCallableResult = mock(HttpsCallableResult::class.java)
