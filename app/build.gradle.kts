@@ -43,7 +43,7 @@ android {
             useSupportLibrary = true
         }
         testInstrumentationRunner = "com.github.se.CustomTestRunner"
-        manifestPlaceholders["MAPS_API_KEY"] = mapsApiKey
+        manifestPlaceholders["MAPS_API_KEY"] = System.getenv("MAPS_API_KEY") ?: mapsApiKey
     }
 
     signingConfigs {
