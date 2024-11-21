@@ -34,7 +34,7 @@ class ProfilesRepositoryFirestore(
   override val connectionTimeOutMs: Long = 15000
   override val periodicTimeCheckWaitTime: Long = 5000
 
-  val DEFAULT_RADIUS = 300.0
+  val DEFAULT_RADIUS = 300
   val DEFAULT_LONGITUDE = 0.0
   val DEFAULT_LATITUDE = 0.0
   private val PERIOD = 1000
@@ -141,7 +141,7 @@ class ProfilesRepositoryFirestore(
    */
   override fun getProfilesInRadius(
       center: GeoPoint,
-      radiusInMeters: Double,
+      radiusInMeters: Int,
       onSuccess: (List<Profile>) -> Unit,
       onFailure: (Exception) -> Unit
   ) {
@@ -228,7 +228,6 @@ class ProfilesRepositoryFirestore(
         } else {
           Source.CACHE
         }
-    Log.d("ProfilesRepositoryFirestore", "getProfileByUid")
     db.collection("profiles").document(uid).get(source).addOnCompleteListener { task ->
       if (task.isSuccessful) {
         val profile = task.result?.let { document -> documentToProfile(document) }
