@@ -35,6 +35,7 @@ import com.github.se.icebreakrr.ui.authentication.SignInScreen
 import com.github.se.icebreakrr.ui.navigation.NavigationActions
 import com.github.se.icebreakrr.ui.navigation.Route
 import com.github.se.icebreakrr.ui.navigation.Screen
+import com.github.se.icebreakrr.ui.profile.HeatMap
 import com.github.se.icebreakrr.ui.profile.OtherProfileView
 import com.github.se.icebreakrr.ui.profile.ProfileEditingScreen
 import com.github.se.icebreakrr.ui.profile.ProfileView
@@ -187,10 +188,7 @@ fun IcebreakrrApp(
   var userName: String? = "null"
   var userUid: String? = "null"
   MeetingRequestManager.meetingRequestViewModel =
-      viewModel(
-          factory =
-              MeetingRequestViewModel.Companion.Factory(
-                  profileViewModel, functions, userUid, userName))
+      viewModel(factory = MeetingRequestViewModel.Companion.Factory(profileViewModel, functions))
   val meetingRequestViewModel = MeetingRequestManager.meetingRequestViewModel
   val startDestination = if (isTesting) Route.AROUND_YOU else Route.AUTH
 
@@ -310,18 +308,13 @@ fun IcebreakrrNavHost(
       composable(Screen.UNBLOCK_PROFILE) {
         UnblockProfileScreen(navigationActions, profileViewModel)
       }
-      composable(Screen.OTHER_PROFILE_VIEW + "?userId={userId}") { navBackStackEntry ->
-        if (meetingRequestViewModel != null) {
-          OtherProfileView(
-              profileViewModel,
-              tagsViewModel,
-              meetingRequestViewModel,
-              navigationActions,
-              navBackStackEntry)
-        } else {
-          throw IllegalStateException(
-              "The Meeting Request View Model shouldn't be null : Bad initialization")
-        }
+      
+    navigation(
+        startDestination = Screen.HEAT_MAP,
+        route = Route.HEAT_MAP,
+    ) {
+      composable(Screen.HEAT_MAP) {
+        HeatMap(navigationActions, profileViewModel, locationViewModel)
       }
     }
   }

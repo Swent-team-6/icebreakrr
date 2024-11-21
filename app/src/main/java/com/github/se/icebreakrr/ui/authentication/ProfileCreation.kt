@@ -310,7 +310,9 @@ fun ProfileCreationScreen(
                           catchPhrase = catchphrase.value,
                           description = description.value,
                           tags = selectedTags,
-                          fcmToken = fcmToken)
+                          fcmToken = fcmToken,
+                          meetingRequestSent = listOf(),
+                          meetingRequestInbox = mapOf())
                   // Creates profile in DB
                   profilesViewModel.addNewProfile(newProfile)
                   // Navigate to AroundYou screen
