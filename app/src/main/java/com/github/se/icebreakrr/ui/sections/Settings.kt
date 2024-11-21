@@ -16,6 +16,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -29,7 +30,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.github.se.icebreakrr.R
 import com.github.se.icebreakrr.authentication.logout
 import com.github.se.icebreakrr.config.LocalIsTesting
 import com.github.se.icebreakrr.data.AppDataStore
@@ -57,7 +60,7 @@ private val BUTTON_COLOR = Color.Red
 private val BUTTON_TEXT_COLOR = Color.White
 private const val LOGOUT_BUTTON_TAG = "logOutButton"
 private val TOGGLE_BOX_HEIGHT = 55.dp
-private val TOGGLE_OPTION_BUTTON_PADDING = 8.dp
+private val BUTTON_PADDING = 8.dp
 private val CARD_PADDING = 16.dp
 
 /**
@@ -140,7 +143,17 @@ fun SettingsScreen(
                 Text("Unblock All", color = Color.White)
               }
 
-          Spacer(modifier = Modifier.padding(vertical = 8.dp))
+          Spacer(modifier = Modifier.padding(vertical = BUTTON_PADDING))
+
+          Button(
+              onClick = { navigationActions.navigateTo(Screen.ALREADY_MET) },
+              colors =
+                  ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary),
+              modifier = Modifier.fillMaxWidth().testTag("alreadyMetButton")) {
+                Text(stringResource(R.string.Already_Met_Settings_Button), color = Color.White)
+              }
+
+          Spacer(modifier = Modifier.padding(vertical = BUTTON_PADDING))
 
           Button(
               onClick = {
@@ -175,7 +188,7 @@ fun ToggleOptionBox(
       modifier =
           modifier
               .fillMaxWidth()
-              .padding(vertical = TOGGLE_OPTION_BUTTON_PADDING)
+              .padding(vertical = BUTTON_PADDING)
               .height(TOGGLE_BOX_HEIGHT)
               .testTag(label),
       elevation = CardDefaults.cardElevation(defaultElevation = CARD_ELEVATION)) {
