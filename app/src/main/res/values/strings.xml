@@ -10,6 +10,7 @@
     <string name="notifications">Notifications</string>
     <string name="No_Internet_Toast">No internet connection available</string>
     <string name="heatmap">HeatMap</string>
+    <string name="location_loading">Map Loading...</string>
     <string name="Not_Implemented_Toast">Not yet implemented</string>
 
     <string name="block_report_modal_title">What would you like to do?</string>

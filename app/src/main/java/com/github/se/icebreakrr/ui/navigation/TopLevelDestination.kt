@@ -24,7 +24,7 @@ object Route {
   const val PROFILE_EDIT = "ProfileEdit"
   const val FILTER = "Filter"
   const val PROFILE_CREATION = "ProfileCreation"
-  const val HEAT_MAP = "HeatMap"
+  const val HEAT_MAP = "Heatmap"
 }
 
 object Screen {
@@ -37,7 +37,7 @@ object Screen {
   const val PROFILE = "Profile Screen"
   const val OTHER_PROFILE_VIEW = "Around You Profile Screen"
   const val PROFILE_CREATION = "Profile Creation Screen"
-  const val HEAT_MAP = "Heat Map"
+  const val HEAT_MAP = "Heatmap Screen"
   const val ALREADY_MET = "Already Met Screen"
 }
 

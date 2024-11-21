@@ -21,6 +21,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.github.se.icebreakrr.R
 import com.github.se.icebreakrr.model.location.LocationViewModel
 import com.github.se.icebreakrr.model.profile.ProfilesViewModel
 import com.github.se.icebreakrr.ui.navigation.BottomNavigationMenu
@@ -39,6 +40,7 @@ import com.google.maps.android.heatmaps.WeightedLatLng
 
 private val DEFAULT_LOCATION = LatLng(46.5197, 6.6323) // EPFL coordinates
 private const val DEFAULT_ZOOM = 15f
+private const val RADIUS = 5000.0
 
 // Define custom gradient colors (from blue to red)
 private val GRADIENT_COLORS =
@@ -61,6 +63,9 @@ private val GRADIENT_START_POINTS =
         1.0f // Peak at Red
         )
 
+val gradient = Gradient(GRADIENT_COLORS, GRADIENT_START_POINTS)
+
+/** This function generates fake points around lausanne to showcase the heatmap display */
 private fun generateFakePoints(): List<WeightedLatLng> {
   // EPFL coordinates: 46.5197, 6.6323
   val epflLat = 46.5197
@@ -122,6 +127,7 @@ fun HeatMap(
     locationViewModel: LocationViewModel
 ) {
   val userLocation = locationViewModel.lastKnownLocation.collectAsState()
+  val profiles = profilesViewModel.filteredProfiles.collectAsState()
 
   Scaffold(
       modifier = Modifier.testTag("heatMapScreen"),
@@ -149,22 +155,17 @@ fun HeatMap(
                     verticalArrangement = Arrangement.Center) {
                       CircularProgressIndicator()
                       Spacer(modifier = Modifier.height(16.dp))
-                      Text("Getting your location...", textAlign = TextAlign.Center)
+                      Text("${R.string.location_loading}", textAlign = TextAlign.Center)
                     }
               }
         } else {
           // Rest of your existing map code
-          val mapLocation =
-              remember(userLocation.value) {
-                userLocation.value?.let { LatLng(it.latitude, it.longitude) } ?: LatLng(0.0, 0.0)
-              }
+          val location = userLocation.value!!
+          val mapLocation = remember(location) { LatLng(location.latitude, location.longitude) }
 
           val cameraPositionState = rememberCameraPositionState {
             position = CameraPosition.fromLatLngZoom(mapLocation, DEFAULT_ZOOM)
           }
-
-          val gradient = Gradient(GRADIENT_COLORS, GRADIENT_START_POINTS)
-          val profiles = profilesViewModel.filteredProfiles.collectAsState()
 
           val weightedLocations =
               remember(profiles.value) {
@@ -198,7 +199,7 @@ fun HeatMap(
                 userLocation.value
                     ?: GeoPoint(DEFAULT_LOCATION.latitude, DEFAULT_LOCATION.longitude)
             profilesViewModel.getFilteredProfilesInRadius(
-                center = center, radiusInMeters = 5000.0 // 5km radius
+                center = center, radiusInMeters = RADIUS // 5km radius
                 )
           }
 
