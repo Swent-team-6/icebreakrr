@@ -130,5 +130,6 @@ class MeetingRequestViewModel(
     }
   }
 
-  fun getInbox() {} // TODO : make a Inbox call to refresh all the messages received, ll use the profileViewModel
+  fun getInbox() {} // TODO : make a Inbox call to refresh all the messages received, ll use the
+  // profileViewModel
 }
