@@ -104,11 +104,10 @@ class MeetingRequestViewModel(
       val data =
           hashMapOf(
               "targetToken" to meetingRequestState.targetToken,
-              "senderUID" to MeetingRequestManager.ourUid,
+              "senderUID" to meetingRequestState.senderUID,
               "message" to MeetingRequestManager.ourName + " : " + meetingRequestState.message,
           )
       try {
-        Log.d("SENDING MEETING REQUEST : ", data.toString())
         val result =
             functions
                 .getHttpsCallable(SEND_MEETING_REQUEST) // Cloud Function name
