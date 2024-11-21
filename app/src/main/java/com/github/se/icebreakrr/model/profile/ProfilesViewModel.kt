@@ -8,15 +8,13 @@ import android.util.Log
 import android.widget.Toast
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.github.se.icebreakrr.ui.sections.DEFAULT_LATITUDE
-import com.github.se.icebreakrr.ui.sections.DEFAULT_LONGITUDE
 import com.github.se.icebreakrr.ui.sections.DEFAULT_RADIUS
+import com.github.se.icebreakrr.ui.sections.DEFAULT_USER_LATITUDE
+import com.github.se.icebreakrr.ui.sections.DEFAULT_USER_LONGITUDE
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.auth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.GeoPoint
-import com.google.firebase.firestore.firestore
 import com.google.firebase.storage.storage
 import java.io.ByteArrayOutputStream
 import java.io.InputStream
@@ -96,7 +94,8 @@ open class ProfilesViewModel(
   init {
     repository.init {
       // Fetch profiles on initialization
-      getFilteredProfilesInRadius(GeoPoint(DEFAULT_LATITUDE, DEFAULT_LONGITUDE), DEFAULT_RADIUS)
+      getFilteredProfilesInRadius(
+          GeoPoint(DEFAULT_USER_LATITUDE, DEFAULT_USER_LONGITUDE), DEFAULT_RADIUS)
       getSelfProfile()
     }
   }
@@ -112,7 +111,7 @@ open class ProfilesViewModel(
    */
   fun getFilteredProfilesInRadius(
       center: GeoPoint,
-      radiusInMeters: Double,
+      radiusInMeters: Int,
       genders: List<Gender>? = null,
       ageRange: IntRange? = null,
       tags: List<String>? = null
