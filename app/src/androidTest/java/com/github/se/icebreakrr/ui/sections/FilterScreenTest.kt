@@ -427,7 +427,6 @@ class FilterScreenTest {
 
   @Test
   fun testRadiusSliderChanges() {
-    val allowedValues = listOf(50, 100, 200, 300, 400, 500)
     val currentRadius = mutableStateOf(100) // Use mutableStateOf here
 
     composeTestRule.setContent {
@@ -436,7 +435,7 @@ class FilterScreenTest {
           onDistanceChange = { newRadius -> currentRadius.value = newRadius })
     }
 
-    allowedValues.forEachIndexed { index, expectedValue ->
+    ALLOWED_VALUES.forEachIndexed { index, expectedValue ->
       // Perform slider action
       composeTestRule.onNodeWithTag("RadiusSlider").performSemanticsAction(
           SemanticsActions.SetProgress) {
@@ -457,7 +456,6 @@ class FilterScreenTest {
   @Test
   fun testRadiusSliderBounds() {
     val initialRadius = 50
-    val allowedValues = listOf(50, 100, 200, 300, 400, 500)
     var currentRadius = initialRadius
 
     composeTestRule.setContent {
@@ -470,13 +468,13 @@ class FilterScreenTest {
         SemanticsActions.SetProgress) {
           it(-1f)
         }
-    assertEquals(allowedValues.first(), currentRadius)
+    assertEquals(ALLOWED_VALUES.first(), currentRadius)
 
     composeTestRule.onNodeWithTag("RadiusSlider").performSemanticsAction(
         SemanticsActions.SetProgress) {
-          it(allowedValues.size.toFloat())
+          it(ALLOWED_VALUES.size.toFloat())
         }
-    assertEquals(allowedValues.last(), currentRadius)
+    assertEquals(ALLOWED_VALUES.last(), currentRadius)
   }
 
   @Test
@@ -496,7 +494,7 @@ class FilterScreenTest {
 
     // Change the slider value and verify
     val newRadius = 300
-    val newIndex = listOf(50, 100, 200, 300, 400, 500).indexOf(newRadius)
+    val newIndex = ALLOWED_VALUES.indexOf(newRadius)
 
     composeTestRule.onNodeWithTag("RadiusSlider").performSemanticsAction(
         SemanticsActions.SetProgress) {
