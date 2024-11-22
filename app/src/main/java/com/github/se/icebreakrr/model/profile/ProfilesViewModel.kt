@@ -8,9 +8,9 @@ import android.util.Log
 import android.widget.Toast
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.github.se.icebreakrr.ui.sections.DEFAULT_LATITUDE
-import com.github.se.icebreakrr.ui.sections.DEFAULT_LONGITUDE
 import com.github.se.icebreakrr.ui.sections.DEFAULT_RADIUS
+import com.github.se.icebreakrr.ui.sections.DEFAULT_USER_LATITUDE
+import com.github.se.icebreakrr.ui.sections.DEFAULT_USER_LONGITUDE
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -30,6 +30,9 @@ open class ProfilesViewModel(
 
   private val _profiles = MutableStateFlow<List<Profile>>(emptyList())
   open val profiles: StateFlow<List<Profile>> = _profiles
+
+  private val _inbox = MutableStateFlow<List<Profile?>>(emptyList())
+  open val inbox: StateFlow<List<Profile?>> = _inbox
 
   private val _filteredProfiles = MutableStateFlow<List<Profile>>(emptyList())
   val filteredProfiles: StateFlow<List<Profile>> = _filteredProfiles
@@ -94,7 +97,8 @@ open class ProfilesViewModel(
   init {
     repository.init {
       // Fetch profiles on initialization
-      getFilteredProfilesInRadius(GeoPoint(DEFAULT_LATITUDE, DEFAULT_LONGITUDE), DEFAULT_RADIUS)
+      getFilteredProfilesInRadius(
+          GeoPoint(DEFAULT_USER_LATITUDE, DEFAULT_USER_LONGITUDE), DEFAULT_RADIUS)
       getSelfProfile()
     }
   }
@@ -110,7 +114,7 @@ open class ProfilesViewModel(
    */
   fun getFilteredProfilesInRadius(
       center: GeoPoint,
-      radiusInMeters: Double,
+      radiusInMeters: Int,
       genders: List<Gender>? = null,
       ageRange: IntRange? = null,
       tags: List<String>? = null
@@ -316,7 +320,35 @@ open class ProfilesViewModel(
    * @param uid The unique ID of the user being blocked.
    */
   fun blockUser(uid: String) {
-    updateProfile(selfProfile.value!!.copy(hasBlocked = selfProfile.value!!.hasBlocked + uid))
+    _selfProfile.update { currentProfile ->
+      currentProfile?.copy(hasBlocked = currentProfile.hasBlocked + uid)
+    }
+    updateProfile(selfProfile.value!!)
+  }
+
+  /**
+   * Unblocks a user by updating the blocking relationship in the repository.
+   *
+   * @param uid The unique ID of the user being unblocked.
+   */
+  fun unblockUser(uid: String) {
+    _selfProfile.update { currentProfile ->
+      currentProfile?.copy(hasBlocked = currentProfile.hasBlocked.filter { it != uid })
+    }
+    updateProfile(selfProfile.value!!)
+    getBlockedUsers()
+  }
+
+  fun getBlockedUsers() {
+    _loading.value = true
+    repository.getBlockedProfiles(
+        selfProfile.value?.hasBlocked ?: emptyList(),
+        onSuccess = { profileList ->
+          _profiles.value = profileList
+          _loading.value = false
+          _isConnected.value = true
+        },
+        onFailure = { e -> handleError(e) })
   }
 
   /** Fetches the current user's profile from the repository. */

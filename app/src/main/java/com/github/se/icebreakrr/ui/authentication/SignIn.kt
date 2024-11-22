@@ -50,6 +50,7 @@ import com.github.se.icebreakrr.R
 import com.github.se.icebreakrr.config.LocalIsTesting
 import com.github.se.icebreakrr.data.AppDataStore
 import com.github.se.icebreakrr.model.filter.FilterViewModel
+import com.github.se.icebreakrr.model.location.LocationViewModel
 import com.github.se.icebreakrr.model.message.MeetingRequestManager
 import com.github.se.icebreakrr.model.message.MeetingRequestViewModel
 import com.github.se.icebreakrr.model.profile.ProfilesViewModel
@@ -57,9 +58,9 @@ import com.github.se.icebreakrr.model.tags.TagsViewModel
 import com.github.se.icebreakrr.ui.navigation.NavigationActions
 import com.github.se.icebreakrr.ui.navigation.Screen
 import com.github.se.icebreakrr.ui.navigation.TopLevelDestinations
-import com.github.se.icebreakrr.ui.sections.DEFAULT_LATITUDE
-import com.github.se.icebreakrr.ui.sections.DEFAULT_LONGITUDE
 import com.github.se.icebreakrr.ui.sections.DEFAULT_RADIUS
+import com.github.se.icebreakrr.ui.sections.DEFAULT_USER_LATITUDE
+import com.github.se.icebreakrr.ui.sections.DEFAULT_USER_LONGITUDE
 import com.github.se.icebreakrr.ui.theme.IceBreakrrBlue
 import com.github.se.icebreakrr.ui.theme.SignInDarkBlue
 import com.github.se.icebreakrr.ui.theme.SignInMiddleBlue
@@ -77,7 +78,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
 // Constant values
-private const val PADDING_PERCENTAGE = 0.2f
 private const val TITLE_FONT_SIZE = 64
 private const val TITLE_LINE_HEIGHT = 25.07
 private const val TITLE_FONT_WEIGHT = 500
@@ -103,7 +103,8 @@ fun SignInScreen(
     navigationActions: NavigationActions,
     filterViewModel: FilterViewModel,
     tagsViewModel: TagsViewModel,
-    appDataStore: AppDataStore
+    appDataStore: AppDataStore,
+    locationViewModel: LocationViewModel
 ) {
 
   // State to hold the current Firebase user
@@ -212,9 +213,10 @@ fun SignInScreen(
                     if (hasAuthToken.value) {
                       // If offline but has token, allow access
                       navigationActions.navigateTo(TopLevelDestinations.AROUND_YOU)
+                      val userLocation = locationViewModel.lastKnownLocation.value
                       profilesViewModel.getFilteredProfilesInRadius(
-                          GeoPoint(DEFAULT_LATITUDE, DEFAULT_LONGITUDE),
-                          DEFAULT_RADIUS,
+                          userLocation ?: GeoPoint(DEFAULT_USER_LATITUDE, DEFAULT_USER_LONGITUDE),
+                          filterViewModel.selectedRadius.value,
                           filterViewModel.selectedGenders.value,
                           filterViewModel.ageRange.value,
                           tagsViewModel.filteredTags.value)
@@ -231,7 +233,7 @@ fun SignInScreen(
                     launcher.launch(googleSignInClient.signInIntent)
 
                     profilesViewModel.getFilteredProfilesInRadius(
-                        GeoPoint(DEFAULT_LATITUDE, DEFAULT_LONGITUDE),
+                        GeoPoint(DEFAULT_USER_LATITUDE, DEFAULT_USER_LONGITUDE),
                         DEFAULT_RADIUS,
                         filterViewModel.selectedGenders.value,
                         filterViewModel.ageRange.value,

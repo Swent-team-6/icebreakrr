@@ -48,12 +48,20 @@ open class MockProfileRepository : ProfilesRepository {
   // Returns a predefined list of profiles for getProfilesInRadius
   override fun getProfilesInRadius(
       center: GeoPoint,
-      radiusInMeters: Double,
+      radiusInMeters: Int,
       onSuccess: (List<Profile>) -> Unit,
       onFailure: (Exception) -> Unit
   ) {
     // Return a predefined list of profiles
     onSuccess(Profile.getMockedProfiles())
+  }
+
+  override fun getBlockedProfiles(
+      blockedProfiles: List<String>,
+      onSuccess: (List<Profile>) -> Unit,
+      onFailure: (Exception) -> Unit
+  ) {
+    onSuccess(Profile.getMockedProfiles().filter { it.uid in blockedProfiles })
   }
 
   // Simulates successful profile addition by calling onSuccess

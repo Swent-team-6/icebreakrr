@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material3.*
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -15,34 +16,28 @@ import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults.Indicator
 import androidx.compose.material3.pulltorefresh.PullToRefreshState
 import androidx.compose.material3.pulltorefresh.pullToRefresh
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
+import androidx.compose.runtime.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.github.se.icebreakrr.model.filter.FilterViewModel
-import com.github.se.icebreakrr.model.location.LocationViewModel
-import com.github.se.icebreakrr.model.profile.Gender
+import com.github.se.icebreakrr.R
+import com.github.se.icebreakrr.model.profile.Profile
 import com.github.se.icebreakrr.model.profile.ProfilesViewModel
-import com.github.se.icebreakrr.model.tags.TagsViewModel
 import com.github.se.icebreakrr.ui.navigation.BottomNavigationMenu
 import com.github.se.icebreakrr.ui.navigation.LIST_TOP_LEVEL_DESTINATIONS
 import com.github.se.icebreakrr.ui.navigation.NavigationActions
 import com.github.se.icebreakrr.ui.navigation.Route
-import com.github.se.icebreakrr.ui.navigation.Screen
-import com.github.se.icebreakrr.ui.sections.shared.FilterFloatingActionButton
 import com.github.se.icebreakrr.ui.sections.shared.ProfileCard
 import com.github.se.icebreakrr.ui.sections.shared.TopBar
 import com.github.se.icebreakrr.ui.theme.messageTextColor
 import com.github.se.icebreakrr.utils.NetworkUtils.isNetworkAvailable
-import com.github.se.icebreakrr.utils.NetworkUtils.isNetworkAvailableWithContext
-import com.github.se.icebreakrr.utils.NetworkUtils.showNoInternetToast
-import com.google.firebase.firestore.GeoPoint
 import kotlinx.coroutines.delay
 
 // Constants for layout dimensions
@@ -51,7 +46,7 @@ private val COLUMN_HORIZONTAL_PADDING = 8.dp
 private val TEXT_SIZE_LARGE = 20.sp
 private val NO_CONNECTION_TEXT_COLOR = messageTextColor
 private val EMPTY_PROFILE_TEXT_COLOR = messageTextColor
-private const val REFRESH_DELAY = 10_000L
+private const val REFRESH_INTERVAL = 10_000L
 
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -64,66 +59,81 @@ private const val REFRESH_DELAY = 10_000L
  *
  * @param navigationActions The actions used for navigating between screens.
  * @param profilesViewModel The view model of the profiles
- * @param tagsViewModel The view model of the tags
- * @param filterViewModel The view model of the filters
  */
-fun AroundYouScreen(
+fun UnblockProfileScreen(
     navigationActions: NavigationActions,
     profilesViewModel: ProfilesViewModel,
-    tagsViewModel: TagsViewModel,
-    filterViewModel: FilterViewModel,
-    locationViewModel: LocationViewModel,
     isTestMode: Boolean = false
 ) {
 
-  val filteredProfiles = profilesViewModel.filteredProfiles.collectAsState()
+  val blockedProfiles = profilesViewModel.profiles.collectAsState()
   val isLoading = profilesViewModel.loading.collectAsState()
-  val context = LocalContext.current
   val isConnected = profilesViewModel.isConnected.collectAsState()
-  val userLocation = locationViewModel.lastKnownLocation.collectAsState()
+
+  var profileToUnblock by remember { mutableStateOf<Profile?>(null) }
+
+  if (profileToUnblock != null) {
+    AlertDialog(
+        modifier = Modifier.testTag("unblockDialog"),
+        onDismissRequest = { profileToUnblock = null },
+        title = { Text(stringResource(R.string.unblock_confirm)) },
+        text = { Text(stringResource(R.string.unblock_confirm_message, profileToUnblock!!.name)) },
+        confirmButton = {
+          TextButton(
+              onClick = {
+                profilesViewModel.unblockUser(profileToUnblock!!.uid)
+                profilesViewModel.getBlockedUsers()
+                profileToUnblock = null
+              }) {
+                Text(stringResource(R.string.block_yes))
+              }
+        },
+        dismissButton = {
+          TextButton(onClick = { profileToUnblock = null }) {
+            Text(stringResource(R.string.block_no))
+          }
+        })
+  }
 
   // Initial check and start of periodic update every 10 seconds
-  LaunchedEffect(isConnected.value, userLocation.value) {
+  LaunchedEffect(isConnected.value) {
     if (!isTestMode && !isNetworkAvailable()) {
       profilesViewModel.updateIsConnected(false)
     } else {
       while (true) {
-
         // Call the profile fetch function
-        profilesViewModel.getFilteredProfilesInRadius(
-            userLocation.value ?: GeoPoint(DEFAULT_USER_LATITUDE, DEFAULT_USER_LONGITUDE),
-            filterViewModel.selectedRadius.value,
-            filterViewModel.selectedGenders.value,
-            filterViewModel.ageRange.value,
-            tagsViewModel.filteredTags.value)
+        profilesViewModel.getBlockedUsers()
 
-        delay(REFRESH_DELAY) // Wait before the next update
+        // Wait 10 seconds before the next update
+        delay(REFRESH_INTERVAL)
       }
     }
   }
 
   Scaffold(
-      modifier = Modifier.testTag("aroundYouScreen"),
+      modifier = Modifier.testTag("unblockScreen"),
       bottomBar = {
         BottomNavigationMenu(
             onTabSelect = { route ->
-              if (route.route != Route.AROUND_YOU) {
-                navigationActions.navigateTo(route)
+              if (navigationActions.currentRoute() != Route.SETTINGS &&
+                  route.route == Route.SETTINGS) {
+                navigationActions.navigateTo(Route.SETTINGS)
+              } else {
+                navigationActions.navigateTo(route.route)
               }
             },
             tabList = LIST_TOP_LEVEL_DESTINATIONS,
-            selectedItem = Route.AROUND_YOU)
+            selectedItem = Route.UNBLOCK_PROFILE)
       },
-      topBar = { TopBar("Around You") },
+      topBar = {
+        TopBar(stringResource(R.string.blocked_profiles), true) { navigationActions.goBack() }
+      },
       content = { innerPadding ->
         PullToRefreshBox(
-            locationViewModel = locationViewModel,
-            filterViewModel = filterViewModel,
-            tagsViewModel = tagsViewModel,
             isRefreshing = isLoading.value,
-            onRefresh = { center, radiusInMeters, genders, ageRange, tags ->
-              profilesViewModel.getFilteredProfilesInRadius(
-                  center, radiusInMeters, genders, ageRange, tags)
+            onRefresh = {
+              profilesViewModel.getSelfProfile()
+              profilesViewModel.getBlockedUsers()
             },
             modifier = Modifier.padding(innerPadding)) {
               LazyColumn(
@@ -131,31 +141,11 @@ fun AroundYouScreen(
                   verticalArrangement = Arrangement.spacedBy(COLUMN_VERTICAL_PADDING),
                   modifier =
                       Modifier.fillMaxSize().padding(horizontal = COLUMN_HORIZONTAL_PADDING)) {
-                    if (!isConnected.value) {
-                      item {
-                        Box(
-                            contentAlignment = Alignment.Center,
-                            modifier = Modifier.fillMaxSize().testTag("noConnectionPrompt")) {
-                              Text(
-                                  text = "No Internet Connection",
-                                  fontSize = TEXT_SIZE_LARGE,
-                                  fontWeight = FontWeight.Bold,
-                                  color = NO_CONNECTION_TEXT_COLOR)
-                            }
-                      }
-                    } else if (filteredProfiles.value.isNotEmpty()) {
-                      items(filteredProfiles.value.size) { index ->
+                    if (blockedProfiles.value.isNotEmpty()) {
+                      items(blockedProfiles.value.size) { index ->
                         ProfileCard(
-                            profile = filteredProfiles.value[index],
-                            onclick = {
-                              if (isNetworkAvailableWithContext(context)) {
-                                navigationActions.navigateTo(
-                                    Screen.OTHER_PROFILE_VIEW +
-                                        "?userId=${filteredProfiles.value[index].uid}")
-                              } else {
-                                showNoInternetToast(context)
-                              }
-                            })
+                            profile = blockedProfiles.value[index],
+                            onclick = { profileToUnblock = blockedProfiles.value[index] })
                       }
                     } else {
                       item {
@@ -163,7 +153,7 @@ fun AroundYouScreen(
                             contentAlignment = Alignment.Center,
                             modifier = Modifier.fillMaxSize().testTag("emptyProfilePrompt")) {
                               Text(
-                                  text = "There is no one around. Try moving!",
+                                  text = stringResource(id = R.string.no_blocked_users),
                                   fontSize = TEXT_SIZE_LARGE,
                                   fontWeight = FontWeight.Bold,
                                   color = EMPTY_PROFILE_TEXT_COLOR)
@@ -172,8 +162,7 @@ fun AroundYouScreen(
                     }
                   }
             }
-      },
-      floatingActionButton = { FilterFloatingActionButton(navigationActions) })
+      })
 }
 
 /**
@@ -182,12 +171,6 @@ fun AroundYouScreen(
  *
  * @param isRefreshing Whether the refresh operation is ongoing; the indicator shows while true.
  * @param onRefresh Called on pull-to-refresh with parameters for filtering:
- * - [center]: the central [GeoPoint] for location-based filtering.
- * - [radiusInMeters]: search radius in meters.
- * - [genders]: list of [Gender] to filter by.
- * - [ageRange]: age range for filtering.
- * - [tags]: tags for filtering.
- *
  * @param modifier [Modifier] for styling the container.
  * @param state State for managing pull-to-refresh gesture.
  * @param contentAlignment Alignment for the content within the box.
@@ -197,38 +180,22 @@ fun AroundYouScreen(
 @Composable
 @ExperimentalMaterial3Api
 fun PullToRefreshBox(
-    locationViewModel: LocationViewModel,
-    filterViewModel: FilterViewModel,
-    tagsViewModel: TagsViewModel,
     isRefreshing: Boolean,
-    onRefresh:
-        (
-            center: GeoPoint,
-            radiusInMeters: Int,
-            genders: List<Gender>?,
-            ageRange: IntRange?,
-            tags: List<String>?) -> Unit,
+    onRefresh: () -> Unit,
     modifier: Modifier = Modifier,
     state: PullToRefreshState = rememberPullToRefreshState(),
     contentAlignment: Alignment = Alignment.TopStart,
-    indicator: @Composable BoxScope.() -> Unit = {
+    indicator: @Composable (BoxScope.() -> Unit) = {
       Indicator(
           modifier = Modifier.align(Alignment.TopCenter).testTag("refreshIndicator"),
           isRefreshing = isRefreshing,
           state = state)
     },
-    content: @Composable BoxScope.() -> Unit
+    content: @Composable (BoxScope.() -> Unit)
 ) {
-  val userLocation = locationViewModel.lastKnownLocation.collectAsState()
+
   Box(
-      modifier.pullToRefresh(state = state, isRefreshing = isRefreshing) {
-        onRefresh(
-            userLocation.value ?: GeoPoint(DEFAULT_USER_LATITUDE, DEFAULT_USER_LONGITUDE),
-            filterViewModel.selectedRadius.value,
-            filterViewModel.selectedGenders.value,
-            filterViewModel.ageRange.value,
-            tagsViewModel.filteredTags.value)
-      },
+      modifier.pullToRefresh(state = state, isRefreshing = isRefreshing) { onRefresh() },
       contentAlignment = contentAlignment) {
         content()
         indicator()

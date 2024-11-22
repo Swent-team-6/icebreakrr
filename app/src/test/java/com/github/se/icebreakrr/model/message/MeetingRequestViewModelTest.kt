@@ -82,8 +82,7 @@ class MeetingRequestViewModelTest {
           targetToken = "TokenUser1",
           senderUID = "senderUid",
           message = "Hello!",
-          picture = null,
-          location = null)
+      )
 
   @Before
   fun setUp() {
@@ -96,9 +95,11 @@ class MeetingRequestViewModelTest {
     mockMeetingRequestManager = mock(MeetingRequestManager::class.java)
 
     // Initialize the ViewModel with mocks
-    meetingRequestViewModel = MeetingRequestViewModel(profilesViewModel, functions, "1", "John Doe")
+    meetingRequestViewModel = MeetingRequestViewModel(profilesViewModel, functions)
     `when`(functions.getHttpsCallable("sendMessage")).thenReturn(callableReference)
+    `when`(functions.getHttpsCallable("sendMeetingRequest")).thenReturn(callableReference)
     `when`(mockMeetingRequestManager.ourName).thenReturn("John Doe")
+    `when`(mockMeetingRequestManager.ourUid).thenReturn("1")
   }
 
   @Test
@@ -108,14 +109,6 @@ class MeetingRequestViewModelTest {
 
     // Assert that the message was updated in the ViewModel state
     assert(meetingRequestViewModel.meetingRequestState.message == message)
-  }
-
-  @Test
-  fun testOnSubmitMeetingRequestUpdatesIsEnteringMessage() = runBlocking {
-    meetingRequestViewModel.onSubmitMeetingRequest()
-
-    // Assert that isEnteringMessage is false after submitting
-    assert(!meetingRequestViewModel.meetingRequestState.isEnteringMessage)
   }
 
   @Test
@@ -131,7 +124,7 @@ class MeetingRequestViewModelTest {
     assert(meetingRequestViewModel.meetingRequestState.targetToken == newToken)
 
     // Assert: Verify that getProfileByUid was called
-    verify(profilesViewModel).getProfileByUid(profile1.uid)
+    verify(profilesViewModel).getProfileByUid(any())
 
     // Assert: Verify that updateProfile was called with the updated profile
     val updatedProfile = existingProfile.copy(fcmToken = newToken)
@@ -149,7 +142,7 @@ class MeetingRequestViewModelTest {
   }
 
   @Test
-  fun testSendMessageCorrectData() = runBlocking {
+  fun testSendMeetingRequestCorrectData() = runBlocking {
     // Mock the callable function
     val callableMock: HttpsCallableResult = mock(HttpsCallableResult::class.java)
     val callableTask: Task<HttpsCallableResult> = Tasks.forResult(callableMock)
@@ -162,10 +155,10 @@ class MeetingRequestViewModelTest {
     meetingRequestViewModel.meetingRequestState = meetingRequestState
 
     // Act: Call the method under test
-    meetingRequestViewModel.sendMessage()
+    meetingRequestViewModel.sendMeetingRequest()
 
     // Assert: Verify that the cloud function was called with the correct data
-    verify(functions).getHttpsCallable("sendMessage")
+    verify(functions).getHttpsCallable("sendMeetingRequest")
 
     // Capture the argument passed to `call`
     val argumentCaptor =
@@ -177,14 +170,12 @@ class MeetingRequestViewModelTest {
     assert(capturedData["targetToken"] == meetingRequestState.targetToken)
     assert(capturedData["senderUID"] == meetingRequestState.senderUID)
     assert(
-        capturedData["body"] ==
+        capturedData["message"] ==
             mockMeetingRequestManager.ourName + " : " + meetingRequestState.message)
-    assert(capturedData["picture"] == meetingRequestState.picture)
-    assert(capturedData["location"] == meetingRequestState.location)
   }
 
   @Test
-  fun testSendMessageErrorFound(): Unit = runBlocking {
+  fun testSendMeetingRequestErrorFound(): Unit = runBlocking {
     // Arrange: Create a task that throws an exception
     val callableTask: Task<HttpsCallableResult> =
         Tasks.forException(RuntimeException("Firebase Error"))
@@ -193,17 +184,17 @@ class MeetingRequestViewModelTest {
     `when`(callableReference.call(any())).thenReturn(callableTask)
 
     // Act
-    meetingRequestViewModel.sendMessage()
+    meetingRequestViewModel.sendMeetingRequest()
 
     // Verify: Ensure no unhandled exceptions and log output if needed
-    verify(functions).getHttpsCallable("sendMessage")
+    verify(functions).getHttpsCallable("sendMeetingRequest")
     verify(callableReference).call(any())
   }
 
   @Test
   fun constructWrongMeetingRequestVM(): Unit = runBlocking {
     val meetingRequestViewModelFactory =
-        MeetingRequestViewModel.Companion.Factory(profilesViewModel, functions, "1", "John Doe")
+        MeetingRequestViewModel.Companion.Factory(profilesViewModel, functions)
     var exception: IllegalArgumentException = IllegalArgumentException("No message")
     try {
       meetingRequestViewModelFactory.create(ProfilesViewModel::class.java)
