@@ -101,6 +101,7 @@ const val FILTER_ACTION_BUTTON_ALPHA = 0.5f
 const val DEFAULT_USER_LATITUDE = 46.51827 // Lausanne
 const val DEFAULT_USER_LONGITUDE = 6.619265 // Lausanne
 val TEXTS_PADDING = 8.dp
+val ALLOWED_VALUES = listOf(50, 100, 200, 300, 400, 500)
 
 // Custom colors
 val IcebreakrrBlue: Color = IceBreakrrBlue
@@ -631,8 +632,7 @@ fun AgeRangeInputFields(
  */
 @Composable
 fun RadiusSlider(radius: Int, onDistanceChange: (Int) -> Unit) {
-  val allowedValues = listOf(50, 100, 200, 300, 400, 500)
-  val currentIndex = allowedValues.indexOf(radius)
+  val currentIndex = ALLOWED_VALUES.indexOf(radius)
   val screenHeight = LocalConfiguration.current.screenHeightDp.dp
 
   Column(
@@ -647,10 +647,10 @@ fun RadiusSlider(radius: Int, onDistanceChange: (Int) -> Unit) {
         value = currentIndex.toFloat(),
         onValueChange = { newValue ->
           val newIndex = newValue.toInt()
-          onDistanceChange(allowedValues[newIndex])
+          onDistanceChange(ALLOWED_VALUES[newIndex])
         },
-        valueRange = 0f..(allowedValues.size - 1).toFloat(),
-        steps = allowedValues.size - 2,
+        valueRange = 0f..(ALLOWED_VALUES.size - 1).toFloat(),
+        steps = ALLOWED_VALUES.size - 2,
         modifier = Modifier.padding(horizontal = (2 * DEFAULT_PADDING).dp).testTag("RadiusSlider"),
         colors =
             SliderDefaults.colors(thumbColor = IceBreakrrBlue, activeTrackColor = IceBreakrrBlue))
