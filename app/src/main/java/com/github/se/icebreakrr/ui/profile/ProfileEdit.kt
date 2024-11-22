@@ -50,7 +50,6 @@ import com.github.se.icebreakrr.ui.sections.shared.UnsavedChangesDialog
 import com.github.se.icebreakrr.ui.sections.shared.handleSafeBackNavigation
 import com.github.se.icebreakrr.ui.tags.TagSelector
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.ktx.auth
 
 @SuppressLint("UnrememberedMutableState", "CoroutineCreationDuringComposition")
 @OptIn(ExperimentalMaterial3Api::class)
