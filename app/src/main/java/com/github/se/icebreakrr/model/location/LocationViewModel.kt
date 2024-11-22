@@ -2,6 +2,7 @@ package com.github.se.icebreakrr.model.location
 
 import android.Manifest
 import android.content.pm.PackageManager
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -104,7 +105,11 @@ class LocationViewModel(
               _lastKnownLocation.value = geoPoint
 
               viewModelScope.launch {
-                (locationRepositoryFirestore as? AppDataStore)?.saveLastKnownLocation(geoPoint)
+                try {
+                  (locationRepositoryFirestore as? AppDataStore)?.saveLastKnownLocation(geoPoint)
+                } catch (e: Exception) {
+                  Log.e("LocationUpdate", "Failed to save location", e)
+                }
               }
             })
 
