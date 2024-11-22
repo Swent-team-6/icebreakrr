@@ -169,6 +169,20 @@ class ProfilesViewModelTest {
   }
 
   @Test
+  fun getBlockedUsersInRadiusHandlesError() = runBlocking {
+    val exception = Exception("Test exception")
+
+    whenever(profilesRepository.getBlockedProfiles(eq(emptyList()), any(), any())).thenAnswer {
+      val onFailure = it.getArgument<(Exception) -> Unit>(2)
+      onFailure(exception)
+    }
+
+    profilesViewModel.getBlockedUsers()
+
+    assertThat(profilesViewModel.error.value, `is`(exception))
+  }
+
+  @Test
   fun addNewProfileCallsRepository() = runBlocking {
     profilesViewModel.addNewProfile(profile1)
 
