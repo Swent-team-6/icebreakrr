@@ -41,9 +41,11 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.github.se.icebreakrr.model.profile.Profile
 import com.github.se.icebreakrr.model.profile.ProfilesViewModel
 import com.github.se.icebreakrr.model.tags.TagsViewModel
 import com.github.se.icebreakrr.ui.navigation.NavigationActions
+import com.github.se.icebreakrr.ui.navigation.Screen
 import com.github.se.icebreakrr.ui.sections.shared.UnsavedChangesDialog
 import com.github.se.icebreakrr.ui.sections.shared.handleSafeBackNavigation
 import com.github.se.icebreakrr.ui.tags.TagSelector
@@ -95,10 +97,13 @@ fun ProfileEditingScreen(
   val tagsSuggestions = tagsViewModel.tagsSuggestions.collectAsState()
   val stringQuery = remember { mutableStateOf("") }
 
+  fun getCopyOfProfile(): Profile {
+    return user!!.copy(
+        catchPhrase = catchphrase.text, description = description.text, tags = selectedTags)
+  }
+
   fun updateProfile() {
-    profilesViewModel.updateProfile(
-        user!!.copy(
-            catchPhrase = catchphrase.text, description = description.text, tags = selectedTags))
+    profilesViewModel.updateProfile(getCopyOfProfile())
   }
 
   if (isLoading) {
@@ -152,6 +157,7 @@ fun ProfileEditingScreen(
                     onSelectionSuccess = { uri ->
                       profilesViewModel.generateTempProfilePictureBitmap(context, uri)
                       isModified = true
+                      navigationActions.navigateTo(Screen.CROP)
                     },
                     onSelectionFailure = {
                       Toast.makeText(context, "Failed to select image", Toast.LENGTH_SHORT).show()
