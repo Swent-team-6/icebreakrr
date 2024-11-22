@@ -16,11 +16,11 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.GeoPoint
 import com.google.firebase.storage.storage
+import java.io.ByteArrayOutputStream
+import java.io.InputStream
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
-import java.io.ByteArrayOutputStream
-import java.io.InputStream
 
 open class ProfilesViewModel(
     private val repository: ProfilesRepository,
@@ -267,14 +267,14 @@ open class ProfilesViewModel(
     _tempProfilePictureBitmap.value = null
   }
 
-/**
- * Processes the cropped image by compressing it if it is too large.
- *
- * @param bitmap The cropped Bitmap to be processed.
- */
-fun processCroppedImage(bitmap: Bitmap) {
-  _tempProfilePictureBitmap.value = compressImageIfTooLarge(bitmap)
-}
+  /**
+   * Processes the cropped image by compressing it if it is too large.
+   *
+   * @param bitmap The cropped Bitmap to be processed.
+   */
+  fun processCroppedImage(bitmap: Bitmap) {
+    _tempProfilePictureBitmap.value = compressImageIfTooLarge(bitmap)
+  }
 
   /**
    * Validates and uploads the profile picture if a temporary profile picture Bitmap exists.

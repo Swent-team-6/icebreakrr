@@ -2,7 +2,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -28,7 +27,6 @@ import com.smarttoolfactory.cropper.settings.CropProperties
 import com.smarttoolfactory.cropper.settings.CropStyle
 import com.smarttoolfactory.cropper.settings.CropType
 
-
 /**
  * Composable function for the Image Cropper Screen.
  *
@@ -40,32 +38,32 @@ fun ImageCropperScreen(
     profilesViewModel: ProfilesViewModel,
     navigationActions: NavigationActions,
 ) {
-    // Remember the temporary bitmap from the ViewModel
-    val tempBitmap = remember { profilesViewModel.tempProfilePictureBitmap.value }
+  // Remember the temporary bitmap from the ViewModel
+  val tempBitmap = remember { profilesViewModel.tempProfilePictureBitmap.value }
 
-    // Create parameters for the ImageCropper
-    val cropProperties = remember {
-        CropDefaults.properties(
-            cropType = CropType.Static,
-            handleSize = 100F,
-            cropOutlineProperty = CropOutlineProperty(OutlineType.Oval, RectCropShape(0, "rect")),
-            aspectRatio = AspectRatio(1f), // 1:1 aspect ratio
-            fixedAspectRatio = true,
-        )
-    }
-    val cropStyle = remember { CropDefaults.style() }
+  // Create parameters for the ImageCropper
+  val cropProperties = remember {
+    CropDefaults.properties(
+        cropType = CropType.Static,
+        handleSize = 100F,
+        cropOutlineProperty = CropOutlineProperty(OutlineType.Oval, RectCropShape(0, "rect")),
+        aspectRatio = AspectRatio(1f), // 1:1 aspect ratio
+        fixedAspectRatio = true,
+    )
+  }
+  val cropStyle = remember { CropDefaults.style() }
 
-    // Box to center the ImageCropper
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        ImageCropperWrapper(
-            tempBitmap = tempBitmap!!.asImageBitmap(),
-            cropProperties = cropProperties,
-            cropStyle = cropStyle,
-            onCropSuccess = { imageBitmap ->
-                profilesViewModel.processCroppedImage(imageBitmap.asAndroidBitmap())
-                navigationActions.goBack()
-            })
-    }
+  // Box to center the ImageCropper
+  Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+    ImageCropperWrapper(
+        tempBitmap = tempBitmap!!.asImageBitmap(),
+        cropProperties = cropProperties,
+        cropStyle = cropStyle,
+        onCropSuccess = { imageBitmap ->
+          profilesViewModel.processCroppedImage(imageBitmap.asAndroidBitmap())
+          navigationActions.goBack()
+        })
+  }
 }
 
 /**
@@ -83,33 +81,33 @@ fun ImageCropperWrapper(
     cropStyle: CropStyle,
     onCropSuccess: (ImageBitmap) -> Unit,
 ) {
-    // Local crop state, scoped to ImageCropper
-    var crop by remember { mutableStateOf(false) }
+  // Local crop state, scoped to ImageCropper
+  var crop by remember { mutableStateOf(false) }
 
-    Box {
-        ImageCropper(
-            modifier = Modifier.fillMaxSize(),
-            imageBitmap = tempBitmap,
-            contentDescription = "Profile Picture",
-            cropProperties = cropProperties,
-            cropStyle = cropStyle,
-            crop = crop, // This state only affects the ImageCropper
-            onCropStart = {},
-            onCropSuccess = { imageBitmap ->
-                crop = false
-                onCropSuccess(imageBitmap) // Callback to propagate the result
-            })
+  Box {
+    ImageCropper(
+        modifier = Modifier.fillMaxSize(),
+        imageBitmap = tempBitmap,
+        contentDescription = "Profile Picture",
+        cropProperties = cropProperties,
+        cropStyle = cropStyle,
+        crop = crop, // This state only affects the ImageCropper
+        onCropStart = {},
+        onCropSuccess = { imageBitmap ->
+          crop = false
+          onCropSuccess(imageBitmap) // Callback to propagate the result
+        })
 
-        // Button to trigger cropping, placed inside the wrapper
-        Button(
-            onClick = { crop = true },
-            modifier = Modifier.align(Alignment.BottomCenter).padding(vertical = 50.dp),
-        ) {
-            Text(
-                text = "Crop",
-                fontSize = 30.sp,
-                modifier = Modifier.align(Alignment.CenterVertically).padding(10.dp),
-            )
-        }
+    // Button to trigger cropping, placed inside the wrapper
+    Button(
+        onClick = { crop = true },
+        modifier = Modifier.align(Alignment.BottomCenter).padding(vertical = 50.dp),
+    ) {
+      Text(
+          text = "Crop",
+          fontSize = 30.sp,
+          modifier = Modifier.align(Alignment.CenterVertically).padding(10.dp),
+      )
     }
+  }
 }
