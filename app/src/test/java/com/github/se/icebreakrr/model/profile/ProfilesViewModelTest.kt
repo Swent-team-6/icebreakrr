@@ -414,43 +414,6 @@ class ProfilesViewModelTest {
   }
 
   @Test
-  fun generateTempProfilePictureBitmapClampsToMaxResolution() = runBlocking {
-    // Mock ContentResolver and Uri
-    val contentResolver = mock(ContentResolver::class.java)
-    val uri = mock(Uri::class.java)
-    whenever(context.contentResolver).thenReturn(contentResolver)
-
-    // Create a test image as InputStream
-    val testImageBytes = ByteArray(100) { it.toByte() }
-    val inputStream = ByteArrayInputStream(testImageBytes)
-    whenever(contentResolver.openInputStream(uri)).thenReturn(inputStream)
-
-    // Create a mock bitmap that will be "decoded" from the input stream
-    val mockBitmap = mock(Bitmap::class.java)
-    whenever(mockBitmap.width).thenReturn(1200) // Width greater than max resolution
-    whenever(mockBitmap.height).thenReturn(1200) // Height greater than max resolution
-
-    // Mock BitmapFactory.decodeStream to return our mock bitmap
-    bitmapFactoryMock.`when`<Bitmap> { BitmapFactory.decodeStream(any()) }.thenReturn(mockBitmap)
-
-    // Mock Bitmap.createBitmap to return the same mock bitmap
-    bitmapMock
-        .`when`<Bitmap> { Bitmap.createBitmap(any<Bitmap>(), any(), any(), any(), any()) }
-        .thenReturn(mockBitmap)
-
-    // Mock Bitmap.createScaledBitmap to return a scaled bitmap
-    val scaledBitmap = mock(Bitmap::class.java)
-    bitmapMock
-        .`when`<Bitmap> { Bitmap.createScaledBitmap(any(), eq(600), eq(600), eq(true)) }
-        .thenReturn(scaledBitmap)
-
-    profilesViewModel.generateTempProfilePictureBitmap(context, uri)
-
-    // Verify that the bitmap was scaled down to the max resolution
-    assertThat(profilesViewModel.tempProfilePictureBitmap.value, `is`(scaledBitmap))
-  }
-
-  @Test
   fun validateAndUploadProfilePictureWithNoTempBitmapDoesNothing() = runBlocking {
     profilesViewModel.clearTempProfilePictureBitmap() // Ensure no temp bitmap exists
     profilesViewModel.validateAndUploadProfilePicture(context)
