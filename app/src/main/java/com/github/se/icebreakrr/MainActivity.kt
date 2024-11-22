@@ -44,6 +44,7 @@ import com.github.se.icebreakrr.ui.sections.AroundYouScreen
 import com.github.se.icebreakrr.ui.sections.FilterScreen
 import com.github.se.icebreakrr.ui.sections.NotificationScreen
 import com.github.se.icebreakrr.ui.sections.SettingsScreen
+import com.github.se.icebreakrr.ui.sections.UnblockProfileScreen
 import com.github.se.icebreakrr.ui.theme.SampleAppTheme
 import com.github.se.icebreakrr.utils.NetworkUtils
 import com.github.se.icebreakrr.utils.PermissionManager
@@ -52,7 +53,6 @@ import com.google.android.gms.location.LocationServices
 import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.firestore
 import com.google.firebase.functions.FirebaseFunctions
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -297,6 +297,15 @@ fun IcebreakrrNavHost(
     ) {
       composable(Screen.FILTER) {
         FilterScreen(navigationActions, tagsViewModel, filterViewModel, profileViewModel)
+      }
+    }
+
+    navigation(
+        startDestination = Screen.UNBLOCK_PROFILE,
+        route = Route.UNBLOCK_PROFILE,
+    ) {
+      composable(Screen.UNBLOCK_PROFILE) {
+        UnblockProfileScreen(navigationActions, profileViewModel)
       }
     }
 
