@@ -169,6 +169,7 @@ dependencies {
 
     //Utils
     implementation(libs.geohashJava)
+    implementation(libs.compose.cropper)
     implementation(libs.gson)
 
     implementation(libs.play.services.location)

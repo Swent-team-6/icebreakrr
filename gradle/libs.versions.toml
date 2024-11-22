@@ -2,6 +2,7 @@
 #Google
 activityCompose = "1.7.0"
 androidxJunit = "1.1.5"
+composeCropper = "0.4.0"
 core = "1.6.1"
 coreTesting = "2.2.0"
 datastorePreferences = "1.1.1"
@@ -80,6 +81,7 @@ androidx-core = { module = "androidx.test:core", version.ref = "core" }
 androidx-core-testing = { module = "androidx.arch.core:core-testing", version.ref = "coreTesting" }
 androidx-junit-v115 = { module = "androidx.test.ext:junit", version.ref = "androidxJunit" }
 androidx-lifecycle-viewmodel-ktx = { module = "androidx.lifecycle:lifecycle-viewmodel-ktx", version.ref = "lifecycleViewmodelKtx" }
+compose-cropper = { module = "com.github.SmartToolFactory:Compose-Cropper", version.ref = "composeCropper" }
 firebase-messaging-ktx = { module = "com.google.firebase:firebase-messaging-ktx" }
 mockito-inline = { module = "org.mockito:mockito-inline", version.ref = "mockitoInline" }
 gradle = { module = "com.android.tools.build:gradle", version.ref = "gradle" }

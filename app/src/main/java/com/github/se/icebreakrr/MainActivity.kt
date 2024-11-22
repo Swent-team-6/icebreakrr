@@ -1,5 +1,6 @@
 package com.github.se.icebreakrr
 
+import ImageCropperScreen
 import ProfileCreationScreen
 import android.Manifest
 import android.content.pm.PackageManager
@@ -299,6 +300,13 @@ fun IcebreakrrNavHost(
       composable(Screen.FILTER) {
         FilterScreen(navigationActions, tagsViewModel, filterViewModel, profileViewModel)
       }
+    }
+
+    navigation(
+        startDestination = Screen.CROP,
+        route = Route.CROP,
+    ) {
+      composable(Screen.CROP) { ImageCropperScreen(profileViewModel, navigationActions) }
     }
 
     navigation(
