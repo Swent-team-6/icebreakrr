@@ -13,16 +13,14 @@ import com.github.se.icebreakrr.ui.sections.DEFAULT_LONGITUDE
 import com.github.se.icebreakrr.ui.sections.DEFAULT_RADIUS
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.auth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.GeoPoint
-import com.google.firebase.firestore.firestore
 import com.google.firebase.storage.storage
-import java.io.ByteArrayOutputStream
-import java.io.InputStream
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
+import java.io.ByteArrayOutputStream
+import java.io.InputStream
 
 open class ProfilesViewModel(
     private val repository: ProfilesRepository,
@@ -269,15 +267,23 @@ open class ProfilesViewModel(
     _tempProfilePictureBitmap.value = null
   }
 
+/**
+ * Processes the cropped image by compressing it if it is too large.
+ *
+ * @param bitmap The cropped Bitmap to be processed.
+ */
+fun processCroppedImage(bitmap: Bitmap) {
+  _tempProfilePictureBitmap.value = compressImageIfTooLarge(bitmap)
+}
+
   /**
    * Validates and uploads the profile picture if a temporary profile picture Bitmap exists.
    *
    * @param context The context used to show a Toast message in case of failure.
    */
   fun validateAndUploadProfilePicture(context: Context) {
-    val imageData =
-        bitmapToJpgByteArray(
-            tempProfilePictureBitmap.value ?: return) // do nothing if null (no selected image)
+
+    val imageData = bitmapToJpgByteArray(tempProfilePictureBitmap.value ?: return)
     if (imageData != null) {
       uploadCurrentUserProfilePicture(imageData)
       clearTempProfilePictureBitmap()
@@ -326,48 +332,39 @@ open class ProfilesViewModel(
   }
 
   /**
-   * Converts an image URI to a processed Bitmap, cropping the image to a square at the center.
+   * Converts an image URI to a Bitmap.
    *
    * @param context The context used to access the content resolver.
    * @param imageUri The URI of the image to be converted.
-   * @param maxResolution The maximum resolution for the output Bitmap. Default is 600.
-   * @return A Bitmap representing the processed image, or null if an error occurs.
+   * @return A Bitmap representing the image, or null if an error occurs.
    */
-  private fun imageUriToBitmap(
-      context: Context,
-      imageUri: Uri,
-      maxResolution: Int = MAX_RESOLUTION
-  ): Bitmap? {
+  private fun imageUriToBitmap(context: Context, imageUri: Uri): Bitmap? {
     return try {
-      // Open an InputStream from the URI
       val inputStream: InputStream? = context.contentResolver.openInputStream(imageUri)
-
-      // Decode InputStream to Bitmap
       val bitmap = BitmapFactory.decodeStream(inputStream)
-      inputStream?.close() // Close the InputStream after decoding
-
-      // Calculate the dimensions for the square crop
-      val dimension = minOf(bitmap.width, bitmap.height)
-      val xOffset = (bitmap.width - dimension) / 2
-      val yOffset = (bitmap.height - dimension) / 2
-
-      // Crop the Bitmap to a square at the center
-      val croppedBitmap = Bitmap.createBitmap(bitmap, xOffset, yOffset, dimension, dimension)
-
-      // Resize the cropped bitmap if it exceeds the maximum resolution
-      if (dimension > maxResolution) {
-        val scale = maxResolution.toFloat() / dimension
-        Bitmap.createScaledBitmap(
-            croppedBitmap,
-            (croppedBitmap.width * scale).toInt(),
-            (croppedBitmap.height * scale).toInt(),
-            true)
-      } else {
-        croppedBitmap
-      }
+      inputStream?.close()
+      bitmap
     } catch (e: Exception) {
       e.printStackTrace()
       null
+    }
+  }
+
+  /**
+   * Compresses an image if it is too large.
+   *
+   * @param bitmap The Bitmap to be compressed.
+   * @param maxResolution The maximum resolution of the image. Default is 600.
+   * @return A compressed Bitmap if the image is too large, or null if the image is already small
+   *   enough.
+   */
+  private fun compressImageIfTooLarge(bitmap: Bitmap, maxResolution: Int = MAX_RESOLUTION): Bitmap {
+    return if (bitmap.width > maxResolution) {
+      val scale = maxResolution.toFloat() / bitmap.width
+      Bitmap.createScaledBitmap(
+          bitmap, (bitmap.width * scale).toInt(), (bitmap.height * scale).toInt(), true)
+    } else {
+      bitmap
     }
   }
 
