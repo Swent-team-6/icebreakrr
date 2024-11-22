@@ -111,7 +111,7 @@ class ProfilesViewModelTest {
   @Test
   fun getFilteredProfilesInRadiusCallsRepositoryWithFilters() = runBlocking {
     val center = GeoPoint(0.0, 0.0)
-    val radiusInMeters = 1000.0
+    val radiusInMeters = 1000
 
     val profilesList = listOf(profile1, profile2)
     whenever(profilesRepository.getProfilesInRadius(eq(center), eq(radiusInMeters), any(), any()))
@@ -134,7 +134,7 @@ class ProfilesViewModelTest {
   @Test
   fun getFilteredProfilesInRadiusWithMultipleGenders() = runBlocking {
     val center = GeoPoint(0.0, 0.0)
-    val radiusInMeters = 1000.0
+    val radiusInMeters = 1000
 
     val profilesList = listOf(profile1, profile2)
     whenever(profilesRepository.getProfilesInRadius(eq(center), eq(radiusInMeters), any(), any()))
@@ -154,7 +154,7 @@ class ProfilesViewModelTest {
   @Test
   fun getFilteredProfilesInRadiusHandlesError() = runBlocking {
     val center = GeoPoint(0.0, 0.0)
-    val radiusInMeters = 1000.0
+    val radiusInMeters = 1000
     val exception = Exception("Test exception")
 
     whenever(profilesRepository.getProfilesInRadius(eq(center), eq(radiusInMeters), any(), any()))
@@ -518,7 +518,7 @@ class ProfilesViewModelTest {
 
     // Simulate a failed request that starts the timer
     val center = GeoPoint(0.0, 0.0)
-    val radiusInMeters = 300.0
+    val radiusInMeters = 300
     val exception =
         com.google.firebase.firestore.FirebaseFirestoreException(
             "Unavailable",
@@ -559,7 +559,7 @@ class ProfilesViewModelTest {
 
     // Simulate a failed request that doesn't start the timer
     val center = GeoPoint(0.0, 0.0)
-    val radiusInMeters = 1000.0
+    val radiusInMeters = 1000
     val exception = Exception("Test exception")
 
     // Mock repository states

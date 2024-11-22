@@ -17,6 +17,7 @@ mockitoMockitoCore = "5.2.0"
 playServicesAuth = "21.2.0"
 playServicesLocation = "21.3.0"
 converterMoshi = "2.9.0"
+gson = "2.10.1"
 
 #Android
 agp = "8.3.2"
@@ -92,6 +93,7 @@ maps-compose-utils = { module = "com.google.maps.android:maps-compose-utils", ve
 androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastorePreferences" }
 androidx-datastore-preferences-core = { module = "androidx.datastore:datastore-preferences-core", version.ref = "datastorePreferences" }
 converter-moshi = { module = "com.squareup.retrofit2:converter-moshi", version.ref = "converterMoshi" }
+gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
 
 #Android
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }

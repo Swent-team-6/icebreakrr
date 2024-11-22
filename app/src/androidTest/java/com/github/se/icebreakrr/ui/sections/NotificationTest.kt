@@ -76,7 +76,7 @@ class NotificationTest {
       onSuccessCallback(emptyList())
       null
     }
-    profilesViewModel.getFilteredProfilesInRadius(GeoPoint(0.0, 0.0), 300.0)
+    profilesViewModel.getFilteredProfilesInRadius(GeoPoint(0.0, 0.0), 300)
 
     composeTestRule.setContent { NotificationScreen(navigationActions, profilesViewModel) }
     composeTestRule.onNodeWithTag("topBar").assertIsDisplayed()
@@ -97,7 +97,7 @@ class NotificationTest {
       null
     }
 
-    profilesViewModel.getFilteredProfilesInRadius(GeoPoint(0.0, 0.0), 300.0)
+    profilesViewModel.getFilteredProfilesInRadius(GeoPoint(0.0, 0.0), 300)
     composeTestRule.setContent { NotificationScreen(navigationActions, profilesViewModel) }
     composeTestRule.onAllNodesWithTag("profileCard").onFirst().assertIsDisplayed()
     composeTestRule.onAllNodesWithTag("profileCard").assertCountEquals(1)
