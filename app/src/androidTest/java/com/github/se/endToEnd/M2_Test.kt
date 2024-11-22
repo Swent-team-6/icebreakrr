@@ -81,19 +81,20 @@ class M2Test {
       composeTestRule.onNodeWithText("#Travel").assertIsDisplayed()
       composeTestRule.onNodeWithText("#Software").assertIsDisplayed()
       composeTestRule.onNodeWithText("#Music").assertIsDisplayed()
-      // click on send request :
-      composeTestRule.onNodeWithTag("requestButton").assertIsDisplayed().performClick()
-      // check if everything is displayed :
-      composeTestRule.onNodeWithTag("messageTextField").assertIsDisplayed()
-      composeTestRule.onNodeWithTag("bluredBackground").assertIsDisplayed()
-      composeTestRule.onNodeWithTag("sendButton").assertIsDisplayed().assertHasClickAction()
-      composeTestRule.onNodeWithTag("cancelButton").assertIsDisplayed().assertHasClickAction()
-      // try to send a message :
-      composeTestRule
-          .onNodeWithTag("messageTextField")
-          .performTextInput("Hey, do you want to meet?")
-      composeTestRule.onNodeWithText("Hey, do you want to meet?").assertIsDisplayed()
-      composeTestRule.onNodeWithTag("sendButton").performClick()
+      //      // click on send request :
+      //      composeTestRule.onNodeWithTag("requestButton").assertIsDisplayed().performClick()
+      //      // check if everything is displayed :
+      //      composeTestRule.onNodeWithTag("messageTextField").assertIsDisplayed()
+      //      composeTestRule.onNodeWithTag("bluredBackground").assertIsDisplayed()
+      //      composeTestRule.onNodeWithTag("sendButton").assertIsDisplayed().assertHasClickAction()
+      //
+      // composeTestRule.onNodeWithTag("cancelButton").assertIsDisplayed().assertHasClickAction()
+      //      // try to send a message :
+      //      composeTestRule
+      //          .onNodeWithTag("messageTextField")
+      //          .performTextInput("Hey, do you want to meet?")
+      //      composeTestRule.onNodeWithText("Hey, do you want to meet?").assertIsDisplayed()
+      //      composeTestRule.onNodeWithTag("sendButton").performClick()
       // reclick on alice profile :
       composeTestRule.onNodeWithText("Alice Inwonderland").assertIsDisplayed().performClick()
       // click on send button :

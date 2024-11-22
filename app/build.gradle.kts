@@ -1,3 +1,4 @@
+import java.io.FileInputStream
 import java.util.Properties
 
 plugins {
@@ -18,6 +19,14 @@ if (keystorePropertiesFile.exists()) {
     keystoreProperties.load(keystorePropertiesFile.inputStream())
 }
 
+val localProperties = Properties()
+val localPropertiesFile = rootProject.file("local.properties")
+if (localPropertiesFile.exists()) {
+    localProperties.load(FileInputStream(localPropertiesFile))
+}
+
+val mapsApiKey: String = localProperties.getProperty("MAPS_API_KEY") ?: ""
+
 android {
     namespace = "com.github.se.icebreakrr"
     compileSdk = 34
@@ -34,6 +43,7 @@ android {
             useSupportLibrary = true
         }
         testInstrumentationRunner = "com.github.se.CustomTestRunner"
+        manifestPlaceholders["MAPS_API_KEY"] = System.getenv("MAPS_API_KEY") ?: mapsApiKey
     }
 
     signingConfigs {
@@ -169,6 +179,7 @@ dependencies {
     implementation(libs.firebase.storage.ktx)
     implementation(libs.androidx.datastore.preferences.core.jvm)
     implementation(libs.androidx.datastore.core.android)
+    implementation(libs.play.services.maps)
     testImplementation(libs.junit)
     globalTestImplementation(libs.androidx.junit)
     globalTestImplementation(libs.androidx.espresso.core)
@@ -207,7 +218,11 @@ dependencies {
     // Arch Core Testing library for InstantTaskExecutorRule
     testImplementation(libs.androidx.core.testing)
 
-
+    // Google Service and Maps
+    implementation(libs.play.services.maps)
+    implementation(libs.play.services.auth)
+    implementation(libs.maps.compose)
+    implementation(libs.maps.compose.utils)
 
     debugImplementation(libs.compose.tooling)
     implementation(libs.coil.compose)

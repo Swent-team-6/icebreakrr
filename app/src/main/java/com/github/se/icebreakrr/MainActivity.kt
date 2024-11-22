@@ -35,6 +35,7 @@ import com.github.se.icebreakrr.ui.authentication.SignInScreen
 import com.github.se.icebreakrr.ui.navigation.NavigationActions
 import com.github.se.icebreakrr.ui.navigation.Route
 import com.github.se.icebreakrr.ui.navigation.Screen
+import com.github.se.icebreakrr.ui.profile.HeatMap
 import com.github.se.icebreakrr.ui.profile.OtherProfileView
 import com.github.se.icebreakrr.ui.profile.ProfileEditingScreen
 import com.github.se.icebreakrr.ui.profile.ProfileView
@@ -43,6 +44,7 @@ import com.github.se.icebreakrr.ui.sections.AroundYouScreen
 import com.github.se.icebreakrr.ui.sections.FilterScreen
 import com.github.se.icebreakrr.ui.sections.NotificationScreen
 import com.github.se.icebreakrr.ui.sections.SettingsScreen
+import com.github.se.icebreakrr.ui.sections.UnblockProfileScreen
 import com.github.se.icebreakrr.ui.theme.SampleAppTheme
 import com.github.se.icebreakrr.utils.NetworkUtils
 import com.github.se.icebreakrr.utils.PermissionManager
@@ -51,7 +53,6 @@ import com.google.android.gms.location.LocationServices
 import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.firestore
 import com.google.firebase.functions.FirebaseFunctions
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -186,10 +187,7 @@ fun IcebreakrrApp(
   var userName: String? = "null"
   var userUid: String? = "null"
   MeetingRequestManager.meetingRequestViewModel =
-      viewModel(
-          factory =
-              MeetingRequestViewModel.Companion.Factory(
-                  profileViewModel, functions, userUid, userName))
+      viewModel(factory = MeetingRequestViewModel.Companion.Factory(profileViewModel, functions))
   val meetingRequestViewModel = MeetingRequestManager.meetingRequestViewModel
   val startDestination = if (isTesting) Route.AROUND_YOU else Route.AUTH
 
@@ -300,6 +298,24 @@ fun IcebreakrrNavHost(
     ) {
       composable(Screen.FILTER) {
         FilterScreen(navigationActions, tagsViewModel, filterViewModel, profileViewModel)
+      }
+    }
+
+    navigation(
+        startDestination = Screen.UNBLOCK_PROFILE,
+        route = Route.UNBLOCK_PROFILE,
+    ) {
+      composable(Screen.UNBLOCK_PROFILE) {
+        UnblockProfileScreen(navigationActions, profileViewModel)
+      }
+    }
+
+    navigation(
+        startDestination = Screen.HEAT_MAP,
+        route = Route.HEAT_MAP,
+    ) {
+      composable(Screen.HEAT_MAP) {
+        HeatMap(navigationActions, profileViewModel, locationViewModel)
       }
     }
   }

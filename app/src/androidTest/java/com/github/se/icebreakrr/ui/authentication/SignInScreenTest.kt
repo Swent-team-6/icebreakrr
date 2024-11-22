@@ -87,8 +87,7 @@ class SignInScreenTest {
             TagsRepository(mock(FirebaseFirestore::class.java), mock(FirebaseAuth::class.java)))
     functions = mock(FirebaseFunctions::class.java)
     ourUid = "UserId1"
-    meetingRequestViewModel =
-        MeetingRequestViewModel(profileViewModel, functions, ourUid, "My name")
+    meetingRequestViewModel = MeetingRequestViewModel(profileViewModel, functions)
   }
 
   @Test
