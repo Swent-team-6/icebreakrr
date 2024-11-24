@@ -25,7 +25,6 @@ The message sent to confirm a meeting request
 */
 data class MeetingConfirmation(
     val targetToken: String = "",
-    val senderUID: String = "",
     val message: String = "",
     val location: String = ""
 )

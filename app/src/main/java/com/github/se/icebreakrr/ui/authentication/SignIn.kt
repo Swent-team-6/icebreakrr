@@ -152,6 +152,7 @@ fun SignInScreen(
                     if (task.isSuccessful) {
                       val fcmToken = task.result
                       meetingRequestViewModel.onLocalTokenChange(token)
+                      MeetingRequestManager.ourFcmToken = fcmToken
                       if (profile == null) {
                         // If profile doesn't exist, navigate to profile creation
                         navigationActions.navigateTo(Screen.PROFILE_CREATION)

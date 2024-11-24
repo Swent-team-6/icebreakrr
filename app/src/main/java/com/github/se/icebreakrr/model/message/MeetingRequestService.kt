@@ -5,6 +5,7 @@ import android.app.NotificationManager
 import android.content.Context
 import android.util.Log
 import androidx.core.app.NotificationCompat
+import ch.hsr.geohash.GeoHash
 import com.github.se.icebreakrr.R
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
@@ -35,13 +36,22 @@ class MeetingRequestService : FirebaseMessagingService() {
       "MEETING RESPONSE" -> {
         val name = remoteMessage.data["senderName"] ?: "null"
         val accepted = remoteMessage.data["accepted"]?.toBoolean() ?: false
+        val senderToken = remoteMessage.data["senderToken"] ?: "null"
         val acceptedString = if (accepted) "accepted" else "rejected"
         Log.d("RESPONSE MESSAGE : " , message)
         MeetingRequestManager.meetingRequestViewModel?.removeFromMeetingRequestSent(senderUid)
         showNotification("Meeting response from : $name", message)
+        MeetingRequestManager.meetingRequestViewModel?.setMeetingConfirmation(targetToken = senderToken, newMessage = "The meeting with ${MeetingRequestManager.ourName} is confirmed !")
+        MeetingRequestManager.meetingRequestViewModel?.sendMeetingConfirmation()
+        Log.d("CONFIRMATION MESSAGE SENT" , "YES !")
       }
       "MEETING CONFIRMATION" -> {
-        Log.d("MEETING CONFIRMATION", "RECEIVED MEETING CONFIRMATION")
+        Log.d("CONFIRMATION MESSAGE RECEIVED" , "YES !")
+        val name = remoteMessage.data["senderName"] ?: "null"
+        val hashedLocation = remoteMessage.data["location"] ?: "null"
+        val geoHash = GeoHash.fromGeohashString(hashedLocation)
+        val location = geoHash.boundingBox.center
+        showNotification("Meeting confirmation from : $name", location.toString())
       }
     }
   }
@@ -62,7 +72,7 @@ class MeetingRequestService : FirebaseMessagingService() {
    * @param title : the title of the notification
    * @param message : the message of our notification
    */
-  fun showNotification(title: String, message: String) {
+  private fun showNotification(title: String, message: String) {
     val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
     val channel =
         NotificationChannel(
