@@ -7,7 +7,6 @@ import com.github.se.icebreakrr.utils.GeoHashUtils
 import com.github.se.icebreakrr.utils.NetworkUtils
 import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.auth
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.GeoPoint
@@ -177,17 +176,17 @@ class ProfilesRepositoryFirestore(
         }
   }
 
-  override fun getBlockedProfiles(
-      blockedProfiles: List<String>,
+  override fun getMultipleProfiles(
+      uidList: List<String>,
       onSuccess: (List<Profile>) -> Unit,
       onFailure: (Exception) -> Unit
   ) {
-    if (blockedProfiles.isEmpty()) {
+    if (uidList.isEmpty()) {
       onSuccess(emptyList())
       return
     }
     db.collection(collectionPath)
-        .whereIn("uid", blockedProfiles)
+        .whereIn("uid", uidList)
         .get()
         .addOnSuccessListener { result ->
           waitingDone.value = false

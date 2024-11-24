@@ -43,7 +43,9 @@ private const val PASSED = "Passed"
 @Composable
 fun NotificationScreen(navigationActions: NavigationActions, profileViewModel: ProfilesViewModel) {
   val context = LocalContext.current
-  val cardList = profileViewModel.profiles.collectAsState()
+  profileViewModel.getSelfProfile()
+  profileViewModel.getInboxOfSelfProfile()
+  val cardList = profileViewModel.inboxItems.collectAsState()
   val navFunction = { Toast.makeText(context, TOAST_MESSAGE, Toast.LENGTH_SHORT).show() }
 
   Scaffold(
@@ -73,8 +75,8 @@ fun NotificationScreen(navigationActions: NavigationActions, profileViewModel: P
                         Modifier.padding(vertical = TEXT_VERTICAL_PADDING)
                             .testTag("notificationFirstText"))
                 Column(verticalArrangement = Arrangement.spacedBy(CARD_SPACING)) {
-                  cardList.value.take(MAX_PENDING_CARDS).forEach { p ->
-                    ProfileCard(p, onclick = navFunction)
+                  cardList.value.forEach { p ->
+                    ProfileCard(p.key, onclick = navFunction)
                   }
                 }
                 Text(
@@ -84,8 +86,8 @@ fun NotificationScreen(navigationActions: NavigationActions, profileViewModel: P
                         Modifier.padding(vertical = TEXT_VERTICAL_PADDING)
                             .testTag("notificationSecondText"))
                 Column(verticalArrangement = Arrangement.spacedBy(CARD_SPACING)) {
-                  cardList.value.drop(MAX_PENDING_CARDS).forEach { p ->
-                    ProfileCard(p, onclick = navFunction, greyedOut = true)
+                  cardList.value.forEach { p ->
+                    ProfileCard(p.key, onclick = navFunction, greyedOut = true)
                   }
                 }
               }

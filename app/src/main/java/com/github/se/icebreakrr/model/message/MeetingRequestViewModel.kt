@@ -21,9 +21,11 @@ class MeetingRequestViewModel(
 ) : ViewModel() {
 
   var meetingRequestState by mutableStateOf(MeetingRequest())
+  var meetingResponseState by mutableStateOf(MeetingResponse())
+  var meetingConfirmationState by mutableStateOf(MeetingConfirmation())
 
-  private val SEND_MESSAGE_FUNCTION_NAME = "sendMessage"
   private val SEND_MEETING_REQUEST = "sendMeetingRequest"
+  private val SEND_MEETING_RESPONSE = "sendMeetingResponse"
 
   companion object {
     class Factory(
@@ -42,7 +44,13 @@ class MeetingRequestViewModel(
   }
 
   init {
-    viewModelScope.launch {}
+    viewModelScope.launch {
+        val ourUid = MeetingRequestManager.ourUid ?: "null"
+        meetingRequestState = meetingRequestState.copy(senderUID = ourUid)
+        meetingResponseState = meetingResponseState.copy(senderUID = ourUid)
+        meetingConfirmationState = meetingConfirmationState.copy(senderUID = ourUid)
+
+    }
   }
 
   /**
@@ -76,6 +84,10 @@ class MeetingRequestViewModel(
     meetingRequestState = meetingRequestState.copy(message = newMessage)
   }
 
+  fun setMeetingResponse(targetToken: String, newMessage: String, accepted: Boolean){
+      meetingResponseState = meetingResponseState.copy(targetToken = targetToken, message = newMessage, accepted = accepted)
+  }
+
   fun sendMeetingRequest() {
     viewModelScope.launch {
       val data =
@@ -87,7 +99,7 @@ class MeetingRequestViewModel(
       try {
         val result =
             functions
-                .getHttpsCallable(SEND_MEETING_REQUEST) // Cloud Function name
+                .getHttpsCallable(SEND_MEETING_REQUEST)
                 .call(data)
                 .await()
 
@@ -97,6 +109,29 @@ class MeetingRequestViewModel(
       }
     }
   }
+
+    fun sendMeetingResponse() {
+        viewModelScope.launch {
+            val data =
+                hashMapOf(
+                    "targetToken" to meetingRequestState.targetToken,
+                    "senderUID" to meetingRequestState.senderUID,
+                    "message" to meetingResponseState.message,
+                    "accepted" to meetingResponseState.accepted
+                )
+            try {
+                val result =
+                    functions
+                        .getHttpsCallable(SEND_MEETING_RESPONSE)
+                        .call(data)
+                        .await()
+
+                meetingResponseState = meetingResponseState.copy(message = "")
+            } catch (e: Exception) {
+                Log.e("FIREBASE ERROR", "Error sending message", e)
+            }
+        }
+    }
 
   fun addToMeetingRequestSent(receiverUID: String) {
     val ourUid = MeetingRequestManager.ourUid ?: "null"
@@ -129,7 +164,4 @@ class MeetingRequestViewModel(
       }
     }
   }
-
-  fun getInbox() {} // TODO : make a Inbox call to refresh all the messages received, ll use the
-  // profileViewModel
 }

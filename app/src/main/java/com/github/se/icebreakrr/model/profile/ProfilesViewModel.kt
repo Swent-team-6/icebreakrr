@@ -19,7 +19,9 @@ import com.google.firebase.storage.storage
 import java.io.ByteArrayOutputStream
 import java.io.InputStream
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 
 open class ProfilesViewModel(
@@ -31,8 +33,10 @@ open class ProfilesViewModel(
   private val _profiles = MutableStateFlow<List<Profile>>(emptyList())
   open val profiles: StateFlow<List<Profile>> = _profiles
 
-  private val _inbox = MutableStateFlow<List<Profile?>>(emptyList())
-  open val inbox: StateFlow<List<Profile?>> = _inbox
+  private val _inboxProfiles = MutableStateFlow<List<Profile?>>(emptyList())
+
+  private val _inboxItems = MutableStateFlow<Map<Profile, String>>(emptyMap())
+  open val inboxItems: StateFlow<Map<Profile, String>> = _inboxItems
 
   private val _filteredProfiles = MutableStateFlow<List<Profile>>(emptyList())
   val filteredProfiles: StateFlow<List<Profile>> = _filteredProfiles
@@ -339,9 +343,10 @@ open class ProfilesViewModel(
     getBlockedUsers()
   }
 
+  /** Fetches all the blocked users */
   fun getBlockedUsers() {
     _loading.value = true
-    repository.getBlockedProfiles(
+    repository.getMultipleProfiles(
         selfProfile.value?.hasBlocked ?: emptyList(),
         onSuccess = { profileList ->
           _profiles.value = profileList
@@ -349,6 +354,29 @@ open class ProfilesViewModel(
           _isConnected.value = true
         },
         onFailure = { e -> handleError(e) })
+  }
+
+  private fun getInboxUsers(inboxUserUid : List<String>) {
+        _loading.value = true
+        repository.getMultipleProfiles(
+            inboxUserUid,
+            onSuccess = { profileList ->
+                _inboxProfiles.value = profileList
+                _loading.value = false
+                _isConnected.value = true
+            },
+            onFailure = { e -> handleError(e) })
+    }
+
+  fun getInboxOfSelfProfile() {
+      val inboxUidList = selfProfile.value?.meetingRequestInbox
+      if (inboxUidList != null) {
+          val uidsMessageList = inboxUidList.toList()
+          val uidsList = uidsMessageList.map { it.first }
+          val messageList = uidsMessageList.map { it.second }
+          getInboxUsers(uidsList)
+          _inboxItems.value = _inboxProfiles.value.filterNotNull().zip(messageList).toMap()
+      }
   }
 
   /** Fetches the current user's profile from the repository. */
