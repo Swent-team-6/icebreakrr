@@ -185,8 +185,6 @@ fun IcebreakrrApp(
   val tagsViewModel: TagsViewModel =
       viewModel(factory = TagsViewModel.Companion.Factory(auth, firestore))
   val filterViewModel: FilterViewModel = viewModel(factory = FilterViewModel.Factory)
-  var userName: String? = "null"
-  var userUid: String? = "null"
   MeetingRequestManager.meetingRequestViewModel =
       viewModel(factory = MeetingRequestViewModel.Companion.Factory(profileViewModel, functions))
   val meetingRequestViewModel = MeetingRequestManager.meetingRequestViewModel

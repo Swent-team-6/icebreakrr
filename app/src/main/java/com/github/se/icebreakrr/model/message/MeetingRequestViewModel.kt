@@ -44,13 +44,7 @@ class MeetingRequestViewModel(
   }
 
   init {
-    viewModelScope.launch {
-        val ourUid = MeetingRequestManager.ourUid ?: "null"
-        meetingRequestState = meetingRequestState.copy(senderUID = ourUid)
-        meetingResponseState = meetingResponseState.copy(senderUID = ourUid)
-        meetingConfirmationState = meetingConfirmationState.copy(senderUID = ourUid)
-
-    }
+    viewModelScope.launch {}
   }
 
   /**
@@ -84,8 +78,10 @@ class MeetingRequestViewModel(
     meetingRequestState = meetingRequestState.copy(message = newMessage)
   }
 
-  fun setMeetingResponse(targetToken: String, newMessage: String, accepted: Boolean){
-      meetingResponseState = meetingResponseState.copy(targetToken = targetToken, message = newMessage, accepted = accepted)
+  fun setMeetingResponse(targetToken: String, newMessage: String, accepted: Boolean) {
+    meetingResponseState =
+        meetingResponseState.copy(
+            targetToken = targetToken, message = newMessage, accepted = accepted)
   }
 
   fun sendMeetingRequest() {
@@ -93,16 +89,11 @@ class MeetingRequestViewModel(
       val data =
           hashMapOf(
               "targetToken" to meetingRequestState.targetToken,
-              "senderUID" to meetingRequestState.senderUID,
-              "message" to MeetingRequestManager.ourName + " : " + meetingRequestState.message,
+              "senderUID" to (MeetingRequestManager.ourUid ?: "null"),
+              "message" to meetingRequestState.message,
           )
       try {
-        val result =
-            functions
-                .getHttpsCallable(SEND_MEETING_REQUEST)
-                .call(data)
-                .await()
-
+        val result = functions.getHttpsCallable(SEND_MEETING_REQUEST).call(data).await()
         meetingRequestState = meetingRequestState.copy(message = "")
       } catch (e: Exception) {
         Log.e("FIREBASE ERROR", "Error sending message", e)
@@ -110,58 +101,79 @@ class MeetingRequestViewModel(
     }
   }
 
-    fun sendMeetingResponse() {
-        viewModelScope.launch {
-            val data =
-                hashMapOf(
-                    "targetToken" to meetingRequestState.targetToken,
-                    "senderUID" to meetingRequestState.senderUID,
-                    "message" to meetingResponseState.message,
-                    "accepted" to meetingResponseState.accepted
-                )
-            try {
-                val result =
-                    functions
-                        .getHttpsCallable(SEND_MEETING_RESPONSE)
-                        .call(data)
-                        .await()
-
-                meetingResponseState = meetingResponseState.copy(message = "")
-            } catch (e: Exception) {
-                Log.e("FIREBASE ERROR", "Error sending message", e)
-            }
-        }
-    }
-
-  fun addToMeetingRequestSent(receiverUID: String) {
-    val ourUid = MeetingRequestManager.ourUid ?: "null"
-    profilesViewModel.getProfileByUidAndThen(ourUid) {
-      val currentMeetingRequestSent =
-          profilesViewModel.selectedProfile.value?.meetingRequestSent ?: listOf()
-      val updatedProfile =
-          profilesViewModel.selectedProfile.value?.copy(
-              meetingRequestSent = currentMeetingRequestSent + receiverUID)
-      if (updatedProfile != null) {
-        profilesViewModel.updateProfile(updatedProfile)
-      } else {
-        Log.e("SENT MEETING REQUEST", "Adding the new meeting request to our sent list failed")
+  fun sendMeetingResponse() {
+    viewModelScope.launch {
+      val data =
+          hashMapOf(
+              "targetToken" to meetingResponseState.targetToken,
+              "senderUID" to (MeetingRequestManager.ourUid ?: "null"),
+              "senderName" to (MeetingRequestManager.ourName ?: "null"),
+              "message" to meetingResponseState.message,
+              "accepted" to meetingResponseState.accepted.toString())
+      try {
+        val result = functions.getHttpsCallable(SEND_MEETING_RESPONSE).call(data).await()
+        meetingResponseState = meetingResponseState.copy(message = "")
+      } catch (e: Exception) {
+        Log.e("FIREBASE ERROR", "Error sending message", e)
       }
     }
   }
 
-  fun addToMeetingRequestInbox(m: MeetingRequest) {
-    val ourUid = MeetingRequestManager.ourUid ?: "null"
-    profilesViewModel.getProfileByUidAndThen(ourUid) {
-      val currentMeetingRequestInbox =
-          profilesViewModel.selectedProfile.value?.meetingRequestInbox ?: mapOf()
-      val updatedProfile =
-          profilesViewModel.selectedProfile.value?.copy(
-              meetingRequestInbox = currentMeetingRequestInbox + (m.senderUID to m.message))
-      if (updatedProfile != null) {
-        profilesViewModel.updateProfile(updatedProfile)
-      } else {
-        Log.e("INBOX MEETING REQUEST", "Adding the new meeting request to our inbox list failed")
-      }
+  fun addToMeetingRequestSent(receiverUID: String) {
+    profilesViewModel.getSelfProfile()
+    val currentMeetingRequestSent =
+        profilesViewModel.selfProfile.value?.meetingRequestSent ?: listOf()
+    val updatedProfile =
+        profilesViewModel.selfProfile.value?.copy(
+            meetingRequestSent = currentMeetingRequestSent + receiverUID)
+    if (updatedProfile != null) {
+      profilesViewModel.updateProfile(updatedProfile)
+    } else {
+      Log.e("SENT MEETING REQUEST", "Adding the new meeting request to our sent list failed")
     }
+  }
+
+  fun removeFromMeetingRequestSent(receiverUID: String) {
+        profilesViewModel.getSelfProfile()
+        val currentMeetingRequestSent =
+            profilesViewModel.selfProfile.value?.meetingRequestSent ?: listOf()
+        val updatedMeetingRequestSend = currentMeetingRequestSent.filter { it != receiverUID }
+        val updatedProfile = profilesViewModel.selfProfile.value?.copy(
+            meetingRequestSent = updatedMeetingRequestSend)
+        if (updatedProfile != null) {
+            profilesViewModel.updateProfile(updatedProfile)
+        } else {
+            Log.e("SENT MEETING REQUEST", "Removing the meeting request of our sent list failed")
+        }
+    }
+
+  fun addToMeetingRequestInbox(senderUID : String, message: String) {
+    profilesViewModel.getSelfProfile()
+    val currentMeetingRequestInbox =
+        profilesViewModel.selfProfile.value?.meetingRequestInbox ?: mapOf()
+    val updatedProfile =
+        profilesViewModel.selfProfile.value?.copy(
+            meetingRequestInbox = currentMeetingRequestInbox + (senderUID to message))
+    if (updatedProfile != null) {
+      profilesViewModel.updateProfile(updatedProfile)
+    } else {
+      Log.e("INBOX MEETING REQUEST", "Adding the new meeting request to our inbox list failed")
+    }
+  }
+
+  fun removeFromMeetingRequestInbox(senderUID: String){
+      profilesViewModel.getSelfProfile()
+      val currentMeetingRequestInbox =
+          profilesViewModel.selfProfile.value?.meetingRequestInbox ?: mapOf()
+      val updatedMeetingRequestInbox =
+          currentMeetingRequestInbox.filterKeys { it != senderUID }
+      val updatedProfile =
+          profilesViewModel.selfProfile.value?.copy(
+              meetingRequestInbox = updatedMeetingRequestInbox)
+      if (updatedProfile != null) {
+          profilesViewModel.updateProfile(updatedProfile)
+      } else {
+          Log.e("INBOX MEETING REQUEST", "Removing the meeting request in our inbox list failed")
+      }
   }
 }

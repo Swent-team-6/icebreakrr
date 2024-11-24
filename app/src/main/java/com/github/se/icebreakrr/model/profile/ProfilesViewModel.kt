@@ -19,7 +19,6 @@ import com.google.firebase.storage.storage
 import java.io.ByteArrayOutputStream
 import java.io.InputStream
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
@@ -356,27 +355,27 @@ open class ProfilesViewModel(
         onFailure = { e -> handleError(e) })
   }
 
-  private fun getInboxUsers(inboxUserUid : List<String>) {
-        _loading.value = true
-        repository.getMultipleProfiles(
-            inboxUserUid,
-            onSuccess = { profileList ->
-                _inboxProfiles.value = profileList
-                _loading.value = false
-                _isConnected.value = true
-            },
-            onFailure = { e -> handleError(e) })
-    }
+  private fun getInboxUsers(inboxUserUid: List<String>) {
+    _loading.value = true
+    repository.getMultipleProfiles(
+        inboxUserUid,
+        onSuccess = { profileList ->
+          _inboxProfiles.value = profileList
+          _loading.value = false
+          _isConnected.value = true
+        },
+        onFailure = { e -> handleError(e) })
+  }
 
   fun getInboxOfSelfProfile() {
-      val inboxUidList = selfProfile.value?.meetingRequestInbox
-      if (inboxUidList != null) {
-          val uidsMessageList = inboxUidList.toList()
-          val uidsList = uidsMessageList.map { it.first }
-          val messageList = uidsMessageList.map { it.second }
-          getInboxUsers(uidsList)
-          _inboxItems.value = _inboxProfiles.value.filterNotNull().zip(messageList).toMap()
-      }
+    val inboxUidList = selfProfile.value?.meetingRequestInbox
+    if (inboxUidList != null) {
+      val uidsMessageList = inboxUidList.toList()
+      val uidsList = uidsMessageList.map { it.first }
+      val messageList = uidsMessageList.map { it.second }
+      getInboxUsers(uidsList)
+      _inboxItems.value = _inboxProfiles.value.filterNotNull().zip(messageList).toMap()
+    }
   }
 
   /** Fetches the current user's profile from the repository. */
