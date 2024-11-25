@@ -75,17 +75,18 @@ fun NotificationScreen(navigationActions: NavigationActions, profileViewModel: P
                             .testTag("notificationFirstText"))
                 Column(verticalArrangement = Arrangement.spacedBy(CARD_SPACING)) {
                   cardList.value.forEach { p ->
-                      ProfileCard(p.key, onclick = {
-                          if(p.key.fcmToken != null) {
-                              MeetingRequestManager.meetingRequestViewModel?.setMeetingResponse(
-                                  p.key.fcmToken!!,
-                                  "Meeting Request Accepted !",
-                                  true
-                              )
-                              MeetingRequestManager.meetingRequestViewModel?.sendMeetingResponse()
-                              MeetingRequestManager.meetingRequestViewModel?.removeFromMeetingRequestInbox(p.key.uid)
+                    ProfileCard(
+                        p.key,
+                        onclick = {
+                          if (p.key.fcmToken != null) {
+                            MeetingRequestManager.meetingRequestViewModel?.setMeetingResponse(
+                                p.key.fcmToken!!, "Meeting Request Accepted !", true)
+                            MeetingRequestManager.meetingRequestViewModel?.sendMeetingResponse()
+                            MeetingRequestManager.meetingRequestViewModel
+                                ?.removeFromMeetingRequestInbox(p.key.uid)
                           }
-                      }) }
+                        })
+                  }
                 }
               }
             }

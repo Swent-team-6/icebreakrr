@@ -390,6 +390,14 @@ open class ProfilesViewModel(
         onFailure = { e -> handleError(e) })
   }
 
+  fun getSelfGeoHash(): String? {
+    return selfProfile.value?.geohash
+  }
+
+  fun getSelfProfileValue(): Profile? {
+    return selfProfile.value
+  }
+
   /**
    * Converts an image URI to a Bitmap.
    *

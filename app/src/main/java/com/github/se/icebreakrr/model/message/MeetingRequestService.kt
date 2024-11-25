@@ -31,22 +31,27 @@ class MeetingRequestService : FirebaseMessagingService() {
     val title = remoteMessage.data["title"] ?: "null"
     when (title) {
       "MEETING REQUEST" -> {
+
         MeetingRequestManager.meetingRequestViewModel?.addToMeetingRequestInbox(senderUid, message)
       }
       "MEETING RESPONSE" -> {
+
         val name = remoteMessage.data["senderName"] ?: "null"
         val accepted = remoteMessage.data["accepted"]?.toBoolean() ?: false
         val senderToken = remoteMessage.data["senderToken"] ?: "null"
         val acceptedString = if (accepted) "accepted" else "rejected"
-        Log.d("RESPONSE MESSAGE : " , message)
+
         MeetingRequestManager.meetingRequestViewModel?.removeFromMeetingRequestSent(senderUid)
         showNotification("Meeting response from : $name", message)
-        MeetingRequestManager.meetingRequestViewModel?.setMeetingConfirmation(targetToken = senderToken, newMessage = "The meeting with ${MeetingRequestManager.ourName} is confirmed !")
+        MeetingRequestManager.meetingRequestViewModel?.setMeetingConfirmation(
+            targetToken = senderToken,
+            newMessage = "The meeting with ${MeetingRequestManager.ourName} is confirmed !")
         MeetingRequestManager.meetingRequestViewModel?.sendMeetingConfirmation()
-        Log.d("CONFIRMATION MESSAGE SENT" , "YES !")
+        Log.d("CONFIRMATION MESSAGE SENT", "YES !")
       }
       "MEETING CONFIRMATION" -> {
-        Log.d("CONFIRMATION MESSAGE RECEIVED" , "YES !")
+
+        Log.d("CONFIRMATION MESSAGE RECEIVED", "YES !")
         val name = remoteMessage.data["senderName"] ?: "null"
         val hashedLocation = remoteMessage.data["location"] ?: "null"
         val geoHash = GeoHash.fromGeohashString(hashedLocation)

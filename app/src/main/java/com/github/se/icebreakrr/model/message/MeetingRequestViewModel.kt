@@ -28,6 +28,10 @@ class MeetingRequestViewModel(
   private val SEND_MEETING_RESPONSE = "sendMeetingResponse"
   private val SEND_MEETING_CONFIRMATION = "sendMeetingConfirmation"
 
+  var senderToken = ""
+  var senderUID = ""
+  var senderName = ""
+
   companion object {
     class Factory(
         private val profilesViewModel: ProfilesViewModel,
@@ -45,9 +49,13 @@ class MeetingRequestViewModel(
   }
 
   init {
-    viewModelScope.launch {
-        profilesViewModel.getSelfProfile()
-    }
+    viewModelScope.launch {}
+  }
+
+  fun setInitialValues(senderToken: String, senderUID: String, senderName: String) {
+    this.senderToken = senderToken
+    this.senderUID = senderUID
+    this.senderName = senderName
   }
 
   /**
@@ -57,8 +65,8 @@ class MeetingRequestViewModel(
    */
   fun onRemoteTokenChange(newToken: String) {
     meetingRequestState = meetingRequestState.copy(targetToken = newToken)
-    MeetingRequestManager.ourFcmToken = newToken
-    val currentProfile = profilesViewModel.selfProfile.value
+    senderToken = newToken
+    val currentProfile = profilesViewModel.getSelfProfileValue()
     if (currentProfile != null) {
       val updatedProfile = currentProfile.copy(fcmToken = newToken)
       profilesViewModel.updateProfile(updatedProfile)
@@ -87,17 +95,15 @@ class MeetingRequestViewModel(
             targetToken = targetToken, message = newMessage, accepted = accepted)
   }
 
-  fun setMeetingConfirmation(targetToken: String, newMessage: String){
-      val location = profilesViewModel.selfProfile.value?.geohash
-      if(location != null) {
-          meetingConfirmationState = meetingConfirmationState.copy(
-              targetToken = targetToken,
-              message = newMessage,
-              location = location
-          )
-      } else {
-          Log.e("MEETING CONFIRMATION", "geohash null for sender profile")
-      }
+  fun setMeetingConfirmation(targetToken: String, newMessage: String) {
+    val location = profilesViewModel.getSelfGeoHash()
+    if (location != null) {
+      meetingConfirmationState =
+          meetingConfirmationState.copy(
+              targetToken = targetToken, message = newMessage, location = location)
+    } else {
+      Log.e("MEETING CONFIRMATION", "geohash null for sender profile")
+    }
   }
 
   fun sendMeetingRequest() {
@@ -105,7 +111,7 @@ class MeetingRequestViewModel(
       val data =
           hashMapOf(
               "targetToken" to meetingRequestState.targetToken,
-              "senderUID" to (MeetingRequestManager.ourUid ?: "null"),
+              "senderUID" to senderUID,
               "message" to meetingRequestState.message,
           )
       try {
@@ -122,9 +128,9 @@ class MeetingRequestViewModel(
       val data =
           hashMapOf(
               "targetToken" to meetingResponseState.targetToken,
-              "senderToken" to MeetingRequestManager.ourFcmToken,
-              "senderUID" to (MeetingRequestManager.ourUid ?: "null"),
-              "senderName" to (MeetingRequestManager.ourName ?: "null"),
+              "senderToken" to senderToken,
+              "senderUID" to senderUID,
+              "senderName" to senderName,
               "message" to meetingResponseState.message,
               "accepted" to meetingResponseState.accepted.toString())
       try {
@@ -136,22 +142,22 @@ class MeetingRequestViewModel(
     }
   }
 
-    fun sendMeetingConfirmation() {
-        viewModelScope.launch {
-            val data =
-                hashMapOf(
-                    "targetToken" to meetingConfirmationState.targetToken,
-                    "senderUID" to (MeetingRequestManager.ourUid ?: "null"),
-                    "senderName" to (MeetingRequestManager.ourName ?: "null"),
-                    "message" to meetingConfirmationState.message,
-                    "location" to meetingConfirmationState.location)
-            try {
-                val result = functions.getHttpsCallable(SEND_MEETING_CONFIRMATION).call(data).await()
-            } catch (e: Exception) {
-                Log.e("FIREBASE ERROR", "Error sending message", e)
-            }
-        }
+  fun sendMeetingConfirmation() {
+    viewModelScope.launch {
+      val data =
+          hashMapOf(
+              "targetToken" to meetingConfirmationState.targetToken,
+              "senderUID" to senderUID,
+              "senderName" to senderName,
+              "message" to meetingConfirmationState.message,
+              "location" to meetingConfirmationState.location)
+      try {
+        val result = functions.getHttpsCallable(SEND_MEETING_CONFIRMATION).call(data).await()
+      } catch (e: Exception) {
+        Log.e("FIREBASE ERROR", "Error sending message", e)
+      }
     }
+  }
 
   fun addToMeetingRequestSent(receiverUID: String) {
     val currentMeetingRequestSent =
@@ -167,19 +173,19 @@ class MeetingRequestViewModel(
   }
 
   fun removeFromMeetingRequestSent(receiverUID: String) {
-        val currentMeetingRequestSent =
-            profilesViewModel.selfProfile.value?.meetingRequestSent ?: listOf()
-        val updatedMeetingRequestSend = currentMeetingRequestSent.filter { it != receiverUID }
-        val updatedProfile = profilesViewModel.selfProfile.value?.copy(
-            meetingRequestSent = updatedMeetingRequestSend)
-        if (updatedProfile != null) {
-            profilesViewModel.updateProfile(updatedProfile)
-        } else {
-            Log.e("SENT MEETING REQUEST", "Removing the meeting request of our sent list failed")
-        }
+    val currentMeetingRequestSent =
+        profilesViewModel.selfProfile.value?.meetingRequestSent ?: listOf()
+    val updatedMeetingRequestSend = currentMeetingRequestSent.filter { it != receiverUID }
+    val updatedProfile =
+        profilesViewModel.selfProfile.value?.copy(meetingRequestSent = updatedMeetingRequestSend)
+    if (updatedProfile != null) {
+      profilesViewModel.updateProfile(updatedProfile)
+    } else {
+      Log.e("SENT MEETING REQUEST", "Removing the meeting request of our sent list failed")
     }
+  }
 
-  fun addToMeetingRequestInbox(senderUID : String, message: String) {
+  fun addToMeetingRequestInbox(senderUID: String, message: String) {
     val currentMeetingRequestInbox =
         profilesViewModel.selfProfile.value?.meetingRequestInbox ?: mapOf()
     val updatedProfile =
@@ -192,18 +198,16 @@ class MeetingRequestViewModel(
     }
   }
 
-  fun removeFromMeetingRequestInbox(senderUID: String){
-      val currentMeetingRequestInbox =
-          profilesViewModel.selfProfile.value?.meetingRequestInbox ?: mapOf()
-      val updatedMeetingRequestInbox =
-          currentMeetingRequestInbox.filterKeys { it != senderUID }
-      val updatedProfile =
-          profilesViewModel.selfProfile.value?.copy(
-              meetingRequestInbox = updatedMeetingRequestInbox)
-      if (updatedProfile != null) {
-          profilesViewModel.updateProfile(updatedProfile)
-      } else {
-          Log.e("INBOX MEETING REQUEST", "Removing the meeting request in our inbox list failed")
-      }
+  fun removeFromMeetingRequestInbox(senderUID: String) {
+    val currentMeetingRequestInbox =
+        profilesViewModel.selfProfile.value?.meetingRequestInbox ?: mapOf()
+    val updatedMeetingRequestInbox = currentMeetingRequestInbox.filterKeys { it != senderUID }
+    val updatedProfile =
+        profilesViewModel.selfProfile.value?.copy(meetingRequestInbox = updatedMeetingRequestInbox)
+    if (updatedProfile != null) {
+      profilesViewModel.updateProfile(updatedProfile)
+    } else {
+      Log.e("INBOX MEETING REQUEST", "Removing the meeting request in our inbox list failed")
+    }
   }
 }

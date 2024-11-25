@@ -249,6 +249,10 @@ fun IcebreakrrNavHost(
       }
       composable(Screen.OTHER_PROFILE_VIEW + "?userId={userId}") { navBackStackEntry ->
         if (meetingRequestViewModel != null) {
+          meetingRequestViewModel.setInitialValues(
+              MeetingRequestManager.ourFcmToken ?: "null",
+              MeetingRequestManager.ourUid ?: "null",
+              MeetingRequestManager.ourName ?: "null")
           OtherProfileView(
               profileViewModel,
               tagsViewModel,
