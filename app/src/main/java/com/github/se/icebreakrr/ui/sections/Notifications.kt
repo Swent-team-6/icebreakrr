@@ -1,6 +1,7 @@
 package com.github.se.icebreakrr.ui.sections
 
 import android.annotation.SuppressLint
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
@@ -27,10 +28,8 @@ import com.github.se.icebreakrr.ui.sections.shared.TopBar
 private val HORIZONTAL_PADDING = 7.dp
 private val TEXT_VERTICAL_PADDING = 16.dp
 private val CARD_SPACING = 16.dp
-private const val MAX_PENDING_CARDS = 4
-private const val TOAST_MESSAGE = "Requests are not implemented yet :)"
 private const val MEETING_REQUEST_MSG = "Pending meeting requests"
-private const val PASSED = "Passed"
+private const val MEETING_REQUEST_ACCEPTED = "Meeting Request Accepted !"
 
 /**
  * Composable function for displaying the notification screen.
@@ -47,9 +46,10 @@ fun NotificationScreen(
     meetingRequestViewModel: MeetingRequestViewModel
 ) {
   val context = LocalContext.current
+  profileViewModel.getSelfProfile()
   profileViewModel.getInboxOfSelfProfile()
   val cardList = profileViewModel.inboxItems.collectAsState()
-
+  Log.d("INBOX VALUE", cardList.value.toString())
   Scaffold(
       modifier = Modifier.testTag("notificationScreen"),
       topBar = { TopBar("Inbox") },
@@ -83,9 +83,11 @@ fun NotificationScreen(
                         onclick = {
                           if (p.key.fcmToken != null) {
                             meetingRequestViewModel.setMeetingResponse(
-                                p.key.fcmToken!!, "Meeting Request Accepted !", true)
+                                p.key.fcmToken!!, MEETING_REQUEST_ACCEPTED, true)
                             meetingRequestViewModel.sendMeetingResponse()
                             meetingRequestViewModel.removeFromMeetingRequestInbox(p.key.uid)
+                            profileViewModel.getSelfProfile()
+                            profileViewModel.getInboxOfSelfProfile()
                           }
                         })
                   }

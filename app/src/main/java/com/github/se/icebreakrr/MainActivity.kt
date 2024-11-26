@@ -244,15 +244,17 @@ fun IcebreakrrNavHost(
         route = Route.AROUND_YOU,
     ) {
       composable(Screen.AROUND_YOU) {
+        profileViewModel.getSelfProfile()
+        profileViewModel.getInboxOfSelfProfile()
+        meetingRequestViewModel?.setInitialValues(
+            MeetingRequestManager.ourFcmToken ?: "null",
+            MeetingRequestManager.ourUid ?: "null",
+            MeetingRequestManager.ourName ?: "null")
         AroundYouScreen(
             navigationActions, profileViewModel, tagsViewModel, filterViewModel, locationViewModel)
       }
       composable(Screen.OTHER_PROFILE_VIEW + "?userId={userId}") { navBackStackEntry ->
         if (meetingRequestViewModel != null) {
-          meetingRequestViewModel.setInitialValues(
-              MeetingRequestManager.ourFcmToken ?: "null",
-              MeetingRequestManager.ourUid ?: "null",
-              MeetingRequestManager.ourName ?: "null")
           OtherProfileView(
               profileViewModel,
               tagsViewModel,
