@@ -16,6 +16,8 @@ class MeetingRequestService : FirebaseMessagingService() {
 
   private val MSG_CHANNEL_ID = "message_channel_id"
   private val MSG_CHANNEL_NAME = "channel_message"
+  private val MSG_RESPONSE = "Meeting response from : "
+  private val MSG_CONFIRMATION = "Meeting confirmation from : "
   private val NOTIFICATION_ID = 0
 
   /**
@@ -38,10 +40,9 @@ class MeetingRequestService : FirebaseMessagingService() {
         val name = remoteMessage.data["senderName"] ?: "null"
         val accepted = remoteMessage.data["accepted"]?.toBoolean() ?: false
         val senderToken = remoteMessage.data["senderToken"] ?: "null"
-        val acceptedString = if (accepted) "accepted" else "rejected"
 
         MeetingRequestManager.meetingRequestViewModel?.removeFromMeetingRequestSent(senderUid)
-        showNotification("Meeting response from : $name", message)
+        showNotification(MSG_RESPONSE + name, message)
         if (accepted) {
           MeetingRequestManager.meetingRequestViewModel?.setMeetingConfirmation(
               targetToken = senderToken,
@@ -50,12 +51,11 @@ class MeetingRequestService : FirebaseMessagingService() {
         }
       }
       "MEETING CONFIRMATION" -> {
-
         val name = remoteMessage.data["senderName"] ?: "null"
         val hashedLocation = remoteMessage.data["location"] ?: "null"
         val geoHash = GeoHash.fromGeohashString(hashedLocation)
         val location = geoHash.boundingBox.center
-        showNotification("Meeting confirmation from : $name", location.toString())
+        showNotification(MSG_CONFIRMATION + name, location.toString())
       }
     }
   }

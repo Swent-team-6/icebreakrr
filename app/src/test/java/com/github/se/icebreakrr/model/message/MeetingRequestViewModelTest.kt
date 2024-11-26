@@ -215,10 +215,6 @@ class MeetingRequestViewModelTest {
 
     val capturedData = argumentCaptor.value as Map<String, Any>
 
-    println(capturedData["targetToken"])
-    println(capturedData["senderUID"])
-    println(capturedData["message"])
-
     assert(capturedData["targetToken"] == meetingRequestState.targetToken)
     assert(capturedData["senderUID"] == meetingRequestViewModel.senderUID)
     assert(capturedData["message"] == meetingRequestState.message)

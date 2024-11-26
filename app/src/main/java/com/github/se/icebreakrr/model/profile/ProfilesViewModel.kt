@@ -375,14 +375,12 @@ open class ProfilesViewModel(
   /** Get the inbox of our user */
   fun getInboxOfSelfProfile() {
     val inboxUidList = selfProfile.value?.meetingRequestInbox
-    Log.d("Inside Inbox : ", selfProfile.value?.meetingRequestInbox.toString())
     if (inboxUidList != null) {
       val uidsMessageList = inboxUidList.toList()
       val uidsList = uidsMessageList.map { it.first }
       val messageList = uidsMessageList.map { it.second }
       getInboxUsers(uidsList)
       _inboxItems.value = _inboxProfiles.value.filterNotNull().zip(messageList).toMap()
-      Log.d("inbox Items : ", _inboxItems.value.toString())
     }
   }
 

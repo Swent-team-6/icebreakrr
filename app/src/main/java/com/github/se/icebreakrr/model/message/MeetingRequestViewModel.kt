@@ -12,9 +12,14 @@ import com.google.firebase.functions.FirebaseFunctions
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
+private const val SEND_MEETING_REQUEST = "sendMeetingRequest"
+private const val SEND_MEETING_RESPONSE = "sendMeetingResponse"
+private const val SEND_MEETING_CONFIRMATION = "sendMeetingConfirmation"
+
 /*
    Class that manages the interaction between messages, the Profile backend and the user of the app
 */
+
 class MeetingRequestViewModel(
     private val profilesViewModel: ProfilesViewModel,
     private val functions: FirebaseFunctions,
@@ -23,10 +28,6 @@ class MeetingRequestViewModel(
   var meetingRequestState by mutableStateOf(MeetingRequest())
   var meetingResponseState by mutableStateOf(MeetingResponse())
   var meetingConfirmationState by mutableStateOf(MeetingConfirmation())
-
-  private val SEND_MEETING_REQUEST = "sendMeetingRequest"
-  private val SEND_MEETING_RESPONSE = "sendMeetingResponse"
-  private val SEND_MEETING_CONFIRMATION = "sendMeetingConfirmation"
 
   var senderToken = ""
   var senderUID = ""
@@ -46,10 +47,6 @@ class MeetingRequestViewModel(
         throw IllegalArgumentException("Unknown ViewModel class")
       }
     }
-  }
-
-  init {
-    viewModelScope.launch {}
   }
 
   /**

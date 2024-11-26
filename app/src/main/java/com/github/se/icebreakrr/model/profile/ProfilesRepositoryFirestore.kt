@@ -37,6 +37,7 @@ class ProfilesRepositoryFirestore(
   val DEFAULT_LONGITUDE = 0.0
   val DEFAULT_LATITUDE = 0.0
   private val PERIOD = 1000
+  private val UID = "uid"
 
   // Generated with the help of CursorAI
   /**
@@ -176,6 +177,13 @@ class ProfilesRepositoryFirestore(
         }
   }
 
+  /**
+   * Retrive multiple profiles, given a list of UID
+   *
+   * @param uidList: a list of UID
+   * @param onSuccess: A callback invoked with a list of profiles if the operation is successful.
+   * @param onFailure A callback invoked with an exception if the operation fails.
+   */
   override fun getMultipleProfiles(
       uidList: List<String>,
       onSuccess: (List<Profile>) -> Unit,
@@ -186,7 +194,7 @@ class ProfilesRepositoryFirestore(
       return
     }
     db.collection(collectionPath)
-        .whereIn("uid", uidList)
+        .whereIn(UID, uidList)
         .get()
         .addOnSuccessListener { result ->
           waitingDone.value = false

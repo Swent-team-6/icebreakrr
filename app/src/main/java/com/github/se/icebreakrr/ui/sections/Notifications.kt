@@ -11,7 +11,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -46,9 +45,7 @@ fun NotificationScreen(
     meetingRequestViewModel: MeetingRequestViewModel
 ) {
   meetingRequestViewModel.updateInboxOfMessages()
-  val context = LocalContext.current
   val cardList = profileViewModel.inboxItems.collectAsState()
-  Log.d("INBOX VALUE", cardList.value.toString())
   Scaffold(
       modifier = Modifier.testTag("notificationScreen"),
       topBar = { TopBar("Inbox") },
@@ -86,6 +83,8 @@ fun NotificationScreen(
                             meetingRequestViewModel.sendMeetingResponse()
                             meetingRequestViewModel.removeFromMeetingRequestInbox(p.key.uid)
                             meetingRequestViewModel.updateInboxOfMessages()
+                          } else {
+                            Log.e("NOTIFICATION PAGE ERROR", "Fcm token of profile is null")
                           }
                         })
                   }
