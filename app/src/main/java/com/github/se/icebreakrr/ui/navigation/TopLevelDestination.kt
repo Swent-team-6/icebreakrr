@@ -43,6 +43,7 @@ object Screen {
   const val UNBLOCK_PROFILE = "Unblock Profile Screen"
   const val HEAT_MAP = "Heatmap Screen"
   const val ALREADY_MET = "Already Met Screen"
+  const val INBOX_PROFILE_VIEW = "Inbox Profile View Screen"
 }
 
 object TopLevelDestinations {

@@ -37,6 +37,7 @@ import com.github.se.icebreakrr.ui.navigation.NavigationActions
 import com.github.se.icebreakrr.ui.navigation.Route
 import com.github.se.icebreakrr.ui.navigation.Screen
 import com.github.se.icebreakrr.ui.profile.HeatMap
+import com.github.se.icebreakrr.ui.profile.InboxProfileViewScreen
 import com.github.se.icebreakrr.ui.profile.OtherProfileView
 import com.github.se.icebreakrr.ui.profile.ProfileEditingScreen
 import com.github.se.icebreakrr.ui.profile.ProfileView
@@ -282,6 +283,7 @@ fun IcebreakrrNavHost(
         route = Route.NOTIFICATIONS,
     ) {
       composable(Screen.NOTIFICATIONS) { NotificationScreen(navigationActions, profileViewModel) }
+      composable(Screen.INBOX_PROFILE_VIEW){InboxProfileViewScreen()}
     }
 
     navigation(

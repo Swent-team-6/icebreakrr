@@ -44,7 +44,6 @@ fun ProfileView(
 
   // Launch a coroutine to fetch the profile when this composable is first displayed
   LaunchedEffect(Unit) {
-    Log.d("TAGSDEBUG", "[ProfileView] current uid : ${auth.currentUser?.uid}")
     auth.currentUser?.let { profilesViewModel.getProfileByUid(it.uid) }
   }
 
