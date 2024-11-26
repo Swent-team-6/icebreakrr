@@ -244,12 +244,6 @@ fun IcebreakrrNavHost(
         route = Route.AROUND_YOU,
     ) {
       composable(Screen.AROUND_YOU) {
-        profileViewModel.getSelfProfile()
-        profileViewModel.getInboxOfSelfProfile()
-        meetingRequestViewModel?.setInitialValues(
-            MeetingRequestManager.ourFcmToken ?: "null",
-            MeetingRequestManager.ourUid ?: "null",
-            MeetingRequestManager.ourName ?: "null")
         AroundYouScreen(
             navigationActions, profileViewModel, tagsViewModel, filterViewModel, locationViewModel)
       }
@@ -286,6 +280,8 @@ fun IcebreakrrNavHost(
         route = Route.NOTIFICATIONS,
     ) {
       composable(Screen.NOTIFICATIONS) {
+        profileViewModel.getSelfProfile()
+        profileViewModel.getInboxOfSelfProfile()
         if (meetingRequestViewModel != null) {
           NotificationScreen(navigationActions, profileViewModel, meetingRequestViewModel)
         } else {
