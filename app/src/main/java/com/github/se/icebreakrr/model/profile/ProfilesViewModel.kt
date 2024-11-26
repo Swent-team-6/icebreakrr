@@ -155,7 +155,6 @@ open class ProfilesViewModel(
 
                     // Filter by how you have reported
                     profile.reports[currentUserId] == null
-
               }
           _profiles.value = profileList
           _filteredProfiles.value = filteredProfiles
@@ -354,10 +353,11 @@ open class ProfilesViewModel(
    * @param profile the profile to report.
    * @param reason the reason for reporting.
    */
-  fun reportUser(profile : Profile, reason: reportType) {
+  fun reportUser(reason: reportType) {
     if (_selectedProfile.value != null) {
       _selectedProfile.update { currentProfile ->
-        currentProfile?.copy(reports = currentProfile.reports.plus(_selfProfile.value!!.uid to reason))
+        currentProfile?.copy(
+            reports = currentProfile.reports.plus(_selfProfile.value!!.uid to reason))
       }
       updateProfile(_selectedProfile.value!!)
     }
