@@ -2,9 +2,11 @@ package com.github.se.icebreakrr.model.location
 
 import android.Manifest
 import android.content.pm.PackageManager
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.github.se.icebreakrr.data.AppDataStore
 import com.github.se.icebreakrr.utils.IPermissionManager
 import com.github.se.icebreakrr.utils.PermissionManager
 import com.google.firebase.firestore.GeoPoint
@@ -46,6 +48,16 @@ class LocationViewModel(
             throw IllegalArgumentException("Unknown ViewModel class")
           }
         }
+  }
+
+  /**
+   * Initializes the ViewModel by restoring the last known location.
+   *
+   * The `init` block ensures that the `restoreLastKnownLocation` function is called when the
+   * ViewModel is created, setting up the initial state for location tracking.
+   */
+  init {
+    restoreLastKnownLocation()
   }
 
   /**
@@ -91,6 +103,14 @@ class LocationViewModel(
               val geoPoint = GeoPoint(location.latitude, location.longitude)
               locationRepositoryFirestore.setUserPosition(geoPoint)
               _lastKnownLocation.value = geoPoint
+
+              viewModelScope.launch {
+                try {
+                  (locationRepositoryFirestore as? AppDataStore)?.saveLastKnownLocation(geoPoint)
+                } catch (e: Exception) {
+                  Log.e("LocationUpdate", "Failed to save location", e)
+                }
+              }
             })
 
     if (locationUpdatesStarted) {
@@ -134,5 +154,19 @@ class LocationViewModel(
   private fun stopObservingPermissions() {
     permissionObserverJob?.takeIf { it.isActive }?.cancel()
     permissionObserverJob = null
+  }
+
+  /**
+   * Restores the last known location from the data store and updates the internal state.
+   *
+   * This function launches a coroutine in the ViewModel scope to observe changes in the
+   * `lastKnownLocation` from the `AppDataStore` and updates `_lastKnownLocation`.
+   */
+  private fun restoreLastKnownLocation() {
+    viewModelScope.launch {
+      (locationRepositoryFirestore as? AppDataStore)?.lastKnownLocation?.collect { location ->
+        _lastKnownLocation.value = location
+      }
+    }
   }
 }

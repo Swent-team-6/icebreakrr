@@ -1,6 +1,8 @@
 package com.github.se.icebreakrr.ui.sections
 
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertIsDisplayed
@@ -14,6 +16,7 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performSemanticsAction
 import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
 import androidx.test.espresso.Espresso
@@ -402,6 +405,110 @@ class FilterScreenTest {
     // Test empty label
     label.value = ""
     composeTestRule.onNodeWithTag("GenderButton").assertIsDisplayed().assertTextEquals(label.value)
+  }
+
+  @Test
+  fun testRadiusSliderInitialValue() {
+    val initialRadius = 100
+    var currentRadius = initialRadius
+
+    composeTestRule.setContent {
+      RadiusSlider(
+          radius = currentRadius, onDistanceChange = { newRadius -> currentRadius = newRadius })
+    }
+
+    // Verify the initial value displayed
+    composeTestRule
+        .onNodeWithTag("RadiusSliderTitle")
+        .assertExists()
+        .assertIsDisplayed()
+        .assertTextEquals("Search Radius: $initialRadius m")
+  }
+
+  @Test
+  fun testRadiusSliderChanges() {
+    val currentRadius = mutableStateOf(100) // Use mutableStateOf here
+
+    composeTestRule.setContent {
+      RadiusSlider(
+          radius = currentRadius.value,
+          onDistanceChange = { newRadius -> currentRadius.value = newRadius })
+    }
+
+    ALLOWED_VALUES.forEachIndexed { index, expectedValue ->
+      // Perform slider action
+      composeTestRule.onNodeWithTag("RadiusSlider").performSemanticsAction(
+          SemanticsActions.SetProgress) {
+            it(index.toFloat()) // Move to specific index
+      }
+
+      // Verify the state updates
+      assertEquals(expectedValue, currentRadius.value)
+
+      // Verify the displayed text matches the value
+      composeTestRule
+          .onNodeWithTag("RadiusSliderTitle")
+          .assertExists()
+          .assertTextEquals("Search Radius: $expectedValue m")
+    }
+  }
+
+  @Test
+  fun testRadiusSliderBounds() {
+    val initialRadius = 50
+    var currentRadius = initialRadius
+
+    composeTestRule.setContent {
+      RadiusSlider(
+          radius = currentRadius, onDistanceChange = { newRadius -> currentRadius = newRadius })
+    }
+
+    // Try setting progress outside the allowed range and verify it stays within bounds
+    composeTestRule.onNodeWithTag("RadiusSlider").performSemanticsAction(
+        SemanticsActions.SetProgress) {
+          it(-1f)
+        }
+    assertEquals(ALLOWED_VALUES.first(), currentRadius)
+
+    composeTestRule.onNodeWithTag("RadiusSlider").performSemanticsAction(
+        SemanticsActions.SetProgress) {
+          it(ALLOWED_VALUES.size.toFloat())
+        }
+    assertEquals(ALLOWED_VALUES.last(), currentRadius)
+  }
+
+  @Test
+  fun testRadiusSliderIntegration() {
+    val initialRadius = 100
+    filterViewModel.setSelectedRadius(initialRadius)
+
+    composeTestRule.setContent {
+      FilterScreen(navigationActions = navigationActionsMock, filterViewModel = filterViewModel)
+    }
+
+    // Verify the initial radius value is displayed
+    composeTestRule
+        .onNodeWithTag("RadiusSliderTitle", useUnmergedTree = true) // Updated
+        .assertExists()
+        .assertTextEquals("Search Radius: $initialRadius m")
+
+    // Change the slider value and verify
+    val newRadius = 300
+    val newIndex = ALLOWED_VALUES.indexOf(newRadius)
+
+    composeTestRule.onNodeWithTag("RadiusSlider").performSemanticsAction(
+        SemanticsActions.SetProgress) {
+          it(newIndex.toFloat())
+        }
+
+    // Verify that the ViewModel is updated with the new radius
+    assertEquals(newRadius, filterViewModel.selectedRadius.value)
+
+    // Verify that the displayed radius value is updated
+    composeTestRule
+        .onNodeWithTag("RadiusSliderTitle", useUnmergedTree = true) // Updated
+        .assertExists()
+        .assertTextEquals("Search Radius: $newRadius m")
   }
 
   @Test

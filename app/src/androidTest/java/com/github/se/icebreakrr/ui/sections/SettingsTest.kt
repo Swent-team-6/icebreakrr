@@ -126,6 +126,9 @@ class SettingsTest {
     composeTestRule.onNodeWithTag("logOutButton").assertIsDisplayed()
     composeTestRule.onNodeWithTag("logOutButton").performClick()
 
+    composeTestRule.onNodeWithTag("blockedUsersButton").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("alreadyMetButton").assertIsDisplayed()
+
     composeTestRule.onNodeWithTag("bottomNavigationMenu").assertIsDisplayed()
   }
 

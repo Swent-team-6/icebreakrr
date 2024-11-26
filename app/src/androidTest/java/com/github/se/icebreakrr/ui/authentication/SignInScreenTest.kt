@@ -13,11 +13,15 @@ import androidx.navigation.NavHostController
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.github.se.icebreakrr.data.AppDataStore
 import com.github.se.icebreakrr.model.filter.FilterViewModel
+import com.github.se.icebreakrr.model.location.ILocationService
+import com.github.se.icebreakrr.model.location.LocationRepository
+import com.github.se.icebreakrr.model.location.LocationViewModel
 import com.github.se.icebreakrr.model.message.MeetingRequestViewModel
 import com.github.se.icebreakrr.model.profile.ProfilesViewModel
 import com.github.se.icebreakrr.model.tags.TagsRepository
 import com.github.se.icebreakrr.model.tags.TagsViewModel
 import com.github.se.icebreakrr.ui.navigation.NavigationActions
+import com.github.se.icebreakrr.utils.IPermissionManager
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.functions.FirebaseFunctions
@@ -46,6 +50,10 @@ class SignInScreenTest {
   private lateinit var navigationActions: NavigationActions
   private lateinit var profileViewModel: ProfilesViewModel
   private lateinit var filterViewModel: FilterViewModel
+  private lateinit var mockLocationService: ILocationService
+  private lateinit var mockLocationRepository: LocationRepository
+  private lateinit var mockPermissionManager: IPermissionManager
+  private lateinit var locationViewModel: LocationViewModel
   private lateinit var mockTagsRepository: TagsRepository
   private lateinit var tagsViewModel: TagsViewModel
   private lateinit var testDataStore: DataStore<Preferences>
@@ -64,6 +72,12 @@ class SignInScreenTest {
     appDataStore = AppDataStore(testDataStore)
 
     // Set up other mocks
+    mockLocationService = mock(ILocationService::class.java)
+    mockLocationRepository = mock(LocationRepository::class.java)
+    mockPermissionManager = mock(IPermissionManager::class.java)
+
+    locationViewModel =
+        LocationViewModel(mockLocationService, mockLocationRepository, mockPermissionManager)
     navHostController = mock(NavHostController::class.java)
     navigationActions = NavigationActions(navHostController)
     profileViewModel = mock(ProfilesViewModel::class.java)
@@ -73,8 +87,7 @@ class SignInScreenTest {
             TagsRepository(mock(FirebaseFirestore::class.java), mock(FirebaseAuth::class.java)))
     functions = mock(FirebaseFunctions::class.java)
     ourUid = "UserId1"
-    meetingRequestViewModel =
-        MeetingRequestViewModel(profileViewModel, functions, ourUid, "My name")
+    meetingRequestViewModel = MeetingRequestViewModel(profileViewModel, functions)
   }
 
   @Test
@@ -90,7 +103,8 @@ class SignInScreenTest {
                   factory =
                       TagsViewModel.Companion.Factory(
                           FirebaseAuth.getInstance(), FirebaseFirestore.getInstance())),
-          appDataStore = appDataStore)
+          appDataStore = appDataStore,
+          locationViewModel = locationViewModel)
     }
 
     composeTestRule.onNodeWithTag("loginScreen").assertIsDisplayed()

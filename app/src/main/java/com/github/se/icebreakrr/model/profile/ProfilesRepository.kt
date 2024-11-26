@@ -20,7 +20,13 @@ interface ProfilesRepository {
 
   fun getProfilesInRadius(
       center: GeoPoint,
-      radiusInMeters: Double,
+      radiusInMeters: Int,
+      onSuccess: (List<Profile>) -> Unit,
+      onFailure: (Exception) -> Unit
+  )
+
+  fun getBlockedProfiles(
+      blockedProfiles: List<String>,
       onSuccess: (List<Profile>) -> Unit,
       onFailure: (Exception) -> Unit
   )

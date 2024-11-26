@@ -3,6 +3,7 @@ package com.github.se.icebreakrr.ui.navigation
 import androidx.annotation.StringRes
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.twotone.AccountCircle
+import androidx.compose.material.icons.twotone.LocationOn
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.github.se.icebreakrr.R
 import com.github.se.icebreakrr.ui.theme.GroupsIcon
@@ -23,6 +24,9 @@ object Route {
   const val PROFILE_EDIT = "ProfileEdit"
   const val FILTER = "Filter"
   const val PROFILE_CREATION = "ProfileCreation"
+  const val CROP = "Crop"
+  const val UNBLOCK_PROFILE = "UnblockProfile"
+  const val HEAT_MAP = "Heatmap"
 }
 
 object Screen {
@@ -35,6 +39,10 @@ object Screen {
   const val PROFILE = "Profile Screen"
   const val OTHER_PROFILE_VIEW = "Around You Profile Screen"
   const val PROFILE_CREATION = "Profile Creation Screen"
+  const val CROP = "Crop Screen"
+  const val UNBLOCK_PROFILE = "Unblock Profile Screen"
+  const val HEAT_MAP = "Heatmap Screen"
+  const val ALREADY_MET = "Already Met Screen"
 }
 
 object TopLevelDestinations {
@@ -46,10 +54,14 @@ object TopLevelDestinations {
   val NOTIFICATIONS =
       TopLevelDestination(
           route = Route.NOTIFICATIONS, icon = NotificationsIcon, textId = R.string.notifications)
+  val HEATMAP =
+      TopLevelDestination(
+          route = Route.HEAT_MAP, icon = Icons.TwoTone.LocationOn, textId = R.string.heatmap)
 }
 
 val LIST_TOP_LEVEL_DESTINATIONS =
     listOf(
         TopLevelDestinations.SETTINGS,
         TopLevelDestinations.AROUND_YOU,
+        TopLevelDestinations.HEATMAP,
         TopLevelDestinations.NOTIFICATIONS)

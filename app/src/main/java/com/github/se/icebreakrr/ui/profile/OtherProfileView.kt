@@ -1,12 +1,18 @@
 package com.github.se.icebreakrr.ui.profile
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -19,9 +25,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavBackStackEntry
+import com.github.se.icebreakrr.R
 import com.github.se.icebreakrr.model.message.MeetingRequestViewModel
 import com.github.se.icebreakrr.model.profile.ProfilesViewModel
 import com.github.se.icebreakrr.model.tags.TagsViewModel
@@ -36,6 +46,8 @@ import com.github.se.icebreakrr.ui.sections.shared.ProfileHeader
  * @param navigationActions Actions to navigate between screens.
  */
 private val ALPHA = 0.5f
+private val MET_BUTTON_HORIZTONAL_PADDING = 16.dp
+private val BUTTON_VERTICAL_PADDING = 16.dp
 
 @Composable
 fun OtherProfileView(
@@ -49,6 +61,7 @@ fun OtherProfileView(
   var writtenMessage by remember { mutableStateOf("") }
   // retrieving user id from navigation params
   val profileId = navBackStackEntry?.arguments?.getString("userId")
+  val context = LocalContext.current
 
   // Launch a coroutine to fetch the profile when this composable is first displayed
   LaunchedEffect(Unit) {
@@ -83,6 +96,27 @@ fun OtherProfileView(
               sendRequest = true
             }
             InfoSection(profile, tagsViewModel)
+
+            // Add spacer for some padding
+            Spacer(modifier = Modifier.height(BUTTON_VERTICAL_PADDING))
+
+            // Already met button
+            Button(
+                onClick = {
+                  Toast.makeText(context, R.string.Not_Implemented_Toast, Toast.LENGTH_SHORT).show()
+                },
+                colors =
+                    ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
+                modifier =
+                    Modifier.fillMaxWidth()
+                        .padding(MET_BUTTON_HORIZTONAL_PADDING)
+                        .align(Alignment.CenterHorizontally)
+                        .testTag("alreadyMetButton")) {
+                  Text(text = stringResource(R.string.Already_Met_Button_Text), color = Color.White)
+                }
+
+            // Add bottom padding
+            Spacer(modifier = Modifier.height(BUTTON_VERTICAL_PADDING))
           }
 
       // this displays the request messaging system
@@ -100,8 +134,10 @@ fun OtherProfileView(
                   onSendClick = {
                     meetingRequestViewModel.onMeetingRequestChange(writtenMessage)
                     meetingRequestViewModel.onLocalTokenChange(profile.fcmToken ?: "null")
-                    meetingRequestViewModel.onSubmitMeetingRequest()
-                    meetingRequestViewModel.sendMessage()
+                    if (!profile.meetingRequestSent.contains(profile.uid)) {
+                      meetingRequestViewModel.sendMeetingRequest()
+                      meetingRequestViewModel.addToMeetingRequestSent(profile.uid)
+                    }
                     writtenMessage = ""
                     navigationActions.goBack()
                   },

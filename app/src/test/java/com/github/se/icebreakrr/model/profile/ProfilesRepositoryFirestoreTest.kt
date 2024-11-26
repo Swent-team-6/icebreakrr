@@ -111,7 +111,7 @@ class ProfilesRepositoryFirestoreTest {
 
     profilesRepositoryFirestore.getProfilesInRadius(
         center = GeoPoint(0.0, 0.0),
-        radiusInMeters = 1000.0,
+        radiusInMeters = 1000,
         onSuccess = { fail("Success callback should not be called") },
         onFailure = { exception -> assertEquals("Test exception", exception.message) })
 
@@ -272,7 +272,7 @@ class ProfilesRepositoryFirestoreTest {
     assertFalse(profilesRepositoryFirestore.waitingDone.value)
 
     profilesRepositoryFirestore.getProfilesInRadius(
-        GeoPoint(0.0, 0.0), 300.0, onSuccess = { fail("Should not succeed") }, onFailure = {})
+        GeoPoint(0.0, 0.0), 300, onSuccess = { fail("Should not succeed") }, onFailure = {})
 
     shadowOf(Looper.getMainLooper()).idle()
 

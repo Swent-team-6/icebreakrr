@@ -57,6 +57,7 @@ private val COLUMN_HORIZONTAL_PADDING = 8.dp
 private val TEXT_SIZE_LARGE = 20.sp
 private val NO_CONNECTION_TEXT_COLOR = messageTextColor
 private val EMPTY_PROFILE_TEXT_COLOR = messageTextColor
+private const val REFRESH_DELAY = 10_000L
 
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -101,20 +102,16 @@ fun AroundYouScreen(
       profilesViewModel.updateIsConnected(false)
     } else if (hasLocationPermission) {
       while (true) {
-        // Use the last known position or a default position
-        val centerLocation = userLocation.value ?: GeoPoint(DEFAULT_LATITUDE, DEFAULT_LONGITUDE)
-        Log.d("AroundYou", "Current user location: $centerLocation")
 
         // Call the profile fetch function
         profilesViewModel.getFilteredProfilesInRadius(
-            centerLocation,
-            DEFAULT_RADIUS,
+            userLocation.value ?: GeoPoint(DEFAULT_USER_LATITUDE, DEFAULT_USER_LONGITUDE),
+            filterViewModel.selectedRadius.value,
             filterViewModel.selectedGenders.value,
             filterViewModel.ageRange.value,
             tagsViewModel.filteredTags.value)
 
-        // Wait 10 seconds before the next update
-        delay(10_000L)
+        delay(REFRESH_DELAY) // Wait before the next update
       }
     }
   }
@@ -134,16 +131,13 @@ fun AroundYouScreen(
       topBar = { TopBar("Around You") },
       content = { innerPadding ->
         PullToRefreshBox(
+            locationViewModel = locationViewModel,
             filterViewModel = filterViewModel,
             tagsViewModel = tagsViewModel,
             isRefreshing = isLoading.value,
-            onRefresh = { _, radiusInMeters, genders, ageRange, tags ->
+            onRefresh = { center, radiusInMeters, genders, ageRange, tags ->
               profilesViewModel.getFilteredProfilesInRadius(
-                  userLocation.value ?: GeoPoint(DEFAULT_LATITUDE, DEFAULT_LONGITUDE),
-                  radiusInMeters,
-                  genders,
-                  ageRange,
-                  tags)
+                  center, radiusInMeters, genders, ageRange, tags)
             },
             modifier = Modifier.padding(innerPadding),
             content = {
@@ -208,13 +202,14 @@ fun AroundYouScreen(
 @Composable
 @ExperimentalMaterial3Api
 fun PullToRefreshBox(
+    locationViewModel: LocationViewModel,
     filterViewModel: FilterViewModel,
     tagsViewModel: TagsViewModel,
     isRefreshing: Boolean,
     onRefresh:
         (
             center: GeoPoint,
-            radiusInMeters: Double,
+            radiusInMeters: Int,
             genders: List<Gender>?,
             ageRange: IntRange?,
             tags: List<String>?) -> Unit,
@@ -229,13 +224,12 @@ fun PullToRefreshBox(
     },
     content: @Composable BoxScope.() -> Unit
 ) {
-
+  val userLocation = locationViewModel.lastKnownLocation.collectAsState()
   Box(
       modifier.pullToRefresh(state = state, isRefreshing = isRefreshing) {
-        // TODO Mocked values, to change with  current location
         onRefresh(
-            GeoPoint(DEFAULT_LATITUDE, DEFAULT_LONGITUDE),
-            DEFAULT_RADIUS,
+            userLocation.value ?: GeoPoint(DEFAULT_USER_LATITUDE, DEFAULT_USER_LONGITUDE),
+            filterViewModel.selectedRadius.value,
             filterViewModel.selectedGenders.value,
             filterViewModel.ageRange.value,
             tagsViewModel.filteredTags.value)

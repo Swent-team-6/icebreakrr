@@ -82,8 +82,7 @@ class NavigationTest {
     mockProfilesRepository = mock(ProfilesRepository::class.java)
     mockFirebaseStorage = mock(FirebaseStorage::class.java)
     mockFunction = mock(FirebaseFunctions::class.java)
-    mockMeetingRequestViewModel =
-        MeetingRequestViewModel(mockProfileViewModel, mockFunction, "1", "John Doe")
+    mockMeetingRequestViewModel = MeetingRequestViewModel(mockProfileViewModel, mockFunction)
     mockFilterViewModel = FilterViewModel()
     tagsViewModel =
         TagsViewModel(
@@ -152,6 +151,10 @@ class NavigationTest {
     // Test navigation to the Settings screen
     composeTestRule.onNodeWithTag("navItem_${R.string.settings}").performClick()
     composeTestRule.onNodeWithTag("settingsScreen").assertIsDisplayed()
+
+    // Test navigation to the AroundYou screen
+    composeTestRule.onNodeWithTag("navItem_${R.string.heatmap}").performClick()
+    composeTestRule.onNodeWithTag("heatMapScreen").assertIsDisplayed()
 
     // Test navigation to the Notifications screen
     composeTestRule.onNodeWithTag("navItem_${R.string.notifications}").performClick()
