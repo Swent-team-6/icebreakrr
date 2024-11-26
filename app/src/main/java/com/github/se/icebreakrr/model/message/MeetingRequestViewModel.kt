@@ -210,4 +210,9 @@ class MeetingRequestViewModel(
       Log.e("INBOX MEETING REQUEST", "Removing the meeting request in our inbox list failed")
     }
   }
+
+  fun updateInboxOfMessages(){
+      profilesViewModel.getSelfProfile()
+      profilesViewModel.getInboxOfSelfProfile()
+  }
 }

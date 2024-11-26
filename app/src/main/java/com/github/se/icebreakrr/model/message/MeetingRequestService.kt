@@ -30,8 +30,8 @@ class MeetingRequestService : FirebaseMessagingService() {
     val title = remoteMessage.data["title"] ?: "null"
     when (title) {
       "MEETING REQUEST" -> {
-
         MeetingRequestManager.meetingRequestViewModel?.addToMeetingRequestInbox(senderUid, message)
+        MeetingRequestManager.meetingRequestViewModel?.updateInboxOfMessages()
       }
       "MEETING RESPONSE" -> {
 

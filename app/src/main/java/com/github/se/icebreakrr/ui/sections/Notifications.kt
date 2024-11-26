@@ -45,9 +45,8 @@ fun NotificationScreen(
     profileViewModel: ProfilesViewModel,
     meetingRequestViewModel: MeetingRequestViewModel
 ) {
+  meetingRequestViewModel.updateInboxOfMessages()
   val context = LocalContext.current
-  profileViewModel.getSelfProfile()
-  profileViewModel.getInboxOfSelfProfile()
   val cardList = profileViewModel.inboxItems.collectAsState()
   Log.d("INBOX VALUE", cardList.value.toString())
   Scaffold(
@@ -86,8 +85,7 @@ fun NotificationScreen(
                                 p.key.fcmToken!!, MEETING_REQUEST_ACCEPTED, true)
                             meetingRequestViewModel.sendMeetingResponse()
                             meetingRequestViewModel.removeFromMeetingRequestInbox(p.key.uid)
-                            profileViewModel.getSelfProfile()
-                            profileViewModel.getInboxOfSelfProfile()
+                            meetingRequestViewModel.updateInboxOfMessages()
                           }
                         })
                   }
