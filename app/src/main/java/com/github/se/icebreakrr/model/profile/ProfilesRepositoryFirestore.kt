@@ -17,6 +17,7 @@ import kotlin.math.cos
 import kotlin.math.sin
 import kotlin.math.sqrt
 import kotlinx.coroutines.flow.MutableStateFlow
+import com.github.se.icebreakrr.model.profile.reportType
 
 class ProfilesRepositoryFirestore(
     private val db: FirebaseFirestore,
@@ -340,9 +341,13 @@ class ProfilesRepositoryFirestore(
       val geohash = document.getString("geohash")
       val hasBlocked =
           (document.get("hasBlocked") as? List<*>)?.filterIsInstance<String>() ?: listOf()
-      val meetingRequestSent =
+      val reports =
+          ((document.get("reports") as? HashMap<*, *>)?.
+            filter { (key, value) -> key is String && value is String }?.
+            map { (key, value) -> key as String to reportType.valueOf(value as String) } ?: listOf()).
+            associate { it.first to it.second }
+        val meetingRequestSent =
           (document.get("meetingRequestSent") as? List<*>)?.filterIsInstance<String>() ?: listOf()
-
       val meetingRequestInbox =
           (document.get("meetingRequestInbox") as? Map<*, *>)
               ?.filter { (key, value) -> key is String && value is String }
@@ -361,6 +366,7 @@ class ProfilesRepositoryFirestore(
           location = location,
           geohash = geohash,
           hasBlocked = hasBlocked,
+          reports = reports,
           meetingRequestSent = meetingRequestSent,
           meetingRequestInbox = meetingRequestInbox)
     } catch (e: Exception) {

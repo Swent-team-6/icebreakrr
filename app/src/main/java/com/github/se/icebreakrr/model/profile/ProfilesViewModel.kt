@@ -124,12 +124,14 @@ open class ProfilesViewModel(
         center = center,
         radiusInMeters = radiusInMeters,
         onSuccess = { profileList ->
-          val currentUserId = _selfProfile.value?.uid
+          val currentUserId = _selfProfile.value?.uid ?: ""
           val filteredProfiles =
               profileList.filter { profile ->
-
                 // Exclude the currently logged-in user's profile
                 profile.uid != currentUserId &&
+
+                    // Filter users than have too many reports
+                    (profile.reports.keys.size <= 1) &&
 
                     // Filter by genders if specified
                     (genders == null || profile.gender in genders || genders.isEmpty()) &&
@@ -146,7 +148,11 @@ open class ProfilesViewModel(
                     !(_selfProfile.value?.hasBlocked?.contains(profile.uid) ?: false) &&
 
                     // Filter by isBlocked
-                    !(profile.hasBlocked.contains(_selfProfile.value?.uid ?: ""))
+                    !(profile.hasBlocked.contains(currentUserId)) &&
+
+                    // Filter by how you have reported
+                    profile.reports[currentUserId] == null
+
               }
           _profiles.value = profileList
           _filteredProfiles.value = filteredProfiles
@@ -337,6 +343,22 @@ open class ProfilesViewModel(
     }
     updateProfile(selfProfile.value!!)
     getBlockedUsers()
+  }
+
+  /**
+   * Unblocks a user by updating the blocking relationship in the repository.
+   *
+   * @param profile the profile to report.
+   * @param reason the reason for reporting.
+   */
+  fun reportUser(profile : Profile, reason: reportType) {
+    Log.i("ProfileRepositoryFirestore", "Selected is ${_selectedProfile.value!!.name} ")
+    if (_selectedProfile.value != null) {
+      _selectedProfile.update { currentProfile ->
+        currentProfile?.copy(reports = currentProfile.reports.plus(_selfProfile.value!!.uid to reason))
+      }
+      updateProfile(_selectedProfile.value!!)
+    }
   }
 
   fun getBlockedUsers() {
