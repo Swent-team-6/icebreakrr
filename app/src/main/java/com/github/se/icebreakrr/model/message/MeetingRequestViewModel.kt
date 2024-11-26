@@ -52,6 +52,12 @@ class MeetingRequestViewModel(
     viewModelScope.launch {}
   }
 
+    /**
+     * Set the initial values of the meeting VM that are needed to send messages
+     * @param senderToken: The FCM token of our user
+     * @param senderUID: The uid of our user
+     * @param senderName: The name of our user
+     */
   fun setInitialValues(senderToken: String, senderUID: String, senderName: String) {
     this.senderToken = senderToken
     this.senderUID = senderUID
@@ -88,13 +94,23 @@ class MeetingRequestViewModel(
   fun onMeetingRequestChange(newMessage: String) {
     meetingRequestState = meetingRequestState.copy(message = newMessage)
   }
-
+    /**
+     * Sets the message of the meeting response
+     * @param targetToken: the FCM token of the target user
+     * @param newMessage: the response message we want to send
+     * @param accepted: the acceptation status of the meeting request
+     */
   fun setMeetingResponse(targetToken: String, newMessage: String, accepted: Boolean) {
     meetingResponseState =
         meetingResponseState.copy(
             targetToken = targetToken, message = newMessage, accepted = accepted)
   }
 
+    /**
+     * Sets the message of the meeting confirmation
+     * @param targetToken: the FCM token of the target user
+     * @param newMessage: the response message we want to send
+     */
   fun setMeetingConfirmation(targetToken: String, newMessage: String) {
     val location = profilesViewModel.getSelfGeoHash()
     if (location != null) {
@@ -106,6 +122,9 @@ class MeetingRequestViewModel(
     }
   }
 
+    /**
+     * Send a meeting request to the target user, by calling a Firebase Cloud Function
+     */
   fun sendMeetingRequest() {
     viewModelScope.launch {
       val data =
@@ -123,6 +142,9 @@ class MeetingRequestViewModel(
     }
   }
 
+    /**
+     * Send a meeting response to the target user, by calling a Firebase Cloud Function
+     */
   fun sendMeetingResponse() {
     viewModelScope.launch {
       val data =
@@ -142,6 +164,9 @@ class MeetingRequestViewModel(
     }
   }
 
+    /**
+     * Send a meeting confirmation to the target user, by calling a Firebase Cloud Function
+     */
   fun sendMeetingConfirmation() {
     viewModelScope.launch {
       val data =
@@ -159,6 +184,10 @@ class MeetingRequestViewModel(
     }
   }
 
+    /**
+     * Adds to the meetingRequestSent list of our profile, the uid of the meeting request target profile
+     * @param receiverUID: the uid of the target user
+     */
   fun addToMeetingRequestSent(receiverUID: String) {
     val currentMeetingRequestSent =
         profilesViewModel.selfProfile.value?.meetingRequestSent ?: listOf()
@@ -171,7 +200,10 @@ class MeetingRequestViewModel(
       Log.e("SENT MEETING REQUEST", "Adding the new meeting request to our sent list failed")
     }
   }
-
+    /**
+     * Remove from the meetingRequestSent list of our profile, the uid of the meeting request target profile
+     * @param receiverUID: the uid of the target user
+     */
   fun removeFromMeetingRequestSent(receiverUID: String) {
     val currentMeetingRequestSent =
         profilesViewModel.selfProfile.value?.meetingRequestSent ?: listOf()
@@ -185,6 +217,11 @@ class MeetingRequestViewModel(
     }
   }
 
+    /**
+     * Adds to our inbox the sender uid and the message the sender sent to us
+     * @param senderUID: the uid of the sender
+     * @param message: the received message
+     */
   fun addToMeetingRequestInbox(senderUID: String, message: String) {
     val currentMeetingRequestInbox =
         profilesViewModel.selfProfile.value?.meetingRequestInbox ?: mapOf()
@@ -198,6 +235,10 @@ class MeetingRequestViewModel(
     }
   }
 
+    /**
+     * Remove the message from the Inbox
+     * @param senderUID: the uid of the sender
+     */
   fun removeFromMeetingRequestInbox(senderUID: String) {
     val currentMeetingRequestInbox =
         profilesViewModel.selfProfile.value?.meetingRequestInbox ?: mapOf()
@@ -211,6 +252,9 @@ class MeetingRequestViewModel(
     }
   }
 
+    /**
+     * Refreshes the content of the inbox to have it available locally
+     */
   fun updateInboxOfMessages(){
       profilesViewModel.getSelfProfile()
       profilesViewModel.getInboxOfSelfProfile()

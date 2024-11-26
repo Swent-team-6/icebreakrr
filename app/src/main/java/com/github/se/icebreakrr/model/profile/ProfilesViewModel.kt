@@ -342,7 +342,9 @@ open class ProfilesViewModel(
     getBlockedUsers()
   }
 
-  /** Fetches all the blocked users */
+  /**
+   * Fetches all the blocked users
+   */
   fun getBlockedUsers() {
     _loading.value = true
     repository.getMultipleProfiles(
@@ -355,6 +357,10 @@ open class ProfilesViewModel(
         onFailure = { e -> handleError(e) })
   }
 
+  /**
+   * Fetches all the profiles that send a message to our profile
+   * @param inboxUserUid: The list of UID of the profiles that have sent a message to our user inbox
+   */
   private fun getInboxUsers(inboxUserUid: List<String>) {
     _loading.value = true
     repository.getMultipleProfiles(
@@ -367,6 +373,9 @@ open class ProfilesViewModel(
         onFailure = { e -> handleError(e) })
   }
 
+  /**
+   * Get the inbox of our user
+   */
   fun getInboxOfSelfProfile() {
     val inboxUidList = selfProfile.value?.meetingRequestInbox
     Log.d("Inside Inbox : ", selfProfile.value?.meetingRequestInbox.toString())
@@ -380,7 +389,9 @@ open class ProfilesViewModel(
     }
   }
 
-  /** Fetches the current user's profile from the repository. */
+  /**
+   * Fetches the current user's profile from the repository.
+   */
   fun getSelfProfile() {
     _loadingSelf.value = true
     repository.getProfileByUid(
@@ -392,10 +403,16 @@ open class ProfilesViewModel(
         onFailure = { e -> handleError(e) })
   }
 
+  /**
+   * Get the geoHash or our profile
+   */
   fun getSelfGeoHash(): String? {
     return selfProfile.value?.geohash
   }
 
+  /**
+   * Get the profile of our current user
+   */
   fun getSelfProfileValue(): Profile? {
     return selfProfile.value
   }
