@@ -186,8 +186,6 @@ fun IcebreakrrApp(
   val tagsViewModel: TagsViewModel =
       viewModel(factory = TagsViewModel.Companion.Factory(auth, firestore))
   val filterViewModel: FilterViewModel = viewModel(factory = FilterViewModel.Factory)
-  var userName: String? = "null"
-  var userUid: String? = "null"
   MeetingRequestManager.meetingRequestViewModel =
       viewModel(factory = MeetingRequestViewModel.Companion.Factory(profileViewModel, functions))
   val meetingRequestViewModel = MeetingRequestManager.meetingRequestViewModel
@@ -282,7 +280,14 @@ fun IcebreakrrNavHost(
         startDestination = Screen.NOTIFICATIONS,
         route = Route.NOTIFICATIONS,
     ) {
-      composable(Screen.NOTIFICATIONS) { NotificationScreen(navigationActions, profileViewModel) }
+      composable(Screen.NOTIFICATIONS) {
+        if (meetingRequestViewModel != null) {
+          NotificationScreen(navigationActions, profileViewModel, meetingRequestViewModel)
+        } else {
+          throw IllegalStateException(
+              "The Meeting Request View Model shouldn't be null : Bad initialization")
+        }
+      }
       composable(Screen.INBOX_PROFILE_VIEW){InboxProfileViewScreen()}
     }
 
