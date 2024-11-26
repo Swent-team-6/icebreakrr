@@ -7,6 +7,9 @@ import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTouchInput
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.PreferenceDataStoreFactory
+import androidx.datastore.preferences.core.Preferences
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.test.espresso.action.ViewActions.swipeDown
 import com.github.se.icebreakrr.data.AppDataStore
@@ -28,18 +31,27 @@ import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.GeoPoint
+import java.io.File
 import java.util.Calendar
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import org.junit.rules.TemporaryFolder
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
 import org.mockito.kotlin.any
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class AroundYouScreenTest {
+  private val testScope = TestScope(UnconfinedTestDispatcher() + Job())
 
   private lateinit var navigationActions: NavigationActions
   private lateinit var mockProfilesRepository: ProfilesRepository
@@ -49,14 +61,25 @@ class AroundYouScreenTest {
   private lateinit var mockLocationService: ILocationService
   private lateinit var mockLocationRepository: LocationRepository
   private lateinit var mockPermissionManager: IPermissionManager
-  private lateinit var mockDataStore: AppDataStore
+  private lateinit var testDataStore: DataStore<Preferences>
+  private lateinit var appDataStore: AppDataStore
 
   private lateinit var locationViewModel: LocationViewModel
 
   @get:Rule val composeTestRule = createComposeRule()
+  @get:Rule val tempFolder = TemporaryFolder()
 
   @Before
-  fun setUp() {
+  fun setUp() = runTest {
+    // Set up real DataStore with test scope
+    testDataStore =
+        PreferenceDataStoreFactory.create(
+            scope = testScope,
+            produceFile = { File(tempFolder.newFolder(), "test_preferences.preferences_pb") })
+    appDataStore = AppDataStore(testDataStore)
+    appDataStore.saveDiscoverableStatus(true)
+
+    // Set up mocks
     navigationActions = mock(NavigationActions::class.java)
     mockProfilesRepository = mock(ProfilesRepository::class.java)
     mockPPRepository = mock(ProfilePicRepository::class.java)
@@ -66,7 +89,6 @@ class AroundYouScreenTest {
     mockLocationService = mock(ILocationService::class.java)
     mockLocationRepository = mock(LocationRepository::class.java)
     mockPermissionManager = mock(IPermissionManager::class.java)
-    mockDataStore = mock(AppDataStore::class.java)
 
     locationViewModel =
         LocationViewModel(mockLocationService, mockLocationRepository, mockPermissionManager)
@@ -80,7 +102,6 @@ class AroundYouScreenTest {
                 mapOf(
                     android.Manifest.permission.ACCESS_FINE_LOCATION to
                         android.content.pm.PackageManager.PERMISSION_GRANTED)))
-
     // Mock successful connection check
     `when`(mockProfilesRepository.getProfilesInRadius(any(), any(), any(), any())).thenAnswer {
         invocation ->
@@ -104,7 +125,7 @@ class AroundYouScreenTest {
           locationViewModel,
           true,
           mockPermissionManager,
-          mockDataStore,
+          appDataStore,
       )
     }
 
@@ -113,7 +134,7 @@ class AroundYouScreenTest {
   }
 
   @Test
-  fun displayTextWhenEmpty() {
+  fun displayTextWhenEmpty() = runTest {
     // Mock the repository behavior
     `when`(mockProfilesRepository.getProfilesInRadius(any(), any(), any(), any())).thenAnswer {
         invocation ->
