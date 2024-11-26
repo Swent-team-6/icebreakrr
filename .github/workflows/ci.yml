@@ -79,8 +79,13 @@ jobs:
           ./gradlew ktfmtCheck
 
       # Create and populate google-services.json file
-      - name: Create and populate google-services.json
-        run: echo ${{ secrets.GOOGLE_SERVICES }} | base64 --decode > ./app/google-services.json
+      - name: Create and populate google-services.json & local.properties
+        env:
+          GOOGLE_SERVICES: ${{ secrets.GOOGLE_SERVICES }}
+          LOCAL_PROPERTIES: ${{ secrets.MAPS_API_KEY }}
+        run:
+          echo ${{ secrets.GOOGLE_SERVICES }} | base64 --decode > ./app/google-services.json
+          echo ${{ secrets.MAPS_API_KEY }} | base64 --decode > ./local.properties
 
       # Create keystore/debug.keystore file
       - name: Create file debug keystore
