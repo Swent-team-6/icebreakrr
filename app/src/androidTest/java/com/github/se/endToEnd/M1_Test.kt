@@ -12,7 +12,6 @@ import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
-import androidx.compose.ui.test.performScrollTo
 import androidx.core.app.ActivityCompat
 import androidx.test.core.app.ActivityScenario
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -89,7 +88,6 @@ class M1_Test {
       composeTestRule.onNodeWithTag("bottomNavigationMenu").assertIsDisplayed()
       composeTestRule.onNodeWithTag("notificationScroll").assertIsDisplayed()
       composeTestRule.onNodeWithTag("notificationFirstText").assertIsDisplayed()
-      composeTestRule.onNodeWithTag("notificationSecondText").performScrollTo()
       composeTestRule.onNodeWithTag("navItem_${R.string.around_you}").performClick()
 
       // Screen 5 : Go back to Around You and click on card

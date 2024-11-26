@@ -14,7 +14,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.github.se.icebreakrr.model.message.MeetingRequestManager
+import com.github.se.icebreakrr.model.message.MeetingRequestViewModel
 import com.github.se.icebreakrr.model.profile.ProfilesViewModel
 import com.github.se.icebreakrr.ui.navigation.BottomNavigationMenu
 import com.github.se.icebreakrr.ui.navigation.LIST_TOP_LEVEL_DESTINATIONS
@@ -41,9 +41,12 @@ private const val PASSED = "Passed"
  */
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun NotificationScreen(navigationActions: NavigationActions, profileViewModel: ProfilesViewModel) {
+fun NotificationScreen(
+    navigationActions: NavigationActions,
+    profileViewModel: ProfilesViewModel,
+    meetingRequestViewModel: MeetingRequestViewModel
+) {
   val context = LocalContext.current
-  profileViewModel.getSelfProfile()
   profileViewModel.getInboxOfSelfProfile()
   val cardList = profileViewModel.inboxItems.collectAsState()
 
@@ -79,11 +82,10 @@ fun NotificationScreen(navigationActions: NavigationActions, profileViewModel: P
                         p.key,
                         onclick = {
                           if (p.key.fcmToken != null) {
-                            MeetingRequestManager.meetingRequestViewModel?.setMeetingResponse(
+                            meetingRequestViewModel.setMeetingResponse(
                                 p.key.fcmToken!!, "Meeting Request Accepted !", true)
-                            MeetingRequestManager.meetingRequestViewModel?.sendMeetingResponse()
-                            MeetingRequestManager.meetingRequestViewModel
-                                ?.removeFromMeetingRequestInbox(p.key.uid)
+                            meetingRequestViewModel.sendMeetingResponse()
+                            meetingRequestViewModel.removeFromMeetingRequestInbox(p.key.uid)
                           }
                         })
                   }
