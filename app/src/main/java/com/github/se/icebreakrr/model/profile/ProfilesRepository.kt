@@ -25,8 +25,8 @@ interface ProfilesRepository {
       onFailure: (Exception) -> Unit
   )
 
-  fun getBlockedProfiles(
-      blockedProfiles: List<String>,
+  fun getMultipleProfiles(
+      uidList: List<String>,
       onSuccess: (List<Profile>) -> Unit,
       onFailure: (Exception) -> Unit
   )

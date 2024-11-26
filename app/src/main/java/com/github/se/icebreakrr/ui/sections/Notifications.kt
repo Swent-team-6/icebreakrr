@@ -1,7 +1,7 @@
 package com.github.se.icebreakrr.ui.sections
 
 import android.annotation.SuppressLint
-import android.widget.Toast
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
@@ -11,10 +11,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.github.se.icebreakrr.model.message.MeetingRequestViewModel
 import com.github.se.icebreakrr.model.profile.ProfilesViewModel
 import com.github.se.icebreakrr.ui.navigation.BottomNavigationMenu
 import com.github.se.icebreakrr.ui.navigation.LIST_TOP_LEVEL_DESTINATIONS
@@ -27,10 +27,8 @@ import com.github.se.icebreakrr.ui.sections.shared.TopBar
 private val HORIZONTAL_PADDING = 7.dp
 private val TEXT_VERTICAL_PADDING = 16.dp
 private val CARD_SPACING = 16.dp
-private const val MAX_PENDING_CARDS = 4
-private const val TOAST_MESSAGE = "Requests are not implemented yet :)"
 private const val MEETING_REQUEST_MSG = "Pending meeting requests"
-private const val PASSED = "Passed"
+private const val MEETING_REQUEST_ACCEPTED = "Meeting Request Accepted !"
 
 /**
  * Composable function for displaying the notification screen.
@@ -41,11 +39,13 @@ private const val PASSED = "Passed"
  */
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun NotificationScreen(navigationActions: NavigationActions, profileViewModel: ProfilesViewModel) {
-  val context = LocalContext.current
-  val cardList = profileViewModel.profiles.collectAsState()
-  val navFunction = { Toast.makeText(context, TOAST_MESSAGE, Toast.LENGTH_SHORT).show() }
-
+fun NotificationScreen(
+    navigationActions: NavigationActions,
+    profileViewModel: ProfilesViewModel,
+    meetingRequestViewModel: MeetingRequestViewModel
+) {
+  meetingRequestViewModel.updateInboxOfMessages()
+  val cardList = profileViewModel.inboxItems.collectAsState()
   Scaffold(
       modifier = Modifier.testTag("notificationScreen"),
       topBar = { TopBar("Inbox") },
@@ -73,19 +73,20 @@ fun NotificationScreen(navigationActions: NavigationActions, profileViewModel: P
                         Modifier.padding(vertical = TEXT_VERTICAL_PADDING)
                             .testTag("notificationFirstText"))
                 Column(verticalArrangement = Arrangement.spacedBy(CARD_SPACING)) {
-                  cardList.value.take(MAX_PENDING_CARDS).forEach { p ->
-                    ProfileCard(p, onclick = navFunction)
-                  }
-                }
-                Text(
-                    text = PASSED,
-                    fontWeight = FontWeight.Bold,
-                    modifier =
-                        Modifier.padding(vertical = TEXT_VERTICAL_PADDING)
-                            .testTag("notificationSecondText"))
-                Column(verticalArrangement = Arrangement.spacedBy(CARD_SPACING)) {
-                  cardList.value.drop(MAX_PENDING_CARDS).forEach { p ->
-                    ProfileCard(p, onclick = navFunction, greyedOut = true)
+                  cardList.value.forEach { p ->
+                    ProfileCard(
+                        p.key,
+                        onclick = {
+                          if (p.key.fcmToken != null) {
+                            meetingRequestViewModel.setMeetingResponse(
+                                p.key.fcmToken!!, MEETING_REQUEST_ACCEPTED, true)
+                            meetingRequestViewModel.sendMeetingResponse()
+                            meetingRequestViewModel.removeFromMeetingRequestInbox(p.key.uid)
+                            meetingRequestViewModel.updateInboxOfMessages()
+                          } else {
+                            Log.e("NOTIFICATION PAGE ERROR", "Fcm token of profile is null")
+                          }
+                        })
                   }
                 }
               }

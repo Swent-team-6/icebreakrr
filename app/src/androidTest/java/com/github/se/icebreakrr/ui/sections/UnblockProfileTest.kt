@@ -50,7 +50,7 @@ class UnblockProfileTest {
     blockedProfiles = fakeProfilesViewModel.profiles.value.filter { it.uid in myProfile.hasBlocked }
 
     // Simulates the ViewModel fetching blocked profiles through the repository
-    `when`(mockProfilesRepository.getBlockedProfiles(any(), any(), any())).thenAnswer { invocation
+    `when`(mockProfilesRepository.getMultipleProfiles(any(), any(), any())).thenAnswer { invocation
       ->
       val onSuccessCallback = invocation.getArgument<(List<Profile>) -> Unit>(1)
       onSuccessCallback(blockedProfiles)
@@ -94,7 +94,7 @@ class UnblockProfileTest {
           profilesViewModel = profilesViewModel,
           isTestMode = true)
     }
-    `when`(mockProfilesRepository.getBlockedProfiles(any(), any(), any())).thenAnswer { invocation
+    `when`(mockProfilesRepository.getMultipleProfiles(any(), any(), any())).thenAnswer { invocation
       ->
       val onSuccessCallback = invocation.getArgument<(List<Profile>) -> Unit>(1)
       onSuccessCallback(emptyList())
