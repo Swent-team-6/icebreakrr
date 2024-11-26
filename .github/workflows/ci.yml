@@ -84,7 +84,8 @@ jobs:
 
       # Create and populate local.properties file
       - name: Create and populate local.properties
-        run: echo ${{ secrets.MAPS_API_KEY }} | base64 --decode > ./local.properties
+        run: |
+          echo "MAPS_API_KEY=${{ secrets.MAPS_API_KEY }}" > ./local.properties
 
       # Create keystore/debug.keystore file
       - name: Create file debug keystore
