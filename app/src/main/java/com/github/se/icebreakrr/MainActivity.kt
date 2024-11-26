@@ -280,8 +280,6 @@ fun IcebreakrrNavHost(
         route = Route.NOTIFICATIONS,
     ) {
       composable(Screen.NOTIFICATIONS) {
-        profileViewModel.getSelfProfile()
-        profileViewModel.getInboxOfSelfProfile()
         if (meetingRequestViewModel != null) {
           NotificationScreen(navigationActions, profileViewModel, meetingRequestViewModel)
         } else {
