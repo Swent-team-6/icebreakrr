@@ -15,8 +15,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
@@ -27,6 +29,8 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -92,11 +96,12 @@ const val AGE_SEPARATOR_FONT_SIZE = 24
 const val DEFAULT_PADDING = 16
 const val SMALL_PADDING = 8
 const val CORNER_RADIUS = 8
-const val DEFAULT_RADIUS = 300.0
-const val DEFAULT_LATITUDE = 46.51827 // Lausanne
-const val DEFAULT_LONGITUDE = 6.619265 // Lausanne
+const val DEFAULT_RADIUS = 300
 const val FILTER_ACTION_BUTTON_ALPHA = 0.5f
+const val DEFAULT_USER_LATITUDE = 46.51827 // Lausanne
+const val DEFAULT_USER_LONGITUDE = 6.619265 // Lausanne
 val TEXTS_PADDING = 8.dp
+val ALLOWED_VALUES = listOf(50, 100, 200, 300, 400, 500)
 
 // Custom colors
 val IcebreakrrBlue: Color = IceBreakrrBlue
@@ -136,8 +141,9 @@ fun FilterScreen(
   val buttonHeight = screenHeight * buttonHeightFactor
   val buttonTextSize = (buttonHeight.value * textSizeFactor).sp
 
-  // Read the selected genders from the ViewModel
   val selectedGenders by filterViewModel.selectedGenders.collectAsState()
+  val radius by filterViewModel.selectedRadius.collectAsState()
+  val ageRange = filterViewModel.ageRange.collectAsState()
 
   LaunchedEffect(Unit) {
     filterViewModel.filteredTags.value.forEach { tag -> tagsViewModel.addFilter(tag) }
@@ -150,8 +156,6 @@ fun FilterScreen(
   var manSelected by remember { mutableStateOf(selectedGenders.contains(Gender.MEN)) }
   var womanSelected by remember { mutableStateOf(selectedGenders.contains(Gender.WOMEN)) }
   var otherSelected by remember { mutableStateOf(selectedGenders.contains(Gender.OTHER)) }
-
-  val ageRange = filterViewModel.ageRange.collectAsState()
 
   var ageFromInput by remember { mutableStateOf("") }
   var ageFrom by remember { mutableStateOf<Int?>(null) }
@@ -299,11 +303,13 @@ fun FilterScreen(
       }) { innerPadding ->
         Box(
             modifier =
-                Modifier.fillMaxSize().clickable(
-                    interactionSource = remember { MutableInteractionSource() },
-                    indication = null) {
-                      currentFocusManager.clearFocus()
-                    }) {
+                Modifier.fillMaxSize()
+                    .verticalScroll(rememberScrollState()) // Add scrolling functionality
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null) {
+                          currentFocusManager.clearFocus()
+                        }) {
               Column(
                   modifier =
                       Modifier.fillMaxSize().padding(innerPadding).padding(DEFAULT_PADDING.dp)) {
@@ -364,6 +370,11 @@ fun FilterScreen(
                     val tagSelectorHeight = screenHeight * tagSelectorHeightFactor
                     val tagSelectorWidth = screenWidth * tagSelectorWidthFactor
 
+                    RadiusSlider(
+                        radius = radius,
+                        onDistanceChange = { newRadius ->
+                          filterViewModel.setSelectedRadius(newRadius)
+                        })
                     Text(
                         "Tags",
                         fontSize = (screenHeight.value * titleFontSizeFactor).sp,
@@ -428,8 +439,8 @@ fun FilterScreen(
                           }
 
                           profilesViewModel.getFilteredProfilesInRadius(
-                              GeoPoint(DEFAULT_LATITUDE, DEFAULT_LONGITUDE),
-                              DEFAULT_RADIUS,
+                              GeoPoint(DEFAULT_USER_LATITUDE, DEFAULT_USER_LONGITUDE),
+                              filterViewModel.selectedRadius.value,
                               filterViewModel.selectedGenders.value,
                               filterViewModel.ageRange.value,
                               tagsViewModel.filteredTags.value)
@@ -611,6 +622,39 @@ fun AgeRangeInputFields(
             textStyle = TextStyle(fontSize = (textFieldHeight.value * textSizeFactor).sp),
             isError = ageToInput.isNotEmpty() && (ageTo == null || ageRangeError))
       }
+}
+
+/**
+ * A composable function that displays a slider to adjust the search radius dynamically.
+ *
+ * @param radius The current radius value in meters.
+ * @param onDistanceChange Callback invoked when the slider value changes, providing the new radius.
+ */
+@Composable
+fun RadiusSlider(radius: Int, onDistanceChange: (Int) -> Unit) {
+  val currentIndex = ALLOWED_VALUES.indexOf(radius)
+  val screenHeight = LocalConfiguration.current.screenHeightDp.dp
+
+  Column(
+      modifier = Modifier.fillMaxWidth().padding(vertical = DEFAULT_PADDING.dp),
+  ) {
+    Text(
+        "Search Radius: $radius m",
+        fontSize = (screenHeight.value * titleFontSizeFactor).sp,
+        modifier = Modifier.padding(vertical = TEXTS_PADDING).testTag("RadiusSliderTitle"))
+
+    Slider(
+        value = currentIndex.toFloat(),
+        onValueChange = { newValue ->
+          val newIndex = newValue.toInt()
+          onDistanceChange(ALLOWED_VALUES[newIndex])
+        },
+        valueRange = 0f..(ALLOWED_VALUES.size - 1).toFloat(),
+        steps = ALLOWED_VALUES.size - 2,
+        modifier = Modifier.padding(horizontal = (2 * DEFAULT_PADDING).dp).testTag("RadiusSlider"),
+        colors =
+            SliderDefaults.colors(thumbColor = IceBreakrrBlue, activeTrackColor = IceBreakrrBlue))
+  }
 }
 
 /**

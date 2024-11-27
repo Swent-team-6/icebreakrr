@@ -24,6 +24,8 @@ object Route {
   const val PROFILE_EDIT = "ProfileEdit"
   const val FILTER = "Filter"
   const val PROFILE_CREATION = "ProfileCreation"
+  const val CROP = "Crop"
+  const val UNBLOCK_PROFILE = "UnblockProfile"
   const val HEAT_MAP = "Heatmap"
 }
 
@@ -37,6 +39,8 @@ object Screen {
   const val PROFILE = "Profile Screen"
   const val OTHER_PROFILE_VIEW = "Around You Profile Screen"
   const val PROFILE_CREATION = "Profile Creation Screen"
+  const val CROP = "Crop Screen"
+  const val UNBLOCK_PROFILE = "Unblock Profile Screen"
   const val HEAT_MAP = "Heatmap Screen"
   const val ALREADY_MET = "Already Met Screen"
 }

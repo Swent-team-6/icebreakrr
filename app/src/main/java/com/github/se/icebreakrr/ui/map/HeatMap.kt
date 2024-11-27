@@ -43,7 +43,7 @@ import com.google.maps.android.heatmaps.WeightedLatLng
 
 private val DEFAULT_LOCATION = LatLng(46.5197, 6.6323) // EPFL coordinates
 private const val DEFAULT_ZOOM = 15f
-private const val RADIUS = 10000.0
+private const val RADIUS = 10000
 
 // Define custom gradient colors (from blue to red)
 private val GRADIENT_COLORS =

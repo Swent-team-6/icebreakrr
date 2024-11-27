@@ -7,6 +7,8 @@ import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import com.google.firebase.firestore.GeoPoint
+import com.google.gson.Gson
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
@@ -28,6 +30,7 @@ open class AppDataStore(private val dataStore: DataStore<Preferences>) {
     // Preference Keys using camelCase as per convention
     private val authTokenKey = stringPreferencesKey("auth_token")
     private val discoverableKey = booleanPreferencesKey("is_discoverable")
+    private val lastKnownLocationKey = stringPreferencesKey("last_known_location")
 
     // Default values
     const val DEFAULT_DISCOVERABLE_STATUS = true
@@ -44,6 +47,57 @@ open class AppDataStore(private val dataStore: DataStore<Preferences>) {
   val authToken: Flow<String?> = dataStore.data.map { preferences -> preferences[authTokenKey] }
   val hasAuthToken: Flow<Boolean> = authToken.map { token -> !token.isNullOrEmpty() }
   val isDiscoverable: Flow<Boolean> = getPreference(discoverableKey, DEFAULT_DISCOVERABLE_STATUS)
+  private val gson = Gson()
+  val lastKnownLocation: Flow<GeoPoint?> =
+      getPreference(lastKnownLocationKey, "").map { json ->
+        if (json.isNotBlank()) gson.fromJson(json, GeoPoint::class.java) else null
+      }
+
+  /**
+   * Saves an authentication token to persistent storage.
+   *
+   * @param token The authentication token to store
+   * @throws IllegalArgumentException if token is empty or blank
+   */
+  suspend fun saveAuthToken(token: String) {
+    require(token.isNotBlank()) { "Auth token cannot be empty or blank" }
+    putPreference(authTokenKey, token)
+  }
+
+  /**
+   * Saves the user's discoverable status in preferences.
+   *
+   * @param isDiscoverable `true` if the user should be discoverable, `false` otherwise.
+   */
+  suspend fun saveDiscoverableStatus(isDiscoverable: Boolean) {
+    putPreference(discoverableKey, isDiscoverable)
+  }
+
+  /**
+   * Saves the last known location as a JSON string in preferences.
+   *
+   * @param location The [GeoPoint] to save, or `null` to store an empty string.
+   */
+  suspend fun saveLastKnownLocation(location: GeoPoint?) {
+    val locationJson = location?.let { gson.toJson(it) } // Convert GeoPoint to JSON string
+    putPreference(lastKnownLocationKey, locationJson ?: "")
+  }
+
+  /**
+   * Removes the stored authentication token. Used during logout or when the token needs to be
+   * invalidated.
+   */
+  suspend fun clearAuthToken() {
+    removePreference(authTokenKey)
+  }
+
+  /**
+   * Clears all stored preferences. Use with caution as this will reset all preferences to their
+   * default values.
+   */
+  suspend fun clearAll() {
+    dataStore.edit { preferences -> preferences.clear() }
+  }
 
   /**
    * Generic function to retrieve a Flow of a stored preference by key, with a default value.
@@ -72,37 +126,5 @@ open class AppDataStore(private val dataStore: DataStore<Preferences>) {
    */
   private suspend fun <T> removePreference(key: Preferences.Key<T>) {
     dataStore.edit { preferences -> preferences.remove(key) }
-  }
-
-  /**
-   * Saves an authentication token to persistent storage.
-   *
-   * @param token The authentication token to store
-   * @throws IllegalArgumentException if token is empty or blank
-   */
-  suspend fun saveAuthToken(token: String) {
-    require(token.isNotBlank()) { "Auth token cannot be empty or blank" }
-    putPreference(authTokenKey, token)
-  }
-
-  /**
-   * Removes the stored authentication token. Used during logout or when the token needs to be
-   * invalidated.
-   */
-  suspend fun clearAuthToken() {
-    removePreference(authTokenKey)
-  }
-
-  /** Save discoverability preference */
-  suspend fun saveDiscoverableStatus(isDiscoverable: Boolean) {
-    putPreference(discoverableKey, isDiscoverable)
-  }
-
-  /**
-   * Clears all stored preferences. Use with caution as this will reset all preferences to their
-   * default values.
-   */
-  suspend fun clearAll() {
-    dataStore.edit { preferences -> preferences.clear() }
   }
 }

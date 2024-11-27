@@ -111,7 +111,7 @@ class ProfilesViewModelTest {
   @Test
   fun getFilteredProfilesInRadiusCallsRepositoryWithFilters() = runBlocking {
     val center = GeoPoint(0.0, 0.0)
-    val radiusInMeters = 1000.0
+    val radiusInMeters = 1000
 
     val profilesList = listOf(profile1, profile2)
     whenever(profilesRepository.getProfilesInRadius(eq(center), eq(radiusInMeters), any(), any()))
@@ -134,7 +134,7 @@ class ProfilesViewModelTest {
   @Test
   fun getFilteredProfilesInRadiusWithMultipleGenders() = runBlocking {
     val center = GeoPoint(0.0, 0.0)
-    val radiusInMeters = 1000.0
+    val radiusInMeters = 1000
 
     val profilesList = listOf(profile1, profile2)
     whenever(profilesRepository.getProfilesInRadius(eq(center), eq(radiusInMeters), any(), any()))
@@ -154,7 +154,7 @@ class ProfilesViewModelTest {
   @Test
   fun getFilteredProfilesInRadiusHandlesError() = runBlocking {
     val center = GeoPoint(0.0, 0.0)
-    val radiusInMeters = 1000.0
+    val radiusInMeters = 1000
     val exception = Exception("Test exception")
 
     whenever(profilesRepository.getProfilesInRadius(eq(center), eq(radiusInMeters), any(), any()))
@@ -164,6 +164,20 @@ class ProfilesViewModelTest {
         }
 
     profilesViewModel.getFilteredProfilesInRadius(center, radiusInMeters)
+
+    assertThat(profilesViewModel.error.value, `is`(exception))
+  }
+
+  @Test
+  fun getBlockedUsersInRadiusHandlesError() = runBlocking {
+    val exception = Exception("Test exception")
+
+    whenever(profilesRepository.getMultipleProfiles(eq(emptyList()), any(), any())).thenAnswer {
+      val onFailure = it.getArgument<(Exception) -> Unit>(2)
+      onFailure(exception)
+    }
+
+    profilesViewModel.getBlockedUsers()
 
     assertThat(profilesViewModel.error.value, `is`(exception))
   }
@@ -400,43 +414,6 @@ class ProfilesViewModelTest {
   }
 
   @Test
-  fun generateTempProfilePictureBitmapClampsToMaxResolution() = runBlocking {
-    // Mock ContentResolver and Uri
-    val contentResolver = mock(ContentResolver::class.java)
-    val uri = mock(Uri::class.java)
-    whenever(context.contentResolver).thenReturn(contentResolver)
-
-    // Create a test image as InputStream
-    val testImageBytes = ByteArray(100) { it.toByte() }
-    val inputStream = ByteArrayInputStream(testImageBytes)
-    whenever(contentResolver.openInputStream(uri)).thenReturn(inputStream)
-
-    // Create a mock bitmap that will be "decoded" from the input stream
-    val mockBitmap = mock(Bitmap::class.java)
-    whenever(mockBitmap.width).thenReturn(1200) // Width greater than max resolution
-    whenever(mockBitmap.height).thenReturn(1200) // Height greater than max resolution
-
-    // Mock BitmapFactory.decodeStream to return our mock bitmap
-    bitmapFactoryMock.`when`<Bitmap> { BitmapFactory.decodeStream(any()) }.thenReturn(mockBitmap)
-
-    // Mock Bitmap.createBitmap to return the same mock bitmap
-    bitmapMock
-        .`when`<Bitmap> { Bitmap.createBitmap(any<Bitmap>(), any(), any(), any(), any()) }
-        .thenReturn(mockBitmap)
-
-    // Mock Bitmap.createScaledBitmap to return a scaled bitmap
-    val scaledBitmap = mock(Bitmap::class.java)
-    bitmapMock
-        .`when`<Bitmap> { Bitmap.createScaledBitmap(any(), eq(600), eq(600), eq(true)) }
-        .thenReturn(scaledBitmap)
-
-    profilesViewModel.generateTempProfilePictureBitmap(context, uri)
-
-    // Verify that the bitmap was scaled down to the max resolution
-    assertThat(profilesViewModel.tempProfilePictureBitmap.value, `is`(scaledBitmap))
-  }
-
-  @Test
   fun validateAndUploadProfilePictureWithNoTempBitmapDoesNothing() = runBlocking {
     profilesViewModel.clearTempProfilePictureBitmap() // Ensure no temp bitmap exists
     profilesViewModel.validateAndUploadProfilePicture(context)
@@ -504,7 +481,7 @@ class ProfilesViewModelTest {
 
     // Simulate a failed request that starts the timer
     val center = GeoPoint(0.0, 0.0)
-    val radiusInMeters = 300.0
+    val radiusInMeters = 300
     val exception =
         com.google.firebase.firestore.FirebaseFirestoreException(
             "Unavailable",
@@ -545,7 +522,7 @@ class ProfilesViewModelTest {
 
     // Simulate a failed request that doesn't start the timer
     val center = GeoPoint(0.0, 0.0)
-    val radiusInMeters = 1000.0
+    val radiusInMeters = 1000
     val exception = Exception("Test exception")
 
     // Mock repository states

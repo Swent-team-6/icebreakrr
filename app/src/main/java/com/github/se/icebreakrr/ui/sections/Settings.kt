@@ -46,6 +46,7 @@ import com.github.se.icebreakrr.ui.navigation.Route
 import com.github.se.icebreakrr.ui.navigation.Screen
 import com.github.se.icebreakrr.ui.sections.shared.ProfileCard
 import com.github.se.icebreakrr.ui.sections.shared.TopBar
+import com.github.se.icebreakrr.utils.NetworkUtils.isNetworkAvailableWithContext
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.launch
 
@@ -131,16 +132,18 @@ fun SettingsScreen(
               })
           Spacer(modifier = Modifier.height(SPACER_HEIGHT_LARGE))
 
-          // this button is temporary and not tested
           Button(
               onClick = {
-                profilesViewModel.updateProfile(
-                    profilesViewModel.selfProfile.value!!.copy(hasBlocked = emptyList()))
-                Toast.makeText(context, "All users unblocked", Toast.LENGTH_SHORT).show()
+                if (isNetworkAvailableWithContext(context) || isTesting) {
+                  navigationActions.navigateTo(Screen.UNBLOCK_PROFILE)
+                } else {
+                  Toast.makeText(context, R.string.No_Internet_Toast, Toast.LENGTH_SHORT).show()
+                }
               },
-              colors = ButtonDefaults.buttonColors(containerColor = Color.Blue),
-              modifier = Modifier.fillMaxWidth()) {
-                Text("Unblock All", color = Color.White)
+              colors =
+                  ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary),
+              modifier = Modifier.fillMaxWidth().testTag("blockedUsersButton")) {
+                Text(stringResource(R.string.unblock_button), color = Color.White)
               }
 
           Spacer(modifier = Modifier.padding(vertical = BUTTON_PADDING))

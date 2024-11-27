@@ -8,20 +8,19 @@ import android.util.Log
 import android.widget.Toast
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.github.se.icebreakrr.ui.sections.DEFAULT_LATITUDE
-import com.github.se.icebreakrr.ui.sections.DEFAULT_LONGITUDE
 import com.github.se.icebreakrr.ui.sections.DEFAULT_RADIUS
+import com.github.se.icebreakrr.ui.sections.DEFAULT_USER_LATITUDE
+import com.github.se.icebreakrr.ui.sections.DEFAULT_USER_LONGITUDE
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.auth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.GeoPoint
-import com.google.firebase.firestore.firestore
 import com.google.firebase.storage.storage
 import java.io.ByteArrayOutputStream
 import java.io.InputStream
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 
 open class ProfilesViewModel(
@@ -32,6 +31,11 @@ open class ProfilesViewModel(
 
   private val _profiles = MutableStateFlow<List<Profile>>(emptyList())
   open val profiles: StateFlow<List<Profile>> = _profiles
+
+  private val _inboxProfiles = MutableStateFlow<List<Profile?>>(emptyList())
+
+  private val _inboxItems = MutableStateFlow<Map<Profile, String>>(emptyMap())
+  open val inboxItems: StateFlow<Map<Profile, String>> = _inboxItems
 
   private val _filteredProfiles = MutableStateFlow<List<Profile>>(emptyList())
   val filteredProfiles: StateFlow<List<Profile>> = _filteredProfiles
@@ -96,7 +100,8 @@ open class ProfilesViewModel(
   init {
     repository.init {
       // Fetch profiles on initialization
-      getFilteredProfilesInRadius(GeoPoint(DEFAULT_LATITUDE, DEFAULT_LONGITUDE), DEFAULT_RADIUS)
+      getFilteredProfilesInRadius(
+          GeoPoint(DEFAULT_USER_LATITUDE, DEFAULT_USER_LONGITUDE), DEFAULT_RADIUS)
       getSelfProfile()
     }
   }
@@ -112,7 +117,7 @@ open class ProfilesViewModel(
    */
   fun getFilteredProfilesInRadius(
       center: GeoPoint,
-      radiusInMeters: Double,
+      radiusInMeters: Int,
       genders: List<Gender>? = null,
       ageRange: IntRange? = null,
       tags: List<String>? = null
@@ -270,14 +275,22 @@ open class ProfilesViewModel(
   }
 
   /**
+   * Processes the cropped image by compressing it if it is too large.
+   *
+   * @param bitmap The cropped Bitmap to be processed.
+   */
+  fun processCroppedImage(bitmap: Bitmap) {
+    _tempProfilePictureBitmap.value = compressImageIfTooLarge(bitmap)
+  }
+
+  /**
    * Validates and uploads the profile picture if a temporary profile picture Bitmap exists.
    *
    * @param context The context used to show a Toast message in case of failure.
    */
   fun validateAndUploadProfilePicture(context: Context) {
-    val imageData =
-        bitmapToJpgByteArray(
-            tempProfilePictureBitmap.value ?: return) // do nothing if null (no selected image)
+
+    val imageData = bitmapToJpgByteArray(tempProfilePictureBitmap.value ?: return)
     if (imageData != null) {
       uploadCurrentUserProfilePicture(imageData)
       clearTempProfilePictureBitmap()
@@ -310,7 +323,65 @@ open class ProfilesViewModel(
    * @param uid The unique ID of the user being blocked.
    */
   fun blockUser(uid: String) {
-    updateProfile(selfProfile.value!!.copy(hasBlocked = selfProfile.value!!.hasBlocked + uid))
+    _selfProfile.update { currentProfile ->
+      currentProfile?.copy(hasBlocked = currentProfile.hasBlocked + uid)
+    }
+    updateProfile(selfProfile.value!!)
+  }
+
+  /**
+   * Unblocks a user by updating the blocking relationship in the repository.
+   *
+   * @param uid The unique ID of the user being unblocked.
+   */
+  fun unblockUser(uid: String) {
+    _selfProfile.update { currentProfile ->
+      currentProfile?.copy(hasBlocked = currentProfile.hasBlocked.filter { it != uid })
+    }
+    updateProfile(selfProfile.value!!)
+    getBlockedUsers()
+  }
+
+  /** Fetches all the blocked users */
+  fun getBlockedUsers() {
+    _loading.value = true
+    repository.getMultipleProfiles(
+        selfProfile.value?.hasBlocked ?: emptyList(),
+        onSuccess = { profileList ->
+          _profiles.value = profileList
+          _loading.value = false
+          _isConnected.value = true
+        },
+        onFailure = { e -> handleError(e) })
+  }
+
+  /**
+   * Fetches all the profiles that send a message to our profile
+   *
+   * @param inboxUserUid: The list of UID of the profiles that have sent a message to our user inbox
+   */
+  private fun getInboxUsers(inboxUserUid: List<String>) {
+    _loading.value = true
+    repository.getMultipleProfiles(
+        inboxUserUid,
+        onSuccess = { profileList ->
+          _inboxProfiles.value = profileList
+          _loading.value = false
+          _isConnected.value = true
+        },
+        onFailure = { e -> handleError(e) })
+  }
+
+  /** Get the inbox of our user */
+  fun getInboxOfSelfProfile() {
+    val inboxUidList = selfProfile.value?.meetingRequestInbox
+    if (inboxUidList != null) {
+      val uidsMessageList = inboxUidList.toList()
+      val uidsList = uidsMessageList.map { it.first }
+      val messageList = uidsMessageList.map { it.second }
+      getInboxUsers(uidsList)
+      _inboxItems.value = _inboxProfiles.value.filterNotNull().zip(messageList).toMap()
+    }
   }
 
   /** Fetches the current user's profile from the repository. */
@@ -325,49 +396,50 @@ open class ProfilesViewModel(
         onFailure = { e -> handleError(e) })
   }
 
+  /** Get the geoHash or our profile */
+  fun getSelfGeoHash(): String? {
+    return selfProfile.value?.geohash
+  }
+
+  /** Get the profile of our current user */
+  fun getSelfProfileValue(): Profile? {
+    return selfProfile.value
+  }
+
   /**
-   * Converts an image URI to a processed Bitmap, cropping the image to a square at the center.
+   * Converts an image URI to a Bitmap.
    *
    * @param context The context used to access the content resolver.
    * @param imageUri The URI of the image to be converted.
-   * @param maxResolution The maximum resolution for the output Bitmap. Default is 600.
-   * @return A Bitmap representing the processed image, or null if an error occurs.
+   * @return A Bitmap representing the image, or null if an error occurs.
    */
-  private fun imageUriToBitmap(
-      context: Context,
-      imageUri: Uri,
-      maxResolution: Int = MAX_RESOLUTION
-  ): Bitmap? {
+  private fun imageUriToBitmap(context: Context, imageUri: Uri): Bitmap? {
     return try {
-      // Open an InputStream from the URI
       val inputStream: InputStream? = context.contentResolver.openInputStream(imageUri)
-
-      // Decode InputStream to Bitmap
       val bitmap = BitmapFactory.decodeStream(inputStream)
-      inputStream?.close() // Close the InputStream after decoding
-
-      // Calculate the dimensions for the square crop
-      val dimension = minOf(bitmap.width, bitmap.height)
-      val xOffset = (bitmap.width - dimension) / 2
-      val yOffset = (bitmap.height - dimension) / 2
-
-      // Crop the Bitmap to a square at the center
-      val croppedBitmap = Bitmap.createBitmap(bitmap, xOffset, yOffset, dimension, dimension)
-
-      // Resize the cropped bitmap if it exceeds the maximum resolution
-      if (dimension > maxResolution) {
-        val scale = maxResolution.toFloat() / dimension
-        Bitmap.createScaledBitmap(
-            croppedBitmap,
-            (croppedBitmap.width * scale).toInt(),
-            (croppedBitmap.height * scale).toInt(),
-            true)
-      } else {
-        croppedBitmap
-      }
+      inputStream?.close()
+      bitmap
     } catch (e: Exception) {
       e.printStackTrace()
       null
+    }
+  }
+
+  /**
+   * Compresses an image if it is too large.
+   *
+   * @param bitmap The Bitmap to be compressed.
+   * @param maxResolution The maximum resolution of the image. Default is 600.
+   * @return A compressed Bitmap if the image is too large, or null if the image is already small
+   *   enough.
+   */
+  private fun compressImageIfTooLarge(bitmap: Bitmap, maxResolution: Int = MAX_RESOLUTION): Bitmap {
+    return if (bitmap.width > maxResolution) {
+      val scale = maxResolution.toFloat() / bitmap.width
+      Bitmap.createScaledBitmap(
+          bitmap, (bitmap.width * scale).toInt(), (bitmap.height * scale).toInt(), true)
+    } else {
+      bitmap
     }
   }
 

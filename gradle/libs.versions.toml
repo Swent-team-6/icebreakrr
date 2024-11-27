@@ -2,6 +2,7 @@
 #Google
 activityCompose = "1.7.0"
 androidxJunit = "1.1.5"
+composeCropper = "0.4.0"
 core = "1.6.1"
 coreTesting = "2.2.0"
 datastorePreferences = "1.1.1"
@@ -17,6 +18,7 @@ mockitoMockitoCore = "5.2.0"
 playServicesAuth = "21.2.0"
 playServicesLocation = "21.3.0"
 converterMoshi = "2.9.0"
+gson = "2.10.1"
 
 #Android
 agp = "8.3.2"
@@ -79,6 +81,7 @@ androidx-core = { module = "androidx.test:core", version.ref = "core" }
 androidx-core-testing = { module = "androidx.arch.core:core-testing", version.ref = "coreTesting" }
 androidx-junit-v115 = { module = "androidx.test.ext:junit", version.ref = "androidxJunit" }
 androidx-lifecycle-viewmodel-ktx = { module = "androidx.lifecycle:lifecycle-viewmodel-ktx", version.ref = "lifecycleViewmodelKtx" }
+compose-cropper = { module = "com.github.SmartToolFactory:Compose-Cropper", version.ref = "composeCropper" }
 firebase-messaging-ktx = { module = "com.google.firebase:firebase-messaging-ktx" }
 mockito-inline = { module = "org.mockito:mockito-inline", version.ref = "mockitoInline" }
 gradle = { module = "com.android.tools.build:gradle", version.ref = "gradle" }
@@ -92,6 +95,7 @@ maps-compose-utils = { module = "com.google.maps.android:maps-compose-utils", ve
 androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastorePreferences" }
 androidx-datastore-preferences-core = { module = "androidx.datastore:datastore-preferences-core", version.ref = "datastorePreferences" }
 converter-moshi = { module = "com.squareup.retrofit2:converter-moshi", version.ref = "converterMoshi" }
+gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
 
 #Android
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }

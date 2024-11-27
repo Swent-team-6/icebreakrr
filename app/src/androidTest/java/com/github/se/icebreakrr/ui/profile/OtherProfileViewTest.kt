@@ -56,8 +56,7 @@ class OtherProfileViewTest {
         ProfilesViewModel(profilesRepository, ppRepository, FirebaseAuth.getInstance())
 
     functions = mock(FirebaseFunctions::class.java)
-    meetingRequestViewModel =
-        MeetingRequestViewModel(profilesViewModel, functions, ourUserId, "My Name")
+    meetingRequestViewModel = MeetingRequestViewModel(profilesViewModel, functions)
 
     tagsViewModel =
         TagsViewModel(

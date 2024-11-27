@@ -80,8 +80,7 @@ class NavigationTest {
     mockProfilesRepository = mock(ProfilesRepository::class.java)
     mockFirebaseStorage = mock(FirebaseStorage::class.java)
     mockFunction = mock(FirebaseFunctions::class.java)
-    mockMeetingRequestViewModel =
-        MeetingRequestViewModel(mockProfileViewModel, mockFunction, "1", "John Doe")
+    mockMeetingRequestViewModel = MeetingRequestViewModel(mockProfileViewModel, mockFunction)
     mockFilterViewModel = FilterViewModel()
     tagsViewModel =
         TagsViewModel(

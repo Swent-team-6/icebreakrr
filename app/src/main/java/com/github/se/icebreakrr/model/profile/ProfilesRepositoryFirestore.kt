@@ -7,7 +7,6 @@ import com.github.se.icebreakrr.utils.GeoHashUtils
 import com.github.se.icebreakrr.utils.NetworkUtils
 import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.auth
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.GeoPoint
@@ -34,10 +33,11 @@ class ProfilesRepositoryFirestore(
   override val connectionTimeOutMs: Long = 15000
   override val periodicTimeCheckWaitTime: Long = 5000
 
-  val DEFAULT_RADIUS = 300.0
+  val DEFAULT_RADIUS = 300
   val DEFAULT_LONGITUDE = 0.0
   val DEFAULT_LATITUDE = 0.0
   private val PERIOD = 1000
+  private val UID = "uid"
 
   // Generated with the help of CursorAI
   /**
@@ -141,7 +141,7 @@ class ProfilesRepositoryFirestore(
    */
   override fun getProfilesInRadius(
       center: GeoPoint,
-      radiusInMeters: Double,
+      radiusInMeters: Int,
       onSuccess: (List<Profile>) -> Unit,
       onFailure: (Exception) -> Unit
   ) {
@@ -164,6 +164,43 @@ class ProfilesRepositoryFirestore(
                 calculateDistance(center, profileLocation) <= radiusInMeters
               }
           onSuccess(profilesInRadius)
+        }
+        .addOnFailureListener { e ->
+          Log.e("ProfilesRepositoryFirestore", "Error getting profiles", e)
+          if (e is com.google.firebase.firestore.FirebaseFirestoreException) {
+            if (!_isWaiting.value && !_waitingDone.value) {
+              _isWaiting.value = true
+              handleConnectionFailure(onFailure)
+            }
+            onFailure(e)
+          }
+        }
+  }
+
+  /**
+   * Retrive multiple profiles, given a list of UID
+   *
+   * @param uidList: a list of UID
+   * @param onSuccess: A callback invoked with a list of profiles if the operation is successful.
+   * @param onFailure A callback invoked with an exception if the operation fails.
+   */
+  override fun getMultipleProfiles(
+      uidList: List<String>,
+      onSuccess: (List<Profile>) -> Unit,
+      onFailure: (Exception) -> Unit
+  ) {
+    if (uidList.isEmpty()) {
+      onSuccess(emptyList())
+      return
+    }
+    db.collection(collectionPath)
+        .whereIn(UID, uidList)
+        .get()
+        .addOnSuccessListener { result ->
+          waitingDone.value = false
+          isWaiting.value = false
+          val profiles = result.documents.mapNotNull { documentToProfile(it) }
+          onSuccess(profiles)
         }
         .addOnFailureListener { e ->
           Log.e("ProfilesRepositoryFirestore", "Error getting profiles", e)
@@ -228,7 +265,6 @@ class ProfilesRepositoryFirestore(
         } else {
           Source.CACHE
         }
-    Log.d("ProfilesRepositoryFirestore", "getProfileByUid")
     db.collection("profiles").document(uid).get(source).addOnCompleteListener { task ->
       if (task.isSuccessful) {
         val profile = task.result?.let { document -> documentToProfile(document) }
@@ -311,7 +347,14 @@ class ProfilesRepositoryFirestore(
       val geohash = document.getString("geohash")
       val hasBlocked =
           (document.get("hasBlocked") as? List<*>)?.filterIsInstance<String>() ?: listOf()
+      val meetingRequestSent =
+          (document.get("meetingRequestSent") as? List<*>)?.filterIsInstance<String>() ?: listOf()
 
+      val meetingRequestInbox =
+          (document.get("meetingRequestInbox") as? Map<*, *>)
+              ?.filter { (key, value) -> key is String && value is String }
+              ?.map { (key, value) -> key as String to value as String }
+              ?.toMap() ?: mapOf()
       Profile(
           uid = uid,
           name = name,
@@ -324,7 +367,9 @@ class ProfilesRepositoryFirestore(
           fcmToken = fcmToken,
           location = location,
           geohash = geohash,
-          hasBlocked = hasBlocked)
+          hasBlocked = hasBlocked,
+          meetingRequestSent = meetingRequestSent,
+          meetingRequestInbox = meetingRequestInbox)
     } catch (e: Exception) {
       Log.e("ProfileRepositoryFirestore", "Error converting document to Profile", e)
       null
