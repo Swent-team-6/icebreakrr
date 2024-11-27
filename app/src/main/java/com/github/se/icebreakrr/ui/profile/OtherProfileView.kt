@@ -28,7 +28,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavBackStackEntry
 import com.github.se.icebreakrr.R
@@ -38,6 +37,7 @@ import com.github.se.icebreakrr.model.tags.TagsViewModel
 import com.github.se.icebreakrr.ui.message.SendRequestScreen
 import com.github.se.icebreakrr.ui.navigation.NavigationActions
 import com.github.se.icebreakrr.ui.sections.shared.InfoSection
+import com.github.se.icebreakrr.ui.sections.shared.MessageWhenLoadingProfile
 import com.github.se.icebreakrr.ui.sections.shared.ProfileHeader
 
 /**
@@ -75,15 +75,7 @@ fun OtherProfileView(
 
   Scaffold(modifier = Modifier.fillMaxSize().testTag("aroundYouProfileScreen")) { paddingValues ->
     if (isLoading) {
-      Box(
-          modifier =
-              Modifier.fillMaxSize()
-                  .background(Color.LightGray)
-                  .padding(paddingValues)
-                  .testTag("loadingBox"),
-          contentAlignment = Alignment.Center) {
-            Text("Loading profile...", textAlign = TextAlign.Center)
-          }
+      MessageWhenLoadingProfile(paddingValues)
     } else if (profile != null) {
 
       Column(
@@ -92,7 +84,7 @@ fun OtherProfileView(
 
             // 2 sections one for the profile image with overlay and
             // one for the information section
-            ProfileHeader(profile, navigationActions, false, profilesViewModel) {
+            ProfileHeader(profile, navigationActions, false, profilesViewModel, false) {
               sendRequest = true
             }
             InfoSection(profile, tagsViewModel)

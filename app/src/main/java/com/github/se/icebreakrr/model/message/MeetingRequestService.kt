@@ -3,6 +3,7 @@ package com.github.se.icebreakrr.model.message
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
+import android.util.Log
 import androidx.core.app.NotificationCompat
 import ch.hsr.geohash.GeoHash
 import com.github.se.icebreakrr.R
@@ -16,7 +17,8 @@ class MeetingRequestService : FirebaseMessagingService() {
 
   private val MSG_CHANNEL_ID = "message_channel_id"
   private val MSG_CHANNEL_NAME = "channel_message"
-  private val MSG_RESPONSE = "Meeting response from : "
+  private val MSG_RESPONSE_ACCEPTED = " accepted your meeting request!"
+  private val MSG_RESPONSE_REJECTED = "rejected your meeting request :("
   private val MSG_CONFIRMATION = "Meeting confirmation from : "
   private val NOTIFICATION_ID = 0
 
@@ -32,6 +34,7 @@ class MeetingRequestService : FirebaseMessagingService() {
     val title = remoteMessage.data["title"] ?: "null"
     when (title) {
       "MEETING REQUEST" -> {
+        Log.d("TESTEST", "nice job bro")
         MeetingRequestManager.meetingRequestViewModel?.addToMeetingRequestInbox(senderUid, message)
         MeetingRequestManager.meetingRequestViewModel?.updateInboxOfMessages()
       }
@@ -41,12 +44,20 @@ class MeetingRequestService : FirebaseMessagingService() {
         val accepted = remoteMessage.data["accepted"]?.toBoolean() ?: false
         val senderToken = remoteMessage.data["senderToken"] ?: "null"
 
+        Log.d("TESTEST", "nice job bro")
+
         MeetingRequestManager.meetingRequestViewModel?.removeFromMeetingRequestSent(senderUid)
-        showNotification(MSG_RESPONSE + name, message)
         if (accepted) {
+          showNotification(name + MSG_RESPONSE_ACCEPTED, message)
           MeetingRequestManager.meetingRequestViewModel?.setMeetingConfirmation(
               targetToken = senderToken,
               newMessage = "The meeting with ${MeetingRequestManager.ourName} is confirmed !")
+          MeetingRequestManager.meetingRequestViewModel?.sendMeetingConfirmation()
+        } else {
+          showNotification(name + MSG_RESPONSE_REJECTED, message)
+          MeetingRequestManager.meetingRequestViewModel?.setMeetingConfirmation(
+              targetToken = senderToken,
+              newMessage = "The meeting with ${MeetingRequestManager.ourName} is cancelled !")
           MeetingRequestManager.meetingRequestViewModel?.sendMeetingConfirmation()
         }
       }

@@ -1,7 +1,6 @@
 package com.github.se.icebreakrr.ui.sections
 
 import android.annotation.SuppressLint
-import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
@@ -11,6 +10,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -20,8 +20,11 @@ import com.github.se.icebreakrr.ui.navigation.BottomNavigationMenu
 import com.github.se.icebreakrr.ui.navigation.LIST_TOP_LEVEL_DESTINATIONS
 import com.github.se.icebreakrr.ui.navigation.NavigationActions
 import com.github.se.icebreakrr.ui.navigation.Route
+import com.github.se.icebreakrr.ui.navigation.Screen
 import com.github.se.icebreakrr.ui.sections.shared.ProfileCard
 import com.github.se.icebreakrr.ui.sections.shared.TopBar
+import com.github.se.icebreakrr.utils.NetworkUtils.isNetworkAvailableWithContext
+import com.github.se.icebreakrr.utils.NetworkUtils.showNoInternetToast
 
 // Constants for padding and list management
 private val HORIZONTAL_PADDING = 7.dp
@@ -46,6 +49,7 @@ fun NotificationScreen(
 ) {
   meetingRequestViewModel.updateInboxOfMessages()
   val cardList = profileViewModel.inboxItems.collectAsState()
+  val context = LocalContext.current
   Scaffold(
       modifier = Modifier.testTag("notificationScreen"),
       topBar = { TopBar("Inbox") },
@@ -77,14 +81,11 @@ fun NotificationScreen(
                     ProfileCard(
                         p.key,
                         onclick = {
-                          if (p.key.fcmToken != null) {
-                            meetingRequestViewModel.setMeetingResponse(
-                                p.key.fcmToken!!, MEETING_REQUEST_ACCEPTED, true)
-                            meetingRequestViewModel.sendMeetingResponse()
-                            meetingRequestViewModel.removeFromMeetingRequestInbox(p.key.uid)
-                            meetingRequestViewModel.updateInboxOfMessages()
+                          if (isNetworkAvailableWithContext(context)) {
+                            navigationActions.navigateTo(
+                                Screen.INBOX_PROFILE_VIEW + "?userId=${p.key.uid}")
                           } else {
-                            Log.e("NOTIFICATION PAGE ERROR", "Fcm token of profile is null")
+                            showNoInternetToast(context)
                           }
                         })
                   }
