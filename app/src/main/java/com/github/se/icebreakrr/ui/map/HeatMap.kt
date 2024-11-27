@@ -14,7 +14,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -40,7 +43,7 @@ import com.google.maps.android.heatmaps.WeightedLatLng
 
 private val DEFAULT_LOCATION = LatLng(46.5197, 6.6323) // EPFL coordinates
 private const val DEFAULT_ZOOM = 15f
-private const val RADIUS = 5000.0
+private const val RADIUS = 10000.0
 
 // Define custom gradient colors (from blue to red)
 private val GRADIENT_COLORS =
@@ -66,59 +69,20 @@ private val GRADIENT_START_POINTS =
 val gradient = Gradient(GRADIENT_COLORS, GRADIENT_START_POINTS)
 
 /** This function generates fake points around lausanne to showcase the heatmap display */
-private fun generateFakePoints(): List<WeightedLatLng> {
-  // EPFL coordinates: 46.5197, 6.6323
-  val epflLat = 46.5197
-  val epflLon = 6.6323
+private fun generateFakePoints(centerLat: Double, centerLon: Double, radius: Double, numberOfPoints: Int = 50): List<WeightedLatLng> {
+    val fakePoints = mutableListOf<WeightedLatLng>()
 
-  // Create a list to store our fake points
-  val fakePoints = mutableListOf<WeightedLatLng>()
+    for (i in 0 until numberOfPoints) { // Generate the specified number of fake points
+        val randomLat = centerLat + (Math.random() - 0.5) * (radius / 111000) // Convert radius from meters to degrees
+        val randomLon = centerLon + (Math.random() - 0.5) * (radius / (111000 * Math.cos(Math.toRadians(centerLat)))) // Adjust for latitude
 
-  // Add points around campus with different weights
-  // Main buildings area
-  fakePoints.addAll(
-      listOf(
-          WeightedLatLng(LatLng(46.5200, 6.6325), 5.0), // BC building
-          WeightedLatLng(LatLng(46.5195, 6.6330), 4.0), // Library
-          WeightedLatLng(LatLng(46.5192, 6.6318), 3.0), // CM building
-          WeightedLatLng(LatLng(46.5205, 6.6315), 4.0), // SG building
-      ))
+        // Add the generated point with a random weight
+        fakePoints.add(WeightedLatLng(LatLng(randomLat, randomLon), Math.random() * 10)) // Random weight between 0 and 10
+    }
 
-  // Rolex Learning Center area
-  fakePoints.addAll(
-      listOf(
-          WeightedLatLng(LatLng(46.5185, 6.6322), 5.0),
-          WeightedLatLng(LatLng(46.5183, 6.6325), 4.0),
-          WeightedLatLng(LatLng(46.5184, 6.6320), 4.0),
-          WeightedLatLng(LatLng(46.5186, 6.6318), 3.0),
-      ))
-
-  // Innovation Park area
-  fakePoints.addAll(
-      listOf(
-          WeightedLatLng(LatLng(46.5175, 6.6365), 2.0),
-          WeightedLatLng(LatLng(46.5173, 6.6360), 2.0),
-          WeightedLatLng(LatLng(46.5177, 6.6362), 1.0),
-      ))
-
-  // Sports center area
-  fakePoints.addAll(
-      listOf(
-          WeightedLatLng(LatLng(46.5220, 6.6380), 3.0),
-          WeightedLatLng(LatLng(46.5218, 6.6385), 2.0),
-          WeightedLatLng(LatLng(46.5215, 6.6382), 2.0),
-      ))
-
-  // Metro station area
-  fakePoints.addAll(
-      listOf(
-          WeightedLatLng(LatLng(46.5225, 6.6285), 4.0),
-          WeightedLatLng(LatLng(46.5223, 6.6283), 3.0),
-          WeightedLatLng(LatLng(46.5227, 6.6287), 3.0),
-      ))
-
-  return fakePoints
+    return fakePoints
 }
+
 
 @Composable
 fun HeatMap(
@@ -126,91 +90,109 @@ fun HeatMap(
     profilesViewModel: ProfilesViewModel,
     locationViewModel: LocationViewModel
 ) {
-  val userLocation = locationViewModel.lastKnownLocation.collectAsState()
-  val profiles = profilesViewModel.filteredProfiles.collectAsState()
+    val userLocation = locationViewModel.lastKnownLocation.collectAsState()
+    val profiles = profilesViewModel.filteredProfiles.collectAsState()
 
-  Scaffold(
-      modifier = Modifier.testTag("heatMapScreen"),
-      bottomBar = {
-        BottomNavigationMenu(
-            onTabSelect = { route ->
-              if (route.route != Route.HEAT_MAP) {
-                navigationActions.navigateTo(route)
-              }
-            },
-            tabList = LIST_TOP_LEVEL_DESTINATIONS,
-            selectedItem = Route.HEAT_MAP)
-      }) { paddingValues ->
+    // State to hold the heatmap provider
+    var heatmapProvider by remember { mutableStateOf<HeatmapTileProvider?>(null) }
+    var isMapLoaded by remember { mutableStateOf(false) } // Track if the map is loaded
+
+    // Define the coordinates for generating fake points
+    val locations = listOf(
+        Pair(46.51805886663674, 6.637429806298338), // Location 1 Lausanne
+        Pair(47.38787303565691, 8.523686394824663), // Location 2 Zurich
+        Pair(46.004976622692936, 8.95195211094253)  // Location 3 Lugano
+    )
+
+    // Generate fake points around the specified locations
+    val allFakePoints = locations.flatMap { (lat, lon) ->
+        generateFakePoints(lat, lon, radius = 5000.0, numberOfPoints = 20) // Adjust radius and number of points as needed
+    }
+
+    Scaffold(
+        modifier = Modifier.testTag("heatMapScreen"),
+        bottomBar = {
+            BottomNavigationMenu(
+                onTabSelect = { route ->
+                    if (route.route != Route.HEAT_MAP) {
+                        navigationActions.navigateTo(route)
+                    }
+                },
+                tabList = LIST_TOP_LEVEL_DESTINATIONS,
+                selectedItem = Route.HEAT_MAP
+            )
+        }
+    ) { paddingValues ->
         if (userLocation.value == null) {
-          // Show loading box when location is not available
-          Box(
-              modifier =
-                  Modifier.fillMaxSize()
-                      .padding(paddingValues)
-                      .background(Color.LightGray)
-                      .testTag("loadingBox"),
-              contentAlignment = Alignment.Center) {
+            // Show loading box when location is not available
+            Box(
+                modifier = Modifier.fillMaxSize()
+                    .padding(paddingValues)
+                    .background(Color.LightGray)
+                    .testTag("loadingBox"),
+                contentAlignment = Alignment.Center
+            ) {
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center) {
-                      CircularProgressIndicator()
-                      Spacer(modifier = Modifier.height(16.dp))
-                      Text("${R.string.location_loading}", textAlign = TextAlign.Center)
-                    }
-              }
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    CircularProgressIndicator()
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text("Loading location...", textAlign = TextAlign.Center)
+                }
+            }
         } else {
-          // Rest of your existing map code
-          val location = userLocation.value!!
-          val mapLocation = remember(location) { LatLng(location.latitude, location.longitude) }
+            val location = userLocation.value!!
+            val mapLocation = remember(location) { LatLng(location.latitude, location.longitude) }
+            val cameraPositionState = rememberCameraPositionState {
+                position = CameraPosition.fromLatLngZoom(mapLocation, DEFAULT_ZOOM)
+            }
 
-          val cameraPositionState = rememberCameraPositionState {
-            position = CameraPosition.fromLatLngZoom(mapLocation, DEFAULT_ZOOM)
-          }
-
-          val weightedLocations =
-              remember(profiles.value) {
-                val realLocations =
-                    profiles.value.mapNotNull { profile ->
-                      profile.location?.let { location ->
+            // Update heatmap when profiles change
+            LaunchedEffect(profiles.value) {
+                val weightedLocations = profiles.value.mapNotNull { profile ->
+                    profile.location?.let { location ->
                         WeightedLatLng(LatLng(location.latitude, location.longitude), 1.0)
-                      }
                     }
+                } + allFakePoints // Combine with fake points
 
-                // Combine real locations with fake points
-                realLocations + generateFakePoints()
-              }
+                heatmapProvider = HeatmapTileProvider.Builder()
+                    .weightedData(weightedLocations)
+                    .radius(50)
+                    .opacity(0.8)
+                    .gradient(gradient)
+                    .maxIntensity(15.0)
+                    .build()
+            }
 
-          val heatmapProvider =
-              remember(weightedLocations) {
-                if (weightedLocations.isNotEmpty()) {
-                  HeatmapTileProvider.Builder()
-                      .weightedData(weightedLocations)
-                      .radius(50)
-                      .opacity(0.8)
-                      .gradient(gradient)
-                      .maxIntensity(15.0)
-                      .build()
-                } else null
-              }
-
-          // Update data fetch to use current location
-          LaunchedEffect(userLocation.value) {
-            val center =
-                userLocation.value
-                    ?: GeoPoint(DEFAULT_LOCATION.latitude, DEFAULT_LOCATION.longitude)
-            profilesViewModel.getFilteredProfilesInRadius(
-                center = center, radiusInMeters = RADIUS // 5km radius
-                )
-          }
-
-          GoogleMap(
-              modifier = Modifier.fillMaxSize().padding(paddingValues).testTag("googleMap"),
-              cameraPositionState = cameraPositionState) {
+            GoogleMap(
+                modifier = Modifier.fillMaxSize().padding(paddingValues).testTag("googleMap"),
+                cameraPositionState = cameraPositionState,
+                onMapLoaded = {
+                    isMapLoaded = true // Set map loaded state to true
+                    val center = cameraPositionState.position.target
+                    profilesViewModel.getFilteredProfilesInRadius(
+                        center = GeoPoint(center.latitude, center.longitude),
+                        radiusInMeters = RADIUS // Adjust radius as needed
+                    )
+                }
+            ) {
                 // Only show heatmap if we have data
                 heatmapProvider?.let { provider ->
-                  TileOverlay(tileProvider = provider, transparency = 0.0f)
+                    TileOverlay(tileProvider = provider, transparency = 0.0f)
                 }
-              }
+            }
+
+            // Fetch profiles when the camera position changes
+            LaunchedEffect(cameraPositionState.position) {
+                if (isMapLoaded) {
+                    val center = cameraPositionState.position.target
+                    profilesViewModel.getFilteredProfilesInRadius(
+                        center = GeoPoint(center.latitude, center.longitude),
+                        radiusInMeters = RADIUS // Adjust radius as needed
+                    )
+                }
+            }
         }
-      }
+    }
 }
