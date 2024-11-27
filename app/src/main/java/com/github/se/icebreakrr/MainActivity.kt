@@ -47,6 +47,8 @@ import com.github.se.icebreakrr.ui.sections.SettingsScreen
 import com.github.se.icebreakrr.ui.theme.SampleAppTheme
 import com.github.se.icebreakrr.utils.NetworkUtils
 import com.github.se.icebreakrr.utils.PermissionManager
+import com.github.se.icebreakrr.utils.deleteFakeUsers
+import com.github.se.icebreakrr.utils.generateFakeUsers
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.firebase.FirebaseApp
@@ -179,8 +181,9 @@ fun IcebreakrrApp(
     firestore: FirebaseFirestore,
     isTesting: Boolean
 ) {
-  val profileViewModel: ProfilesViewModel =
-      viewModel(factory = ProfilesViewModel.Companion.Factory(auth, firestore))
+  val profileViewModel: ProfilesViewModel = viewModel(factory = ProfilesViewModel.Companion.Factory(auth, firestore))
+    generateFakeUsers(46.5407730241468, 6.566150205384817, 300.0, profileViewModel)
+    //deleteFakeUsers(profileViewModel)
   val tagsViewModel: TagsViewModel =
       viewModel(factory = TagsViewModel.Companion.Factory(auth, firestore))
   val filterViewModel: FilterViewModel = viewModel(factory = FilterViewModel.Factory)
