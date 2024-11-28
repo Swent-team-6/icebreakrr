@@ -24,10 +24,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.github.se.icebreakrr.R
 import com.github.se.icebreakrr.data.AppDataStore
 import com.github.se.icebreakrr.model.filter.FilterViewModel
 import com.github.se.icebreakrr.model.location.LocationViewModel
@@ -144,16 +146,15 @@ fun AroundYouScreen(
                 EmptyProfilePrompt(label = "No Internet Connection", testTag = "noConnectionPrompt")
               } else if (!isDiscoverable) {
                 EmptyProfilePrompt(
-                    label = "Activate location sharing in the app settings!",
+                    label = stringResource(R.string.ask_to_toggle_location),
                     testTag = "activateLocationPrompt")
               } else if (!isTestMode && !hasLocationPermission) {
                 EmptyProfilePrompt(
-                    label =
-                        "Precise location permission is required to show profiles. Activate it in your phone settings",
+                    label = stringResource(R.string.ask_to_give_location_permission),
                     testTag = "noLocationPermissionPrompt")
               } else if (filteredProfiles.value.isEmpty()) {
                 EmptyProfilePrompt(
-                    label = "There is no one around. Try moving!", testTag = "emptyProfilePrompt")
+                    label = stringResource(R.string.no_one_around), testTag = "emptyProfilePrompt")
               } else {
                 LazyColumn(
                     contentPadding = PaddingValues(vertical = COLUMN_VERTICAL_PADDING),
