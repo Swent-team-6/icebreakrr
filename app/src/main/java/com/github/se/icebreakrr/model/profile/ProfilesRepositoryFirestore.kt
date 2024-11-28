@@ -1,5 +1,6 @@
 package com.github.se.icebreakrr.model.profile
 
+import android.location.Location
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
@@ -377,30 +378,21 @@ class ProfilesRepositoryFirestore(
   }
 
   /**
-   * Converts degrees to radians.
-   *
-   * @param deg Angle in degrees.
-   * @return Angle in radians.
-   */
-  private fun deg2rad(deg: Double): Double = deg * Math.PI / 180.0
-
-  /**
-   * Calculates the distance between two geographic points using the Haversine formula.
+   * Calculates the distance between two geographic points using the Android Location class.
    *
    * @param point1 First geographic point.
    * @param point2 Second geographic point.
    * @return Distance between the points in meters.
    */
   private fun calculateDistance(point1: GeoPoint, point2: GeoPoint): Double {
-    val earthRadius = 6371000.0 // meters
-    val dLat = deg2rad(point2.latitude - point1.latitude)
-    val dLon = deg2rad(point2.longitude - point1.longitude)
-    val lat1 = deg2rad(point1.latitude)
-    val lat2 = deg2rad(point2.latitude)
-
-    val a = sin(dLat / 2) * sin(dLat / 2) + cos(lat1) * cos(lat2) * sin(dLon / 2) * sin(dLon / 2)
-    val c = 2 * atan2(sqrt(a), sqrt(1 - a))
-
-    return earthRadius * c
+    val location1 = Location("").apply {
+      latitude = point1.latitude
+      longitude = point1.longitude
+    }
+    val location2 = Location("").apply {
+      latitude = point2.latitude
+      longitude = point2.longitude
+    }
+    return location1.distanceTo(location2).toDouble() // Returns distance in meters
   }
 }
