@@ -34,6 +34,7 @@ fun UnblockProfileScreen(
   val isLoading = profilesViewModel.loading.collectAsState()
   val isConnected = profilesViewModel.isConnected.collectAsState()
   val context = LocalContext.current
+  val inboxItems = profilesViewModel.selfProfile.collectAsState()
 
   var profileToUnblock by remember { mutableStateOf<Profile?>(null) }
 
@@ -70,5 +71,6 @@ fun UnblockProfileScreen(
       },
       selectedProfile = profileToUnblock,
       periodicRefreshAction = { profilesViewModel.getBlockedUsers() },
-      isTestMode = isTestMode)
+      isTestMode = isTestMode,
+      notificationCount = inboxItems.value?.meetingRequestInbox?.size ?: 0)
 }
