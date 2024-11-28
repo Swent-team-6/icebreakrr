@@ -66,7 +66,7 @@ class UnblockProfileTest {
           profilesViewModel = profilesViewModel,
           isTestMode = true)
     }
-    composeTestRule.onNodeWithTag("unblockScreen").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("profileListScreen").assertIsDisplayed()
     composeTestRule.onNodeWithTag("bottomNavigationMenu").assertIsDisplayed()
     composeTestRule.onNodeWithTag("topBar").assertIsDisplayed()
   }
@@ -120,7 +120,7 @@ class UnblockProfileTest {
     composeTestRule.waitForIdle()
 
     composeTestRule.onNodeWithText(blockedProfiles[0].name).performClick()
-    composeTestRule.onNodeWithTag("unblockDialog").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("confirmDialog").assertIsDisplayed()
     composeTestRule.onNodeWithText("Yes").assertIsDisplayed()
     composeTestRule.onNodeWithText("No").assertIsDisplayed()
     composeTestRule.onNodeWithText("Unblock ?").assertIsDisplayed()
@@ -141,8 +141,9 @@ class UnblockProfileTest {
     composeTestRule.waitForIdle()
 
     composeTestRule.onNodeWithText(blockedProfiles[0].name).performClick()
+    composeTestRule.onNodeWithText("No").assertIsDisplayed()
     composeTestRule.onNodeWithText("No").performClick()
-    composeTestRule.onNodeWithTag("unblockDialog").assertIsNotDisplayed()
+    composeTestRule.onNodeWithTag("confirmDialog").assertIsNotDisplayed()
     composeTestRule.onNodeWithText(blockedProfiles[0].name).assertIsDisplayed()
   }
 
