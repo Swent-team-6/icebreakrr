@@ -302,7 +302,8 @@ fun IcebreakrrNavHost(
               navBackStackEntry,
               navigationActions,
               tagsViewModel,
-              meetingRequestViewModel)
+              meetingRequestViewModel,
+              isTesting)
         } else {
           throw IllegalStateException(
               "The Meeting Request View Model shouldn't be null : Bad initialization")

@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -25,6 +26,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
@@ -50,18 +52,19 @@ fun InboxProfileViewScreen(
     navBackStackEntry: NavBackStackEntry?,
     navigationActions: NavigationActions,
     tagsViewModel: TagsViewModel,
-    meetingRequestViewModel: MeetingRequestViewModel
+    meetingRequestViewModel: MeetingRequestViewModel,
+    isTesting: Boolean
 ) {
 
   LaunchedEffect(Unit) {
     val profileId = navBackStackEntry?.arguments?.getString("userId")
-    if (profileId != null) {
-      profilesViewModel.getProfileByUid(profileId)
+    if (profileId != null || isTesting) {
+      profilesViewModel.getProfileByUid(profileId ?: "")
       meetingRequestViewModel.updateInboxOfMessages()
     }
   }
 
-  val isLoading = profilesViewModel.loading.collectAsState(initial = true).value
+  val isLoading = profilesViewModel.loading.collectAsState().value
   val profile = profilesViewModel.selectedProfile.collectAsState().value
   val inboxItems = profilesViewModel.inboxItems.collectAsState()
   val context = LocalContext.current
@@ -126,18 +129,22 @@ fun AcceptDeclineRequest(
   val configuration = LocalConfiguration.current
   val screenHeight = configuration.screenHeightDp.dp
   val screenWidth = configuration.screenWidthDp.dp
+
   Box(
       modifier =
           Modifier.shadow(
-                  elevation = 4.dp, spotColor = Color(0x40000000), ambientColor = Color(0x40000000))
+                  elevation = 4.dp,
+                  shape = RoundedCornerShape(size = 23.dp), // Match shadow to the rounded corners
+                  spotColor = Color(0x40000000),
+                  ambientColor = Color(0x40000000))
+              .clip(RoundedCornerShape(size = 23.dp)) // Enforce clipping to the rounded shape
+              .background(Color(0xFFEAEEFF)) // Background color inside the rounded corners
               .height(115.dp)
               .width((screenWidth.value * 0.9).dp)
-              .background(Color(0xFFEAEEFF), RoundedCornerShape(size = 23.dp))
-              .padding(start = 10.5.dp, end = 14.5.dp, top = 8.dp, bottom = 8.dp)) {
+              .padding(start = 10.5.dp, end = 14.5.dp, top = 8.dp, bottom = 8.dp)
+              .testTag("Accept/DeclineBox")) {
         Column(
-            modifier =
-                Modifier.fillMaxSize(1f)
-                    .background(Color(0xFFEAEEFF), RoundedCornerShape(size = 23.dp)),
+            modifier = Modifier.fillMaxSize(), // Remove redundant background in Column
             verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.Start) {
               Text(
@@ -149,18 +156,18 @@ fun AcceptDeclineRequest(
                           fontWeight = FontWeight(500),
                           color = Color(0xFF000000),
                           letterSpacing = 0.2.sp,
-                      ))
+                      ),
+                  modifier = Modifier.testTag("RequestMessage"))
               Spacer(modifier = Modifier.height(10.dp))
               Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
                 IconButton(
                     onClick = onAcceptClick,
                     modifier =
-                        Modifier.padding(start = 12.dp, top = 12.dp, end = 12.dp, bottom = 12.dp)
-                            .width(48.dp)
-                            .height(48.dp)
-                            .background(
-                                color = Color(0xFF65558F),
-                                shape = RoundedCornerShape(size = 100.dp))) {
+                        Modifier.padding(12.dp)
+                            .size(48.dp) // Use size for brevity
+                            .clip(RoundedCornerShape(100.dp)) // Enforce round shape
+                            .background(Color(0xFF65558F))
+                            .testTag("acceptButton")) {
                       Icon(
                           imageVector = Icons.Outlined.Check,
                           contentDescription = "Accept Request Button",
@@ -169,12 +176,11 @@ fun AcceptDeclineRequest(
                 IconButton(
                     onClick = onDeclineClick,
                     modifier =
-                        Modifier.padding(start = 12.dp, top = 12.dp, end = 12.dp, bottom = 12.dp)
-                            .width(48.dp)
-                            .height(48.dp)
-                            .background(
-                                color = Color(0xFF65558F),
-                                shape = RoundedCornerShape(size = 100.dp))) {
+                        Modifier.padding(12.dp)
+                            .size(48.dp)
+                            .clip(RoundedCornerShape(100.dp)) // Enforce round shape
+                            .background(Color(0xFF65558F))
+                            .testTag("declineButton")) {
                       Icon(
                           imageVector = Icons.Outlined.Close,
                           contentDescription = "Decline Request Button",
