@@ -69,6 +69,8 @@ open class ProfilesViewModel(
   private val MAX_RESOLUTION = 600
   private val DEFAULT_QUALITY = 100
 
+  private val MAX_REPORTS_BEFORE_BAN = 2
+
   companion object {
     class Factory(private val auth: FirebaseAuth, private val firestore: FirebaseFirestore) :
         ViewModelProvider.Factory {
@@ -134,7 +136,7 @@ open class ProfilesViewModel(
                 profile.uid != currentUserId &&
 
                     // Filter users than have too many reports
-                    (profile.reports.keys.size <= 1) &&
+                    (profile.reports.keys.size <= MAX_REPORTS_BEFORE_BAN) &&
 
                     // Filter by genders if specified
                     (genders == null || profile.gender in genders || genders.isEmpty()) &&
