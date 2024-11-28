@@ -31,6 +31,12 @@ interface ProfilesRepository {
       onFailure: (Exception) -> Unit
   )
 
+  fun getAlreadyMetProfiles(
+      alreadyMetProfiles: List<String>,
+      onSuccess: (List<Profile>) -> Unit,
+      onFailure: (Exception) -> Unit
+  )
+
   fun addNewProfile(profile: Profile, onSuccess: () -> Unit, onFailure: (Exception) -> Unit)
 
   fun updateProfile(profile: Profile, onSuccess: () -> Unit, onFailure: (Exception) -> Unit)
