@@ -36,6 +36,10 @@ val predefinedUserIds =
         "usertest24",
         "usertest25")
 
+// Constants for user generation
+private const val RADIUS_DIVISOR = 50000.0 // Used to adjust the radius for latitude and longitude
+private const val GEOHASH_PRECISION = 7 // Precision for geohash encoding
+
 // Function to generate fake users around a specific location and add them to the database
 fun generateFakeUsers(
     centerLat: Double,
@@ -47,14 +51,14 @@ fun generateFakeUsers(
 
     // Generate random latitude and longitude within the specified radius
     val randomLat =
-        centerLat + (Random.nextDouble() - 0.5) * (radius / 50000) // Adjust radius for sparsity
+        centerLat + (Random.nextDouble() - 0.5) * (radius / RADIUS_DIVISOR) // Adjust radius for sparsity
     val randomLon =
         centerLon +
             (Random.nextDouble() - 0.5) *
-                (radius / (50000 * Math.cos(Math.toRadians(centerLat)))) // Adjust for latitude
+                (radius / (RADIUS_DIVISOR * Math.cos(Math.toRadians(centerLat)))) // Adjust for latitude
 
     // Generate geohash for the random location
-    val geohash = GeoHashUtils.encode(randomLat, randomLon, precision = 7)
+    val geohash = GeoHashUtils.encode(randomLat, randomLon, precision = GEOHASH_PRECISION)
 
     // Create a fake profile
     val fakeProfile =
