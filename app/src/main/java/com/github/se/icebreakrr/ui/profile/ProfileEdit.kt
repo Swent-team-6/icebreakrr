@@ -172,16 +172,16 @@ fun ProfileEditingScreen(
                       Toast.makeText(context, "Failed to select image", Toast.LENGTH_SHORT).show()
                     },
                     onDeletion = {
-                        when (pictureChangeState) {
-                          UNCHANGED -> { // delete current profile picture
-                              if (user.profilePictureUrl != null) {
-                                  profilesViewModel.setPictureChangeState(TO_DELETE)
-                                  isModified = true
-                              }
+                      when (pictureChangeState) {
+                        UNCHANGED -> { // delete current profile picture
+                          if (user.profilePictureUrl != null) {
+                            profilesViewModel.setPictureChangeState(TO_DELETE)
+                            isModified = true
                           }
-                            // else cancel changes
-                          else -> profilesViewModel.setPictureChangeState(UNCHANGED)
                         }
+                        // else cancel changes
+                        else -> profilesViewModel.setPictureChangeState(UNCHANGED)
+                      }
                     })
 
                 Spacer(modifier = Modifier.height(padding))
