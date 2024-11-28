@@ -39,6 +39,8 @@ import com.github.se.icebreakrr.ui.message.SendRequestScreen
 import com.github.se.icebreakrr.ui.navigation.NavigationActions
 import com.github.se.icebreakrr.ui.sections.shared.InfoSection
 import com.github.se.icebreakrr.ui.sections.shared.ProfileHeader
+import com.github.se.icebreakrr.utils.NetworkUtils.isNetworkAvailableWithContext
+import com.github.se.icebreakrr.utils.NetworkUtils.showNoInternetToast
 
 /**
  * In Around You, when you click on a profile, this is the composable used to display it
@@ -103,7 +105,15 @@ fun OtherProfileView(
             // Already met button
             Button(
                 onClick = {
-                  Toast.makeText(context, R.string.Not_Implemented_Toast, Toast.LENGTH_SHORT).show()
+                  if (isNetworkAvailableWithContext(context)) {
+                    profilesViewModel.addAlreadyMet(profile.uid)
+                    Toast.makeText(context, R.string.Already_Met_Button_Success, Toast.LENGTH_SHORT)
+                        .show()
+                    profilesViewModel.getSelfProfile()
+                    navigationActions.goBack()
+                  } else {
+                    showNoInternetToast(context = context)
+                  }
                 },
                 colors =
                     ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
