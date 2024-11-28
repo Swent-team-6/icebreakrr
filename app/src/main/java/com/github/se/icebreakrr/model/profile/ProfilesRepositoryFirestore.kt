@@ -214,36 +214,6 @@ class ProfilesRepositoryFirestore(
         }
   }
 
-  override fun getAlreadyMetProfiles(
-      alreadyMetProfiles: List<String>,
-      onSuccess: (List<Profile>) -> Unit,
-      onFailure: (Exception) -> Unit
-  ) {
-    if (alreadyMetProfiles.isEmpty()) {
-      onSuccess(emptyList())
-      return
-    }
-    db.collection(collectionPath)
-        .whereIn("uid", alreadyMetProfiles)
-        .get()
-        .addOnSuccessListener { result ->
-          waitingDone.value = false
-          isWaiting.value = false
-          val profiles = result.documents.mapNotNull { documentToProfile(it) }
-          onSuccess(profiles)
-        }
-        .addOnFailureListener { e ->
-          Log.e("ProfilesRepositoryFirestore", "Error getting profiles", e)
-          if (e is com.google.firebase.firestore.FirebaseFirestoreException) {
-            if (!_isWaiting.value && !_waitingDone.value) {
-              _isWaiting.value = true
-              handleConnectionFailure(onFailure)
-            }
-            onFailure(e)
-          }
-        }
-  }
-
   /**
    * Adds a new profile to Firestore.
    *

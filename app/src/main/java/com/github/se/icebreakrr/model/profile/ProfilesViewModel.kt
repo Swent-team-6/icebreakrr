@@ -409,7 +409,7 @@ open class ProfilesViewModel(
 
   fun getAlreadyMetUsers() {
     _loading.value = true
-    repository.getAlreadyMetProfiles(
+    repository.getMultipleProfiles(
         selfProfile.value?.hasAlreadyMet ?: emptyList(),
         onSuccess = { profileList ->
           _profiles.value = profileList
