@@ -22,6 +22,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.github.se.icebreakrr.ui.theme.IceBreakrrBlue
 
+private const val BADGE_OFFSET_X = 10
+
 /**
  * Composable function that creates a bottom navigation menu.
  *
@@ -32,6 +34,7 @@ import com.github.se.icebreakrr.ui.theme.IceBreakrrBlue
  *   selected [TopLevelDestination] as a parameter.
  * @param tabList A list of [TopLevelDestination] objects that define the available tabs.
  * @param selectedItem The route of the currently selected tab, used to highlight the active tab.
+ * @param notificationCount : number of notification pending
  *
  * The menu's style adapts to the app's theme, and includes a tag for UI testing.
  */
@@ -71,15 +74,19 @@ fun BottomNavigationMenu(
       }
 }
 
+/**
+ * Badge composable put in the navigation bar item notification
+ *
+ * @param count : number of pending notifications
+ */
 @Composable
 fun Badge(count: Int) {
   Box(
       modifier =
-          Modifier.offset(x = 10.dp, y = (-5).dp) // Manually position the badge
-              .size(17.dp) // Badge size
+          Modifier.offset(x = 10.dp, y = (-5).dp)
+              .size(17.dp)
               .background(Color.Red, shape = CircleShape),
-      contentAlignment = Alignment.Center // Center the text within the badge
-      ) {
+      contentAlignment = Alignment.Center) {
         Text(
             text = count.toString(),
             color = Color.White,

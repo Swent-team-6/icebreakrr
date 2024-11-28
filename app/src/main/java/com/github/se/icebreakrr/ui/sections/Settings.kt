@@ -78,7 +78,7 @@ fun SettingsScreen(
     profilesViewModel: ProfilesViewModel,
     navigationActions: NavigationActions,
     appDataStore: AppDataStore,
-    auth: FirebaseAuth,
+    auth: FirebaseAuth
 ) {
 
   val context = LocalContext.current

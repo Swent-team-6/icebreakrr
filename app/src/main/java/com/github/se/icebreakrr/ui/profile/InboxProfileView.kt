@@ -34,7 +34,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavBackStackEntry
@@ -65,7 +64,17 @@ private const val ACCEPT_DECLINE_ICON_BUTTON_SIZE = 48
 private const val ACCEPT_DECLINE_ICON_BUTTON_ROUNDED = 100
 private const val ACCEPT_DECLINE_ICON_BUTTON_COLOR = 0xFF65558F
 
-
+/**
+ * Screen that appears when you click on a profile in the notification tab. You can accept or
+ * decline the notification.
+ *
+ * @param profilesViewModel : view model of the profile
+ * @param navBackStackEntry : used to retrieve the uid of the user that we clicked on
+ * @param navigationActions : go back when we accept, decline or go back
+ * @param tagsViewModel : used to display user's tag
+ * @param meetingRequestViewModel : view model to send/receive meeting requests
+ * @param isTesting : indicates if we are in testing mode or not
+ */
 @Composable
 fun InboxProfileViewScreen(
     profilesViewModel: ProfilesViewModel,
@@ -125,6 +134,17 @@ fun InboxProfileViewScreen(
   }
 }
 
+/**
+ * Piece of code called when we accept or decline a meeting request. We need to send the response
+ * (if we accepted or not), remove the user from your inbox, update the inbox and go back in the
+ * notification screen
+ *
+ * @param meetingRequestViewModel : view model that receive/send messages
+ * @param navigationActions : used to go back in the notification screen
+ * @param uid : uid of the target user (user that send you the meeting request)
+ * @param accepted : Boolean that indicates if you accepted or not the request
+ * @param fcm : fcm of the target user (user that send you the meeting request)
+ */
 fun acceptDeclineCode(
     meetingRequestViewModel: MeetingRequestViewModel,
     navigationActions: NavigationActions,
@@ -139,6 +159,13 @@ fun acceptDeclineCode(
   navigationActions.goBack()
 }
 
+/**
+ * Composable that shows the accept decline box with the meeting request message that goes with it
+ *
+ * @param requestMessage : message that the user sends you
+ * @param onAcceptClick : code to execute when we accept the request
+ * @param onDeclineClick : code to execute when we decline the request
+ */
 @Composable
 fun AcceptDeclineRequest(
     requestMessage: String,
@@ -146,7 +173,6 @@ fun AcceptDeclineRequest(
     onDeclineClick: () -> Unit = {},
 ) {
   val configuration = LocalConfiguration.current
-  val screenHeight = configuration.screenHeightDp.dp
   val screenWidth = configuration.screenWidthDp.dp
 
   Box(
@@ -160,7 +186,11 @@ fun AcceptDeclineRequest(
               .background(Color(ACCEPT_DECLINE_BOX_COLOR))
               .height(ACCEPT_DECLINE_BOX_HEIGHT.dp)
               .width((screenWidth.value * ACCEPT_DECLINE_BOX_WIDTH_FACTOR).dp)
-              .padding(start = ACCEPT_DECLINE_PADDING_START.dp, end = ACCEPT_DECLINE_PADDING_END.dp, top = ACCEPT_DECLINE_PADDING_TOP_BOTTOM.dp, bottom = ACCEPT_DECLINE_PADDING_TOP_BOTTOM.dp)
+              .padding(
+                  start = ACCEPT_DECLINE_PADDING_START.dp,
+                  end = ACCEPT_DECLINE_PADDING_END.dp,
+                  top = ACCEPT_DECLINE_PADDING_TOP_BOTTOM.dp,
+                  bottom = ACCEPT_DECLINE_PADDING_TOP_BOTTOM.dp)
               .testTag("Accept/DeclineBox")) {
         Column(
             modifier = Modifier.fillMaxSize(),

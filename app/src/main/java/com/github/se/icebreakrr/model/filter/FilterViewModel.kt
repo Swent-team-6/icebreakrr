@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
 // This file was written with the help of CursorAI
-open class FilterViewModel : ViewModel() {
+class FilterViewModel : ViewModel() {
 
   private val _selectedGenders = MutableStateFlow<List<Gender>>(emptyList())
   val selectedGenders: StateFlow<List<Gender>> = _selectedGenders

@@ -48,6 +48,8 @@ import com.github.se.icebreakrr.ui.sections.shared.ProfileHeader
 private val ALPHA = 0.5f
 private val MET_BUTTON_HORIZTONAL_PADDING = 16.dp
 private val BUTTON_VERTICAL_PADDING = 16.dp
+private const val USER_ALREADY_SEND_REQUEST_TOAST_MESSAGE =
+    "this user has already send you a meeting request!"
 
 @Composable
 fun OtherProfileView(
@@ -85,13 +87,11 @@ fun OtherProfileView(
             // 2 sections one for the profile image with overlay and
             // one for the information section
             ProfileHeader(profile, navigationActions, false, profilesViewModel, false) {
+              // if the user already send you a meeting request, show a toast
               if (!profile.meetingRequestSent.contains(meetingRequestViewModel.senderUID)) {
                 sendRequest = true
               } else {
-                Toast.makeText(
-                        context,
-                        "this user has already send you a meeting request!",
-                        Toast.LENGTH_SHORT)
+                Toast.makeText(context, USER_ALREADY_SEND_REQUEST_TOAST_MESSAGE, Toast.LENGTH_SHORT)
                     .show()
                 sendRequest = false
               }
