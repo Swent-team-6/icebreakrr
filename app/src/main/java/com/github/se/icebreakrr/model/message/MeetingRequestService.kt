@@ -38,7 +38,6 @@ class MeetingRequestService : FirebaseMessagingService() {
         MeetingRequestManager.meetingRequestViewModel?.updateInboxOfMessages()
       }
       "MEETING RESPONSE" -> {
-
         val name = remoteMessage.data["senderName"] ?: "null"
         val accepted = remoteMessage.data["accepted"]?.toBoolean() ?: false
         val senderToken = remoteMessage.data["senderToken"] ?: "null"
