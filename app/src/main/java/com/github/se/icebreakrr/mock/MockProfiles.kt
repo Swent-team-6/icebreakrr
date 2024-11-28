@@ -255,6 +255,21 @@ fun Profile.Companion.getMockedProfiles(): List<Profile> {
           listOf(),
           listOf())
 
+  val hasAlreadyMetList =
+      listOf(
+          listOf("4", "5"),
+          listOf(),
+          listOf(),
+          listOf(),
+          listOf(),
+          listOf(),
+          listOf(),
+          listOf(),
+          listOf(),
+          listOf(),
+          listOf(),
+          listOf())
+
   val profiles = mutableListOf<Profile>()
   for (i in uids.indices) {
     profiles.add(
@@ -267,7 +282,8 @@ fun Profile.Companion.getMockedProfiles(): List<Profile> {
             description = descriptions[i],
             tags = tagsList[i],
             profilePictureUrl = null,
-            hasBlocked = hasBlockedList[i]))
+            hasBlocked = hasBlockedList[i],
+            hasAlreadyMet = hasAlreadyMetList[i]))
   }
   return profiles
 }

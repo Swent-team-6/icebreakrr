@@ -36,6 +36,8 @@ import com.github.se.icebreakrr.ui.theme.messageTextColor
 import com.github.se.icebreakrr.utils.NetworkUtils.isNetworkAvailable
 import kotlinx.coroutines.delay
 
+// This file was written with the help of CursorAI
+
 private val COLUMN_VERTICAL_PADDING = 16.dp
 private val COLUMN_HORIZONTAL_PADDING = 8.dp
 private val TEXT_SIZE_LARGE = 20.sp
@@ -43,6 +45,30 @@ private val NO_CONNECTION_TEXT_COLOR = messageTextColor
 private val EMPTY_PROFILE_TEXT_COLOR = messageTextColor
 private const val REFRESH_INTERVAL = 10_000L
 
+/**
+ * A composable function that displays a list of profiles with various interactive features.
+ *
+ * @param navigationActions Handler for navigation actions within the app
+ * @param profilesViewModel ViewModel managing profile-related data
+ * @param title Screen title displayed in the top bar
+ * @param emptyMessage Message to display when no profiles are available
+ * @param onProfileClickConfirm Callback when a profile is clicked and confirmed
+ * @param onProfileClickDismiss Callback when a profile selection is dismissed
+ * @param profiles State containing the list of profiles to display
+ * @param isLoading State indicating if data is being loaded
+ * @param isConnected State indicating network connectivity
+ * @param onRefresh Callback for refresh action
+ * @param additionalRefreshAction Optional additional action to perform on refresh
+ * @param showConfirmDialog Whether to show confirmation dialog
+ * @param confirmDialogTitle Title for confirmation dialog
+ * @param confirmDialogMessage Message for confirmation dialog
+ * @param confirmButtonText Text for confirm button
+ * @param dismissButtonText Text for dismiss button
+ * @param onConfirmAction Callback for confirmation action
+ * @param selectedProfile Currently selected profile
+ * @param periodicRefreshAction Optional action for periodic refresh
+ * @param isTestMode Flag to indicate if running in test mode
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
