@@ -154,6 +154,10 @@ open class ProfilesViewModel(
 
                     // Filter by isBlocked
                     !(profile.hasBlocked.contains(currentUserId)) &&
+                    !(profile.hasBlocked.contains(_selfProfile.value?.uid ?: "")) &&
+
+                    // Filter by hasAlreadyMet
+                    !(_selfProfile.value?.hasAlreadyMet?.contains(profile.uid) ?: false) &&
 
                     // Filter by how you have reported
                     profile.reports[currentUserId] == null
@@ -378,6 +382,42 @@ open class ProfilesViewModel(
         onFailure = { e -> handleError(e) })
   }
 
+  /**
+   * Adds user to current user's already met list in the repository.
+   *
+   * @param uid The unique ID of the user being added.
+   */
+  fun addAlreadyMet(uid: String) {
+    _selfProfile.update { currentProfile ->
+      currentProfile?.copy(hasAlreadyMet = currentProfile.hasAlreadyMet + uid)
+    }
+    updateProfile(selfProfile.value!!)
+  }
+
+  /**
+   * Removes user to current user's already met list in the repository.
+   *
+   * @param uid The unique ID of the user being removed.
+   */
+  fun removeAlreadyMet(uid: String) {
+    _selfProfile.update { currentProfile ->
+      currentProfile?.copy(hasAlreadyMet = currentProfile.hasAlreadyMet.filter { it != uid })
+    }
+    updateProfile(selfProfile.value!!)
+    getBlockedUsers()
+  }
+
+  fun getAlreadyMetUsers() {
+    _loading.value = true
+    repository.getMultipleProfiles(
+        selfProfile.value?.hasAlreadyMet ?: emptyList(),
+        onSuccess = { profileList ->
+          _profiles.value = profileList
+          _loading.value = false
+          _isConnected.value = true
+        },
+        onFailure = { e -> handleError(e) })
+  }
   /**
    * Fetches all the profiles that send a message to our profile
    *
