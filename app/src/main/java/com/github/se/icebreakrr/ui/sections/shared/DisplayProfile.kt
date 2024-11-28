@@ -148,7 +148,7 @@ fun ProfileHeader(
     myProfile: Boolean,
     profilesViewModel: ProfilesViewModel,
     profileInNotification: Boolean,
-    onEditClick: () -> Unit
+    onEditClick: (() -> Unit)?
 ) {
 
   val context = LocalContext.current
@@ -237,7 +237,9 @@ fun ProfileHeader(
                       IconButton(
                           onClick = {
                             if (isNetworkAvailable()) {
-                              onEditClick()
+                              if (onEditClick != null) {
+                                onEditClick()
+                              }
                             } else {
                               showNoInternetToast(context = context)
                             }

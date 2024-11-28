@@ -30,7 +30,6 @@ import org.junit.runner.RunWith
 import org.mockito.Mockito.doAnswer
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
-import org.mockito.Mockito.`when`
 import org.mockito.kotlin.anyOrNull
 
 @RunWith(AndroidJUnit4::class)

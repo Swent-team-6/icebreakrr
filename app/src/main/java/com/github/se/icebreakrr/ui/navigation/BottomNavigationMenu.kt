@@ -23,6 +23,8 @@ import androidx.compose.ui.unit.dp
 import com.github.se.icebreakrr.ui.theme.IceBreakrrBlue
 
 private const val BADGE_OFFSET_X = 10
+private const val BADGE_OFFSET_Y = -5
+private const val BADGE_SIZE = 17
 
 /**
  * Composable function that creates a bottom navigation menu.
@@ -83,8 +85,8 @@ fun BottomNavigationMenu(
 fun Badge(count: Int) {
   Box(
       modifier =
-          Modifier.offset(x = 10.dp, y = (-5).dp)
-              .size(17.dp)
+          Modifier.offset(x = BADGE_OFFSET_X.dp, y = (BADGE_OFFSET_Y).dp)
+              .size(BADGE_SIZE.dp)
               .background(Color.Red, shape = CircleShape),
       contentAlignment = Alignment.Center) {
         Text(

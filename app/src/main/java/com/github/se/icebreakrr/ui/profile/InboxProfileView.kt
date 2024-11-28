@@ -1,7 +1,6 @@
 package com.github.se.icebreakrr.ui.profile
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.content.MediaType.Companion.Text
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -104,7 +103,7 @@ fun InboxProfileViewScreen(
     ->
     if (isLoading) {
       MessageWhenLoadingProfile(paddingValues = paddingValues)
-    } else if (profile != null) {
+    } else if (profile?.fcmToken != null) {
       Column(horizontalAlignment = Alignment.CenterHorizontally) {
         ProfileHeader(
             profile = profile,
@@ -112,13 +111,13 @@ fun InboxProfileViewScreen(
             myProfile = false,
             profilesViewModel = profilesViewModel,
             profileInNotification = true,
-            onEditClick = {})
+            onEditClick = null)
         Spacer(modifier = Modifier.height(SPACER_HEIGHT.dp))
         AcceptDeclineRequest(
             message ?: "",
             {
               acceptDeclineCode(
-                  meetingRequestViewModel, navigationActions, profile.uid, true, profile.fcmToken!!)
+                  meetingRequestViewModel, navigationActions, profile.uid, true, profile.fcmToken)
             },
             {
               acceptDeclineCode(
