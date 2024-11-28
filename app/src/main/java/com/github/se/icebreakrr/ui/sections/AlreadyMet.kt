@@ -1,26 +1,20 @@
 package com.github.se.icebreakrr.ui.sections
 
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
+import ProfileListScreen
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import com.github.se.icebreakrr.R
+import com.github.se.icebreakrr.model.profile.Profile
 import com.github.se.icebreakrr.model.profile.ProfilesViewModel
 import com.github.se.icebreakrr.ui.navigation.NavigationActions
-import com.github.se.icebreakrr.ui.navigation.Screen
-import com.github.se.icebreakrr.ui.sections.shared.ProfileCard
-import com.github.se.icebreakrr.ui.sections.shared.TopBar
 import com.github.se.icebreakrr.utils.NetworkUtils.isNetworkAvailableWithContext
 import com.github.se.icebreakrr.utils.NetworkUtils.showNoInternetToast
-
-private val COLUMN_VERTICAL_PADDING = 16.dp
-private val COLUMN_HORIZONTAL_PADDING = 8.dp
 
 /**
  * Screen that displays a list of users that the current user has already met. This screen is
@@ -33,38 +27,48 @@ private val COLUMN_HORIZONTAL_PADDING = 8.dp
  * @param profilesViewModel ViewModel handling profile data operations
  */
 @Composable
-fun AlreadyMetScreen(navigationActions: NavigationActions, profilesViewModel: ProfilesViewModel) {
-  val cardList = profilesViewModel.profiles.collectAsState()
+fun AlreadyMetScreen(
+    navigationActions: NavigationActions,
+    profilesViewModel: ProfilesViewModel,
+    isTestMode: Boolean = false
+) {
+  val alreadyMetProfiles = profilesViewModel.profiles.collectAsState()
+  val isLoading = profilesViewModel.loading.collectAsState()
+  val isConnected = profilesViewModel.isConnected.collectAsState()
   val context = LocalContext.current
 
-  Scaffold(
-      modifier = Modifier.testTag("alreadyMetScreen"),
-      topBar = {
-        TopBar(stringResource(R.string.already_met), true) { navigationActions.goBack() }
-      },
-      content = { innerPadding ->
-        Column(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
-          Text(
-              "Already Met Screen - To be implemented",
-              modifier = Modifier.align(Alignment.CenterHorizontally))
+  var profileToUnmeet by remember { mutableStateOf<Profile?>(null) }
 
-          LazyColumn(
-              contentPadding = PaddingValues(vertical = COLUMN_VERTICAL_PADDING),
-              verticalArrangement = Arrangement.spacedBy(COLUMN_VERTICAL_PADDING),
-              modifier = Modifier.fillMaxSize().padding(horizontal = COLUMN_HORIZONTAL_PADDING)) {
-                items(cardList.value.size) { index ->
-                  ProfileCard(
-                      profile = cardList.value[index],
-                      onclick = {
-                        if (isNetworkAvailableWithContext(context)) {
-                          navigationActions.navigateTo(
-                              Screen.OTHER_PROFILE_VIEW + "?userId=${cardList.value[index].uid}")
-                        } else {
-                          showNoInternetToast(context)
-                        }
-                      })
-                }
-              }
+  ProfileListScreen(
+      navigationActions = navigationActions,
+      profilesViewModel = profilesViewModel,
+      title = stringResource(R.string.already_met),
+      emptyMessage = stringResource(R.string.no_already_met_users),
+      onProfileClick = { profile ->
+        if (isNetworkAvailableWithContext(context)) {
+          profileToUnmeet = profile
+        } else {
+          showNoInternetToast(context)
         }
-      })
+      },
+      profiles = alreadyMetProfiles,
+      isLoading = isLoading,
+      isConnected = isConnected,
+      onRefresh = { profilesViewModel.getAlreadyMetUsers() },
+      showConfirmDialog = profileToUnmeet != null,
+      confirmDialogTitle = stringResource(R.string.unmeet_confirm),
+      confirmDialogMessage =
+          profileToUnmeet?.let { stringResource(R.string.unmeet_confirm_message, it.name) },
+      confirmButtonText = stringResource(R.string.unmeet_yes),
+      dismissButtonText = stringResource(R.string.unmeet_no),
+      onConfirmAction = {
+        profileToUnmeet?.let { profile ->
+          profilesViewModel.removeAlreadyMet(profile.uid)
+          profilesViewModel.getAlreadyMetUsers()
+          profileToUnmeet = null
+        }
+      },
+      selectedProfile = profileToUnmeet,
+      periodicRefreshAction = { profilesViewModel.getAlreadyMetUsers() },
+      isTestMode = isTestMode)
 }
