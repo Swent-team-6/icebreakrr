@@ -7,14 +7,26 @@ import java.util.Calendar
 /**
  * Data class representing a user's profile.
  *
+ * This class encapsulates the various attributes of a user's profile, including personal details,
+ * location, tags, and interaction data such as meeting requests and blocked users.
+ *
  * @property uid The unique identifier for the profile.
  * @property name The name of the user.
  * @property gender The user's gender.
  * @property birthDate The birth date of the user as a [Timestamp].
  * @property catchPhrase The user's catchphrase or tagline.
  * @property description A brief description of the user.
- * @property tags A list of tags associated with the user.
+ * @property tags A list of tags associated with the user, useful for matching or categorization.
  * @property profilePictureUrl The URL of the user's profile picture (optional).
+ * @property fcmToken The Firebase Cloud Messaging (FCM) token for push notifications (optional).
+ * @property location The geographical location of the user as a [GeoPoint] (optional).
+ * @property geohash A geohash representation of the user's location (optional).
+ * @property distanceToSelfProfile The distance of this profile from the user's current location, in
+ *   meters (optional).
+ * @property hasBlocked A list of user IDs that this user has blocked.
+ * @property meetingRequestSent A list of user IDs to whom this user has sent meeting requests.
+ * @property meetingRequestInbox A map containing meeting requests received, where the key is the
+ *   sender's user ID and the value is the accompanying message.
  */
 data class Profile(
     val uid: String,
@@ -28,6 +40,7 @@ data class Profile(
     val fcmToken: String? = null,
     val location: GeoPoint? = null,
     val geohash: String? = null,
+    val distanceToSelfProfile: Int? = null,
     var hasBlocked: List<String> = listOf(),
     val meetingRequestSent: List<String> = listOf(),
     val meetingRequestInbox: Map<String, String> = mapOf()
