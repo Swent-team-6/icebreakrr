@@ -20,7 +20,6 @@ import java.io.ByteArrayOutputStream
 import java.io.InputStream
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 
 open class ProfilesViewModel(
@@ -45,6 +44,14 @@ open class ProfilesViewModel(
 
   private val _selfProfile = MutableStateFlow<Profile?>(null)
   open val selfProfile: StateFlow<Profile?> = _selfProfile
+
+  // This stores the state of the modification during the profile edition (null if not in edition)
+  private val _editedCurrentProfile = MutableStateFlow<Profile?>(null)
+  open val editedCurrentProfile: StateFlow<Profile?> = _editedCurrentProfile
+
+  // This stores the state of the modification during the profile edition
+  private val _pictureChangeState = MutableStateFlow(ProfilePictureState.UNCHANGED)
+  open val pictureChangeState: StateFlow<ProfilePictureState> = _pictureChangeState
 
   private val _loading = MutableStateFlow(false)
   open val loading: StateFlow<Boolean> = _loading
@@ -85,6 +92,17 @@ open class ProfilesViewModel(
         throw IllegalArgumentException("Unknown ViewModel class")
       }
     }
+  }
+
+  /** Represents the state of a profile picture change. */
+  enum class ProfilePictureState {
+    UNCHANGED,
+    TO_UPLOAD,
+    TO_DELETE
+  }
+
+  fun setPictureChangeState(state: ProfilePictureState) {
+    _pictureChangeState.value = state
   }
 
   /**
@@ -244,17 +262,12 @@ open class ProfilesViewModel(
    * @param imageData The byte array of the image file to be uploaded.
    * @throws IllegalStateException if the user is not logged in.
    */
-  fun uploadCurrentUserProfilePicture(imageData: ByteArray) {
-    val userId = selectedProfile.value?.uid ?: throw IllegalStateException("User not logged in")
+  fun uploadCurrentUserProfilePicture(imageData: ByteArray, onSuccess: (url: String?) -> Unit) {
+    val userId = _selfProfile.value?.uid ?: throw IllegalStateException("User not logged in")
     ppRepository.uploadProfilePicture(
         userId = userId,
         imageData = imageData,
-        onSuccess = { url ->
-          // _selectedProfile cannot be null here, as it must be set to current user before calling
-          // this function
-          _selectedProfile.update { selected -> selected!!.copy(profilePictureUrl = url) }
-          updateProfile(selectedProfile.value!!)
-        },
+        onSuccess = onSuccess,
         onFailure = { e -> handleError(e) })
   }
 
@@ -269,9 +282,30 @@ open class ProfilesViewModel(
     _tempProfilePictureBitmap.value = bitmap
   }
 
+  /**
+   * Saves the edited profile to the state.
+   *
+   * @param profile The profile to be saved.
+   */
+  fun saveEditedProfile(profile: Profile) {
+    _editedCurrentProfile.value = profile
+  }
+
   /** Clears the temporary profile picture Bitmap. */
   fun clearTempProfilePictureBitmap() {
     _tempProfilePictureBitmap.value = null
+  }
+
+  /** Clears the edited profile from the state. */
+  private fun clearEditedProfile() {
+    _editedCurrentProfile.value = null
+  }
+
+  /** Resets every state related to profile edition. */
+  fun resetProfileEditionState() {
+    clearTempProfilePictureBitmap()
+    clearEditedProfile()
+    _pictureChangeState.value = ProfilePictureState.UNCHANGED
   }
 
   /**
@@ -281,6 +315,38 @@ open class ProfilesViewModel(
    */
   fun processCroppedImage(bitmap: Bitmap) {
     _tempProfilePictureBitmap.value = compressImageIfTooLarge(bitmap)
+    _pictureChangeState.value = ProfilePictureState.TO_UPLOAD
+  }
+
+  fun validateProfileChanges(context: Context) {
+    when (_pictureChangeState.value) {
+      ProfilePictureState.TO_UPLOAD ->
+          validateAndUploadProfilePicture(context) { url ->
+            val newProfile = _editedCurrentProfile.value!!.copy(profilePictureUrl = url)
+            updateProfile(newProfile)
+            _selfProfile.value = newProfile
+            // todo: "_selectedProfile.value = newProfile" needs to be removed when all the other
+            // personal profile views are updated to use the selfProfile instead of the
+            // selectedProfile
+            _selectedProfile.value = newProfile
+
+            resetProfileEditionState()
+          }
+      ProfilePictureState.TO_DELETE ->
+          deleteCurrentUserProfilePicture() {
+            val newProfile = _editedCurrentProfile.value?.copy(profilePictureUrl = null)
+            updateProfile(newProfile!!)
+            _selfProfile.value = newProfile
+            _selectedProfile.value = newProfile // todo: same as above
+            resetProfileEditionState()
+          }
+      else -> {
+        updateProfile(_editedCurrentProfile.value!!)
+        _selfProfile.value = _editedCurrentProfile.value
+        _selectedProfile.value = _editedCurrentProfile.value // todo: same as above
+        resetProfileEditionState()
+      }
+    }
   }
 
   /**
@@ -288,15 +354,12 @@ open class ProfilesViewModel(
    *
    * @param context The context used to show a Toast message in case of failure.
    */
-  fun validateAndUploadProfilePicture(context: Context) {
-
+  fun validateAndUploadProfilePicture(context: Context, onSuccess: (url: String?) -> Unit) {
     val imageData = bitmapToJpgByteArray(tempProfilePictureBitmap.value ?: return)
     if (imageData != null) {
-      uploadCurrentUserProfilePicture(imageData)
-      clearTempProfilePictureBitmap()
+      uploadCurrentUserProfilePicture(imageData, onSuccess)
     } else {
       Toast.makeText(context, "Failed to upload profile picture", Toast.LENGTH_SHORT).show()
-      clearTempProfilePictureBitmap()
     }
   }
 
@@ -305,15 +368,10 @@ open class ProfilesViewModel(
    *
    * @throws IllegalStateException if the user is not logged in.
    */
-  fun deleteCurrentUserProfilePicture() {
+  fun deleteCurrentUserProfilePicture(onSuccess: () -> Unit) {
     ppRepository.deleteProfilePicture(
-        userId = selectedProfile.value?.uid ?: throw IllegalStateException("User not logged in"),
-        onSuccess = {
-          _selectedProfile.update { currentProfile ->
-            currentProfile?.copy(profilePictureUrl = null)
-          }
-          updateProfile(selectedProfile.value!!)
-        },
+        userId = _selfProfile.value?.uid ?: throw IllegalStateException("User not logged in"),
+        onSuccess = onSuccess,
         onFailure = { e -> handleError(e) })
   }
 
