@@ -56,12 +56,12 @@ open class MockProfileRepository : ProfilesRepository {
     onSuccess(Profile.getMockedProfiles())
   }
 
-  override fun getBlockedProfiles(
-      blockedProfiles: List<String>,
+  override fun getMultipleProfiles(
+      uidList: List<String>,
       onSuccess: (List<Profile>) -> Unit,
       onFailure: (Exception) -> Unit
   ) {
-    onSuccess(Profile.getMockedProfiles().filter { it.uid in blockedProfiles })
+    onSuccess(Profile.getMockedProfiles().filter { it.uid in uidList })
   }
 
   override fun getAlreadyMetProfiles(

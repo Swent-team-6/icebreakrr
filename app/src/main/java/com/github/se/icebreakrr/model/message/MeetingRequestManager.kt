@@ -7,6 +7,7 @@ object MeetingRequestManager {
   var meetingRequestViewModel: MeetingRequestViewModel? = null
   var ourName: String? = null
   var ourUid: String? = null
+  var ourFcmToken: String? = null
   /**
    * Update the fcm token stored in the Firebase to keep it up to date
    *
