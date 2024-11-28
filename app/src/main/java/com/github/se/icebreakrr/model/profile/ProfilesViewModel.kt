@@ -154,12 +154,11 @@ open class ProfilesViewModel(
 
                     // Filter by isBlocked
                     !(profile.hasBlocked.contains(currentUserId)) &&
-
                     !(profile.hasBlocked.contains(_selfProfile.value?.uid ?: "")) &&
 
                     // Filter by hasAlreadyMet
                     !(_selfProfile.value?.hasAlreadyMet?.contains(profile.uid) ?: false) &&
-                
+
                     // Filter by how you have reported
                     profile.reports[currentUserId] == null
               }
