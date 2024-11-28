@@ -64,6 +64,14 @@ open class MockProfileRepository : ProfilesRepository {
     onSuccess(Profile.getMockedProfiles().filter { it.uid in blockedProfiles })
   }
 
+  override fun getAlreadyMetProfiles(
+      alreadyMetProfiles: List<String>,
+      onSuccess: (List<Profile>) -> Unit,
+      onFailure: (Exception) -> Unit
+  ) {
+    onSuccess(Profile.getMockedProfiles().filter { it.uid in alreadyMetProfiles })
+  }
+
   // Simulates successful profile addition by calling onSuccess
   override fun addNewProfile(
       profile: Profile,
