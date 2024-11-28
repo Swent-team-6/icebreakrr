@@ -182,9 +182,7 @@ fun IcebreakrrApp(
     firestore: FirebaseFirestore,
     isTesting: Boolean
 ) {
-  val profileViewModel: ProfilesViewModel = viewModel(factory = ProfilesViewModel.Companion.Factory(auth, firestore))
-    generateFakeUsers(46.5407730241468, 6.566150205384817, 300.0, profileViewModel)
-    //deleteFakeUsers(profileViewModel)
+    val profileViewModel: ProfilesViewModel = viewModel(factory = ProfilesViewModel.Companion.Factory(auth, firestore))
   val tagsViewModel: TagsViewModel =
       viewModel(factory = TagsViewModel.Companion.Factory(auth, firestore))
   val filterViewModel: FilterViewModel = viewModel(factory = FilterViewModel.Factory)
