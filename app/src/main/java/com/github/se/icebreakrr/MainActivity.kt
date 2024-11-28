@@ -37,6 +37,7 @@ import com.github.se.icebreakrr.ui.navigation.NavigationActions
 import com.github.se.icebreakrr.ui.navigation.Route
 import com.github.se.icebreakrr.ui.navigation.Screen
 import com.github.se.icebreakrr.ui.profile.HeatMap
+import com.github.se.icebreakrr.ui.profile.InboxProfileViewScreen
 import com.github.se.icebreakrr.ui.profile.OtherProfileView
 import com.github.se.icebreakrr.ui.profile.ProfileEditingScreen
 import com.github.se.icebreakrr.ui.profile.ProfileView
@@ -198,7 +199,8 @@ fun IcebreakrrApp(
       appDataStore,
       locationViewModel,
       startDestination,
-      auth)
+      auth,
+      isTesting)
 }
 
 @Composable
@@ -210,7 +212,8 @@ fun IcebreakrrNavHost(
     appDataStore: AppDataStore,
     locationViewModel: LocationViewModel,
     startDestination: String,
-    auth: FirebaseAuth
+    auth: FirebaseAuth,
+    isTesting: Boolean
 ) {
   val navController = rememberNavController()
   val navigationActions = NavigationActions(navController)
@@ -245,7 +248,12 @@ fun IcebreakrrNavHost(
     ) {
       composable(Screen.AROUND_YOU) {
         AroundYouScreen(
-            navigationActions, profileViewModel, tagsViewModel, filterViewModel, locationViewModel)
+            navigationActions,
+            profileViewModel,
+            tagsViewModel,
+            filterViewModel,
+            locationViewModel,
+            isTesting)
       }
       composable(Screen.OTHER_PROFILE_VIEW + "?userId={userId}") { navBackStackEntry ->
         if (meetingRequestViewModel != null) {
@@ -287,48 +295,62 @@ fun IcebreakrrNavHost(
               "The Meeting Request View Model shouldn't be null : Bad initialization")
         }
       }
-    }
-
-    navigation(
-        startDestination = Screen.PROFILE_EDIT,
-        route = Route.PROFILE_EDIT,
-    ) {
-      composable(Screen.PROFILE_EDIT) {
-        ProfileEditingScreen(navigationActions, tagsViewModel, profileViewModel, auth)
+      composable(Screen.INBOX_PROFILE_VIEW + "?userId={userId}") { navBackStackEntry ->
+        if (meetingRequestViewModel != null) {
+          InboxProfileViewScreen(
+              profileViewModel,
+              navBackStackEntry,
+              navigationActions,
+              tagsViewModel,
+              meetingRequestViewModel,
+              isTesting)
+        } else {
+          throw IllegalStateException(
+              "The Meeting Request View Model shouldn't be null : Bad initialization")
+        }
       }
-    }
 
-    navigation(
-        startDestination = Screen.FILTER,
-        route = Route.FILTER,
-    ) {
-      composable(Screen.FILTER) {
-        FilterScreen(navigationActions, tagsViewModel, filterViewModel, profileViewModel)
+      navigation(
+          startDestination = Screen.PROFILE_EDIT,
+          route = Route.PROFILE_EDIT,
+      ) {
+        composable(Screen.PROFILE_EDIT) {
+          ProfileEditingScreen(navigationActions, tagsViewModel, profileViewModel, auth)
+        }
       }
-    }
 
-    navigation(
-        startDestination = Screen.CROP,
-        route = Route.CROP,
-    ) {
-      composable(Screen.CROP) { ImageCropperScreen(profileViewModel, navigationActions) }
-    }
-
-    navigation(
-        startDestination = Screen.UNBLOCK_PROFILE,
-        route = Route.UNBLOCK_PROFILE,
-    ) {
-      composable(Screen.UNBLOCK_PROFILE) {
-        UnblockProfileScreen(navigationActions, profileViewModel)
+      navigation(
+          startDestination = Screen.FILTER,
+          route = Route.FILTER,
+      ) {
+        composable(Screen.FILTER) {
+          FilterScreen(navigationActions, tagsViewModel, filterViewModel, profileViewModel)
+        }
       }
-    }
 
-    navigation(
-        startDestination = Screen.HEAT_MAP,
-        route = Route.HEAT_MAP,
-    ) {
-      composable(Screen.HEAT_MAP) {
-        HeatMap(navigationActions, profileViewModel, locationViewModel)
+      navigation(
+          startDestination = Screen.CROP,
+          route = Route.CROP,
+      ) {
+        composable(Screen.CROP) { ImageCropperScreen(profileViewModel, navigationActions) }
+      }
+
+      navigation(
+          startDestination = Screen.UNBLOCK_PROFILE,
+          route = Route.UNBLOCK_PROFILE,
+      ) {
+        composable(Screen.UNBLOCK_PROFILE) {
+          UnblockProfileScreen(navigationActions, profileViewModel)
+        }
+      }
+
+      navigation(
+          startDestination = Screen.HEAT_MAP,
+          route = Route.HEAT_MAP,
+      ) {
+        composable(Screen.HEAT_MAP) {
+          HeatMap(navigationActions, profileViewModel, locationViewModel)
+        }
       }
     }
   }

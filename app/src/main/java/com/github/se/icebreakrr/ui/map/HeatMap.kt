@@ -124,10 +124,12 @@ private fun generateFakePoints(): List<WeightedLatLng> {
 fun HeatMap(
     navigationActions: NavigationActions,
     profilesViewModel: ProfilesViewModel,
-    locationViewModel: LocationViewModel
+    locationViewModel: LocationViewModel,
 ) {
+
   val userLocation = locationViewModel.lastKnownLocation.collectAsState()
   val profiles = profilesViewModel.filteredProfiles.collectAsState()
+  val myProfile = profilesViewModel.selfProfile.collectAsState()
 
   Scaffold(
       modifier = Modifier.testTag("heatMapScreen"),
@@ -139,7 +141,8 @@ fun HeatMap(
               }
             },
             tabList = LIST_TOP_LEVEL_DESTINATIONS,
-            selectedItem = Route.HEAT_MAP)
+            selectedItem = Route.HEAT_MAP,
+            notificationCount = myProfile.value?.meetingRequestInbox?.size ?: 0)
       }) { paddingValues ->
         if (userLocation.value == null) {
           // Show loading box when location is not available

@@ -16,7 +16,8 @@ class MeetingRequestService : FirebaseMessagingService() {
 
   private val MSG_CHANNEL_ID = "message_channel_id"
   private val MSG_CHANNEL_NAME = "channel_message"
-  private val MSG_RESPONSE = "Meeting response from : "
+  private val MSG_RESPONSE_ACCEPTED = " accepted your meeting request!"
+  private val MSG_RESPONSE_REJECTED = " rejected your meeting request :("
   private val MSG_CONFIRMATION = "Meeting confirmation from : "
   private val NOTIFICATION_ID = 0
 
@@ -27,11 +28,10 @@ class MeetingRequestService : FirebaseMessagingService() {
    */
   override fun onMessageReceived(remoteMessage: RemoteMessage) {
     super.onMessageReceived(remoteMessage)
-    println(remoteMessage.data)
     val senderUid = remoteMessage.data["senderUID"] ?: "null"
     val message = remoteMessage.data["message"] ?: "null"
     val title = remoteMessage.data["title"] ?: "null"
-    val context: Context = this
+
     when (title) {
       "MEETING REQUEST" -> {
         MeetingRequestManager.meetingRequestViewModel?.addToMeetingRequestInbox(senderUid, message)
@@ -43,11 +43,17 @@ class MeetingRequestService : FirebaseMessagingService() {
         val senderToken = remoteMessage.data["senderToken"] ?: "null"
 
         MeetingRequestManager.meetingRequestViewModel?.removeFromMeetingRequestSent(senderUid)
-        showNotification(context, MSG_RESPONSE + name, message)
         if (accepted) {
+          showNotification(name + MSG_RESPONSE_ACCEPTED, "")
           MeetingRequestManager.meetingRequestViewModel?.setMeetingConfirmation(
               targetToken = senderToken,
               newMessage = "The meeting with ${MeetingRequestManager.ourName} is confirmed !")
+          MeetingRequestManager.meetingRequestViewModel?.sendMeetingConfirmation()
+        } else {
+          showNotification(name + MSG_RESPONSE_REJECTED, "")
+          MeetingRequestManager.meetingRequestViewModel?.setMeetingConfirmation(
+              targetToken = senderToken,
+              newMessage = "The meeting with ${MeetingRequestManager.ourName} is cancelled !")
           MeetingRequestManager.meetingRequestViewModel?.sendMeetingConfirmation()
         }
       }
@@ -56,7 +62,7 @@ class MeetingRequestService : FirebaseMessagingService() {
         val hashedLocation = remoteMessage.data["location"] ?: "null"
         val geoHash = GeoHash.fromGeohashString(hashedLocation)
         val location = geoHash.boundingBox.center
-        showNotification(context, MSG_CONFIRMATION + name, location.toString())
+        showNotification(MSG_CONFIRMATION + name, location.toString())
       }
     }
   }
@@ -77,9 +83,8 @@ class MeetingRequestService : FirebaseMessagingService() {
    * @param title : the title of the notification
    * @param message : the message of our notification
    */
-  private fun showNotification(context: Context, title: String, message: String) {
-    val notificationManager =
-        context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+  private fun showNotification(title: String, message: String) {
+    val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
     val channel =
         NotificationChannel(
                 MSG_CHANNEL_ID, MSG_CHANNEL_NAME, NotificationManager.IMPORTANCE_DEFAULT)
