@@ -1,6 +1,7 @@
 package com.github.se.icebreakrr.ui.sections
 
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onFirst
@@ -18,6 +19,7 @@ import com.github.se.icebreakrr.model.profile.Profile
 import com.github.se.icebreakrr.model.profile.ProfilePicRepository
 import com.github.se.icebreakrr.model.profile.ProfilesRepository
 import com.github.se.icebreakrr.model.profile.ProfilesViewModel
+import com.github.se.icebreakrr.model.sort.SortViewModel
 import com.github.se.icebreakrr.model.tags.TagsViewModel
 import com.github.se.icebreakrr.ui.navigation.NavigationActions
 import com.github.se.icebreakrr.ui.navigation.Route
@@ -45,6 +47,7 @@ class AroundYouScreenTest {
   private lateinit var mockPPRepository: ProfilePicRepository
   private lateinit var profilesViewModel: ProfilesViewModel
 
+  private lateinit var sortViewModel: SortViewModel
   private lateinit var mockLocationService: ILocationService
   private lateinit var mockLocationRepository: LocationRepository
   private lateinit var mockPermissionManager: IPermissionManager
@@ -61,6 +64,7 @@ class AroundYouScreenTest {
     profilesViewModel =
         ProfilesViewModel(mockProfilesRepository, mockPPRepository, mock(FirebaseAuth::class.java))
 
+    sortViewModel = SortViewModel(profilesViewModel)
     mockLocationService = mock(ILocationService::class.java)
     mockLocationRepository = mock(LocationRepository::class.java)
     mockPermissionManager = mock(IPermissionManager::class.java)
@@ -93,6 +97,7 @@ class AroundYouScreenTest {
                       mock(FirebaseAuth::class.java), mock(FirebaseFirestore::class.java))),
           viewModel(factory = FilterViewModel.Factory),
           locationViewModel,
+          sortViewModel,
           true)
     }
 
@@ -193,6 +198,35 @@ class AroundYouScreenTest {
     composeTestRule.onNodeWithTag("filterButton").assertIsDisplayed()
     composeTestRule.onNodeWithTag("filterButton").performClick()
     verify(navigationActions).navigateTo(screen = Screen.FILTER)
+  }
+
+  @Test
+  fun sortDropdownDisplaysCorrectly() {
+    // Check initial display
+    composeTestRule
+        .onNodeWithTag("SortOptionsDropdown_Selected")
+        .assertExists()
+        .assertIsDisplayed()
+        .assertTextContains("Sort by: Distance")
+
+    // Click to expand the dropdown
+    composeTestRule.onNodeWithTag("SortOptionsDropdown_Selected").performClick()
+
+    // Check that the options are displayed
+    composeTestRule
+        .onNodeWithTag("SortOptionsDropdown_Option_AGE")
+        .assertExists()
+        .assertIsDisplayed()
+    composeTestRule
+        .onNodeWithTag("SortOptionsDropdown_Option_COMMON_TAGS")
+        .assertExists()
+        .assertIsDisplayed()
+
+    // Select an option
+    composeTestRule.onNodeWithTag("SortOptionsDropdown_Option_AGE").performClick()
+
+    // Check that the selected option is updated
+    composeTestRule.onNodeWithTag("SortOptionsDropdown_Selected").assertTextContains("Sort by: Age")
   }
 
   // Helper function to create a mock profile
