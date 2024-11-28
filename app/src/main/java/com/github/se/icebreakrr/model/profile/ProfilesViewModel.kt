@@ -20,7 +20,6 @@ import java.io.ByteArrayOutputStream
 import java.io.InputStream
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 
 open class ProfilesViewModel(
@@ -396,7 +395,7 @@ open class ProfilesViewModel(
         onFailure = { e -> handleError(e) })
   }
 
-  /** Get the geoHash or our profile */
+  /** Get the geoHash of our profile */
   fun getSelfGeoHash(): String? {
     return selfProfile.value?.geohash
   }

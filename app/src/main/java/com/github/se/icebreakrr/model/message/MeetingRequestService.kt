@@ -27,22 +27,23 @@ class MeetingRequestService : FirebaseMessagingService() {
    */
   override fun onMessageReceived(remoteMessage: RemoteMessage) {
     super.onMessageReceived(remoteMessage)
+    println(remoteMessage.data)
     val senderUid = remoteMessage.data["senderUID"] ?: "null"
     val message = remoteMessage.data["message"] ?: "null"
     val title = remoteMessage.data["title"] ?: "null"
+    val context: Context = this
     when (title) {
       "MEETING REQUEST" -> {
         MeetingRequestManager.meetingRequestViewModel?.addToMeetingRequestInbox(senderUid, message)
         MeetingRequestManager.meetingRequestViewModel?.updateInboxOfMessages()
       }
       "MEETING RESPONSE" -> {
-
         val name = remoteMessage.data["senderName"] ?: "null"
         val accepted = remoteMessage.data["accepted"]?.toBoolean() ?: false
         val senderToken = remoteMessage.data["senderToken"] ?: "null"
 
         MeetingRequestManager.meetingRequestViewModel?.removeFromMeetingRequestSent(senderUid)
-        showNotification(MSG_RESPONSE + name, message)
+        showNotification(context, MSG_RESPONSE + name, message)
         if (accepted) {
           MeetingRequestManager.meetingRequestViewModel?.setMeetingConfirmation(
               targetToken = senderToken,
@@ -55,7 +56,7 @@ class MeetingRequestService : FirebaseMessagingService() {
         val hashedLocation = remoteMessage.data["location"] ?: "null"
         val geoHash = GeoHash.fromGeohashString(hashedLocation)
         val location = geoHash.boundingBox.center
-        showNotification(MSG_CONFIRMATION + name, location.toString())
+        showNotification(context, MSG_CONFIRMATION + name, location.toString())
       }
     }
   }
@@ -76,8 +77,9 @@ class MeetingRequestService : FirebaseMessagingService() {
    * @param title : the title of the notification
    * @param message : the message of our notification
    */
-  private fun showNotification(title: String, message: String) {
-    val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+  private fun showNotification(context: Context, title: String, message: String) {
+    val notificationManager =
+        context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
     val channel =
         NotificationChannel(
                 MSG_CHANNEL_ID, MSG_CHANNEL_NAME, NotificationManager.IMPORTANCE_DEFAULT)
