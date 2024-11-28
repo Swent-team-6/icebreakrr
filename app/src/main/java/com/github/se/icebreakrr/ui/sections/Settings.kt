@@ -149,7 +149,13 @@ fun SettingsScreen(
           Spacer(modifier = Modifier.padding(vertical = BUTTON_PADDING))
 
           Button(
-              onClick = { navigationActions.navigateTo(Screen.ALREADY_MET) },
+              onClick = {
+                if (isNetworkAvailableWithContext(context) || isTesting) {
+                  navigationActions.navigateTo(Screen.ALREADY_MET)
+                } else {
+                  Toast.makeText(context, R.string.No_Internet_Toast, Toast.LENGTH_SHORT).show()
+                }
+              },
               colors =
                   ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary),
               modifier = Modifier.fillMaxWidth().testTag("alreadyMetButton")) {
