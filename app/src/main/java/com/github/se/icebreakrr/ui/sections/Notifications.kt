@@ -61,7 +61,8 @@ fun NotificationScreen(
               }
             },
             tabList = LIST_TOP_LEVEL_DESTINATIONS,
-            selectedItem = Route.NOTIFICATIONS)
+            selectedItem = Route.NOTIFICATIONS,
+            notificationCount = cardList.value.size)
       },
       content = { innerPadding ->
         LazyColumn(

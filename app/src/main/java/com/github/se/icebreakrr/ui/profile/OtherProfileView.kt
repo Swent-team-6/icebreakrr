@@ -85,7 +85,16 @@ fun OtherProfileView(
             // 2 sections one for the profile image with overlay and
             // one for the information section
             ProfileHeader(profile, navigationActions, false, profilesViewModel, false) {
-              sendRequest = true
+              if (!profile.meetingRequestSent.contains(meetingRequestViewModel.senderUID)) {
+                sendRequest = true
+              } else {
+                Toast.makeText(
+                        context,
+                        "this user has already send you a meeting request!",
+                        Toast.LENGTH_SHORT)
+                    .show()
+                sendRequest = false
+              }
             }
             InfoSection(profile, tagsViewModel)
 
@@ -126,10 +135,8 @@ fun OtherProfileView(
                   onSendClick = {
                     meetingRequestViewModel.onMeetingRequestChange(writtenMessage)
                     meetingRequestViewModel.onLocalTokenChange(profile.fcmToken ?: "null")
-                    if (!profile.meetingRequestSent.contains(profile.uid)) {
-                      meetingRequestViewModel.sendMeetingRequest()
-                      meetingRequestViewModel.addToMeetingRequestSent(profile.uid)
-                    }
+                    meetingRequestViewModel.sendMeetingRequest()
+                    meetingRequestViewModel.addToMeetingRequestSent(profile.uid)
                     writtenMessage = ""
                     navigationActions.goBack()
                   },

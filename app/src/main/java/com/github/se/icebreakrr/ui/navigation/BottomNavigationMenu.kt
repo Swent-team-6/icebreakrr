@@ -1,13 +1,20 @@
 package com.github.se.icebreakrr.ui.navigation
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.Badge
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
@@ -32,7 +39,8 @@ import com.github.se.icebreakrr.ui.theme.IceBreakrrBlue
 fun BottomNavigationMenu(
     onTabSelect: (TopLevelDestination) -> Unit,
     tabList: List<TopLevelDestination>,
-    selectedItem: String
+    selectedItem: String,
+    notificationCount: Int
 ) {
   NavigationBar(
       modifier = Modifier.fillMaxWidth().height(60.dp).testTag("bottomNavigationMenu"),
@@ -40,7 +48,14 @@ fun BottomNavigationMenu(
       contentColor = Color.Gray) {
         tabList.forEach { tab ->
           NavigationBarItem(
-              icon = { Icon(tab.icon, contentDescription = stringResource(id = tab.textId)) },
+              icon = {
+                Box {
+                  Icon(tab.icon, contentDescription = stringResource(id = tab.textId))
+                  if (tab.route == Route.NOTIFICATIONS && notificationCount > 0) {
+                    Badge(count = notificationCount)
+                  }
+                }
+              },
               label = { Text(stringResource(id = tab.textId)) },
               selected = tab.route == selectedItem,
               onClick = { onTabSelect(tab) },
@@ -53,5 +68,21 @@ fun BottomNavigationMenu(
                   ),
               modifier = Modifier.testTag("navItem_${tab.textId}"))
         }
+      }
+}
+
+@Composable
+fun Badge(count: Int) {
+  Box(
+      modifier =
+          Modifier.offset(x = 10.dp, y = (-5).dp) // Manually position the badge
+              .size(17.dp) // Badge size
+              .background(Color.Red, shape = CircleShape),
+      contentAlignment = Alignment.Center // Center the text within the badge
+      ) {
+        Text(
+            text = count.toString(),
+            color = Color.White,
+            style = androidx.compose.material3.MaterialTheme.typography.labelSmall)
       }
 }

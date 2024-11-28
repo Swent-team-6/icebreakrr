@@ -32,9 +32,10 @@ class MeetingRequestService : FirebaseMessagingService() {
     val senderUid = remoteMessage.data["senderUID"] ?: "null"
     val message = remoteMessage.data["message"] ?: "null"
     val title = remoteMessage.data["title"] ?: "null"
+
     when (title) {
       "MEETING REQUEST" -> {
-        Log.d("TESTEST", "nice job bro")
+        Log.d("TESTEST", "received meeting request")
         MeetingRequestManager.meetingRequestViewModel?.addToMeetingRequestInbox(senderUid, message)
         MeetingRequestManager.meetingRequestViewModel?.updateInboxOfMessages()
       }
@@ -43,8 +44,6 @@ class MeetingRequestService : FirebaseMessagingService() {
         val name = remoteMessage.data["senderName"] ?: "null"
         val accepted = remoteMessage.data["accepted"]?.toBoolean() ?: false
         val senderToken = remoteMessage.data["senderToken"] ?: "null"
-
-        Log.d("TESTEST", "nice job bro")
 
         MeetingRequestManager.meetingRequestViewModel?.removeFromMeetingRequestSent(senderUid)
         if (accepted) {

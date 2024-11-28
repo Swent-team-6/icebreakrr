@@ -84,8 +84,18 @@ fun InboxProfileViewScreen(
         Spacer(modifier = Modifier.height(10.dp))
         AcceptDeclineRequest(
             message ?: "",
-            { acceptDeclineCode(meetingRequestViewModel, navigationActions, profile.uid, true) },
-            { acceptDeclineCode(meetingRequestViewModel, navigationActions, profile.uid, false) })
+            {
+              acceptDeclineCode(
+                  meetingRequestViewModel, navigationActions, profile.uid, true, profile.fcmToken!!)
+            },
+            {
+              acceptDeclineCode(
+                  meetingRequestViewModel,
+                  navigationActions,
+                  profile.uid,
+                  false,
+                  profile.fcmToken!!)
+            })
         InfoSection(profile = profile, tagsViewModel = tagsViewModel)
       }
     }
@@ -96,9 +106,10 @@ fun acceptDeclineCode(
     meetingRequestViewModel: MeetingRequestViewModel,
     navigationActions: NavigationActions,
     uid: String,
-    accepted: Boolean
+    accepted: Boolean,
+    fcm: String
 ) {
-  meetingRequestViewModel.setMeetingResponse(uid, "accepting/decline request", accepted)
+  meetingRequestViewModel.setMeetingResponse(fcm, "accepting/decline request", accepted)
   meetingRequestViewModel.sendMeetingResponse()
   meetingRequestViewModel.removeFromMeetingRequestInbox(uid)
   meetingRequestViewModel.updateInboxOfMessages()

@@ -69,6 +69,7 @@ fun UnblockProfileScreen(
   val blockedProfiles = profilesViewModel.profiles.collectAsState()
   val isLoading = profilesViewModel.loading.collectAsState()
   val isConnected = profilesViewModel.isConnected.collectAsState()
+  val inboxItems = profilesViewModel.inboxItems.collectAsState()
 
   var profileToUnblock by remember { mutableStateOf<Profile?>(null) }
 
@@ -123,7 +124,8 @@ fun UnblockProfileScreen(
               }
             },
             tabList = LIST_TOP_LEVEL_DESTINATIONS,
-            selectedItem = Route.UNBLOCK_PROFILE)
+            selectedItem = Route.UNBLOCK_PROFILE,
+            notificationCount = inboxItems.value.size)
       },
       topBar = {
         TopBar(stringResource(R.string.blocked_profiles), true) { navigationActions.goBack() }
