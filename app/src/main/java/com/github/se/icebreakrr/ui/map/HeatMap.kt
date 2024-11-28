@@ -1,5 +1,6 @@
 package com.github.se.icebreakrr.ui.profile
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -40,10 +41,12 @@ import com.google.maps.android.compose.rememberCameraPositionState
 import com.google.maps.android.heatmaps.Gradient
 import com.google.maps.android.heatmaps.HeatmapTileProvider
 import com.google.maps.android.heatmaps.WeightedLatLng
+import android.location.Location
 
 private val DEFAULT_LOCATION = LatLng(46.5197, 6.6323) // EPFL coordinates
 private const val DEFAULT_ZOOM = 15f
 private const val RADIUS = 10000
+private const val MOVED_RELOAD = 200
 
 // Define custom gradient colors (from blue to red)
 private val GRADIENT_COLORS =
@@ -68,22 +71,6 @@ private val GRADIENT_START_POINTS =
 
 val gradient = Gradient(GRADIENT_COLORS, GRADIENT_START_POINTS)
 
-/** This function generates fake points around lausanne to showcase the heatmap display */
-private fun generateFakePoints(centerLat: Double, centerLon: Double, radius: Double, numberOfPoints: Int = 50): List<WeightedLatLng> {
-    val fakePoints = mutableListOf<WeightedLatLng>()
-
-    for (i in 0 until numberOfPoints) { // Generate the specified number of fake points
-        val randomLat = centerLat + (Math.random() - 0.5) * (radius / 111000) // Convert radius from meters to degrees
-        val randomLon = centerLon + (Math.random() - 0.5) * (radius / (111000 * Math.cos(Math.toRadians(centerLat)))) // Adjust for latitude
-
-        // Add the generated point with a random weight
-        fakePoints.add(WeightedLatLng(LatLng(randomLat, randomLon), Math.random() * 10)) // Random weight between 0 and 10
-    }
-
-    return fakePoints
-}
-
-
 @Composable
 fun HeatMap(
     navigationActions: NavigationActions,
@@ -93,21 +80,9 @@ fun HeatMap(
     val userLocation = locationViewModel.lastKnownLocation.collectAsState()
     val profiles = profilesViewModel.filteredProfiles.collectAsState()
 
-    // State to hold the heatmap provider
     var heatmapProvider by remember { mutableStateOf<HeatmapTileProvider?>(null) }
-    var isMapLoaded by remember { mutableStateOf(false) } // Track if the map is loaded
-
-    // Define the coordinates for generating fake points
-    val locations = listOf(
-        Pair(46.51805886663674, 6.637429806298338), // Location 1 Lausanne
-        Pair(47.38787303565691, 8.523686394824663), // Location 2 Zurich
-        Pair(46.004976622692936, 8.95195211094253)  // Location 3 Lugano
-    )
-
-    // Generate fake points around the specified locations
-    val allFakePoints = locations.flatMap { (lat, lon) ->
-        generateFakePoints(lat, lon, radius = 5000.0, numberOfPoints = 20) // Adjust radius and number of points as needed
-    }
+    var isMapLoaded by remember { mutableStateOf(false) }
+    var lastCameraPosition by remember { mutableStateOf<LatLng?>(null) }
 
     Scaffold(
         modifier = Modifier.testTag("heatMapScreen"),
@@ -132,18 +107,11 @@ fun HeatMap(
                     .testTag("loadingBox"),
                 contentAlignment = Alignment.Center
             ) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
-                ) {
-                    CircularProgressIndicator()
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Text("Loading location...", textAlign = TextAlign.Center)
-                }
+                CircularProgressIndicator()
             }
         } else {
             val location = userLocation.value!!
-            val mapLocation = remember(location) { LatLng(location.latitude, location.longitude) }
+            val mapLocation = LatLng(location.latitude, location.longitude)
             val cameraPositionState = rememberCameraPositionState {
                 position = CameraPosition.fromLatLngZoom(mapLocation, DEFAULT_ZOOM)
             }
@@ -151,33 +119,39 @@ fun HeatMap(
             // Update heatmap when profiles change
             LaunchedEffect(profiles.value) {
                 val weightedLocations = profiles.value.mapNotNull { profile ->
-                    profile.location?.let { location ->
-                        WeightedLatLng(LatLng(location.latitude, location.longitude), 1.0)
+                    profile.location?.let { loc ->
+                        WeightedLatLng(LatLng(loc.latitude, loc.longitude), 1.0)
                     }
-                } + allFakePoints // Combine with fake points
+                }
 
-                heatmapProvider = HeatmapTileProvider.Builder()
-                    .weightedData(weightedLocations)
-                    .radius(50)
-                    .opacity(0.8)
-                    .gradient(gradient)
-                    .maxIntensity(15.0)
-                    .build()
+                // Check if weightedLocations is not empty before updating the heatmap
+                if (weightedLocations.isNotEmpty()) {
+                    heatmapProvider = HeatmapTileProvider.Builder()
+                        .weightedData(weightedLocations)
+                        .radius(50)
+                        .opacity(0.8)
+                        .gradient(gradient)
+                        .maxIntensity(15.0)
+                        .build()
+                } else {
+                    // Optionally handle the case where there are no valid locations
+                    Log.w("HeatMap", "No valid locations to display on the heatmap.")
+                }
             }
 
             GoogleMap(
                 modifier = Modifier.fillMaxSize().padding(paddingValues).testTag("googleMap"),
                 cameraPositionState = cameraPositionState,
                 onMapLoaded = {
-                    isMapLoaded = true // Set map loaded state to true
+                    isMapLoaded = true
                     val center = cameraPositionState.position.target
                     profilesViewModel.getFilteredProfilesInRadius(
                         center = GeoPoint(center.latitude, center.longitude),
-                        radiusInMeters = RADIUS // Adjust radius as needed
+                        radiusInMeters = RADIUS
                     )
+                    lastCameraPosition = center
                 }
             ) {
-                // Only show heatmap if we have data
                 heatmapProvider?.let { provider ->
                     TileOverlay(tileProvider = provider, transparency = 0.0f)
                 }
@@ -187,10 +161,42 @@ fun HeatMap(
             LaunchedEffect(cameraPositionState.position) {
                 if (isMapLoaded) {
                     val center = cameraPositionState.position.target
-                    profilesViewModel.getFilteredProfilesInRadius(
-                        center = GeoPoint(center.latitude, center.longitude),
-                        radiusInMeters = RADIUS // Adjust radius as needed
-                    )
+                    val lastPosition = lastCameraPosition ?: center
+
+                    // Ensure lastPosition is valid before creating Location objects
+                    if (lastPosition.latitude.isNaN() || lastPosition.longitude.isNaN()) {
+                        return@LaunchedEffect
+                    }
+
+                    // Create Location objects for distance calculation
+                    val currentLocation = Location("").apply {
+                        latitude = center.latitude
+                        longitude = center.longitude
+                    }
+
+                    val previousLocation = Location("").apply {
+                        latitude = lastPosition.latitude
+                        longitude = lastPosition.longitude
+                    }
+
+                    // Calculate the distance moved
+                    val distanceMoved = currentLocation.distanceTo(previousLocation)
+
+                    // Check if the distance moved is greater than the current radius
+                    if (distanceMoved >= MOVED_RELOAD) {
+                        // Validate inputs before calling the function
+                        if (!center.latitude.isNaN() && !center.longitude.isNaN() && RADIUS > 0) {
+                            try {
+                                profilesViewModel.getFilteredProfilesInRadius(
+                                    center = GeoPoint(center.latitude, center.longitude),
+                                    radiusInMeters = RADIUS
+                                )
+                                lastCameraPosition = center // Update last camera position
+                            } catch (e: Exception) {
+                                Log.e("HeatMap", "Error fetching profiles: ${e.message}")
+                            }
+                        }
+                    }
                 }
             }
         }
