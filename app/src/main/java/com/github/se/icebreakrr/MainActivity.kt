@@ -49,8 +49,6 @@ import com.github.se.icebreakrr.ui.sections.UnblockProfileScreen
 import com.github.se.icebreakrr.ui.theme.SampleAppTheme
 import com.github.se.icebreakrr.utils.NetworkUtils
 import com.github.se.icebreakrr.utils.PermissionManager
-import com.github.se.icebreakrr.utils.deleteFakeUsers
-import com.github.se.icebreakrr.utils.generateFakeUsers
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.firebase.FirebaseApp
@@ -182,7 +180,8 @@ fun IcebreakrrApp(
     firestore: FirebaseFirestore,
     isTesting: Boolean
 ) {
-    val profileViewModel: ProfilesViewModel = viewModel(factory = ProfilesViewModel.Companion.Factory(auth, firestore))
+  val profileViewModel: ProfilesViewModel =
+      viewModel(factory = ProfilesViewModel.Companion.Factory(auth, firestore))
   val tagsViewModel: TagsViewModel =
       viewModel(factory = TagsViewModel.Companion.Factory(auth, firestore))
   val filterViewModel: FilterViewModel = viewModel(factory = FilterViewModel.Factory)

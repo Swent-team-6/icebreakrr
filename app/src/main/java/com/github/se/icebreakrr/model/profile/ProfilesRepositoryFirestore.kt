@@ -12,10 +12,6 @@ import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.GeoPoint
 import com.google.firebase.firestore.Source
-import kotlin.math.atan2
-import kotlin.math.cos
-import kotlin.math.sin
-import kotlin.math.sqrt
 import kotlinx.coroutines.flow.MutableStateFlow
 
 class ProfilesRepositoryFirestore(
@@ -385,14 +381,16 @@ class ProfilesRepositoryFirestore(
    * @return Distance between the points in meters.
    */
   private fun calculateDistance(point1: GeoPoint, point2: GeoPoint): Double {
-    val location1 = Location("").apply {
-      latitude = point1.latitude
-      longitude = point1.longitude
-    }
-    val location2 = Location("").apply {
-      latitude = point2.latitude
-      longitude = point2.longitude
-    }
+    val location1 =
+        Location("").apply {
+          latitude = point1.latitude
+          longitude = point1.longitude
+        }
+    val location2 =
+        Location("").apply {
+          latitude = point2.latitude
+          longitude = point2.longitude
+        }
     return location1.distanceTo(location2).toDouble() // Returns distance in meters
   }
 }

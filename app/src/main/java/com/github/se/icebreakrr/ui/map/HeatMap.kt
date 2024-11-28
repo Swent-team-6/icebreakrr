@@ -1,17 +1,13 @@
 package com.github.se.icebreakrr.ui.profile
 
+import android.location.Location
 import android.util.Log
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -23,9 +19,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
-import com.github.se.icebreakrr.R
 import com.github.se.icebreakrr.model.location.LocationViewModel
 import com.github.se.icebreakrr.model.profile.ProfilesViewModel
 import com.github.se.icebreakrr.ui.navigation.BottomNavigationMenu
@@ -41,7 +34,6 @@ import com.google.maps.android.compose.rememberCameraPositionState
 import com.google.maps.android.heatmaps.Gradient
 import com.google.maps.android.heatmaps.HeatmapTileProvider
 import com.google.maps.android.heatmaps.WeightedLatLng
-import android.location.Location
 
 private val DEFAULT_LOCATION = LatLng(46.5197, 6.6323) // EPFL coordinates
 private const val DEFAULT_ZOOM = 15f
@@ -77,128 +69,126 @@ fun HeatMap(
     profilesViewModel: ProfilesViewModel,
     locationViewModel: LocationViewModel
 ) {
-    val userLocation = locationViewModel.lastKnownLocation.collectAsState()
-    val profiles = profilesViewModel.filteredProfiles.collectAsState()
+  val userLocation = locationViewModel.lastKnownLocation.collectAsState()
+  val profiles = profilesViewModel.filteredProfiles.collectAsState()
 
-    var heatmapProvider by remember { mutableStateOf<HeatmapTileProvider?>(null) }
-    var isMapLoaded by remember { mutableStateOf(false) }
-    var lastCameraPosition by remember { mutableStateOf<LatLng?>(null) }
+  var heatmapProvider by remember { mutableStateOf<HeatmapTileProvider?>(null) }
+  var isMapLoaded by remember { mutableStateOf(false) }
+  var lastCameraPosition by remember { mutableStateOf<LatLng?>(null) }
 
-    Scaffold(
-        modifier = Modifier.testTag("heatMapScreen"),
-        bottomBar = {
-            BottomNavigationMenu(
-                onTabSelect = { route ->
-                    if (route.route != Route.HEAT_MAP) {
-                        navigationActions.navigateTo(route)
-                    }
-                },
-                tabList = LIST_TOP_LEVEL_DESTINATIONS,
-                selectedItem = Route.HEAT_MAP
-            )
-        }
-    ) { paddingValues ->
+  Scaffold(
+      modifier = Modifier.testTag("heatMapScreen"),
+      bottomBar = {
+        BottomNavigationMenu(
+            onTabSelect = { route ->
+              if (route.route != Route.HEAT_MAP) {
+                navigationActions.navigateTo(route)
+              }
+            },
+            tabList = LIST_TOP_LEVEL_DESTINATIONS,
+            selectedItem = Route.HEAT_MAP)
+      }) { paddingValues ->
         if (userLocation.value == null) {
-            // Show loading box when location is not available
-            Box(
-                modifier = Modifier.fillMaxSize()
-                    .padding(paddingValues)
-                    .background(Color.LightGray)
-                    .testTag("loadingBox"),
-                contentAlignment = Alignment.Center
-            ) {
+          // Show loading box when location is not available
+          Box(
+              modifier =
+                  Modifier.fillMaxSize()
+                      .padding(paddingValues)
+                      .background(Color.LightGray)
+                      .testTag("loadingBox"),
+              contentAlignment = Alignment.Center) {
                 CircularProgressIndicator()
-            }
+              }
         } else {
-            val location = userLocation.value!!
-            val mapLocation = LatLng(location.latitude, location.longitude)
-            val cameraPositionState = rememberCameraPositionState {
-                position = CameraPosition.fromLatLngZoom(mapLocation, DEFAULT_ZOOM)
-            }
+          val location = userLocation.value!!
+          val mapLocation = LatLng(location.latitude, location.longitude)
+          val cameraPositionState = rememberCameraPositionState {
+            position = CameraPosition.fromLatLngZoom(mapLocation, DEFAULT_ZOOM)
+          }
 
-            // Update heatmap when profiles change
-            LaunchedEffect(profiles.value) {
-                val weightedLocations = profiles.value.mapNotNull { profile ->
-                    profile.location?.let { loc ->
-                        WeightedLatLng(LatLng(loc.latitude, loc.longitude), 1.0)
-                    }
+          // Update heatmap when profiles change
+          LaunchedEffect(profiles.value) {
+            val weightedLocations =
+                profiles.value.mapNotNull { profile ->
+                  profile.location?.let { loc ->
+                    WeightedLatLng(LatLng(loc.latitude, loc.longitude), 1.0)
+                  }
                 }
 
-                // Check if weightedLocations is not empty before updating the heatmap
-                if (weightedLocations.isNotEmpty()) {
-                    heatmapProvider = HeatmapTileProvider.Builder()
-                        .weightedData(weightedLocations)
-                        .radius(50)
-                        .opacity(0.8)
-                        .gradient(gradient)
-                        .maxIntensity(15.0)
-                        .build()
-                } else {
-                    // Optionally handle the case where there are no valid locations
-                    Log.w("HeatMap", "No valid locations to display on the heatmap.")
-                }
+            // Check if weightedLocations is not empty before updating the heatmap
+            if (weightedLocations.isNotEmpty()) {
+              heatmapProvider =
+                  HeatmapTileProvider.Builder()
+                      .weightedData(weightedLocations)
+                      .radius(50)
+                      .opacity(0.8)
+                      .gradient(gradient)
+                      .maxIntensity(15.0)
+                      .build()
+            } else {
+              // Optionally handle the case where there are no valid locations
+              Log.w("HeatMap", "No valid locations to display on the heatmap.")
             }
+          }
 
-            GoogleMap(
-                modifier = Modifier.fillMaxSize().padding(paddingValues).testTag("googleMap"),
-                cameraPositionState = cameraPositionState,
-                onMapLoaded = {
-                    isMapLoaded = true
-                    val center = cameraPositionState.position.target
+          GoogleMap(
+              modifier = Modifier.fillMaxSize().padding(paddingValues).testTag("googleMap"),
+              cameraPositionState = cameraPositionState,
+              onMapLoaded = {
+                isMapLoaded = true
+                val center = cameraPositionState.position.target
+                profilesViewModel.getFilteredProfilesInRadius(
+                    center = GeoPoint(center.latitude, center.longitude), radiusInMeters = RADIUS)
+                lastCameraPosition = center
+              }) {
+                heatmapProvider?.let { provider ->
+                  TileOverlay(tileProvider = provider, transparency = 0.0f)
+                }
+              }
+
+          // Fetch profiles when the camera position changes
+          LaunchedEffect(cameraPositionState.position) {
+            if (isMapLoaded) {
+              val center = cameraPositionState.position.target
+              val lastPosition = lastCameraPosition ?: center
+
+              // Ensure lastPosition is valid before creating Location objects
+              if (lastPosition.latitude.isNaN() || lastPosition.longitude.isNaN()) {
+                return@LaunchedEffect
+              }
+
+              // Create Location objects for distance calculation
+              val currentLocation =
+                  Location("").apply {
+                    latitude = center.latitude
+                    longitude = center.longitude
+                  }
+
+              val previousLocation =
+                  Location("").apply {
+                    latitude = lastPosition.latitude
+                    longitude = lastPosition.longitude
+                  }
+
+              // Calculate the distance moved
+              val distanceMoved = currentLocation.distanceTo(previousLocation)
+
+              // Check if the distance moved is greater than the current radius
+              if (distanceMoved >= MOVED_RELOAD) {
+                // Validate inputs before calling the function
+                if (!center.latitude.isNaN() && !center.longitude.isNaN() && RADIUS > 0) {
+                  try {
                     profilesViewModel.getFilteredProfilesInRadius(
                         center = GeoPoint(center.latitude, center.longitude),
-                        radiusInMeters = RADIUS
-                    )
-                    lastCameraPosition = center
+                        radiusInMeters = RADIUS)
+                    lastCameraPosition = center // Update last camera position
+                  } catch (e: Exception) {
+                    Log.e("HeatMap", "Error fetching profiles: ${e.message}")
+                  }
                 }
-            ) {
-                heatmapProvider?.let { provider ->
-                    TileOverlay(tileProvider = provider, transparency = 0.0f)
-                }
+              }
             }
-
-            // Fetch profiles when the camera position changes
-            LaunchedEffect(cameraPositionState.position) {
-                if (isMapLoaded) {
-                    val center = cameraPositionState.position.target
-                    val lastPosition = lastCameraPosition ?: center
-
-                    // Ensure lastPosition is valid before creating Location objects
-                    if (lastPosition.latitude.isNaN() || lastPosition.longitude.isNaN()) {
-                        return@LaunchedEffect
-                    }
-
-                    // Create Location objects for distance calculation
-                    val currentLocation = Location("").apply {
-                        latitude = center.latitude
-                        longitude = center.longitude
-                    }
-
-                    val previousLocation = Location("").apply {
-                        latitude = lastPosition.latitude
-                        longitude = lastPosition.longitude
-                    }
-
-                    // Calculate the distance moved
-                    val distanceMoved = currentLocation.distanceTo(previousLocation)
-
-                    // Check if the distance moved is greater than the current radius
-                    if (distanceMoved >= MOVED_RELOAD) {
-                        // Validate inputs before calling the function
-                        if (!center.latitude.isNaN() && !center.longitude.isNaN() && RADIUS > 0) {
-                            try {
-                                profilesViewModel.getFilteredProfilesInRadius(
-                                    center = GeoPoint(center.latitude, center.longitude),
-                                    radiusInMeters = RADIUS
-                                )
-                                lastCameraPosition = center // Update last camera position
-                            } catch (e: Exception) {
-                                Log.e("HeatMap", "Error fetching profiles: ${e.message}")
-                            }
-                        }
-                    }
-                }
-            }
+          }
         }
-    }
+      }
 }
