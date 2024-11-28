@@ -70,7 +70,7 @@ fun ProfileEditingScreen(
   val padding = screenWidth * 0.02f
   val textSize = screenWidth * 0.08f
 
-  val profilePictureSize = screenWidth * 0.25f
+  val profilePictureSize = screenWidth * 0.40f
   val catchphraseHeight = screenHeight * 0.10f
   val descriptionHeight = screenHeight * 0.16f
 
@@ -174,6 +174,9 @@ fun ProfileEditingScreen(
                     },
                     onSelectionFailure = {
                       Toast.makeText(context, "Failed to select image", Toast.LENGTH_SHORT).show()
+                    },
+                    onDeletion = {
+                      // todo
                     })
 
                 Spacer(modifier = Modifier.height(padding))
