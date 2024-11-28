@@ -103,6 +103,7 @@ fun ProfileEditingScreen(
 
   fun updateProfile() {
     profilesViewModel.updateProfile(getCopyOfProfile())
+    profilesViewModel.getSelfProfile()
   }
 
   if (isLoading) {
