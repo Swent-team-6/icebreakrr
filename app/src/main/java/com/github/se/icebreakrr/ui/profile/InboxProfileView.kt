@@ -46,6 +46,26 @@ import com.github.se.icebreakrr.ui.sections.shared.InfoSection
 import com.github.se.icebreakrr.ui.sections.shared.MessageWhenLoadingProfile
 import com.github.se.icebreakrr.ui.sections.shared.ProfileHeader
 
+private const val ACCEPT_DECLINE_ELEVATION = 4
+private const val ACCEPT_DECLINE_ROUNDER_CORNER_SHAPE = 23
+private const val ACCEPT_DECLINE_SHADOW_COLOR = 0x40000000
+private const val ACCEPT_DECLINE_BOX_COLOR = 0xFFEAEEFF
+private const val ACCEPT_DECLINE_BOX_HEIGHT = 115
+private const val ACCEPT_DECLINE_BOX_WIDTH_FACTOR = 0.9
+private const val ACCEPT_DECLINE_PADDING_START = 10.5
+private const val ACCEPT_DECLINE_PADDING_END = 14.5
+private const val ACCEPT_DECLINE_PADDING_TOP_BOTTOM = 8
+private const val REQUEST_MESSAGE_FONT_SIZE = 20
+private const val REQUEST_MESSAGE_LINE_HEIGHT = 20
+private const val REQUEST_MESSAGE_FONT_WEIGHT = 500
+private const val REQUEST_MESSAGE_LETTER_SPACING = 0.2
+private const val SPACER_HEIGHT = 10
+private const val ACCEPT_DECLINE_ICON_BUTTON_PADDING = 12
+private const val ACCEPT_DECLINE_ICON_BUTTON_SIZE = 48
+private const val ACCEPT_DECLINE_ICON_BUTTON_ROUNDED = 100
+private const val ACCEPT_DECLINE_ICON_BUTTON_COLOR = 0xFF65558F
+
+
 @Composable
 fun InboxProfileViewScreen(
     profilesViewModel: ProfilesViewModel,
@@ -84,7 +104,7 @@ fun InboxProfileViewScreen(
             profilesViewModel = profilesViewModel,
             profileInNotification = true,
             onEditClick = {})
-        Spacer(modifier = Modifier.height(10.dp))
+        Spacer(modifier = Modifier.height(SPACER_HEIGHT.dp))
         AcceptDeclineRequest(
             message ?: "",
             {
@@ -120,9 +140,8 @@ fun acceptDeclineCode(
 }
 
 @Composable
-@Preview
 fun AcceptDeclineRequest(
-    requestMessage: String = "Hey, do you want to meet in front of the coop?",
+    requestMessage: String,
     onAcceptClick: () -> Unit = {},
     onDeclineClick: () -> Unit = {},
 ) {
@@ -133,40 +152,40 @@ fun AcceptDeclineRequest(
   Box(
       modifier =
           Modifier.shadow(
-                  elevation = 4.dp,
-                  shape = RoundedCornerShape(size = 23.dp), // Match shadow to the rounded corners
-                  spotColor = Color(0x40000000),
-                  ambientColor = Color(0x40000000))
-              .clip(RoundedCornerShape(size = 23.dp)) // Enforce clipping to the rounded shape
-              .background(Color(0xFFEAEEFF)) // Background color inside the rounded corners
-              .height(115.dp)
-              .width((screenWidth.value * 0.9).dp)
-              .padding(start = 10.5.dp, end = 14.5.dp, top = 8.dp, bottom = 8.dp)
+                  elevation = ACCEPT_DECLINE_ELEVATION.dp,
+                  shape = RoundedCornerShape(size = ACCEPT_DECLINE_ROUNDER_CORNER_SHAPE.dp),
+                  spotColor = Color(ACCEPT_DECLINE_SHADOW_COLOR),
+                  ambientColor = Color(ACCEPT_DECLINE_SHADOW_COLOR))
+              .clip(RoundedCornerShape(size = ACCEPT_DECLINE_ROUNDER_CORNER_SHAPE.dp))
+              .background(Color(ACCEPT_DECLINE_BOX_COLOR))
+              .height(ACCEPT_DECLINE_BOX_HEIGHT.dp)
+              .width((screenWidth.value * ACCEPT_DECLINE_BOX_WIDTH_FACTOR).dp)
+              .padding(start = ACCEPT_DECLINE_PADDING_START.dp, end = ACCEPT_DECLINE_PADDING_END.dp, top = ACCEPT_DECLINE_PADDING_TOP_BOTTOM.dp, bottom = ACCEPT_DECLINE_PADDING_TOP_BOTTOM.dp)
               .testTag("Accept/DeclineBox")) {
         Column(
-            modifier = Modifier.fillMaxSize(), // Remove redundant background in Column
+            modifier = Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.Start) {
               Text(
                   text = requestMessage,
                   style =
                       TextStyle(
-                          fontSize = 20.sp,
-                          lineHeight = 20.sp,
-                          fontWeight = FontWeight(500),
-                          color = Color(0xFF000000),
-                          letterSpacing = 0.2.sp,
+                          fontSize = REQUEST_MESSAGE_FONT_SIZE.sp,
+                          lineHeight = REQUEST_MESSAGE_LINE_HEIGHT.sp,
+                          fontWeight = FontWeight(REQUEST_MESSAGE_FONT_WEIGHT),
+                          color = Color.Black,
+                          letterSpacing = REQUEST_MESSAGE_LETTER_SPACING.sp,
                       ),
                   modifier = Modifier.testTag("RequestMessage"))
-              Spacer(modifier = Modifier.height(10.dp))
+              Spacer(modifier = Modifier.height(SPACER_HEIGHT.dp))
               Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
                 IconButton(
                     onClick = onAcceptClick,
                     modifier =
-                        Modifier.padding(12.dp)
-                            .size(48.dp) // Use size for brevity
-                            .clip(RoundedCornerShape(100.dp)) // Enforce round shape
-                            .background(Color(0xFF65558F))
+                        Modifier.padding(ACCEPT_DECLINE_ICON_BUTTON_PADDING.dp)
+                            .size(ACCEPT_DECLINE_ICON_BUTTON_SIZE.dp)
+                            .clip(RoundedCornerShape(ACCEPT_DECLINE_ICON_BUTTON_ROUNDED.dp))
+                            .background(Color(ACCEPT_DECLINE_ICON_BUTTON_COLOR))
                             .testTag("acceptButton")) {
                       Icon(
                           imageVector = Icons.Outlined.Check,
@@ -176,10 +195,10 @@ fun AcceptDeclineRequest(
                 IconButton(
                     onClick = onDeclineClick,
                     modifier =
-                        Modifier.padding(12.dp)
-                            .size(48.dp)
-                            .clip(RoundedCornerShape(100.dp)) // Enforce round shape
-                            .background(Color(0xFF65558F))
+                        Modifier.padding(ACCEPT_DECLINE_ICON_BUTTON_PADDING.dp)
+                            .size(ACCEPT_DECLINE_ICON_BUTTON_SIZE.dp)
+                            .clip(RoundedCornerShape(ACCEPT_DECLINE_ICON_BUTTON_ROUNDED.dp))
+                            .background(Color(ACCEPT_DECLINE_ICON_BUTTON_COLOR))
                             .testTag("declineButton")) {
                       Icon(
                           imageVector = Icons.Outlined.Close,
