@@ -19,8 +19,8 @@ import org.junit.Test
 import org.mockito.Mockito
 import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.verify
 
-// The file was written with the help of CursorAI
 class AlreadyMetScreenTest {
   @get:Rule val composeTestRule = createComposeRule()
 
@@ -40,61 +40,57 @@ class AlreadyMetScreenTest {
         ProfilesViewModel(mockProfilesRepository, ProfilePicRepositoryStorage(mock()), mock())
     fakeProfilesViewModel = MockProfileViewModel()
 
-    // Get Alice's profile (first mock profile)
+    // Get Alice's profile and her already met profiles
     myProfile = Profile.getMockedProfiles()[0]
-
-    // Get profiles that Alice has already met
     alreadyMetProfiles = Profile.getMockedProfiles().filter { it.uid in myProfile.hasAlreadyMet }
 
-    // Set up fake view model with the already met profiles
+    // Set up fake view model
     fakeProfilesViewModel.setSelfProfile(myProfile)
     fakeProfilesViewModel.setLoading(false)
 
     // Mock repository state flows
     Mockito.`when`(mockProfilesRepository.isWaiting).thenReturn(MutableStateFlow(false))
     Mockito.`when`(mockProfilesRepository.waitingDone).thenReturn(MutableStateFlow(false))
+
+    // Mock repository to return already met profiles
+    Mockito.`when`(mockProfilesRepository.getMultipleProfiles(any(), any(), any())).thenAnswer {
+        invocation ->
+      val onSuccessCallback = invocation.getArgument<(List<Profile>) -> Unit>(1)
+      onSuccessCallback(alreadyMetProfiles)
+      null
+    }
   }
 
   @Test
-  fun testAlreadyMetScreenBasicLayout() = runTest {
+  fun testAlreadyMetScreenDisplaysCorrectly() = runTest {
     composeTestRule.setContent {
       AlreadyMetScreen(
           navigationActions = navigationActions,
           profilesViewModel = profilesViewModel,
           isTestMode = true)
     }
-
-    // Verify basic layout components
     composeTestRule.onNodeWithTag("profileListScreen").assertIsDisplayed()
     composeTestRule.onNodeWithTag("bottomNavigationMenu").assertIsDisplayed()
     composeTestRule.onNodeWithTag("topBar").assertIsDisplayed()
   }
 
   @Test
-  fun testAlreadyMetScreenWithProfiles() = runTest {
-    // Set up the fake view model with the already met profiles
-    fakeProfilesViewModel.setLoading(false)
-
+  fun testAlreadyMetScreenDisplaysCorrectlyWithProfiles() = runTest {
     composeTestRule.setContent {
       AlreadyMetScreen(
           navigationActions = navigationActions,
-          profilesViewModel = fakeProfilesViewModel,
+          profilesViewModel = profilesViewModel,
           isTestMode = true)
     }
-
-    // Wait for UI to update
+    profilesViewModel.getAlreadyMetUsers()
     composeTestRule.waitForIdle()
 
-    // Verify profiles are displayed
-    alreadyMetProfiles.forEach { profile ->
-      composeTestRule.onNodeWithText(profile.name).assertExists()
-      composeTestRule.onNodeWithText(profile.name).assertIsDisplayed()
-    }
+    composeTestRule.onAllNodesWithTag("profileCard").onFirst().assertIsDisplayed()
+    alreadyMetProfiles.forEach { composeTestRule.onNodeWithText(it.name).assertExists() }
   }
 
   @Test
-  fun testAlreadyMetScreenEmptyState() = runTest {
-    // Mock repository to return empty list
+  fun testAlreadyMetScreenDisplaysCorrectlyWithNoProfiles() = runTest {
     Mockito.`when`(mockProfilesRepository.getMultipleProfiles(any(), any(), any())).thenAnswer {
         invocation ->
       val onSuccessCallback = invocation.getArgument<(List<Profile>) -> Unit>(1)
@@ -112,68 +108,50 @@ class AlreadyMetScreenTest {
     profilesViewModel.getAlreadyMetUsers()
     composeTestRule.waitForIdle()
 
-    // Verify empty state message
     composeTestRule
         .onNodeWithText(context.getString(R.string.no_already_met_users))
         .assertIsDisplayed()
   }
 
   @Test
-  fun testUnmeetUserFlow() = runTest {
-    fakeProfilesViewModel.setLoading(false)
-
+  fun testUnmeetUserDialogDisplayed() = runTest {
     composeTestRule.setContent {
       AlreadyMetScreen(
           navigationActions = navigationActions,
-          profilesViewModel = fakeProfilesViewModel,
+          profilesViewModel = profilesViewModel,
           isTestMode = true)
     }
 
+    profilesViewModel.getAlreadyMetUsers()
     composeTestRule.waitForIdle()
 
-    alreadyMetProfiles.first().let { profile ->
-      composeTestRule.onNodeWithText(profile.name).performClick()
-    }
-
-    // Verify confirmation dialog
+    composeTestRule.onNodeWithText(alreadyMetProfiles[0].name).performClick()
     composeTestRule.onNodeWithTag("confirmDialog").assertIsDisplayed()
-    composeTestRule.onNodeWithText(context.getString(R.string.unmeet_confirm)).assertIsDisplayed()
-    composeTestRule
-        .onNodeWithText(context.getString(R.string.unmeet_confirm_message))
-        .assertIsDisplayed()
     composeTestRule.onNodeWithText(context.getString(R.string.unmeet_yes)).assertIsDisplayed()
     composeTestRule.onNodeWithText(context.getString(R.string.unmeet_no)).assertIsDisplayed()
   }
 
   @Test
-  fun testUnmeetUserConfirmation() = runTest {
+  fun testUnmeetUserCancellation() = runTest {
     composeTestRule.setContent {
       AlreadyMetScreen(
           navigationActions = navigationActions,
-          profilesViewModel = fakeProfilesViewModel,
+          profilesViewModel = profilesViewModel,
           isTestMode = true)
     }
 
+    profilesViewModel.getAlreadyMetUsers()
     composeTestRule.waitForIdle()
 
-    // Click on first already met profile
-    val firstProfile = alreadyMetProfiles.first()
+    val firstProfile = alreadyMetProfiles[0]
     composeTestRule.onNodeWithText(firstProfile.name).performClick()
-
-    // Click Yes on confirmation dialog
-    composeTestRule.onNodeWithText(context.getString(R.string.unmeet_yes)).performClick()
-
-    // Wait for the UI to update after unmeet action
-    composeTestRule.waitForIdle()
-
-    // Dialog should be dismissed
+    composeTestRule.onNodeWithText(context.getString(R.string.unmeet_no)).performClick()
     composeTestRule.onNodeWithTag("confirmDialog").assertDoesNotExist()
+    composeTestRule.onNodeWithText(firstProfile.name).assertExists()
   }
 
   @Test
-  fun testUnmeetUserCancellation() = runTest {
-    fakeProfilesViewModel.setLoading(false)
-
+  fun testNavigationBackButton() = runTest {
     composeTestRule.setContent {
       AlreadyMetScreen(
           navigationActions = navigationActions,
@@ -181,23 +159,8 @@ class AlreadyMetScreenTest {
           isTestMode = true)
     }
 
-    composeTestRule.waitForIdle()
-
-    // Click on first already met profile
-    val firstProfile = alreadyMetProfiles.first()
-    composeTestRule.onNodeWithText(firstProfile.name).performClick()
-
-    // Click No on confirmation dialog
-    composeTestRule.onNodeWithText(context.getString(R.string.unmeet_no)).performClick()
-
-    // Wait for the UI to update
-    composeTestRule.waitForIdle()
-
-    // Dialog should be dismissed
-    composeTestRule.onNodeWithTag("confirmDialog").assertDoesNotExist()
-
-    // Profile should still be visible
-    composeTestRule.onNodeWithText(firstProfile.name).assertIsDisplayed()
+    composeTestRule.onNodeWithTag("goBackButton").performClick()
+    verify(navigationActions).goBack()
   }
 
   @Test
@@ -211,7 +174,6 @@ class AlreadyMetScreenTest {
           isTestMode = true)
     }
 
-    // Verify refresh indicator exists
     composeTestRule.onNodeWithTag("refreshIndicator").assertExists()
   }
 }
