@@ -51,11 +51,13 @@ fun generateFakeUsers(
 
     // Generate random latitude and longitude within the specified radius
     val randomLat =
-        centerLat + (Random.nextDouble() - 0.5) * (radius / RADIUS_DIVISOR) // Adjust radius for sparsity
+        centerLat +
+            (Random.nextDouble() - 0.5) * (radius / RADIUS_DIVISOR) // Adjust radius for sparsity
     val randomLon =
         centerLon +
             (Random.nextDouble() - 0.5) *
-                (radius / (RADIUS_DIVISOR * Math.cos(Math.toRadians(centerLat)))) // Adjust for latitude
+                (radius /
+                    (RADIUS_DIVISOR * Math.cos(Math.toRadians(centerLat)))) // Adjust for latitude
 
     // Generate geohash for the random location
     val geohash = GeoHashUtils.encode(randomLat, randomLon, precision = GEOHASH_PRECISION)
