@@ -8,6 +8,8 @@ import android.util.Log
 import android.widget.Toast
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import com.github.se.icebreakrr.model.profile.ProfilesViewModel.ProfilePictureState.TO_DELETE
+import com.github.se.icebreakrr.model.profile.ProfilesViewModel.ProfilePictureState.UNCHANGED
 import com.github.se.icebreakrr.ui.sections.DEFAULT_RADIUS
 import com.github.se.icebreakrr.ui.sections.DEFAULT_USER_LATITUDE
 import com.github.se.icebreakrr.ui.sections.DEFAULT_USER_LONGITUDE

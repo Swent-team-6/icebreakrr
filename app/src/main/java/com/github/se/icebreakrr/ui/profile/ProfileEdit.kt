@@ -110,10 +110,6 @@ fun ProfileEditingScreen(
         catchPhrase = catchphrase.text, description = description.text, tags = selectedTags)
   }
 
-  fun updateProfile() {
-    profilesViewModel.updateProfile(getEditedProfile())
-  }
-
   if (isLoading) {
     Box(
         modifier = Modifier.fillMaxSize().background(Color.LightGray).testTag("loadingBox"),
@@ -176,7 +172,16 @@ fun ProfileEditingScreen(
                       Toast.makeText(context, "Failed to select image", Toast.LENGTH_SHORT).show()
                     },
                     onDeletion = {
-                      // todo
+                        when (pictureChangeState) {
+                          UNCHANGED -> { // delete current profile picture
+                              if (user.profilePictureUrl != null) {
+                                  profilesViewModel.setPictureChangeState(TO_DELETE)
+                                  isModified = true
+                              }
+                          }
+                            // else cancel changes
+                          else -> profilesViewModel.setPictureChangeState(UNCHANGED)
+                        }
                     })
 
                 Spacer(modifier = Modifier.height(padding))
