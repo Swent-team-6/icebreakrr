@@ -1,5 +1,6 @@
 package com.github.se.icebreakrr.utils
 
+import android.util.Log
 import com.github.se.icebreakrr.model.profile.Gender
 import com.github.se.icebreakrr.model.profile.Profile
 import com.github.se.icebreakrr.model.profile.ProfilesRepository
@@ -9,11 +10,14 @@ import com.google.firebase.firestore.GeoPoint
 import kotlin.random.Random
 
 // Predefined user IDs
-private val predefinedUserIds = listOf(
+val predefinedUserIds = listOf(
     "usertest1", "usertest2", "usertest3", "usertest4", 
     "usertest5", "usertest6", "usertest7", "usertest8", 
     "usertest9", "usertest10", "usertest11", "usertest12", 
-    "usertest13", "usertest14", "usertest15"
+    "usertest13", "usertest14", "usertest15", "usertest16",
+    "usertest17", "usertest18", "usertest19", "usertest20",
+    "usertest21", "usertest22", "usertest23", "usertest24",
+    "usertest25"
 )
 
 // Function to generate fake users around a specific location and add them to the database
@@ -21,8 +25,8 @@ fun generateFakeUsers(centerLat: Double, centerLon: Double, radius: Double, prof
     for (userId in predefinedUserIds) {
 
         // Generate random latitude and longitude within the specified radius
-        val randomLat = centerLat + (Random.nextDouble() - 0.5) * (radius / 111000) // Convert radius from meters to degrees
-        val randomLon = centerLon + (Random.nextDouble() - 0.5) * (radius / (111000 * Math.cos(Math.toRadians(centerLat)))) // Adjust for latitude
+        val randomLat = centerLat + (Random.nextDouble() - 0.5) * (radius / 50000) // Adjust radius for sparsity
+        val randomLon = centerLon + (Random.nextDouble() - 0.5) * (radius / (50000 * Math.cos(Math.toRadians(centerLat)))) // Adjust for latitude
 
         // Generate geohash for the random location
         val geohash = GeoHashUtils.encode(randomLat, randomLon, precision = 7)
