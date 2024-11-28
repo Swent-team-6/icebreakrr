@@ -104,7 +104,6 @@ fun ProfileEditingScreen(
   val selectedTags = tagsViewModel.filteringTags.collectAsState().value
   val tagsSuggestions = tagsViewModel.tagsSuggestions.collectAsState()
   val stringQuery = remember { mutableStateOf("") }
-
   fun getEditedProfile(): Profile {
     return user.copy(
         catchPhrase = catchphrase.text, description = description.text, tags = selectedTags)

@@ -103,6 +103,11 @@ open class ProfilesViewModel(
     TO_DELETE
   }
 
+  /**
+   * Updates the profile picture change state.
+   *
+   * @param state The new state of the profile picture change.
+   */
   fun setPictureChangeState(state: ProfilePictureState) {
     _pictureChangeState.value = state
   }
@@ -261,8 +266,8 @@ open class ProfilesViewModel(
   /**
    * Uploads the current user's profile picture to the remote storage system.
    *
-   * @param imageData The byte array of the image file to be uploaded.
-   * @throws IllegalStateException if the user is not logged in.
+   * @param imageData The byte array representing the image data.
+   * @param onSuccess A callback function that is invoked when the upload is successful.
    */
   fun uploadCurrentUserProfilePicture(imageData: ByteArray, onSuccess: (url: String?) -> Unit) {
     val userId = _selfProfile.value?.uid ?: throw IllegalStateException("User not logged in")
@@ -320,6 +325,11 @@ open class ProfilesViewModel(
     _pictureChangeState.value = ProfilePictureState.TO_UPLOAD
   }
 
+  /**
+   * Validates the profile changes and updates both the image and the profile repository.
+   *
+   * @param context The context used to show a Toast message in case of failure.
+   */
   fun validateProfileChanges(context: Context) {
     when (_pictureChangeState.value) {
       ProfilePictureState.TO_UPLOAD ->
@@ -334,7 +344,7 @@ open class ProfilesViewModel(
 
             resetProfileEditionState()
           }
-      ProfilePictureState.TO_DELETE ->
+      TO_DELETE ->
           deleteCurrentUserProfilePicture() {
             val newProfile = _editedCurrentProfile.value?.copy(profilePictureUrl = null)
             updateProfile(newProfile!!)
@@ -352,9 +362,10 @@ open class ProfilesViewModel(
   }
 
   /**
-   * Validates and uploads the profile picture if a temporary profile picture Bitmap exists.
+   * Validates and uploads the profile picture to the remote storage system.
    *
    * @param context The context used to show a Toast message in case of failure.
+   * @param onSuccess A callback function that is invoked when the upload is successful.
    */
   fun validateAndUploadProfilePicture(context: Context, onSuccess: (url: String?) -> Unit) {
     val imageData = bitmapToJpgByteArray(tempProfilePictureBitmap.value ?: return)
@@ -368,7 +379,7 @@ open class ProfilesViewModel(
   /**
    * Deletes the current user's profile picture from the remote storage system.
    *
-   * @throws IllegalStateException if the user is not logged in.
+   * @param onSuccess A callback function that is invoked when the deletion is successful.
    */
   fun deleteCurrentUserProfilePicture(onSuccess: () -> Unit) {
     ppRepository.deleteProfilePicture(
