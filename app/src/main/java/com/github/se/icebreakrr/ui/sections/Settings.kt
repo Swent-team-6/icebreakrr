@@ -80,6 +80,7 @@ fun SettingsScreen(
     appDataStore: AppDataStore,
     auth: FirebaseAuth
 ) {
+
   val context = LocalContext.current
   val scrollState = rememberScrollState()
   val coroutineScope = rememberCoroutineScope()
@@ -92,6 +93,7 @@ fun SettingsScreen(
   val isLoading = profilesViewModel.loading.collectAsState(initial = true).value
   val profile = profilesViewModel.selectedProfile.collectAsState().value
   val isTesting = LocalIsTesting.current
+  val myProfile = profilesViewModel.selfProfile.collectAsState()
 
   Scaffold(
       topBar = { TopBar("Settings") },
@@ -104,7 +106,8 @@ fun SettingsScreen(
               }
             },
             tabList = LIST_TOP_LEVEL_DESTINATIONS,
-            selectedItem = Route.SETTINGS)
+            selectedItem = Route.SETTINGS,
+            notificationCount = myProfile.value?.meetingRequestInbox?.size ?: 0)
       },
   ) { innerPadding ->
     Column(

@@ -92,7 +92,8 @@ fun ProfileListScreen(
     onConfirmAction: (() -> Unit)? = null,
     selectedProfile: Profile? = null,
     periodicRefreshAction: (() -> Unit)? = null,
-    isTestMode: Boolean = false
+    isTestMode: Boolean = false,
+    notificationCount: Int
 ) {
   LaunchedEffect(isConnected.value) {
     if (!isTestMode && !isNetworkAvailable()) {
@@ -137,7 +138,8 @@ fun ProfileListScreen(
               }
             },
             tabList = LIST_TOP_LEVEL_DESTINATIONS,
-            selectedItem = Route.UNBLOCK_PROFILE)
+            selectedItem = Route.UNBLOCK_PROFILE,
+            notificationCount = notificationCount)
       },
       topBar = { TopBar(title, true) { navigationActions.goBack() } },
       content = { innerPadding ->

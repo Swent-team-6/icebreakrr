@@ -35,6 +35,7 @@ fun AlreadyMetScreen(
   val alreadyMetProfiles = profilesViewModel.profiles.collectAsState()
   val isLoading = profilesViewModel.loading.collectAsState()
   val isConnected = profilesViewModel.isConnected.collectAsState()
+  val inboxItems = profilesViewModel.selfProfile.collectAsState()
   val context = LocalContext.current
 
   var profileToUnmeet by remember { mutableStateOf<Profile?>(null) }
@@ -71,5 +72,6 @@ fun AlreadyMetScreen(
       },
       selectedProfile = profileToUnmeet,
       periodicRefreshAction = { profilesViewModel.getAlreadyMetUsers() },
-      isTestMode = isTestMode)
+      isTestMode = isTestMode,
+      notificationCount = inboxItems.value?.meetingRequestInbox?.size ?: 0)
 }
