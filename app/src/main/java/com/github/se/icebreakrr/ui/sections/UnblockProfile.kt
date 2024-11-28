@@ -42,13 +42,14 @@ fun UnblockProfileScreen(
       profilesViewModel = profilesViewModel,
       title = stringResource(R.string.blocked_profiles),
       emptyMessage = stringResource(R.string.no_blocked_users),
-      onProfileClick = { profile ->
+      onProfileClickConfirm = { profile ->
         if (isNetworkAvailableWithContext(context)) {
           profileToUnblock = profile
         } else {
           showNoInternetToast(context)
         }
       },
+      onProfileClickDismiss = { profileToUnblock = null },
       profiles = blockedProfiles,
       isLoading = isLoading,
       isConnected = isConnected,

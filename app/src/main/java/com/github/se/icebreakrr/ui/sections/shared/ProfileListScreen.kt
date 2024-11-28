@@ -51,7 +51,8 @@ fun ProfileListScreen(
     profilesViewModel: ProfilesViewModel,
     title: String,
     emptyMessage: String,
-    onProfileClick: (Profile) -> Unit,
+    onProfileClickConfirm: (Profile) -> Unit,
+    onProfileClickDismiss: (Profile) -> Unit,
     profiles: State<List<Profile>>,
     isLoading: State<Boolean>,
     isConnected: State<Boolean>,
@@ -82,7 +83,7 @@ fun ProfileListScreen(
   if (showConfirmDialog && selectedProfile != null) {
     AlertDialog(
         modifier = Modifier.testTag("confirmDialog"),
-        onDismissRequest = { onProfileClick(selectedProfile) }, // Dismiss dialog
+        onDismissRequest = { onProfileClickDismiss(selectedProfile) }, // Dismiss dialog
         title = { Text(confirmDialogTitle ?: "") },
         text = { Text(confirmDialogMessage ?: "") },
         confirmButton = {
@@ -90,7 +91,7 @@ fun ProfileListScreen(
         },
         dismissButton = {
           TextButton(
-              onClick = { onProfileClick(selectedProfile) } // Dismiss dialog
+              onClick = { onProfileClickDismiss(selectedProfile) } // Dismiss dialog
               ) {
                 Text(dismissButtonText ?: "")
               }
@@ -131,7 +132,7 @@ fun ProfileListScreen(
                         items(profiles.value.size) { index: Int ->
                           ProfileCard(
                               profile = profiles.value[index],
-                              onclick = { onProfileClick(profiles.value[index]) })
+                              onclick = { onProfileClickConfirm(profiles.value[index]) })
                         }
                       } else {
                         item {

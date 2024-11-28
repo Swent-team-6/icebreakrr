@@ -44,13 +44,14 @@ fun AlreadyMetScreen(
       profilesViewModel = profilesViewModel,
       title = stringResource(R.string.already_met),
       emptyMessage = stringResource(R.string.no_already_met_users),
-      onProfileClick = { profile ->
+      onProfileClickConfirm = { profile ->
         if (isNetworkAvailableWithContext(context)) {
           profileToUnmeet = profile
         } else {
           showNoInternetToast(context)
         }
       },
+      onProfileClickDismiss = { profileToUnmeet = null },
       profiles = alreadyMetProfiles,
       isLoading = isLoading,
       isConnected = isConnected,
