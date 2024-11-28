@@ -26,8 +26,7 @@ class LocationViewModel(
     get() = _isUpdatingLocation
 
   private val _lastKnownLocation = MutableStateFlow<GeoPoint?>(null)
-  val lastKnownLocation: StateFlow<GeoPoint?>
-    get() = _lastKnownLocation
+  val lastKnownLocation: StateFlow<GeoPoint?> = _lastKnownLocation
 
   private var permissionObserverJob: Job? = null
 

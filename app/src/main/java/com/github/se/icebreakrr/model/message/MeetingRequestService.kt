@@ -3,7 +3,6 @@ package com.github.se.icebreakrr.model.message
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
-import android.util.Log
 import androidx.core.app.NotificationCompat
 import ch.hsr.geohash.GeoHash
 import com.github.se.icebreakrr.R
@@ -35,7 +34,6 @@ class MeetingRequestService : FirebaseMessagingService() {
 
     when (title) {
       "MEETING REQUEST" -> {
-        Log.d("TESTEST", "received meeting request")
         MeetingRequestManager.meetingRequestViewModel?.addToMeetingRequestInbox(senderUid, message)
         MeetingRequestManager.meetingRequestViewModel?.updateInboxOfMessages()
       }

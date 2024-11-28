@@ -374,7 +374,6 @@ open class ProfilesViewModel(
 
   /** Get the inbox of our user */
   fun getInboxOfSelfProfile() {
-    Log.d("TESTEST", "CALL getInboxOfSelfProfile")
     val inboxUidList = selfProfile.value?.meetingRequestInbox
     if (inboxUidList != null) {
       val uidsMessageList = inboxUidList.toList()
