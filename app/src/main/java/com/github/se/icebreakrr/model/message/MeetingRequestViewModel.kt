@@ -113,7 +113,6 @@ class MeetingRequestViewModel(
    */
   fun setMeetingConfirmation(targetToken: String, newMessage: String) {
     val location = profilesViewModel.getSelfGeoHash()
-    println("location : " + location)
     if (location != null) {
       meetingConfirmationState =
           meetingConfirmationState.copy(

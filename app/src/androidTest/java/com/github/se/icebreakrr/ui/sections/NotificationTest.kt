@@ -5,6 +5,7 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
+import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -156,7 +157,7 @@ class NotificationTest {
 
   @Test
   fun InboxListOneElement() {
-    val updatedProfile = profile1.copy(meetingRequestInbox = mapOf(("Jean" to "hello !")))
+    val updatedProfile = profile1.copy(meetingRequestInbox = mapOf((profile2.name to "hello !")))
     `when`(mockProfilesRepository.getProfileByUid(eq("1"), any(), any())).thenAnswer {
       val onSuccess = it.getArgument<(Profile) -> Unit>(1)
       onSuccess(updatedProfile)
@@ -173,6 +174,7 @@ class NotificationTest {
     composeTestRule.onNodeWithTag("bottomNavigationMenu").assertIsDisplayed()
     composeTestRule.onNodeWithTag("profileCard").assertIsDisplayed()
     composeTestRule.onNodeWithTag("notificationFirstText").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("profileCard").performClick()
   }
 
   @Test
@@ -180,7 +182,7 @@ class NotificationTest {
     val updatedProfile =
         profile1.copy(
             meetingRequestInbox =
-                mapOf(("Jean D'eau" to "hello !"), ("Clint O'Neil" to "Hey dude !")))
+                mapOf((profile2.name to "hello !"), (profile3.name to "Hey dude !")))
     `when`(mockProfilesRepository.getProfileByUid(eq("1"), any(), any())).thenAnswer {
       val onSuccess = it.getArgument<(Profile) -> Unit>(1)
       onSuccess(updatedProfile)
@@ -197,6 +199,7 @@ class NotificationTest {
     composeTestRule.onNodeWithTag("bottomNavigationMenu").assertIsDisplayed()
     composeTestRule.onAllNodesWithTag("profileCard").assertCountEquals(2)
     composeTestRule.onNodeWithTag("notificationFirstText").assertIsDisplayed()
+    composeTestRule.onAllNodesWithTag("profileCard").onFirst().performClick()
   }
 
   @Test
