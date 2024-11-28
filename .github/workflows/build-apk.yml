@@ -1,13 +1,9 @@
 name: Build and Upload Artifacts
 
 on:
-  workflow_dispatch:
-    inputs:
-      branch:
-        description: 'Branch to build'
-        required: true
-        default: 'main'
-        type: string
+  push:
+    branches:
+      - main
 
 jobs:
   build:
@@ -15,8 +11,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-        with:
-          ref: ${{ github.event.inputs.branch }}
 
       - name: Set up JDK 17
         uses: actions/setup-java@v2
