@@ -82,6 +82,11 @@ jobs:
       - name: Create and populate google-services.json
         run: echo ${{ secrets.GOOGLE_SERVICES }} | base64 --decode > ./app/google-services.json
 
+      # Create and populate local.properties file
+      - name: Create and populate local.properties
+        run: |
+          echo "MAPS_API_KEY=${{ secrets.MAPS_API_KEY }}" > ./local.properties
+
       # Create keystore/debug.keystore file
       - name: Create file debug keystore
         run: |

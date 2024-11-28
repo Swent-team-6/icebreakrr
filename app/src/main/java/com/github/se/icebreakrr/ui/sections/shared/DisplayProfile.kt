@@ -313,8 +313,10 @@ fun ProfileHeader(
                                   }
                               TextButton(
                                   onClick = {
+                                    profilesViewModel.reportUser(selectedReportType!!)
                                     blockReportModal = false
                                     showReportOptions = false
+                                    navigationActions.goBack()
                                     Toast.makeText(
                                             context,
                                             context.getString(
