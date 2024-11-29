@@ -271,7 +271,8 @@ fun IcebreakrrNavHost(
             locationViewModel,
             sortViewModel,
             permissionManager,
-            appDataStore)
+            appDataStore,
+            isTesting)
       }
       composable(Screen.OTHER_PROFILE_VIEW + "?userId={userId}") { navBackStackEntry ->
         if (meetingRequestViewModel != null) {
