@@ -37,6 +37,7 @@ import com.github.se.icebreakrr.authentication.logout
 import com.github.se.icebreakrr.config.LocalIsTesting
 import com.github.se.icebreakrr.data.AppDataStore
 import com.github.se.icebreakrr.mock.getMockedProfiles
+import com.github.se.icebreakrr.model.location.LocationViewModel
 import com.github.se.icebreakrr.model.profile.Profile
 import com.github.se.icebreakrr.model.profile.ProfilesViewModel
 import com.github.se.icebreakrr.ui.navigation.BottomNavigationMenu
@@ -78,6 +79,7 @@ fun SettingsScreen(
     profilesViewModel: ProfilesViewModel,
     navigationActions: NavigationActions,
     appDataStore: AppDataStore,
+    locationViewModel: LocationViewModel,
     auth: FirebaseAuth
 ) {
 
@@ -131,6 +133,10 @@ fun SettingsScreen(
               label = "Toggle Discoverability",
               isChecked = isDiscoverable,
               onCheckedChange = { discoverable ->
+                when (discoverable) {
+                  true -> locationViewModel.tryToStartLocationUpdates()
+                  false -> locationViewModel.stopLocationUpdates()
+                }
                 coroutineScope.launch { appDataStore.saveDiscoverableStatus(discoverable) }
               })
           Spacer(modifier = Modifier.height(SPACER_HEIGHT_LARGE))
@@ -193,7 +199,6 @@ fun ToggleOptionBox(
     onCheckedChange: (Boolean) -> Unit,
     modifier: Modifier = Modifier
 ) {
-  // Constants for card styling
 
   Card(
       shape = CARD_SHAPE,
