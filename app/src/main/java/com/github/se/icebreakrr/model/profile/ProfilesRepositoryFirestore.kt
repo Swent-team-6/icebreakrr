@@ -142,11 +142,11 @@ class ProfilesRepositoryFirestore(
       onSuccess: (List<Profile>) -> Unit,
       onFailure: (Exception) -> Unit
   ) {
-    // Determine geohash precision based on radius
+    // Determine the precision of the geohash based on the radius
     val geohashPrecision = if (radiusInMeters <= 50) 7 else 6
     val centerGeohash = GeoHashUtils.encode(center.latitude, center.longitude, geohashPrecision)
 
-    // Fetch profiles within the bounding geohashes
+    // Get profiles in geohash range
     db.collection(collectionPath)
         .whereGreaterThanOrEqualTo("geohash", centerGeohash)
         .whereLessThanOrEqualTo("geohash", centerGeohash + "\uf8ff")
@@ -154,12 +154,25 @@ class ProfilesRepositoryFirestore(
         .addOnSuccessListener { result ->
           waitingDone.value = false
           isWaiting.value = false
+
           val profiles = result.documents.mapNotNull { documentToProfile(it) }
+
+          // Filter profiles within the specified radius and add their distanceToSelfProfile
           val profilesInRadius =
-              profiles.filter { profile ->
-                val profileLocation = profile.location ?: return@filter false
-                calculateDistance(center, profileLocation) <= radiusInMeters
+              profiles.mapNotNull { profile ->
+                val profileLocation = profile.location
+                if (profileLocation != null) {
+                  val distance = calculateDistance(center, profileLocation)
+                  if (distance <= radiusInMeters) {
+                    profile.copy(distanceToSelfProfile = distance.toInt())
+                  } else {
+                    null // Exclude profiles outside the radius
+                  }
+                } else {
+                  null // Exclude profiles without location
+                }
               }
+
           onSuccess(profilesInRadius)
         }
         .addOnFailureListener { e ->
@@ -169,8 +182,8 @@ class ProfilesRepositoryFirestore(
               _isWaiting.value = true
               handleConnectionFailure(onFailure)
             }
-            onFailure(e)
           }
+          onFailure(e)
         }
   }
 

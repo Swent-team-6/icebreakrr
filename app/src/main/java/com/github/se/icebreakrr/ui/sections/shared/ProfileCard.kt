@@ -88,11 +88,28 @@ fun ProfileCard(
                   horizontalAlignment = Alignment.Start,
               ) {
                 val textColor = if (greyedOut) GREYED_OUT_COLOR else Color.Unspecified
-                Text(
-                    text = profile.name,
-                    color = textColor,
-                    fontSize = NAME_FONT_SIZE,
-                    fontWeight = FontWeight.Bold)
+                // Profile name with distance on the right
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically) {
+                      // Profile name
+                      Text(
+                          text = profile.name,
+                          color = textColor,
+                          fontSize = NAME_FONT_SIZE,
+                          fontWeight = FontWeight.Bold,
+                          modifier = Modifier.weight(1f) // Push distance to the right
+                          )
+
+                      // Distance text
+                      profile.distanceToSelfProfile?.let { distance ->
+                        Text(
+                            text = "$distance m",
+                            color = textColor,
+                            fontSize = CATCHPHRASE_FONT_SIZE, // Smaller font size
+                            fontWeight = FontWeight.Normal)
+                      }
+                    }
 
                 Text(
                     text = "\"${profile.catchPhrase}\"",

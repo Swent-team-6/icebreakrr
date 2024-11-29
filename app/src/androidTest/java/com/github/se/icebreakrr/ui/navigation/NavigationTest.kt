@@ -17,6 +17,7 @@ import com.github.se.icebreakrr.model.message.MeetingRequestViewModel
 import com.github.se.icebreakrr.model.profile.ProfilePicRepositoryStorage
 import com.github.se.icebreakrr.model.profile.ProfilesRepository
 import com.github.se.icebreakrr.model.profile.ProfilesViewModel
+import com.github.se.icebreakrr.model.sort.SortViewModel
 import com.github.se.icebreakrr.model.tags.TagsRepository
 import com.github.se.icebreakrr.model.tags.TagsViewModel
 import com.github.se.icebreakrr.utils.IPermissionManager
@@ -48,6 +49,7 @@ class NavigationTest {
   private lateinit var profilesViewModel: ProfilesViewModel
   private lateinit var mockProfileViewModel: MockProfileViewModel
   private lateinit var tagsViewModel: TagsViewModel
+  private lateinit var sortViewModel: SortViewModel
   private lateinit var mockProfilesRepository: ProfilesRepository
   private lateinit var mockTagsRepository: TagsRepository
   private lateinit var mockFirebaseStorage: FirebaseStorage
@@ -88,6 +90,7 @@ class NavigationTest {
             ProfilePicRepositoryStorage(mockFirebaseStorage),
             mock(FirebaseAuth::class.java))
 
+    sortViewModel = SortViewModel(profilesViewModel)
     mockLocationService = mock(ILocationService::class.java)
     mockLocationRepository = mock(LocationRepository::class.java)
     mockPermissionManager = mock(IPermissionManager::class.java)
@@ -103,6 +106,7 @@ class NavigationTest {
           mockProfileViewModel,
           tagsViewModel,
           mockFilterViewModel,
+          sortViewModel,
           mockMeetingRequestViewModel,
           appDataStore,
           locationViewModel,

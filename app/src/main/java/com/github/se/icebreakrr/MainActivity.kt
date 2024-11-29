@@ -31,6 +31,7 @@ import com.github.se.icebreakrr.model.location.LocationViewModel
 import com.github.se.icebreakrr.model.message.MeetingRequestManager
 import com.github.se.icebreakrr.model.message.MeetingRequestViewModel
 import com.github.se.icebreakrr.model.profile.ProfilesViewModel
+import com.github.se.icebreakrr.model.sort.SortViewModel
 import com.github.se.icebreakrr.model.tags.TagsViewModel
 import com.github.se.icebreakrr.ui.authentication.SignInScreen
 import com.github.se.icebreakrr.ui.navigation.NavigationActions
@@ -188,6 +189,8 @@ fun IcebreakrrApp(
   val filterViewModel: FilterViewModel = viewModel(factory = FilterViewModel.Factory)
   MeetingRequestManager.meetingRequestViewModel =
       viewModel(factory = MeetingRequestViewModel.Companion.Factory(profileViewModel, functions))
+  val sortViewModel: SortViewModel =
+      viewModel(factory = SortViewModel.createFactory(profileViewModel))
   val meetingRequestViewModel = MeetingRequestManager.meetingRequestViewModel
   val startDestination = if (isTesting) Route.AROUND_YOU else Route.AUTH
 
@@ -195,6 +198,7 @@ fun IcebreakrrApp(
       profileViewModel,
       tagsViewModel,
       filterViewModel,
+      sortViewModel,
       meetingRequestViewModel,
       appDataStore,
       locationViewModel,
@@ -208,6 +212,7 @@ fun IcebreakrrNavHost(
     profileViewModel: ProfilesViewModel,
     tagsViewModel: TagsViewModel,
     filterViewModel: FilterViewModel,
+    sortViewModel: SortViewModel,
     meetingRequestViewModel: MeetingRequestViewModel?,
     appDataStore: AppDataStore,
     locationViewModel: LocationViewModel,
@@ -253,6 +258,7 @@ fun IcebreakrrNavHost(
             tagsViewModel,
             filterViewModel,
             locationViewModel,
+            sortViewModel,
             isTesting)
       }
       composable(Screen.OTHER_PROFILE_VIEW + "?userId={userId}") { navBackStackEntry ->

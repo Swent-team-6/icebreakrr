@@ -43,7 +43,7 @@ open class ProfilesViewModel(
   open val selectedProfile: StateFlow<Profile?> = _selectedProfile
 
   private val _selfProfile = MutableStateFlow<Profile?>(null)
-  open val selfProfile: StateFlow<Profile?> = _selfProfile
+  open var selfProfile: StateFlow<Profile?> = _selfProfile
 
   private val _loading = MutableStateFlow(false)
   open val loading: StateFlow<Boolean> = _loading
