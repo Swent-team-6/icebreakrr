@@ -28,7 +28,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavBackStackEntry
 import com.github.se.icebreakrr.R
@@ -38,7 +37,10 @@ import com.github.se.icebreakrr.model.tags.TagsViewModel
 import com.github.se.icebreakrr.ui.message.SendRequestScreen
 import com.github.se.icebreakrr.ui.navigation.NavigationActions
 import com.github.se.icebreakrr.ui.sections.shared.InfoSection
+import com.github.se.icebreakrr.ui.sections.shared.MessageWhenLoadingProfile
 import com.github.se.icebreakrr.ui.sections.shared.ProfileHeader
+import com.github.se.icebreakrr.utils.NetworkUtils.isNetworkAvailableWithContext
+import com.github.se.icebreakrr.utils.NetworkUtils.showNoInternetToast
 
 /**
  * In Around You, when you click on a profile, this is the composable used to display it
@@ -48,6 +50,8 @@ import com.github.se.icebreakrr.ui.sections.shared.ProfileHeader
 private val ALPHA = 0.5f
 private val MET_BUTTON_HORIZTONAL_PADDING = 16.dp
 private val BUTTON_VERTICAL_PADDING = 16.dp
+private const val USER_ALREADY_SEND_REQUEST_TOAST_MESSAGE =
+    "this user has already send you a meeting request!"
 
 @Composable
 fun OtherProfileView(
@@ -75,15 +79,7 @@ fun OtherProfileView(
 
   Scaffold(modifier = Modifier.fillMaxSize().testTag("aroundYouProfileScreen")) { paddingValues ->
     if (isLoading) {
-      Box(
-          modifier =
-              Modifier.fillMaxSize()
-                  .background(Color.LightGray)
-                  .padding(paddingValues)
-                  .testTag("loadingBox"),
-          contentAlignment = Alignment.Center) {
-            Text("Loading profile...", textAlign = TextAlign.Center)
-          }
+      MessageWhenLoadingProfile(paddingValues)
     } else if (profile != null) {
 
       Column(
@@ -92,8 +88,15 @@ fun OtherProfileView(
 
             // 2 sections one for the profile image with overlay and
             // one for the information section
-            ProfileHeader(profile, navigationActions, false, profilesViewModel) {
-              sendRequest = true
+            ProfileHeader(profile, navigationActions, false, profilesViewModel, false) {
+              // if the user already send you a meeting request, show a toast
+              if (!profile.meetingRequestSent.contains(meetingRequestViewModel.senderUID)) {
+                sendRequest = true
+              } else {
+                Toast.makeText(context, USER_ALREADY_SEND_REQUEST_TOAST_MESSAGE, Toast.LENGTH_SHORT)
+                    .show()
+                sendRequest = false
+              }
             }
             InfoSection(profile, tagsViewModel)
 
@@ -103,7 +106,15 @@ fun OtherProfileView(
             // Already met button
             Button(
                 onClick = {
-                  Toast.makeText(context, R.string.Not_Implemented_Toast, Toast.LENGTH_SHORT).show()
+                  if (isNetworkAvailableWithContext(context)) {
+                    profilesViewModel.addAlreadyMet(profile.uid)
+                    Toast.makeText(context, R.string.Already_Met_Button_Success, Toast.LENGTH_SHORT)
+                        .show()
+                    profilesViewModel.getSelfProfile()
+                    navigationActions.goBack()
+                  } else {
+                    showNoInternetToast(context = context)
+                  }
                 },
                 colors =
                     ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
@@ -134,10 +145,8 @@ fun OtherProfileView(
                   onSendClick = {
                     meetingRequestViewModel.onMeetingRequestChange(writtenMessage)
                     meetingRequestViewModel.onLocalTokenChange(profile.fcmToken ?: "null")
-                    if (!profile.meetingRequestSent.contains(profile.uid)) {
-                      meetingRequestViewModel.sendMeetingRequest()
-                      meetingRequestViewModel.addToMeetingRequestSent(profile.uid)
-                    }
+                    meetingRequestViewModel.sendMeetingRequest()
+                    meetingRequestViewModel.addToMeetingRequestSent(profile.uid)
                     writtenMessage = ""
                     navigationActions.goBack()
                   },

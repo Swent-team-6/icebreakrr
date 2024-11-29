@@ -16,7 +16,8 @@ class MeetingRequestService : FirebaseMessagingService() {
 
   private val MSG_CHANNEL_ID = "message_channel_id"
   private val MSG_CHANNEL_NAME = "channel_message"
-  private val MSG_RESPONSE = "Meeting response from : "
+  private val MSG_RESPONSE_ACCEPTED = " accepted your meeting request!"
+  private val MSG_RESPONSE_REJECTED = " rejected your meeting request :("
   private val MSG_CONFIRMATION = "Meeting confirmation from : "
   private val NOTIFICATION_ID = 0
 
@@ -30,23 +31,29 @@ class MeetingRequestService : FirebaseMessagingService() {
     val senderUid = remoteMessage.data["senderUID"] ?: "null"
     val message = remoteMessage.data["message"] ?: "null"
     val title = remoteMessage.data["title"] ?: "null"
+
     when (title) {
       "MEETING REQUEST" -> {
         MeetingRequestManager.meetingRequestViewModel?.addToMeetingRequestInbox(senderUid, message)
         MeetingRequestManager.meetingRequestViewModel?.updateInboxOfMessages()
       }
       "MEETING RESPONSE" -> {
-
         val name = remoteMessage.data["senderName"] ?: "null"
         val accepted = remoteMessage.data["accepted"]?.toBoolean() ?: false
         val senderToken = remoteMessage.data["senderToken"] ?: "null"
 
         MeetingRequestManager.meetingRequestViewModel?.removeFromMeetingRequestSent(senderUid)
-        showNotification(MSG_RESPONSE + name, message)
         if (accepted) {
+          showNotification(name + MSG_RESPONSE_ACCEPTED, "")
           MeetingRequestManager.meetingRequestViewModel?.setMeetingConfirmation(
               targetToken = senderToken,
               newMessage = "The meeting with ${MeetingRequestManager.ourName} is confirmed !")
+          MeetingRequestManager.meetingRequestViewModel?.sendMeetingConfirmation()
+        } else {
+          showNotification(name + MSG_RESPONSE_REJECTED, "")
+          MeetingRequestManager.meetingRequestViewModel?.setMeetingConfirmation(
+              targetToken = senderToken,
+              newMessage = "The meeting with ${MeetingRequestManager.ourName} is cancelled !")
           MeetingRequestManager.meetingRequestViewModel?.sendMeetingConfirmation()
         }
       }

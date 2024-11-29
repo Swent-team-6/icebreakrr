@@ -100,6 +100,7 @@ fun AroundYouScreen(
   val context = LocalContext.current
   val isConnected = profilesViewModel.isConnected.collectAsState()
   val userLocation = locationViewModel.lastKnownLocation.collectAsState()
+  val myProfile = profilesViewModel.selfProfile.collectAsState()
 
   // Initial check and start of periodic update every 10 seconds
   LaunchedEffect(isConnected.value, userLocation.value) {
@@ -107,7 +108,6 @@ fun AroundYouScreen(
       profilesViewModel.updateIsConnected(false)
     } else {
       while (true) {
-
         // Call the profile fetch function
         profilesViewModel.getFilteredProfilesInRadius(
             userLocation.value ?: GeoPoint(DEFAULT_USER_LATITUDE, DEFAULT_USER_LONGITUDE),
@@ -142,7 +142,8 @@ fun AroundYouScreen(
               }
             },
             tabList = LIST_TOP_LEVEL_DESTINATIONS,
-            selectedItem = Route.AROUND_YOU)
+            selectedItem = Route.AROUND_YOU,
+            notificationCount = myProfile.value?.meetingRequestInbox?.size ?: 0)
       },
       topBar = { TopBar("Around You") },
       content = { innerPadding ->

@@ -42,6 +42,8 @@ data class Profile(
     val geohash: String? = null,
     val distanceToSelfProfile: Int? = null,
     var hasBlocked: List<String> = listOf(),
+    var hasAlreadyMet: List<String> = listOf(),
+    var reports: Map<String, reportType> = mapOf(),
     val meetingRequestSent: List<String> = listOf(),
     val meetingRequestInbox: Map<String, String> = mapOf()
 ) {

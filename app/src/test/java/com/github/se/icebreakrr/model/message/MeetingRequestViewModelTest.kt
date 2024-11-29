@@ -3,10 +3,14 @@ package com.github.se.icebreakrr.model.message
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import com.github.se.icebreakrr.model.profile.Gender
 import com.github.se.icebreakrr.model.profile.Profile
+import com.github.se.icebreakrr.model.profile.ProfilePicRepository
+import com.github.se.icebreakrr.model.profile.ProfilesRepository
 import com.github.se.icebreakrr.model.profile.ProfilesViewModel
 import com.google.android.gms.tasks.Task
 import com.google.android.gms.tasks.Tasks
 import com.google.firebase.Timestamp
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.functions.FirebaseFunctions
 import com.google.firebase.functions.HttpsCallableReference
 import com.google.firebase.functions.HttpsCallableResult
@@ -27,6 +31,7 @@ import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
 import org.mockito.kotlin.any
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -35,10 +40,13 @@ class MeetingRequestViewModelTest {
   @get:Rule val instantTaskExecutorRule = InstantTaskExecutorRule()
 
   private lateinit var profilesViewModel: ProfilesViewModel
-  private lateinit var functions: FirebaseFunctions
-
-  private val testDispatcher: TestDispatcher = UnconfinedTestDispatcher()
   private lateinit var meetingRequestViewModel: MeetingRequestViewModel
+  private lateinit var functions: FirebaseFunctions
+  private lateinit var profilesRepository: ProfilesRepository
+  private lateinit var ppRepository: ProfilePicRepository
+  private lateinit var mockUser: FirebaseUser
+  private lateinit var auth: FirebaseAuth
+  private val testDispatcher: TestDispatcher = UnconfinedTestDispatcher()
   private val callableReference: HttpsCallableReference = mock()
 
   private val birthDate2005 =
@@ -98,18 +106,20 @@ class MeetingRequestViewModelTest {
     Dispatchers.setMain(testDispatcher)
 
     // Mock the dependencies
-    profilesViewModel = mock(ProfilesViewModel::class.java)
+    profilesRepository = mock(ProfilesRepository::class.java)
+    ppRepository = mock(ProfilePicRepository::class.java)
     functions = mock(FirebaseFunctions::class.java)
+    mockUser = mock(FirebaseUser::class.java)
+    auth = mock(FirebaseAuth::class.java)
 
-    // Initialize the ViewModel with mocks
+    // Initialize the ViewModels with mocks
+    profilesViewModel = ProfilesViewModel(profilesRepository, ppRepository, auth)
     meetingRequestViewModel = MeetingRequestViewModel(profilesViewModel, functions)
     `when`(functions.getHttpsCallable("sendMeetingRequest")).thenReturn(callableReference)
     `when`(functions.getHttpsCallable("sendMeetingResponse")).thenReturn(callableReference)
     `when`(functions.getHttpsCallable("sendMeetingConfirmation")).thenReturn(callableReference)
-
-    `when`(profilesViewModel.getSelfProfile()).then {}
-    `when`(profilesViewModel.getSelfGeoHash()).thenReturn(profile1.geohash)
-    `when`(profilesViewModel.getSelfProfileValue()).thenReturn(profile1)
+    `when`(auth.currentUser).thenReturn(mockUser)
+    `when`(mockUser.uid).thenReturn("1")
   }
 
   @Test
@@ -149,7 +159,13 @@ class MeetingRequestViewModelTest {
   @Test
   fun onMeetingConfirmationSetTest() = runBlocking {
     val message = "New Message"
-    meetingRequestViewModel.setMeetingConfirmation(profile2.fcmToken ?: "null", message)
+    `when`(profilesRepository.getProfileByUid(eq("1"), any(), any())).thenAnswer {
+      val onSuccess = it.getArgument<(Profile) -> Unit>(1)
+      onSuccess(profile1)
+    }
+    profilesViewModel.getSelfProfile()
+    meetingRequestViewModel.setMeetingConfirmation(
+        targetToken = profile2.fcmToken ?: "null", newMessage = message)
     assert(meetingRequestViewModel.meetingConfirmationState.message == message)
     assert(
         (meetingRequestViewModel.meetingConfirmationState.targetToken) ==
@@ -161,15 +177,18 @@ class MeetingRequestViewModelTest {
   fun testOnRemoteTokenChange() = runBlocking {
     val newToken = "TokenUser3"
     val existingProfile = profile1
-    // Act: Call the method under test
+    `when`(profilesRepository.getProfileByUid(eq("1"), any(), any())).thenAnswer {
+      val onSuccess = it.getArgument<(Profile) -> Unit>(1)
+      onSuccess(profile1)
+    }
+    profilesViewModel.getSelfProfile()
+
     meetingRequestViewModel.onRemoteTokenChange(newToken)
 
-    // Assert: Verify that meetingRequestState was updated
     assert(meetingRequestViewModel.meetingRequestState.targetToken == newToken)
 
-    // Assert: Verify that updateProfile was called with the updated profile
     val updatedProfile = existingProfile.copy(fcmToken = newToken)
-    verify(profilesViewModel).updateProfile(updatedProfile)
+    verify(profilesRepository).updateProfile(eq(updatedProfile), any(), any())
   }
 
   @Test
@@ -328,5 +347,67 @@ class MeetingRequestViewModelTest {
     }
 
     assertEquals("Unknown ViewModel class", exception.message)
+  }
+
+  @Test
+  fun addMeetingRequestSentTest(): Unit = runBlocking {
+    val updatedProfile1 = profile1.copy(meetingRequestSent = listOf("2"))
+    `when`(profilesRepository.getProfileByUid(eq("1"), any(), any())).thenAnswer {
+      val onSuccess = it.getArgument<(Profile) -> Unit>(1)
+      onSuccess(profile1)
+    }
+    profilesViewModel.getSelfProfile()
+    meetingRequestViewModel.addToMeetingRequestSent(profile2.uid)
+    verify(profilesRepository).getProfileByUid(eq("1"), any(), any())
+    verify(profilesRepository).updateProfile(eq(updatedProfile1), any(), any())
+  }
+
+  @Test
+  fun removeMeetingRequestSentTest(): Unit = runBlocking {
+    val updatedProfile1 = profile1.copy(meetingRequestSent = listOf("2"))
+    `when`(profilesRepository.getProfileByUid(eq("1"), any(), any())).thenAnswer {
+      val onSuccess = it.getArgument<(Profile) -> Unit>(1)
+      onSuccess(updatedProfile1)
+    }
+    profilesViewModel.getSelfProfile()
+    meetingRequestViewModel.removeFromMeetingRequestSent("2")
+    verify(profilesRepository).getProfileByUid(eq("1"), any(), any())
+    verify(profilesRepository).updateProfile(eq(profile1), any(), any())
+  }
+
+  @Test
+  fun addMeetingRequestInboxTest(): Unit = runBlocking {
+    val updatedProfile1 = profile1.copy(meetingRequestInbox = mapOf("2" to "hello"))
+    `when`(profilesRepository.getProfileByUid(eq("1"), any(), any())).thenAnswer {
+      val onSuccess = it.getArgument<(Profile) -> Unit>(1)
+      onSuccess(profile1)
+    }
+    profilesViewModel.getSelfProfile()
+    meetingRequestViewModel.addToMeetingRequestInbox("2", "hello")
+    verify(profilesRepository).getProfileByUid(eq("1"), any(), any())
+    verify(profilesRepository).updateProfile(eq(updatedProfile1), any(), any())
+  }
+
+  @Test
+  fun removeMeetingRequestInboxTest(): Unit = runBlocking {
+    val updatedProfile1 = profile1.copy(meetingRequestInbox = mapOf("2" to "hello"))
+    `when`(profilesRepository.getProfileByUid(eq("1"), any(), any())).thenAnswer {
+      val onSuccess = it.getArgument<(Profile) -> Unit>(1)
+      onSuccess(updatedProfile1)
+    }
+    profilesViewModel.getSelfProfile()
+    meetingRequestViewModel.removeFromMeetingRequestInbox("2")
+    verify(profilesRepository).getProfileByUid(eq("1"), any(), any())
+    verify(profilesRepository).updateProfile(eq(profile1), any(), any())
+  }
+
+  @Test
+  fun updateInboxOfMessagesTest() {
+    `when`(profilesRepository.getProfileByUid(eq("1"), any(), any())).thenAnswer {
+      val onSuccess = it.getArgument<(Profile) -> Unit>(1)
+      onSuccess(profile1)
+    }
+    meetingRequestViewModel.updateInboxOfMessages()
+    verify(profilesRepository).getProfileByUid(eq("1"), any(), any())
   }
 }
