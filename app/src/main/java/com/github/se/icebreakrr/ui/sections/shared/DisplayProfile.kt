@@ -147,7 +147,8 @@ fun ProfileHeader(
     navigationActions: NavigationActions,
     myProfile: Boolean,
     profilesViewModel: ProfilesViewModel,
-    onEditClick: () -> Unit
+    profileInNotification: Boolean,
+    onEditClick: (() -> Unit)?
 ) {
 
   val context = LocalContext.current
@@ -222,32 +223,36 @@ fun ProfileHeader(
                   modifier = Modifier.testTag("username"))
 
               // Edit Button or message button
-              val buttonIcon =
-                  if (myProfile) Icons.Filled.Create else Icons.AutoMirrored.Filled.Send
-              val buttonDescription = if (myProfile) "Edit Profile" else "Send Request"
-              val buttonTag = if (myProfile) "editButton" else "requestButton"
-              Box(
-                  modifier =
-                      Modifier.size(REQUEST_BUTTON_SIZE)
-                          .shadow(REQUEST_BUTTON_ELEVATION, shape = CircleShape)
-                          .background(IceBreakrrBlue, CircleShape),
-                  contentAlignment = Alignment.Center) {
-                    IconButton(
-                        onClick = {
-                          if (isNetworkAvailable()) {
-                            onEditClick()
-                          } else {
-                            showNoInternetToast(context = context)
+              if (!profileInNotification) {
+                val buttonIcon =
+                    if (myProfile) Icons.Filled.Create else Icons.AutoMirrored.Filled.Send
+                val buttonDescription = if (myProfile) "Edit Profile" else "Send Request"
+                val buttonTag = if (myProfile) "editButton" else "requestButton"
+                Box(
+                    modifier =
+                        Modifier.size(REQUEST_BUTTON_SIZE)
+                            .shadow(REQUEST_BUTTON_ELEVATION, shape = CircleShape)
+                            .background(IceBreakrrBlue, CircleShape),
+                    contentAlignment = Alignment.Center) {
+                      IconButton(
+                          onClick = {
+                            if (isNetworkAvailable()) {
+                              if (onEditClick != null) {
+                                onEditClick()
+                              }
+                            } else {
+                              showNoInternetToast(context = context)
+                            }
+                          },
+                          modifier = Modifier.testTag(buttonTag)) {
+                            Icon(
+                                imageVector = buttonIcon,
+                                contentDescription = buttonDescription,
+                                tint = Color.White,
+                                modifier = Modifier.fillMaxSize(BUTTON_ICON_SCALE))
                           }
-                        },
-                        modifier = Modifier.testTag(buttonTag)) {
-                          Icon(
-                              imageVector = buttonIcon,
-                              contentDescription = buttonDescription,
-                              tint = Color.White,
-                              modifier = Modifier.fillMaxSize(BUTTON_ICON_SCALE))
-                        }
-                  }
+                    }
+              }
             }
       }
 
@@ -310,8 +315,10 @@ fun ProfileHeader(
                                   }
                               TextButton(
                                   onClick = {
+                                    profilesViewModel.reportUser(selectedReportType!!)
                                     blockReportModal = false
                                     showReportOptions = false
+                                    navigationActions.goBack()
                                     Toast.makeText(
                                             context,
                                             context.getString(
@@ -428,4 +435,17 @@ fun ProfileDescription(description: String) {
       style = DESCRIPTION_TEXT_STYLE,
       color = Color.Black.copy(alpha = ALPHA_DESCRIPTION),
       modifier = Modifier.padding(DESCRIPTION_PADDING).testTag("profileDescription"))
+}
+
+@Composable
+fun MessageWhenLoadingProfile(paddingValues: PaddingValues) {
+  Box(
+      modifier =
+          Modifier.fillMaxSize()
+              .background(Color.LightGray)
+              .padding(paddingValues)
+              .testTag("loadingBox"),
+      contentAlignment = Alignment.Center) {
+        Text("Loading profile...", textAlign = TextAlign.Center)
+      }
 }

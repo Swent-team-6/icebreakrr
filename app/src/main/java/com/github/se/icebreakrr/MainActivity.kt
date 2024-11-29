@@ -31,12 +31,14 @@ import com.github.se.icebreakrr.model.location.LocationViewModel
 import com.github.se.icebreakrr.model.message.MeetingRequestManager
 import com.github.se.icebreakrr.model.message.MeetingRequestViewModel
 import com.github.se.icebreakrr.model.profile.ProfilesViewModel
+import com.github.se.icebreakrr.model.sort.SortViewModel
 import com.github.se.icebreakrr.model.tags.TagsViewModel
 import com.github.se.icebreakrr.ui.authentication.SignInScreen
 import com.github.se.icebreakrr.ui.navigation.NavigationActions
 import com.github.se.icebreakrr.ui.navigation.Route
 import com.github.se.icebreakrr.ui.navigation.Screen
 import com.github.se.icebreakrr.ui.profile.HeatMap
+import com.github.se.icebreakrr.ui.profile.InboxProfileViewScreen
 import com.github.se.icebreakrr.ui.profile.OtherProfileView
 import com.github.se.icebreakrr.ui.profile.ProfileEditingScreen
 import com.github.se.icebreakrr.ui.profile.ProfileView
@@ -194,10 +196,10 @@ fun IcebreakrrApp(
   val tagsViewModel: TagsViewModel =
       viewModel(factory = TagsViewModel.Companion.Factory(auth, firestore))
   val filterViewModel: FilterViewModel = viewModel(factory = FilterViewModel.Factory)
-  var userName: String? = "null"
-  var userUid: String? = "null"
   MeetingRequestManager.meetingRequestViewModel =
       viewModel(factory = MeetingRequestViewModel.Companion.Factory(profileViewModel, functions))
+  val sortViewModel: SortViewModel =
+      viewModel(factory = SortViewModel.createFactory(profileViewModel))
   val meetingRequestViewModel = MeetingRequestManager.meetingRequestViewModel
   val startDestination = if (isTesting) Route.AROUND_YOU else Route.AUTH
 
@@ -205,6 +207,7 @@ fun IcebreakrrApp(
       profileViewModel,
       tagsViewModel,
       filterViewModel,
+      sortViewModel,
       meetingRequestViewModel,
       appDataStore,
       locationViewModel,
@@ -219,6 +222,7 @@ fun IcebreakrrNavHost(
     profileViewModel: ProfilesViewModel,
     tagsViewModel: TagsViewModel,
     filterViewModel: FilterViewModel,
+    sortViewModel: SortViewModel,
     meetingRequestViewModel: MeetingRequestViewModel?,
     appDataStore: AppDataStore,
     locationViewModel: LocationViewModel,
@@ -260,14 +264,7 @@ fun IcebreakrrNavHost(
     ) {
       composable(Screen.AROUND_YOU) {
         AroundYouScreen(
-            navigationActions = navigationActions,
-            profilesViewModel = profileViewModel,
-            tagsViewModel = tagsViewModel,
-            filterViewModel = filterViewModel,
-            locationViewModel = locationViewModel,
-            isTestMode = isTesting,
-            permissionManager = permissionManager,
-            appDataStore = appDataStore)
+            navigationActions, profileViewModel, tagsViewModel, filterViewModel, locationViewModel)
       }
       composable(Screen.OTHER_PROFILE_VIEW + "?userId={userId}") { navBackStackEntry ->
         if (meetingRequestViewModel != null) {
@@ -306,49 +303,70 @@ fun IcebreakrrNavHost(
         startDestination = Screen.NOTIFICATIONS,
         route = Route.NOTIFICATIONS,
     ) {
-      composable(Screen.NOTIFICATIONS) { NotificationScreen(navigationActions, profileViewModel) }
-    }
-
-    navigation(
-        startDestination = Screen.PROFILE_EDIT,
-        route = Route.PROFILE_EDIT,
-    ) {
-      composable(Screen.PROFILE_EDIT) {
-        ProfileEditingScreen(navigationActions, tagsViewModel, profileViewModel, auth)
+      composable(Screen.NOTIFICATIONS) {
+        if (meetingRequestViewModel != null) {
+          NotificationScreen(navigationActions, profileViewModel, meetingRequestViewModel)
+        } else {
+          throw IllegalStateException(
+              "The Meeting Request View Model shouldn't be null : Bad initialization")
+        }
       }
-    }
-
-    navigation(
-        startDestination = Screen.FILTER,
-        route = Route.FILTER,
-    ) {
-      composable(Screen.FILTER) {
-        FilterScreen(navigationActions, tagsViewModel, filterViewModel, profileViewModel)
+      composable(Screen.INBOX_PROFILE_VIEW + "?userId={userId}") { navBackStackEntry ->
+        if (meetingRequestViewModel != null) {
+          InboxProfileViewScreen(
+              profileViewModel,
+              navBackStackEntry,
+              navigationActions,
+              tagsViewModel,
+              meetingRequestViewModel,
+              isTesting)
+        } else {
+          throw IllegalStateException(
+              "The Meeting Request View Model shouldn't be null : Bad initialization")
+        }
       }
-    }
 
-    navigation(
-        startDestination = Screen.CROP,
-        route = Route.CROP,
-    ) {
-      composable(Screen.CROP) { ImageCropperScreen(profileViewModel, navigationActions) }
-    }
-
-    navigation(
-        startDestination = Screen.UNBLOCK_PROFILE,
-        route = Route.UNBLOCK_PROFILE,
-    ) {
-      composable(Screen.UNBLOCK_PROFILE) {
-        UnblockProfileScreen(navigationActions, profileViewModel)
+      navigation(
+          startDestination = Screen.PROFILE_EDIT,
+          route = Route.PROFILE_EDIT,
+      ) {
+        composable(Screen.PROFILE_EDIT) {
+          ProfileEditingScreen(navigationActions, tagsViewModel, profileViewModel, auth)
+        }
       }
-    }
 
-    navigation(
-        startDestination = Screen.HEAT_MAP,
-        route = Route.HEAT_MAP,
-    ) {
-      composable(Screen.HEAT_MAP) {
-        HeatMap(navigationActions, profileViewModel, locationViewModel)
+      navigation(
+          startDestination = Screen.FILTER,
+          route = Route.FILTER,
+      ) {
+        composable(Screen.FILTER) {
+          FilterScreen(navigationActions, tagsViewModel, filterViewModel, profileViewModel)
+        }
+      }
+
+      navigation(
+          startDestination = Screen.CROP,
+          route = Route.CROP,
+      ) {
+        composable(Screen.CROP) { ImageCropperScreen(profileViewModel, navigationActions) }
+      }
+
+      navigation(
+          startDestination = Screen.UNBLOCK_PROFILE,
+          route = Route.UNBLOCK_PROFILE,
+      ) {
+        composable(Screen.UNBLOCK_PROFILE) {
+          UnblockProfileScreen(navigationActions, profileViewModel)
+        }
+      }
+
+      navigation(
+          startDestination = Screen.HEAT_MAP,
+          route = Route.HEAT_MAP,
+      ) {
+        composable(Screen.HEAT_MAP) {
+          HeatMap(navigationActions, profileViewModel, locationViewModel)
+        }
       }
     }
   }

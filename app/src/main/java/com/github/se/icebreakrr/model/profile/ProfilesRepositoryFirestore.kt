@@ -1,5 +1,6 @@
 package com.github.se.icebreakrr.model.profile
 
+import android.location.Location
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
@@ -7,15 +8,10 @@ import com.github.se.icebreakrr.utils.GeoHashUtils
 import com.github.se.icebreakrr.utils.NetworkUtils
 import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.auth
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.GeoPoint
 import com.google.firebase.firestore.Source
-import kotlin.math.atan2
-import kotlin.math.cos
-import kotlin.math.sin
-import kotlin.math.sqrt
 import kotlinx.coroutines.flow.MutableStateFlow
 
 class ProfilesRepositoryFirestore(
@@ -38,6 +34,7 @@ class ProfilesRepositoryFirestore(
   val DEFAULT_LONGITUDE = 0.0
   val DEFAULT_LATITUDE = 0.0
   private val PERIOD = 1000
+  private val UID = "uid"
 
   // Generated with the help of CursorAI
   /**
@@ -145,11 +142,11 @@ class ProfilesRepositoryFirestore(
       onSuccess: (List<Profile>) -> Unit,
       onFailure: (Exception) -> Unit
   ) {
-    // Determine geohash precision based on radius
+    // Determine the precision of the geohash based on the radius
     val geohashPrecision = if (radiusInMeters <= 50) 7 else 6
     val centerGeohash = GeoHashUtils.encode(center.latitude, center.longitude, geohashPrecision)
 
-    // Fetch profiles within the bounding geohashes
+    // Get profiles in geohash range
     db.collection(collectionPath)
         .whereGreaterThanOrEqualTo("geohash", centerGeohash)
         .whereLessThanOrEqualTo("geohash", centerGeohash + "\uf8ff")
@@ -157,12 +154,25 @@ class ProfilesRepositoryFirestore(
         .addOnSuccessListener { result ->
           waitingDone.value = false
           isWaiting.value = false
+
           val profiles = result.documents.mapNotNull { documentToProfile(it) }
+
+          // Filter profiles within the specified radius and add their distanceToSelfProfile
           val profilesInRadius =
-              profiles.filter { profile ->
-                val profileLocation = profile.location ?: return@filter false
-                calculateDistance(center, profileLocation) <= radiusInMeters
+              profiles.mapNotNull { profile ->
+                val profileLocation = profile.location
+                if (profileLocation != null) {
+                  val distance = calculateDistance(center, profileLocation)
+                  if (distance <= radiusInMeters) {
+                    profile.copy(distanceToSelfProfile = distance.toInt())
+                  } else {
+                    null // Exclude profiles outside the radius
+                  }
+                } else {
+                  null // Exclude profiles without location
+                }
               }
+
           onSuccess(profilesInRadius)
         }
         .addOnFailureListener { e ->
@@ -172,22 +182,29 @@ class ProfilesRepositoryFirestore(
               _isWaiting.value = true
               handleConnectionFailure(onFailure)
             }
-            onFailure(e)
           }
+          onFailure(e)
         }
   }
 
-  override fun getBlockedProfiles(
-      blockedProfiles: List<String>,
+  /**
+   * Retrive multiple profiles, given a list of UID
+   *
+   * @param uidList: a list of UID
+   * @param onSuccess: A callback invoked with a list of profiles if the operation is successful.
+   * @param onFailure A callback invoked with an exception if the operation fails.
+   */
+  override fun getMultipleProfiles(
+      uidList: List<String>,
       onSuccess: (List<Profile>) -> Unit,
       onFailure: (Exception) -> Unit
   ) {
-    if (blockedProfiles.isEmpty()) {
+    if (uidList.isEmpty()) {
       onSuccess(emptyList())
       return
     }
     db.collection(collectionPath)
-        .whereIn("uid", blockedProfiles)
+        .whereIn(UID, uidList)
         .get()
         .addOnSuccessListener { result ->
           waitingDone.value = false
@@ -340,9 +357,16 @@ class ProfilesRepositoryFirestore(
       val geohash = document.getString("geohash")
       val hasBlocked =
           (document.get("hasBlocked") as? List<*>)?.filterIsInstance<String>() ?: listOf()
+      val hasAlreadyMet =
+          (document.get("hasAlreadyMet") as? List<*>)?.filterIsInstance<String>() ?: listOf()
+      val reports =
+          ((document.get("reports") as? HashMap<*, *>)
+                  ?.filter { (key, value) -> key is String && value is String }
+                  ?.map { (key, value) -> key as String to reportType.valueOf(value as String) }
+                  ?: listOf())
+              .associate { it.first to it.second }
       val meetingRequestSent =
           (document.get("meetingRequestSent") as? List<*>)?.filterIsInstance<String>() ?: listOf()
-
       val meetingRequestInbox =
           (document.get("meetingRequestInbox") as? Map<*, *>)
               ?.filter { (key, value) -> key is String && value is String }
@@ -361,6 +385,8 @@ class ProfilesRepositoryFirestore(
           location = location,
           geohash = geohash,
           hasBlocked = hasBlocked,
+          hasAlreadyMet = hasAlreadyMet,
+          reports = reports,
           meetingRequestSent = meetingRequestSent,
           meetingRequestInbox = meetingRequestInbox)
     } catch (e: Exception) {
@@ -370,30 +396,23 @@ class ProfilesRepositoryFirestore(
   }
 
   /**
-   * Converts degrees to radians.
-   *
-   * @param deg Angle in degrees.
-   * @return Angle in radians.
-   */
-  private fun deg2rad(deg: Double): Double = deg * Math.PI / 180.0
-
-  /**
-   * Calculates the distance between two geographic points using the Haversine formula.
+   * Calculates the distance between two geographic points using the Android Location class.
    *
    * @param point1 First geographic point.
    * @param point2 Second geographic point.
    * @return Distance between the points in meters.
    */
   private fun calculateDistance(point1: GeoPoint, point2: GeoPoint): Double {
-    val earthRadius = 6371000.0 // meters
-    val dLat = deg2rad(point2.latitude - point1.latitude)
-    val dLon = deg2rad(point2.longitude - point1.longitude)
-    val lat1 = deg2rad(point1.latitude)
-    val lat2 = deg2rad(point2.latitude)
-
-    val a = sin(dLat / 2) * sin(dLat / 2) + cos(lat1) * cos(lat2) * sin(dLon / 2) * sin(dLon / 2)
-    val c = 2 * atan2(sqrt(a), sqrt(1 - a))
-
-    return earthRadius * c
+    val location1 =
+        Location("").apply {
+          latitude = point1.latitude
+          longitude = point1.longitude
+        }
+    val location2 =
+        Location("").apply {
+          latitude = point2.latitude
+          longitude = point2.longitude
+        }
+    return location1.distanceTo(location2).toDouble() // Returns distance in meters
   }
 }

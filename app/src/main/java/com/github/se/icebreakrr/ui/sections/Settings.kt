@@ -82,6 +82,7 @@ fun SettingsScreen(
     locationViewModel: LocationViewModel,
     auth: FirebaseAuth
 ) {
+
   val context = LocalContext.current
   val scrollState = rememberScrollState()
   val coroutineScope = rememberCoroutineScope()
@@ -94,6 +95,7 @@ fun SettingsScreen(
   val isLoading = profilesViewModel.loading.collectAsState(initial = true).value
   val profile = profilesViewModel.selectedProfile.collectAsState().value
   val isTesting = LocalIsTesting.current
+  val myProfile = profilesViewModel.selfProfile.collectAsState()
 
   Scaffold(
       topBar = { TopBar("Settings") },
@@ -106,7 +108,8 @@ fun SettingsScreen(
               }
             },
             tabList = LIST_TOP_LEVEL_DESTINATIONS,
-            selectedItem = Route.SETTINGS)
+            selectedItem = Route.SETTINGS,
+            notificationCount = myProfile.value?.meetingRequestInbox?.size ?: 0)
       },
   ) { innerPadding ->
     Column(
@@ -155,7 +158,13 @@ fun SettingsScreen(
           Spacer(modifier = Modifier.padding(vertical = BUTTON_PADDING))
 
           Button(
-              onClick = { navigationActions.navigateTo(Screen.ALREADY_MET) },
+              onClick = {
+                if (isNetworkAvailableWithContext(context) || isTesting) {
+                  navigationActions.navigateTo(Screen.ALREADY_MET)
+                } else {
+                  Toast.makeText(context, R.string.No_Internet_Toast, Toast.LENGTH_SHORT).show()
+                }
+              },
               colors =
                   ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary),
               modifier = Modifier.fillMaxWidth().testTag("alreadyMetButton")) {

@@ -32,6 +32,12 @@
 
     <string name="Already_Met_Button_Text">"I Already Met This Person"</string>
     <string name="Already_Met_Settings_Button">People You Already Met</string>
+    <string name="Already_Met_Button_Success">You successfully added this user to your already met list</string>
+    <string name="no_already_met_users">You haven\'t met anyone yet. Go explore the world!</string>
+    <string name="unmeet_confirm">Did you add this user by mistake?</string>
+    <string name="unmeet_confirm_message">Remove from your already met list?</string>
+    <string name="unmeet_yes">Yes</string>
+    <string name="unmeet_no">No</string>
 
     <string name="blocked_profiles">Blocked Profiles</string>
 

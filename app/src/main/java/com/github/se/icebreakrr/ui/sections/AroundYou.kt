@@ -2,14 +2,22 @@ package com.github.se.icebreakrr.ui.sections
 
 import android.annotation.SuppressLint
 import android.content.pm.PackageManager
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults.Indicator
@@ -20,8 +28,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
@@ -35,6 +48,8 @@ import com.github.se.icebreakrr.model.filter.FilterViewModel
 import com.github.se.icebreakrr.model.location.LocationViewModel
 import com.github.se.icebreakrr.model.profile.Gender
 import com.github.se.icebreakrr.model.profile.ProfilesViewModel
+import com.github.se.icebreakrr.model.sort.SortOption
+import com.github.se.icebreakrr.model.sort.SortViewModel
 import com.github.se.icebreakrr.model.tags.TagsViewModel
 import com.github.se.icebreakrr.ui.navigation.BottomNavigationMenu
 import com.github.se.icebreakrr.ui.navigation.LIST_TOP_LEVEL_DESTINATIONS
@@ -50,12 +65,15 @@ import com.github.se.icebreakrr.utils.NetworkUtils.isNetworkAvailable
 import com.github.se.icebreakrr.utils.NetworkUtils.isNetworkAvailableWithContext
 import com.github.se.icebreakrr.utils.NetworkUtils.showNoInternetToast
 import com.google.firebase.firestore.GeoPoint
+import java.util.Locale
 import kotlinx.coroutines.delay
 
 // Constants for layout dimensions
 private val COLUMN_VERTICAL_PADDING = 16.dp
 private val COLUMN_HORIZONTAL_PADDING = 8.dp
+private val SORT_TOP_PADDING = 4.dp
 private val TEXT_SIZE_LARGE = 20.sp
+private val TEXT_SMALL_SIZE = 16.sp
 private val NO_CONNECTION_TEXT_COLOR = messageTextColor
 private val EMPTY_PROFILE_TEXT_COLOR = messageTextColor
 private const val REFRESH_DELAY = 10_000L
@@ -80,6 +98,7 @@ fun AroundYouScreen(
     tagsViewModel: TagsViewModel,
     filterViewModel: FilterViewModel,
     locationViewModel: LocationViewModel,
+    sortViewModel: SortViewModel,
     isTestMode: Boolean = false,
     permissionManager: IPermissionManager,
     appDataStore: AppDataStore
@@ -96,6 +115,7 @@ fun AroundYouScreen(
   val userLocation = locationViewModel.lastKnownLocation.collectAsState()
   // Collect the discoverability state from DataStore
   val isDiscoverable by appDataStore.isDiscoverable.collectAsState(initial = false)
+  val myProfile = profilesViewModel.selfProfile.collectAsState()
 
   // Initial check and start of periodic update every 10 seconds
   LaunchedEffect(isConnected.value, userLocation.value) {
@@ -103,7 +123,6 @@ fun AroundYouScreen(
       profilesViewModel.updateIsConnected(false)
     } else if (hasLocationPermission) {
       while (true) {
-
         // Call the profile fetch function
         profilesViewModel.getFilteredProfilesInRadius(
             userLocation.value ?: GeoPoint(DEFAULT_USER_LATITUDE, DEFAULT_USER_LONGITUDE),
@@ -117,6 +136,17 @@ fun AroundYouScreen(
     }
   }
 
+  // Generate the sorted profile list based on the selected sortOption
+  val sortOption = sortViewModel.selectedSortOption.collectAsState()
+  val sortedProfiles =
+      remember(filteredProfiles.value, sortOption.value) {
+        when (sortOption.value) {
+          SortOption.AGE -> sortViewModel.sortByAge(filteredProfiles.value)
+          SortOption.DISTANCE -> sortViewModel.sortByDistance(filteredProfiles.value)
+          SortOption.COMMON_TAGS -> sortViewModel.sortByCommonTags(filteredProfiles.value)
+        }
+      }
+
   Scaffold(
       modifier = Modifier.testTag("aroundYouScreen"),
       bottomBar = {
@@ -127,58 +157,159 @@ fun AroundYouScreen(
               }
             },
             tabList = LIST_TOP_LEVEL_DESTINATIONS,
-            selectedItem = Route.AROUND_YOU)
+            selectedItem = Route.AROUND_YOU,
+            notificationCount = myProfile.value?.meetingRequestInbox?.size ?: 0)
       },
       topBar = { TopBar("Around You") },
       content = { innerPadding ->
-        PullToRefreshBox(
-            locationViewModel = locationViewModel,
-            filterViewModel = filterViewModel,
-            tagsViewModel = tagsViewModel,
-            isRefreshing = isLoading.value,
-            onRefresh = { center, radiusInMeters, genders, ageRange, tags ->
-              profilesViewModel.getFilteredProfilesInRadius(
-                  center, radiusInMeters, genders, ageRange, tags)
-            },
-            modifier = Modifier.padding(innerPadding),
-            content = {
-              if (!isConnected.value) {
-                EmptyProfilePrompt(label = "No Internet Connection", testTag = "noConnectionPrompt")
-              } else if (!isDiscoverable) {
-                EmptyProfilePrompt(
-                    label = stringResource(R.string.ask_to_toggle_location),
-                    testTag = "activateLocationPrompt")
-              } else if (!isTestMode && !hasLocationPermission) {
-                EmptyProfilePrompt(
-                    label = stringResource(R.string.ask_to_give_location_permission),
-                    testTag = "noLocationPermissionPrompt")
-              } else if (filteredProfiles.value.isEmpty()) {
-                EmptyProfilePrompt(
-                    label = stringResource(R.string.no_one_around), testTag = "emptyProfilePrompt")
-              } else {
+
+        // Wrapping dropdown and profile list in a Column
+        Column(modifier = Modifier.padding(innerPadding).fillMaxSize()) {
+          // Sort Options Dropdown
+          SortOptionsDropdown(
+              selectedOption = sortOption.value,
+              onOptionSelected = { sortViewModel.updateSortOption(it) },
+              modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp))
+
+          // Profile List
+          PullToRefreshBox(
+              locationViewModel = locationViewModel,
+              filterViewModel = filterViewModel,
+              tagsViewModel = tagsViewModel,
+              isRefreshing = isLoading.value,
+              onRefresh = { center, radiusInMeters, genders, ageRange, tags ->
+                profilesViewModel.getFilteredProfilesInRadius(
+                    center, radiusInMeters, genders, ageRange, tags)
+              },
+              modifier = Modifier.fillMaxSize()) {
                 LazyColumn(
                     contentPadding = PaddingValues(vertical = COLUMN_VERTICAL_PADDING),
                     verticalArrangement = Arrangement.spacedBy(COLUMN_VERTICAL_PADDING),
                     modifier =
                         Modifier.fillMaxSize().padding(horizontal = COLUMN_HORIZONTAL_PADDING)) {
-                      items(filteredProfiles.value.size) { index ->
-                        ProfileCard(
-                            profile = filteredProfiles.value[index],
-                            onclick = {
-                              if (isNetworkAvailableWithContext(context)) {
-                                navigationActions.navigateTo(
-                                    Screen.OTHER_PROFILE_VIEW +
-                                        "?userId=${filteredProfiles.value[index].uid}")
-                              } else {
-                                showNoInternetToast(context)
+                      if (!isConnected.value) {
+                        item {
+                          Box(
+                              contentAlignment = Alignment.Center,
+                              modifier = Modifier.fillMaxSize().testTag("noConnectionPrompt")) {
+                                Text(
+                                    text = "No Internet Connection",
+                                    fontSize = TEXT_SIZE_LARGE,
+                                    fontWeight = FontWeight.Bold,
+                                    color = NO_CONNECTION_TEXT_COLOR)
                               }
-                            })
+                        }
+                      } else if (sortedProfiles.isNotEmpty()) {
+                        items(sortedProfiles.size) { index ->
+                          ProfileCard(
+                              profile = sortedProfiles[index],
+                              onclick = {
+                                if (isNetworkAvailableWithContext(context)) {
+                                  navigationActions.navigateTo(
+                                      Screen.OTHER_PROFILE_VIEW +
+                                          "?userId=${sortedProfiles[index].uid}")
+                                } else {
+                                  showNoInternetToast(context)
+                                }
+                              })
+                        }
+                      } else {
+                        item {
+                          Box(
+                              contentAlignment = Alignment.Center,
+                              modifier = Modifier.fillMaxSize().testTag("emptyProfilePrompt")) {
+                                Text(
+                                    text = "There is no one around. Try moving!",
+                                    fontSize = TEXT_SIZE_LARGE,
+                                    fontWeight = FontWeight.Bold,
+                                    color = EMPTY_PROFILE_TEXT_COLOR)
+                              }
+                        }
                       }
                     }
               }
-            })
+        })
       },
       floatingActionButton = { FilterFloatingActionButton(navigationActions) })
+}
+
+/**
+ * A composable dropdown menu that allows the user to select a sort option.
+ *
+ * This dropdown displays the currently selected sort option and provides a list of other available
+ * options when expanded. The user can select a new sort option from the list, which triggers the
+ * provided callback to handle the selection.
+ *
+ * @param selectedOption The currently selected sort option, displayed at the top of the dropdown.
+ * @param onOptionSelected A callback function that is triggered when the user selects a new sort
+ *   option.
+ * @param modifier A [Modifier] applied to the container of the dropdown for customization.
+ */
+@Composable
+fun SortOptionsDropdown(
+    selectedOption: SortOption,
+    onOptionSelected: (SortOption) -> Unit,
+    modifier: Modifier = Modifier
+) {
+  var expanded by remember { mutableStateOf(false) }
+
+  // List of all options excluding the selected one
+  val otherOptions = SortOption.values().filter { it != selectedOption }
+
+  Column(modifier = modifier) {
+    // Selected option with a dropdown indicator
+    Row(
+        modifier =
+            Modifier.fillMaxWidth()
+                .clickable { expanded = !expanded }
+                .padding(COLUMN_HORIZONTAL_PADDING)
+                .testTag("SortOptionsDropdown_Selected"),
+        verticalAlignment = Alignment.CenterVertically) {
+          Text(
+              text =
+                  "Sort by: ${
+                    selectedOption.name.replace("_", " ").lowercase()
+                        .replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.ROOT) else it.toString() }
+                }",
+              fontSize = TEXT_SMALL_SIZE,
+              modifier =
+                  Modifier.weight(1f) // Pushes the arrow to the end
+                      .testTag("SortOptionsDropdown_Text"))
+          Icon(
+              imageVector =
+                  if (expanded) Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown,
+              contentDescription = if (expanded) "Collapse" else "Expand",
+              modifier = Modifier.testTag("SortOptionsDropdown_Arrow"))
+        }
+
+    // Show other options when expanded
+    if (expanded) {
+      otherOptions.forEach { option ->
+        Row(
+            modifier =
+                Modifier.fillMaxWidth()
+                    .clickable {
+                      expanded = false
+                      onOptionSelected(option)
+                    }
+                    .padding(
+                        start = COLUMN_VERTICAL_PADDING,
+                        top = SORT_TOP_PADDING,
+                        bottom = COLUMN_HORIZONTAL_PADDING)
+                    .testTag("SortOptionsDropdown_Option_${option.name}"),
+        ) {
+          Text(
+              text =
+                  option.name.replace("_", " ").lowercase().replaceFirstChar {
+                    if (it.isLowerCase()) it.titlecase(Locale.ROOT) else it.toString()
+                  },
+              fontSize = TEXT_SMALL_SIZE,
+              color = Color.Gray // Differentiate it visually
+              )
+        }
+      }
+    }
+  }
 }
 
 /**

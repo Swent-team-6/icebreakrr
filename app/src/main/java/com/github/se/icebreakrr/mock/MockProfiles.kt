@@ -56,12 +56,12 @@ open class MockProfileRepository : ProfilesRepository {
     onSuccess(Profile.getMockedProfiles())
   }
 
-  override fun getBlockedProfiles(
-      blockedProfiles: List<String>,
+  override fun getMultipleProfiles(
+      uidList: List<String>,
       onSuccess: (List<Profile>) -> Unit,
       onFailure: (Exception) -> Unit
   ) {
-    onSuccess(Profile.getMockedProfiles().filter { it.uid in blockedProfiles })
+    onSuccess(Profile.getMockedProfiles().filter { it.uid in uidList })
   }
 
   // Simulates successful profile addition by calling onSuccess
@@ -117,7 +117,7 @@ open class MockProfileViewModel :
   override val loading: StateFlow<Boolean> = _loading.asStateFlow()
 
   private val _selfProfile = MutableStateFlow<Profile?>(null)
-  override val selfProfile: StateFlow<Profile?> = _selfProfile.asStateFlow()
+  override var selfProfile: StateFlow<Profile?> = _selfProfile.asStateFlow()
 
   private val _loadingSelf = MutableStateFlow(false)
   override val loadingSelf: StateFlow<Boolean> = _loadingSelf.asStateFlow()
@@ -247,6 +247,21 @@ fun Profile.Companion.getMockedProfiles(): List<Profile> {
           listOf(),
           listOf())
 
+  val hasAlreadyMetList =
+      listOf(
+          listOf("4"),
+          listOf(),
+          listOf(),
+          listOf(),
+          listOf(),
+          listOf(),
+          listOf(),
+          listOf(),
+          listOf(),
+          listOf(),
+          listOf(),
+          listOf())
+
   val profiles = mutableListOf<Profile>()
   for (i in uids.indices) {
     profiles.add(
@@ -259,7 +274,8 @@ fun Profile.Companion.getMockedProfiles(): List<Profile> {
             description = descriptions[i],
             tags = tagsList[i],
             profilePictureUrl = null,
-            hasBlocked = hasBlockedList[i]))
+            hasBlocked = hasBlockedList[i],
+            hasAlreadyMet = hasAlreadyMetList[i]))
   }
   return profiles
 }

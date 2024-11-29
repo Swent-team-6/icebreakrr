@@ -31,8 +31,10 @@ open class ProfilesViewModel(
   private val _profiles = MutableStateFlow<List<Profile>>(emptyList())
   open val profiles: StateFlow<List<Profile>> = _profiles
 
-  private val _inbox = MutableStateFlow<List<Profile?>>(emptyList())
-  open val inbox: StateFlow<List<Profile?>> = _inbox
+  private val _inboxProfiles = MutableStateFlow<List<Profile?>>(emptyList())
+
+  private val _inboxItems = MutableStateFlow<Map<Profile, String>>(emptyMap())
+  open val inboxItems: StateFlow<Map<Profile, String>> = _inboxItems
 
   private val _filteredProfiles = MutableStateFlow<List<Profile>>(emptyList())
   val filteredProfiles: StateFlow<List<Profile>> = _filteredProfiles
@@ -41,7 +43,7 @@ open class ProfilesViewModel(
   open val selectedProfile: StateFlow<Profile?> = _selectedProfile
 
   private val _selfProfile = MutableStateFlow<Profile?>(null)
-  open val selfProfile: StateFlow<Profile?> = _selfProfile
+  open var selfProfile: StateFlow<Profile?> = _selfProfile
 
   private val _loading = MutableStateFlow(false)
   open val loading: StateFlow<Boolean> = _loading
@@ -65,6 +67,8 @@ open class ProfilesViewModel(
 
   private val MAX_RESOLUTION = 600
   private val DEFAULT_QUALITY = 100
+
+  private val MAX_REPORTS_BEFORE_BAN = 2
 
   companion object {
     class Factory(private val auth: FirebaseAuth, private val firestore: FirebaseFirestore) :
@@ -124,12 +128,14 @@ open class ProfilesViewModel(
         center = center,
         radiusInMeters = radiusInMeters,
         onSuccess = { profileList ->
-          val currentUserId = _selfProfile.value?.uid
+          val currentUserId = _selfProfile.value?.uid ?: ""
           val filteredProfiles =
               profileList.filter { profile ->
-
                 // Exclude the currently logged-in user's profile
                 profile.uid != currentUserId &&
+
+                    // Filter users than have too many reports
+                    (profile.reports.keys.size <= MAX_REPORTS_BEFORE_BAN) &&
 
                     // Filter by genders if specified
                     (genders == null || profile.gender in genders || genders.isEmpty()) &&
@@ -146,7 +152,14 @@ open class ProfilesViewModel(
                     !(_selfProfile.value?.hasBlocked?.contains(profile.uid) ?: false) &&
 
                     // Filter by isBlocked
-                    !(profile.hasBlocked.contains(_selfProfile.value?.uid ?: ""))
+                    !(profile.hasBlocked.contains(currentUserId)) &&
+                    !(profile.hasBlocked.contains(_selfProfile.value?.uid ?: "")) &&
+
+                    // Filter by hasAlreadyMet
+                    !(_selfProfile.value?.hasAlreadyMet?.contains(profile.uid) ?: false) &&
+
+                    // Filter by how you have reported
+                    profile.reports[currentUserId] == null
               }
           _profiles.value = profileList
           _filteredProfiles.value = filteredProfiles
@@ -339,9 +352,26 @@ open class ProfilesViewModel(
     getBlockedUsers()
   }
 
+  /**
+   * Reports a user by updating its reports Map with the selfProfile Uid and the specified reason
+   *
+   * @param profile the profile to report.
+   * @param reason the reason for reporting.
+   */
+  fun reportUser(reason: reportType) {
+    if (_selectedProfile.value != null) {
+      _selectedProfile.update { currentProfile ->
+        currentProfile?.copy(
+            reports = currentProfile.reports.plus(_selfProfile.value!!.uid to reason))
+      }
+      updateProfile(_selectedProfile.value!!)
+    }
+  }
+
+  /** Fetches all the blocked users */
   fun getBlockedUsers() {
     _loading.value = true
-    repository.getBlockedProfiles(
+    repository.getMultipleProfiles(
         selfProfile.value?.hasBlocked ?: emptyList(),
         onSuccess = { profileList ->
           _profiles.value = profileList
@@ -349,6 +379,71 @@ open class ProfilesViewModel(
           _isConnected.value = true
         },
         onFailure = { e -> handleError(e) })
+  }
+
+  /**
+   * Adds user to current user's already met list in the repository.
+   *
+   * @param uid The unique ID of the user being added.
+   */
+  fun addAlreadyMet(uid: String) {
+    _selfProfile.update { currentProfile ->
+      currentProfile?.copy(hasAlreadyMet = currentProfile.hasAlreadyMet + uid)
+    }
+    updateProfile(selfProfile.value!!)
+  }
+
+  /**
+   * Removes user to current user's already met list in the repository.
+   *
+   * @param uid The unique ID of the user being removed.
+   */
+  fun removeAlreadyMet(uid: String) {
+    _selfProfile.update { currentProfile ->
+      currentProfile?.copy(hasAlreadyMet = currentProfile.hasAlreadyMet.filter { it != uid })
+    }
+    updateProfile(selfProfile.value!!)
+    getBlockedUsers()
+  }
+
+  fun getAlreadyMetUsers() {
+    _loading.value = true
+    repository.getMultipleProfiles(
+        selfProfile.value?.hasAlreadyMet ?: emptyList(),
+        onSuccess = { profileList ->
+          _profiles.value = profileList
+          _loading.value = false
+          _isConnected.value = true
+        },
+        onFailure = { e -> handleError(e) })
+  }
+  /**
+   * Fetches all the profiles that send a message to our profile
+   *
+   * @param inboxUserUid: The list of UID of the profiles that have sent a message to our user inbox
+   */
+  private fun getInboxUsers(inboxUserUid: List<String>) {
+    _loading.value = true
+    repository.getMultipleProfiles(
+        inboxUserUid,
+        onSuccess = { profileList ->
+          _inboxProfiles.value = profileList
+          _loading.value = false
+          _isConnected.value = true
+        },
+        onFailure = { e -> handleError(e) })
+  }
+
+  /** Get the inbox of our user */
+  fun getInboxOfSelfProfile() {
+    val inboxUidList = selfProfile.value?.meetingRequestInbox
+    if (inboxUidList != null) {
+      val uidsMessageList = inboxUidList.toList()
+      val uidsList = uidsMessageList.map { it.first }
+      val messageList = uidsMessageList.map { it.second }
+      getInboxUsers(uidsList)
+      _inboxItems.value = _inboxProfiles.value.filterNotNull().zip(messageList).toMap()
+    }
   }
 
   /** Fetches the current user's profile from the repository. */
@@ -361,6 +456,16 @@ open class ProfilesViewModel(
           _loadingSelf.value = false
         },
         onFailure = { e -> handleError(e) })
+  }
+
+  /** Get the geoHash of our profile */
+  fun getSelfGeoHash(): String? {
+    return selfProfile.value?.geohash
+  }
+
+  /** Get the profile of our current user */
+  fun getSelfProfileValue(): Profile? {
+    return selfProfile.value
   }
 
   /**
