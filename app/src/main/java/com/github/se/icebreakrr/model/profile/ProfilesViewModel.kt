@@ -269,7 +269,7 @@ open class ProfilesViewModel(
    * @param imageData The byte array representing the image data.
    * @param onSuccess A callback function that is invoked when the upload is successful.
    */
-  fun uploadCurrentUserProfilePicture(imageData: ByteArray, onSuccess: (url: String?) -> Unit) {
+  private fun uploadCurrentUserProfilePicture(imageData: ByteArray, onSuccess: (url: String?) -> Unit) {
     val userId = _selfProfile.value?.uid ?: throw IllegalStateException("User not logged in")
     ppRepository.uploadProfilePicture(
         userId = userId,
@@ -381,7 +381,7 @@ open class ProfilesViewModel(
    *
    * @param onSuccess A callback function that is invoked when the deletion is successful.
    */
-  fun deleteCurrentUserProfilePicture(onSuccess: () -> Unit) {
+  private fun deleteCurrentUserProfilePicture(onSuccess: () -> Unit) {
     ppRepository.deleteProfilePicture(
         userId = _selfProfile.value?.uid ?: throw IllegalStateException("User not logged in"),
         onSuccess = onSuccess,
