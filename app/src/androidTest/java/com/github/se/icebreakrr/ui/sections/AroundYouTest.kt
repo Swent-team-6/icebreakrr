@@ -128,9 +128,9 @@ class AroundYouScreenTest {
           viewModel(factory = FilterViewModel.Factory),
           locationViewModel,
           sortViewModel,
-          true,
           mockPermissionManager,
           appDataStore,
+          true,
       )
     }
 
