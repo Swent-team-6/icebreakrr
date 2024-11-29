@@ -33,14 +33,16 @@ import com.github.se.icebreakrr.model.profile.ProfilesViewModel.ProfilePictureSt
 import com.github.se.icebreakrr.ui.theme.IceBreakrrBlue
 
 /**
- * A composable function that displays a profile picture with an option to select a new image from
- * gallery.
+ * A composable that displays a profile picture with an edit icon to allow the user to change the
+ * picture. The user can also remove the picture by clicking on the remove icon.
  *
- * @param url The URL of the profile picture to display. If null, a placeholder image is shown.
+ * @param url The URL of the profile picture.
+ * @param localBitmap The local bitmap of the profile picture.
+ * @param pictureChangeState The state of the profile picture.
  * @param size The size of the profile picture.
- * @param onSelectionSuccess A callback function that is invoked when an image is successfully
- *   selected.
- * @param onSelectionFailure A callback function that is invoked when image selection fails.
+ * @param onSelectionSuccess Callback when the user successfully selects a new picture.
+ * @param onSelectionFailure Callback when the user fails to select a new picture.
+ * @param onDeletion Callback when the taps the cancel/delete button.
  */
 private val ICON_PADDING = 5.dp
 
