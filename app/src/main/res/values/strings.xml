@@ -41,6 +41,7 @@
 
     <string name="blocked_profiles">Blocked Profiles</string>
 
+    <string name="no_internet">No Internet Connection</string>
     <string name="ask_to_toggle_location">Activate location sharing in the app settings!</string>
     <string name="ask_to_give_location_permission">Precise location permission is required to show profiles. Activate it in your phone settings</string>
     <string name="no_one_around">There is no one around. Try moving!</string>
