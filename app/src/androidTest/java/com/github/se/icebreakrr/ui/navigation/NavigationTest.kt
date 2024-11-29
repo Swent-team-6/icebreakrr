@@ -43,100 +43,92 @@ import org.mockito.Mockito.`when`
 @OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(AndroidJUnit4::class)
 class NavigationTest {
-    private val testScope = TestScope(UnconfinedTestDispatcher() + Job())
+  private val testScope = TestScope(UnconfinedTestDispatcher() + Job())
 
-    @get:Rule
-    val composeTestRule = createComposeRule()
-    @get:Rule
-    val tempFolder = TemporaryFolder()
+  @get:Rule val composeTestRule = createComposeRule()
+  @get:Rule val tempFolder = TemporaryFolder()
 
-    private lateinit var profilesViewModel: ProfilesViewModel
-    private lateinit var mockProfileViewModel: MockProfileViewModel
-    private lateinit var tagsViewModel: TagsViewModel
-    private lateinit var sortViewModel: SortViewModel
-    private lateinit var mockProfilesRepository: ProfilesRepository
-    private lateinit var mockTagsRepository: TagsRepository
-    private lateinit var mockFirebaseStorage: FirebaseStorage
-    private lateinit var mockMeetingRequestViewModel: MeetingRequestViewModel
-    private lateinit var mockFunction: FirebaseFunctions
-    private lateinit var mockFilterViewModel: FilterViewModel
-    private lateinit var testDataStore: DataStore<Preferences>
-    private lateinit var appDataStore: AppDataStore
+  private lateinit var profilesViewModel: ProfilesViewModel
+  private lateinit var mockProfileViewModel: MockProfileViewModel
+  private lateinit var tagsViewModel: TagsViewModel
+  private lateinit var sortViewModel: SortViewModel
+  private lateinit var mockProfilesRepository: ProfilesRepository
+  private lateinit var mockTagsRepository: TagsRepository
+  private lateinit var mockFirebaseStorage: FirebaseStorage
+  private lateinit var mockMeetingRequestViewModel: MeetingRequestViewModel
+  private lateinit var mockFunction: FirebaseFunctions
+  private lateinit var mockFilterViewModel: FilterViewModel
+  private lateinit var testDataStore: DataStore<Preferences>
+  private lateinit var appDataStore: AppDataStore
 
-    private lateinit var mockLocationService: ILocationService
-    private lateinit var mockLocationRepository: LocationRepository
-    private lateinit var mockPermissionManager: IPermissionManager
+  private lateinit var mockLocationService: ILocationService
+  private lateinit var mockLocationRepository: LocationRepository
+  private lateinit var mockPermissionManager: IPermissionManager
 
-    private lateinit var locationViewModel: LocationViewModel
+  private lateinit var locationViewModel: LocationViewModel
 
-    @Before
-    fun setup() {
-        // Set up real DataStore with test scope
-        testDataStore =
-            PreferenceDataStoreFactory.create(
-                scope = testScope,
-                produceFile = { File(tempFolder.newFolder(), "test_preferences.preferences_pb") })
-        appDataStore = AppDataStore(testDataStore)
+  @Before
+  fun setup() {
+    // Set up real DataStore with test scope
+    testDataStore =
+        PreferenceDataStoreFactory.create(
+            scope = testScope,
+            produceFile = { File(tempFolder.newFolder(), "test_preferences.preferences_pb") })
+    appDataStore = AppDataStore(testDataStore)
 
-        // Initialize mocks and view models
-        mockProfileViewModel = MockProfileViewModel()
-        mockProfilesRepository = mock(ProfilesRepository::class.java)
-        mockFirebaseStorage = mock(FirebaseStorage::class.java)
-        mockFunction = mock(FirebaseFunctions::class.java)
-        mockMeetingRequestViewModel = MeetingRequestViewModel(mockProfileViewModel, mockFunction)
-        mockFilterViewModel = FilterViewModel()
-        tagsViewModel =
-            TagsViewModel(
-                TagsRepository(mock(FirebaseFirestore::class.java), mock(FirebaseAuth::class.java))
-            )
-        profilesViewModel =
-            ProfilesViewModel(
-                mockProfilesRepository,
-                ProfilePicRepositoryStorage(mockFirebaseStorage),
-                mock(FirebaseAuth::class.java)
-            )
+    // Initialize mocks and view models
+    mockProfileViewModel = MockProfileViewModel()
+    mockProfilesRepository = mock(ProfilesRepository::class.java)
+    mockFirebaseStorage = mock(FirebaseStorage::class.java)
+    mockFunction = mock(FirebaseFunctions::class.java)
+    mockMeetingRequestViewModel = MeetingRequestViewModel(mockProfileViewModel, mockFunction)
+    mockFilterViewModel = FilterViewModel()
+    tagsViewModel =
+        TagsViewModel(
+            TagsRepository(mock(FirebaseFirestore::class.java), mock(FirebaseAuth::class.java)))
+    profilesViewModel =
+        ProfilesViewModel(
+            mockProfilesRepository,
+            ProfilePicRepositoryStorage(mockFirebaseStorage),
+            mock(FirebaseAuth::class.java))
 
-        sortViewModel = SortViewModel(profilesViewModel)
-        mockLocationService = mock(ILocationService::class.java)
-        mockLocationRepository = mock(LocationRepository::class.java)
-        mockPermissionManager = mock(IPermissionManager::class.java)
+    sortViewModel = SortViewModel(profilesViewModel)
+    mockLocationService = mock(ILocationService::class.java)
+    mockLocationRepository = mock(LocationRepository::class.java)
+    mockPermissionManager = mock(IPermissionManager::class.java)
 
-        locationViewModel =
-            LocationViewModel(mockLocationService, mockLocationRepository, mockPermissionManager)
+    locationViewModel =
+        LocationViewModel(mockLocationService, mockLocationRepository, mockPermissionManager)
 
-        // mock state flow
-        `when`(mockPermissionManager.permissionStatuses)
-            .thenReturn(
-                MutableStateFlow(
-                    mapOf(
-                        android.Manifest.permission.ACCESS_FINE_LOCATION to
-                                android.content.pm.PackageManager.PERMISSION_GRANTED
-                    )
-                )
-            )
+    // mock state flow
+    `when`(mockPermissionManager.permissionStatuses)
+        .thenReturn(
+            MutableStateFlow(
+                mapOf(
+                    android.Manifest.permission.ACCESS_FINE_LOCATION to
+                        android.content.pm.PackageManager.PERMISSION_GRANTED)))
+  }
+
+  @Test
+  fun testNavigationLogin() = runTest {
+    composeTestRule.setContent {
+      IcebreakrrNavHost(
+          mockProfileViewModel,
+          tagsViewModel,
+          mockFilterViewModel,
+          sortViewModel,
+          mockMeetingRequestViewModel,
+          appDataStore,
+          locationViewModel,
+          Route.AUTH,
+          mock(FirebaseAuth::class.java),
+          mock(IPermissionManager::class.java),
+          true)
     }
 
-    @Test
-    fun testNavigationLogin() = runTest {
-        composeTestRule.setContent {
-            IcebreakrrNavHost(
-                mockProfileViewModel,
-                tagsViewModel,
-                mockFilterViewModel,
-                sortViewModel,
-                mockMeetingRequestViewModel,
-                appDataStore,
-                locationViewModel,
-                Route.AUTH,
-                mock(FirebaseAuth::class.java),
-                mock(IPermissionManager::class.java),
-                true
-            )
-        }
-
-        // Assert that the login screen is shown on launch
-        composeTestRule.onNodeWithTag("loginScreen").assertExists()
-    }
+    // Assert that the login screen is shown on launch
+    composeTestRule.onNodeWithTag("loginScreen").assertExists()
+  }
 }
 
     /**

@@ -31,7 +31,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -164,73 +163,63 @@ fun AroundYouScreen(
       content = { innerPadding ->
 
         // Wrapping dropdown and profile list in a Column
-        Column(modifier = Modifier
-            .padding(innerPadding)
-            .fillMaxSize()) {
-            // Sort Options Dropdown
-            SortOptionsDropdown(
-                selectedOption = sortOption.value,
-                onOptionSelected = { sortViewModel.updateSortOption(it) },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 8.dp)
-            )
+        Column(modifier = Modifier.padding(innerPadding).fillMaxSize()) {
+          // Sort Options Dropdown
+          SortOptionsDropdown(
+              selectedOption = sortOption.value,
+              onOptionSelected = { sortViewModel.updateSortOption(it) },
+              modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp))
 
-            // Profile List
-            PullToRefreshBox(
-                locationViewModel = locationViewModel,
-                filterViewModel = filterViewModel,
-                tagsViewModel = tagsViewModel,
-                isRefreshing = isLoading.value,
-                onRefresh = { center, radiusInMeters, genders, ageRange, tags ->
-                    profilesViewModel.getFilteredProfilesInRadius(
-                        center, radiusInMeters, genders, ageRange, tags
-                    )
-                },
-                modifier = Modifier.fillMaxSize(),
-                content = {
-                    if (!isConnected.value){
-                        EmptyProfilePrompt(
-                            label = stringResource(id = R.string.no_internet),
-                            testTag = "noConnectionPrompt"
-                        )
-                    } else if (!isDiscoverable) {
-                        EmptyProfilePrompt(
-                            label = stringResource(R.string.ask_to_toggle_location),
-                            testTag = "activateLocationPrompt"
-                        )
-                    } else if (!isTestMode && !hasLocationPermission) {
-                        EmptyProfilePrompt(
-                            label = stringResource(R.string.ask_to_give_location_permission),
-                            testTag = "noLocationPermissionPrompt")
-                    } else if (sortedProfiles.isEmpty()) {
-                        EmptyProfilePrompt(
-                            label = stringResource(R.string.no_one_around), testTag = "emptyProfilePrompt")
-                    } else {
-                        LazyColumn(
-                            contentPadding = PaddingValues(vertical = COLUMN_VERTICAL_PADDING),
-                            verticalArrangement = Arrangement.spacedBy(COLUMN_VERTICAL_PADDING),
-                            modifier =
-                            Modifier.fillMaxSize().padding(horizontal = COLUMN_HORIZONTAL_PADDING)
-                        ) {
-                            items(sortedProfiles.size) { index ->
-                                ProfileCard(
-                                    profile = sortedProfiles[index],
-                                    onclick = {
-                                        if (isNetworkAvailableWithContext(context)) {
-                                            navigationActions.navigateTo(
-                                                Screen.OTHER_PROFILE_VIEW +
-                                                        "?userId=${sortedProfiles[index].uid}"
-                                            )
-                                        } else {
-                                            showNoInternetToast(context)
-                                        }
-                                    })
-                            }
-
+          // Profile List
+          PullToRefreshBox(
+              locationViewModel = locationViewModel,
+              filterViewModel = filterViewModel,
+              tagsViewModel = tagsViewModel,
+              isRefreshing = isLoading.value,
+              onRefresh = { center, radiusInMeters, genders, ageRange, tags ->
+                profilesViewModel.getFilteredProfilesInRadius(
+                    center, radiusInMeters, genders, ageRange, tags)
+              },
+              modifier = Modifier.fillMaxSize(),
+              content = {
+                if (!isConnected.value) {
+                  EmptyProfilePrompt(
+                      label = stringResource(id = R.string.no_internet),
+                      testTag = "noConnectionPrompt")
+                } else if (!isDiscoverable) {
+                  EmptyProfilePrompt(
+                      label = stringResource(R.string.ask_to_toggle_location),
+                      testTag = "activateLocationPrompt")
+                } else if (!isTestMode && !hasLocationPermission) {
+                  EmptyProfilePrompt(
+                      label = stringResource(R.string.ask_to_give_location_permission),
+                      testTag = "noLocationPermissionPrompt")
+                } else if (sortedProfiles.isEmpty()) {
+                  EmptyProfilePrompt(
+                      label = stringResource(R.string.no_one_around),
+                      testTag = "emptyProfilePrompt")
+                } else {
+                  LazyColumn(
+                      contentPadding = PaddingValues(vertical = COLUMN_VERTICAL_PADDING),
+                      verticalArrangement = Arrangement.spacedBy(COLUMN_VERTICAL_PADDING),
+                      modifier =
+                          Modifier.fillMaxSize().padding(horizontal = COLUMN_HORIZONTAL_PADDING)) {
+                        items(sortedProfiles.size) { index ->
+                          ProfileCard(
+                              profile = sortedProfiles[index],
+                              onclick = {
+                                if (isNetworkAvailableWithContext(context)) {
+                                  navigationActions.navigateTo(
+                                      Screen.OTHER_PROFILE_VIEW +
+                                          "?userId=${sortedProfiles[index].uid}")
+                                } else {
+                                  showNoInternetToast(context)
+                                }
+                              })
                         }
-                    }
-            })
+                      }
+                }
+              })
         }
       },
       floatingActionButton = { FilterFloatingActionButton(navigationActions) })
@@ -263,11 +252,10 @@ fun SortOptionsDropdown(
     // Selected option with a dropdown indicator
     Row(
         modifier =
-        Modifier
-            .fillMaxWidth()
-            .clickable { expanded = !expanded }
-            .padding(COLUMN_HORIZONTAL_PADDING)
-            .testTag("SortOptionsDropdown_Selected"),
+            Modifier.fillMaxWidth()
+                .clickable { expanded = !expanded }
+                .padding(COLUMN_HORIZONTAL_PADDING)
+                .testTag("SortOptionsDropdown_Selected"),
         verticalAlignment = Alignment.CenterVertically) {
           Text(
               text =
@@ -277,9 +265,8 @@ fun SortOptionsDropdown(
                 }",
               fontSize = TEXT_SMALL_SIZE,
               modifier =
-              Modifier
-                  .weight(1f) // Pushes the arrow to the end
-                  .testTag("SortOptionsDropdown_Text"))
+                  Modifier.weight(1f) // Pushes the arrow to the end
+                      .testTag("SortOptionsDropdown_Text"))
           Icon(
               imageVector =
                   if (expanded) Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown,
@@ -292,18 +279,16 @@ fun SortOptionsDropdown(
       otherOptions.forEach { option ->
         Row(
             modifier =
-            Modifier
-                .fillMaxWidth()
-                .clickable {
-                    expanded = false
-                    onOptionSelected(option)
-                }
-                .padding(
-                    start = COLUMN_VERTICAL_PADDING,
-                    top = SORT_TOP_PADDING,
-                    bottom = COLUMN_HORIZONTAL_PADDING
-                )
-                .testTag("SortOptionsDropdown_Option_${option.name}"),
+                Modifier.fillMaxWidth()
+                    .clickable {
+                      expanded = false
+                      onOptionSelected(option)
+                    }
+                    .padding(
+                        start = COLUMN_VERTICAL_PADDING,
+                        top = SORT_TOP_PADDING,
+                        bottom = COLUMN_HORIZONTAL_PADDING)
+                    .testTag("SortOptionsDropdown_Option_${option.name}"),
         ) {
           Text(
               text =
@@ -356,9 +341,7 @@ fun PullToRefreshBox(
     contentAlignment: Alignment = Alignment.TopStart,
     indicator: @Composable BoxScope.() -> Unit = {
       Indicator(
-          modifier = Modifier
-              .align(Alignment.TopCenter)
-              .testTag("refreshIndicator"),
+          modifier = Modifier.align(Alignment.TopCenter).testTag("refreshIndicator"),
           isRefreshing = isRefreshing,
           state = state)
     },
@@ -382,9 +365,7 @@ fun PullToRefreshBox(
 
 @Composable
 fun EmptyProfilePrompt(label: String, testTag: String) {
-  Box(contentAlignment = Alignment.Center, modifier = Modifier
-      .fillMaxSize()
-      .testTag(testTag)) {
+  Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize().testTag(testTag)) {
     Text(
         text = label,
         fontSize = TEXT_SIZE_LARGE,
