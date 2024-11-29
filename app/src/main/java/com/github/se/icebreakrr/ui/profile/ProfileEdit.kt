@@ -43,6 +43,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.github.se.icebreakrr.model.profile.Profile
 import com.github.se.icebreakrr.model.profile.ProfilesViewModel
+import com.github.se.icebreakrr.model.profile.ProfilesViewModel.ProfilePictureState.*
 import com.github.se.icebreakrr.model.tags.TagsViewModel
 import com.github.se.icebreakrr.ui.navigation.NavigationActions
 import com.github.se.icebreakrr.ui.navigation.Screen
@@ -69,7 +70,7 @@ fun ProfileEditingScreen(
   val padding = screenWidth * 0.02f
   val textSize = screenWidth * 0.08f
 
-  val profilePictureSize = screenWidth * 0.25f
+  val profilePictureSize = screenWidth * 0.40f
   val catchphraseHeight = screenHeight * 0.10f
   val descriptionHeight = screenHeight * 0.16f
 
@@ -82,27 +83,30 @@ fun ProfileEditingScreen(
   }
 
   val isLoading = profilesViewModel.loading.collectAsState(initial = true).value
-  val user = profilesViewModel.selectedProfile.collectAsState().value
+  val pictureChangeState = profilesViewModel.pictureChangeState.collectAsState().value
+  val user = profilesViewModel.selfProfile.collectAsState().value!!
+  val editedCurrentProfile = profilesViewModel.editedCurrentProfile.collectAsState().value
   val tempBitmap = profilesViewModel.tempProfilePictureBitmap.collectAsState().value
 
-  var catchphrase by remember { mutableStateOf(TextFieldValue(user!!.catchPhrase)) }
-  var description by remember { mutableStateOf(TextFieldValue(user!!.description)) }
+  var catchphrase by remember {
+    mutableStateOf(TextFieldValue(editedCurrentProfile?.catchPhrase ?: user.catchPhrase))
+  }
+  var description by remember {
+    mutableStateOf(TextFieldValue(editedCurrentProfile?.description ?: user.description))
+  }
   val expanded = remember { mutableStateOf(false) }
 
   var showDialog by remember { mutableStateOf(false) }
-  var isModified by remember { mutableStateOf(false) }
+  var isModified by remember {
+    mutableStateOf(editedCurrentProfile != null || pictureChangeState != UNCHANGED)
+  }
 
   val selectedTags = tagsViewModel.filteringTags.collectAsState().value
   val tagsSuggestions = tagsViewModel.tagsSuggestions.collectAsState()
   val stringQuery = remember { mutableStateOf("") }
-
-  fun getCopyOfProfile(): Profile {
-    return user!!.copy(
+  fun getEditedProfile(): Profile {
+    return user.copy(
         catchPhrase = catchphrase.text, description = description.text, tags = selectedTags)
-  }
-
-  fun updateProfile() {
-    profilesViewModel.updateProfile(getCopyOfProfile())
   }
 
   if (isLoading) {
@@ -111,7 +115,7 @@ fun ProfileEditingScreen(
         contentAlignment = Alignment.Center) {
           Text("Loading profile...", textAlign = TextAlign.Center)
         }
-  } else if (user != null) {
+  } else {
 
     Scaffold(
         modifier = Modifier.testTag("profileEditScreen"),
@@ -127,7 +131,8 @@ fun ProfileEditingScreen(
                           isModified = isModified,
                           setShowDialog = { showDialog = it },
                           tagsViewModel = tagsViewModel,
-                          navigationActions = navigationActions)
+                          navigationActions = navigationActions,
+                          profilesViewModel = profilesViewModel)
                     }) {
                       Icon(Icons.Default.ArrowBack, contentDescription = "Back")
                     }
@@ -136,10 +141,12 @@ fun ProfileEditingScreen(
                 IconButton(
                     modifier = Modifier.testTag("checkButton"),
                     onClick = {
-                      updateProfile()
-                      profilesViewModel.validateAndUploadProfilePicture(context)
+                      if (isModified) {
+                        profilesViewModel.saveEditedProfile(getEditedProfile())
+                        profilesViewModel.validateProfileChanges(context)
+                      }
                       tagsViewModel.leaveUI()
-                      navigationActions.goBack()
+                      navigationActions.goBack() // todo: block with loading until done (uploading)
                     }) {
                       Icon(Icons.Default.Check, contentDescription = "Save")
                     }
@@ -152,14 +159,28 @@ fun ProfileEditingScreen(
                 ProfilePictureSelector(
                     url = user.profilePictureUrl,
                     localBitmap = tempBitmap,
+                    pictureChangeState = pictureChangeState,
                     size = profilePictureSize,
                     onSelectionSuccess = { uri ->
                       profilesViewModel.generateTempProfilePictureBitmap(context, uri)
-                      isModified = true
+                      // save modification and implicitly sets isModified at next recomposition:
+                      profilesViewModel.saveEditedProfile(getEditedProfile())
                       navigationActions.navigateTo(Screen.CROP)
                     },
                     onSelectionFailure = {
                       Toast.makeText(context, "Failed to select image", Toast.LENGTH_SHORT).show()
+                    },
+                    onDeletion = {
+                      when (pictureChangeState) {
+                        UNCHANGED -> { // delete current profile picture
+                          if (user.profilePictureUrl != null) {
+                            profilesViewModel.setPictureChangeState(TO_DELETE)
+                            isModified = true
+                          }
+                        }
+                        // else cancel changes
+                        else -> profilesViewModel.setPictureChangeState(UNCHANGED)
+                      }
                     })
 
                 Spacer(modifier = Modifier.height(padding))
@@ -243,7 +264,7 @@ fun ProfileEditingScreen(
                     onConfirm = {
                       showDialog = false
                       tagsViewModel.leaveUI()
-                      profilesViewModel.clearTempProfilePictureBitmap()
+                      profilesViewModel.resetProfileEditionState()
                       navigationActions.goBack()
                     })
               }
@@ -256,6 +277,7 @@ fun ProfileEditingScreen(
         isModified = isModified,
         setShowDialog = { showDialog = it },
         tagsViewModel = tagsViewModel,
-        navigationActions = navigationActions)
+        navigationActions = navigationActions,
+        profilesViewModel = profilesViewModel)
   }
 }

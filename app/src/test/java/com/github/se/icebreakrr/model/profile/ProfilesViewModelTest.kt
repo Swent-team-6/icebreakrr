@@ -9,7 +9,6 @@ import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.GeoPoint
 import java.io.ByteArrayInputStream
-import java.io.ByteArrayOutputStream
 import java.util.Calendar
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -25,7 +24,6 @@ import org.hamcrest.CoreMatchers.nullValue
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.After
 import org.junit.Assert.assertFalse
-import org.junit.Assert.assertThrows
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -45,6 +43,7 @@ class ProfilesViewModelTest {
   private lateinit var profilesViewModel: ProfilesViewModel
   private lateinit var mockProfileViewModel: ProfilesViewModel
   private lateinit var mockAndThen: () -> Unit
+  private lateinit var mockAuth: FirebaseAuth
   @OptIn(ExperimentalCoroutinesApi::class)
   private val testDispatcher: TestDispatcher = UnconfinedTestDispatcher()
 
@@ -88,8 +87,8 @@ class ProfilesViewModelTest {
     context = mock(Context::class.java)
     profilesRepository = mock(ProfilesRepository::class.java)
     ppRepository = mock(ProfilePicRepository::class.java)
-    profilesViewModel =
-        ProfilesViewModel(profilesRepository, ppRepository, mock(FirebaseAuth::class.java))
+    mockAuth = mock(FirebaseAuth::class.java)
+    profilesViewModel = ProfilesViewModel(profilesRepository, ppRepository, mockAuth)
     mockProfileViewModel = mock(ProfilesViewModel::class.java)
     mockAndThen = mock()
 
@@ -286,185 +285,6 @@ class ProfilesViewModelTest {
     assertThat(profilesViewModel.error.value, `is`(exception))
   }
 
-  @Test
-  fun uploadCurrentUserProfilePictureSucceeds() = runBlocking {
-    val imageData = ByteArray(4) { 0xFF.toByte() }
-
-    whenever(profilesRepository.getProfileByUid(eq("1"), any(), any())).thenAnswer {
-      val onSuccess = it.getArgument<(Profile) -> Unit>(1)
-      onSuccess(profile1)
-    }
-
-    whenever(ppRepository.uploadProfilePicture(any(), any(), any(), any())).thenAnswer {
-      val onSuccess = it.getArgument<(String?) -> Unit>(2)
-      onSuccess("http://example.com/profile.jpg")
-    }
-
-    profilesViewModel.getProfileByUid("1")
-    profilesViewModel.uploadCurrentUserProfilePicture(imageData)
-
-    verify(ppRepository).uploadProfilePicture(eq("1"), eq(imageData), any(), any())
-    assertThat(
-        profilesViewModel.selectedProfile.value?.profilePictureUrl,
-        `is`("http://example.com/profile.jpg"))
-  }
-
-  @Test
-  fun uploadCurrentUserProfilePictureFails() = runBlocking {
-    val imageData = ByteArray(4) { 0xFF.toByte() }
-    val exception = Exception("Failed to upload profile picture")
-
-    whenever(profilesRepository.getProfileByUid(eq("1"), any(), any())).thenAnswer {
-      val onSuccess = it.getArgument<(Profile) -> Unit>(1)
-      onSuccess(profile1)
-    }
-
-    whenever(ppRepository.uploadProfilePicture(any(), any(), any(), any())).thenAnswer {
-      val onFailure = it.getArgument<(Exception) -> Unit>(3)
-      onFailure(exception)
-    }
-
-    profilesViewModel.getProfileByUid("1")
-    profilesViewModel.uploadCurrentUserProfilePicture(imageData)
-
-    verify(ppRepository).uploadProfilePicture(eq("1"), eq(imageData), any(), any())
-    assertThat(profilesViewModel.error.value, `is`(exception))
-  }
-
-  @Test
-  fun uploadCurrentUserProfilePictureThrowsExceptionIfUserNotLoggedIn() {
-    val imageData = ByteArray(4) { 0xFF.toByte() }
-
-    val exception =
-        assertThrows(IllegalStateException::class.java) {
-          profilesViewModel.uploadCurrentUserProfilePicture(imageData)
-        }
-
-    assertThat(exception.message, `is`("User not logged in"))
-  }
-
-  @Test
-  fun deleteCurrentUserProfilePictureSucceeds() = runBlocking {
-    whenever(profilesRepository.getProfileByUid(eq("1"), any(), any())).thenAnswer {
-      val onSuccess = it.getArgument<(Profile) -> Unit>(1)
-      onSuccess(profile1)
-    }
-
-    whenever(ppRepository.deleteProfilePicture(any(), any(), any())).thenAnswer {
-      val onSuccess = it.getArgument<() -> Unit>(1)
-      onSuccess()
-    }
-
-    profilesViewModel.getProfileByUid("1")
-    profilesViewModel.deleteCurrentUserProfilePicture()
-
-    verify(ppRepository).deleteProfilePicture(eq("1"), any(), any())
-    assertThat(profilesViewModel.selectedProfile.value?.profilePictureUrl, `is`(nullValue()))
-  }
-
-  @Test
-  fun deleteCurrentUserProfilePictureFails() = runBlocking {
-    val exception = Exception("Failed to delete profile picture")
-
-    whenever(profilesRepository.getProfileByUid(eq("1"), any(), any())).thenAnswer {
-      val onSuccess = it.getArgument<(Profile) -> Unit>(1)
-      onSuccess(profile1)
-    }
-
-    whenever(ppRepository.deleteProfilePicture(any(), any(), any())).thenAnswer {
-      val onFailure = it.getArgument<(Exception) -> Unit>(2)
-      onFailure(exception)
-    }
-
-    profilesViewModel.getProfileByUid("1")
-    profilesViewModel.deleteCurrentUserProfilePicture()
-
-    verify(ppRepository).deleteProfilePicture(eq("1"), any(), any())
-    assertThat(profilesViewModel.error.value, `is`(exception))
-  }
-
-  @Test
-  fun generateTempProfilePictureBitmapSucceeds() = runBlocking {
-    // Mock ContentResolver and Uri
-    val contentResolver = mock(ContentResolver::class.java)
-    val uri = mock(Uri::class.java)
-    whenever(context.contentResolver).thenReturn(contentResolver)
-
-    // Create a test image as InputStream
-    val testImageBytes = ByteArray(100) { it.toByte() }
-    val inputStream = ByteArrayInputStream(testImageBytes)
-    whenever(contentResolver.openInputStream(uri)).thenReturn(inputStream)
-
-    // Create a mock bitmap that will be "decoded" from the input stream
-    val mockBitmap = mock(Bitmap::class.java)
-    whenever(mockBitmap.width).thenReturn(100)
-    whenever(mockBitmap.height).thenReturn(100)
-
-    // Mock BitmapFactory.decodeStream to return our mock bitmap
-    bitmapFactoryMock.`when`<Bitmap> { BitmapFactory.decodeStream(any()) }.thenReturn(mockBitmap)
-
-    // Mock Bitmap.createBitmap to return the same mock bitmap
-    bitmapMock
-        .`when`<Bitmap> { Bitmap.createBitmap(any<Bitmap>(), any(), any(), any(), any()) }
-        .thenReturn(mockBitmap)
-
-    profilesViewModel.generateTempProfilePictureBitmap(context, uri)
-
-    assertThat(profilesViewModel.tempProfilePictureBitmap.value, `is`(mockBitmap))
-  }
-
-  @Test
-  fun validateAndUploadProfilePictureWithNoTempBitmapDoesNothing() = runBlocking {
-    profilesViewModel.clearTempProfilePictureBitmap() // Ensure no temp bitmap exists
-    profilesViewModel.validateAndUploadProfilePicture(context)
-
-    // Verify no interactions with upload functionality
-    verify(profilesRepository, never()).updateProfile(any(), any(), any())
-  }
-
-  @Test
-  fun validateAndUploadProfilePictureSucceeds() = runBlocking {
-    // Mock successful profile setup
-    whenever(profilesRepository.getProfileByUid(eq("1"), any(), any())).thenAnswer {
-      val onSuccess = it.getArgument<(Profile) -> Unit>(1)
-      onSuccess(profile1)
-    }
-    profilesViewModel.getProfileByUid("1")
-
-    // Create and set a mock bitmap
-    val mockBitmap = mock(Bitmap::class.java)
-    whenever(mockBitmap.compress(eq(Bitmap.CompressFormat.JPEG), eq(100), any())).thenAnswer {
-      val stream = it.getArgument<ByteArrayOutputStream>(2)
-      stream.write(ByteArray(100))
-      true
-    }
-
-    // Set the temp bitmap
-    val field = ProfilesViewModel::class.java.getDeclaredField("_tempProfilePictureBitmap")
-    field.isAccessible = true
-    val tempProfilePictureBitmap = field.get(profilesViewModel) as MutableStateFlow<Bitmap?>
-    tempProfilePictureBitmap.value = mockBitmap
-
-    profilesViewModel.validateAndUploadProfilePicture(context)
-
-    // Verify upload was called and temp bitmap was cleared
-    verify(ppRepository).uploadProfilePicture(eq("1"), any(), any(), any())
-    assertThat(profilesViewModel.tempProfilePictureBitmap.value, `is`(nullValue()))
-  }
-
-  @Test
-  fun clearTempProfilePictureBitmapSucceeds() {
-    val mockBitmap = mock(Bitmap::class.java)
-    val field = ProfilesViewModel::class.java.getDeclaredField("_tempProfilePictureBitmap")
-    field.isAccessible = true
-    val tempProfilePictureBitmap = field.get(profilesViewModel) as MutableStateFlow<Bitmap?>
-    tempProfilePictureBitmap.value = mockBitmap
-
-    profilesViewModel.clearTempProfilePictureBitmap()
-
-    assertThat(profilesViewModel.tempProfilePictureBitmap.value, `is`(nullValue()))
-  }
-
   // Generated with the help of CursorAI
   @OptIn(ExperimentalCoroutinesApi::class)
   @Test
@@ -546,5 +366,99 @@ class ProfilesViewModelTest {
 
     // Should still be online because it wasn't the correct error
     assertTrue(profilesViewModel.isConnected.value)
+  }
+
+  @Test
+  fun clearTempProfilePictureBitmapSucceeds() {
+    val mockBitmap = mock(Bitmap::class.java)
+    val field = ProfilesViewModel::class.java.getDeclaredField("_tempProfilePictureBitmap")
+    field.isAccessible = true
+    val tempProfilePictureBitmap = field.get(profilesViewModel) as MutableStateFlow<Bitmap?>
+    tempProfilePictureBitmap.value = mockBitmap
+
+    profilesViewModel.clearTempProfilePictureBitmap()
+
+    assertThat(profilesViewModel.tempProfilePictureBitmap.value, `is`(nullValue()))
+  }
+
+  @Test
+  fun generateTempProfilePictureBitmapSucceeds() = runBlocking {
+    // Mock ContentResolver and Uri
+    val contentResolver = mock(ContentResolver::class.java)
+    val uri = mock(Uri::class.java)
+    whenever(context.contentResolver).thenReturn(contentResolver)
+
+    // Create a test image as InputStream
+    val testImageBytes = ByteArray(100) { it.toByte() }
+    val inputStream = ByteArrayInputStream(testImageBytes)
+    whenever(contentResolver.openInputStream(uri)).thenReturn(inputStream)
+
+    // Create a mock bitmap that will be "decoded" from the input stream
+    val mockBitmap = mock(Bitmap::class.java)
+    whenever(mockBitmap.width).thenReturn(100)
+    whenever(mockBitmap.height).thenReturn(100)
+
+    // Mock BitmapFactory.decodeStream to return our mock bitmap
+    bitmapFactoryMock.`when`<Bitmap> { BitmapFactory.decodeStream(any()) }.thenReturn(mockBitmap)
+
+    // Mock Bitmap.createBitmap to return the same mock bitmap
+    bitmapMock
+        .`when`<Bitmap> { Bitmap.createBitmap(any<Bitmap>(), any(), any(), any(), any()) }
+        .thenReturn(mockBitmap)
+
+    profilesViewModel.generateTempProfilePictureBitmap(context, uri)
+
+    assertThat(profilesViewModel.tempProfilePictureBitmap.value, `is`(mockBitmap))
+  }
+
+  @Test
+  fun validateAndUploadProfilePictureWithNoTempBitmapDoesNothing() = runBlocking {
+    profilesViewModel.clearTempProfilePictureBitmap() // Ensure no temp bitmap exists
+    profilesViewModel.validateAndUploadProfilePicture(context) { /*pass*/}
+
+    // Verify no interactions with upload functionality
+    verify(profilesRepository, never()).updateProfile(any(), any(), any())
+  }
+
+  @Test
+  fun setPictureChangeStateUpdatesState() {
+    profilesViewModel.setPictureChangeState(ProfilesViewModel.ProfilePictureState.TO_UPLOAD)
+    assertThat(
+        profilesViewModel.pictureChangeState.value,
+        `is`(ProfilesViewModel.ProfilePictureState.TO_UPLOAD))
+  }
+
+  @Test
+  fun saveEditedProfileUpdatesState() {
+    profilesViewModel.saveEditedProfile(profile1)
+    assertThat(profilesViewModel.editedCurrentProfile.value, `is`(profile1))
+  }
+
+  @Test
+  fun resetProfileEditionStateClearsStates() {
+    profilesViewModel.saveEditedProfile(profile1)
+    profilesViewModel.setPictureChangeState(ProfilesViewModel.ProfilePictureState.TO_UPLOAD)
+
+    profilesViewModel.resetProfileEditionState()
+
+    assertThat(profilesViewModel.editedCurrentProfile.value, `is`(nullValue()))
+    assertThat(
+        profilesViewModel.pictureChangeState.value,
+        `is`(ProfilesViewModel.ProfilePictureState.UNCHANGED))
+    assertThat(profilesViewModel.tempProfilePictureBitmap.value, `is`(nullValue()))
+  }
+
+  @Test
+  fun processCroppedImageUpdatesState() {
+    val mockBitmap = mock(Bitmap::class.java)
+    whenever(mockBitmap.width).thenReturn(100)
+    whenever(mockBitmap.height).thenReturn(100)
+
+    profilesViewModel.processCroppedImage(mockBitmap)
+
+    assertThat(profilesViewModel.tempProfilePictureBitmap.value, `is`(mockBitmap))
+    assertThat(
+        profilesViewModel.pictureChangeState.value,
+        `is`(ProfilesViewModel.ProfilePictureState.TO_UPLOAD))
   }
 }

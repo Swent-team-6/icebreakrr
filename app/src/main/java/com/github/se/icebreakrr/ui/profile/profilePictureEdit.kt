@@ -1,3 +1,4 @@
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -63,6 +64,13 @@ fun ImageCropperScreen(
           profilesViewModel.processCroppedImage(imageBitmap.asAndroidBitmap())
           navigationActions.goBack()
         })
+  }
+
+  BackHandler {
+    // for now makes impossible to quit the screen without cropping (as this may discard a
+    // valid temporary profile picture). A possible improvement for the future could be to add
+    // a slot to save the not cropped image so it doesn't discard the valid actual
+    // temporary image.
   }
 }
 

@@ -54,6 +54,7 @@ class ProfileEditingScreenTest {
     var mockProfile = Profile.getMockedProfiles()[0]
     fakeProfilesViewModel.setSelectedProfile(mockProfile)
     fakeProfilesViewModel.setLoading(false)
+    fakeProfilesViewModel.setSelfProfile(mockProfile)
   }
 
   @Test

@@ -273,7 +273,8 @@ fun FilterScreen(
         isModified = isModified,
         setShowDialog = { showDialog = it },
         tagsViewModel = tagsViewModel,
-        navigationActions = navigationActions)
+        navigationActions = navigationActions,
+        profilesViewModel = profilesViewModel)
   }
 
   Scaffold(
@@ -290,7 +291,8 @@ fun FilterScreen(
                         isModified = isModified,
                         setShowDialog = { showDialog = it },
                         tagsViewModel = tagsViewModel,
-                        navigationActions = navigationActions)
+                        navigationActions = navigationActions,
+                        profilesViewModel = profilesViewModel)
                   },
                   modifier = Modifier.testTag("Back Button")) {
                     Icon(

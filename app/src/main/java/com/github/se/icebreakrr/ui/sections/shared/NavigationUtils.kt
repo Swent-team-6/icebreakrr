@@ -1,5 +1,6 @@
 package com.github.se.icebreakrr.ui.sections.shared
 
+import com.github.se.icebreakrr.model.profile.ProfilesViewModel
 import com.github.se.icebreakrr.model.tags.TagsViewModel
 import com.github.se.icebreakrr.ui.navigation.NavigationActions
 
@@ -16,12 +17,14 @@ fun handleSafeBackNavigation(
     isModified: Boolean,
     setShowDialog: (Boolean) -> Unit,
     tagsViewModel: TagsViewModel,
-    navigationActions: NavigationActions
+    navigationActions: NavigationActions,
+    profilesViewModel: ProfilesViewModel
 ) {
   if (isModified) {
     setShowDialog(true)
   } else {
     tagsViewModel.leaveUI()
+    profilesViewModel.resetProfileEditionState()
     navigationActions.goBack()
   }
 }
