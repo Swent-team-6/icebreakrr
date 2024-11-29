@@ -17,12 +17,14 @@ import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.storage
+import kotlinx.coroutines.flow.MutableStateFlow
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito
 import org.mockito.Mockito.mock
+import org.mockito.Mockito.`when`
 import org.mockito.kotlin.verify
 
 @RunWith(AndroidJUnit4::class)
@@ -54,6 +56,7 @@ class ProfileEditingScreenTest {
     var mockProfile = Profile.getMockedProfiles()[0]
     fakeProfilesViewModel.setSelectedProfile(mockProfile)
     fakeProfilesViewModel.setLoading(false)
+    fakeProfilesViewModel.setSelfProfile(mockProfile)
   }
 
   @Test
