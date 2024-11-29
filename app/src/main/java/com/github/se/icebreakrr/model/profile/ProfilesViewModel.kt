@@ -269,7 +269,10 @@ open class ProfilesViewModel(
    * @param imageData The byte array representing the image data.
    * @param onSuccess A callback function that is invoked when the upload is successful.
    */
-  private fun uploadCurrentUserProfilePicture(imageData: ByteArray, onSuccess: (url: String?) -> Unit) {
+  private fun uploadCurrentUserProfilePicture(
+      imageData: ByteArray,
+      onSuccess: (url: String?) -> Unit
+  ) {
     val userId = _selfProfile.value?.uid ?: throw IllegalStateException("User not logged in")
     ppRepository.uploadProfilePicture(
         userId = userId,

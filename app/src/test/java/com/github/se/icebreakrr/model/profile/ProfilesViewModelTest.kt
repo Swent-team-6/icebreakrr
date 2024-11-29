@@ -7,10 +7,8 @@ import android.graphics.BitmapFactory
 import android.net.Uri
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.GeoPoint
 import java.io.ByteArrayInputStream
-import java.io.ByteArrayOutputStream
 import java.util.Calendar
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -26,7 +24,6 @@ import org.hamcrest.CoreMatchers.nullValue
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.After
 import org.junit.Assert.assertFalse
-import org.junit.Assert.assertThrows
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -91,8 +88,7 @@ class ProfilesViewModelTest {
     profilesRepository = mock(ProfilesRepository::class.java)
     ppRepository = mock(ProfilePicRepository::class.java)
     mockAuth = mock(FirebaseAuth::class.java)
-    profilesViewModel =
-        ProfilesViewModel(profilesRepository, ppRepository, mockAuth)
+    profilesViewModel = ProfilesViewModel(profilesRepository, ppRepository, mockAuth)
     mockProfileViewModel = mock(ProfilesViewModel::class.java)
     mockAndThen = mock()
 
@@ -289,7 +285,6 @@ class ProfilesViewModelTest {
     assertThat(profilesViewModel.error.value, `is`(exception))
   }
 
-
   // Generated with the help of CursorAI
   @OptIn(ExperimentalCoroutinesApi::class)
   @Test
@@ -419,38 +414,42 @@ class ProfilesViewModelTest {
   @Test
   fun validateAndUploadProfilePictureWithNoTempBitmapDoesNothing() = runBlocking {
     profilesViewModel.clearTempProfilePictureBitmap() // Ensure no temp bitmap exists
-    profilesViewModel.validateAndUploadProfilePicture(context){ /*pass*/}
+    profilesViewModel.validateAndUploadProfilePicture(context) { /*pass*/}
 
     // Verify no interactions with upload functionality
     verify(profilesRepository, never()).updateProfile(any(), any(), any())
   }
 
   @Test
-fun setPictureChangeStateUpdatesState() {
+  fun setPictureChangeStateUpdatesState() {
     profilesViewModel.setPictureChangeState(ProfilesViewModel.ProfilePictureState.TO_UPLOAD)
-    assertThat(profilesViewModel.pictureChangeState.value, `is`(ProfilesViewModel.ProfilePictureState.TO_UPLOAD))
-}
+    assertThat(
+        profilesViewModel.pictureChangeState.value,
+        `is`(ProfilesViewModel.ProfilePictureState.TO_UPLOAD))
+  }
 
-@Test
-fun saveEditedProfileUpdatesState() {
+  @Test
+  fun saveEditedProfileUpdatesState() {
     profilesViewModel.saveEditedProfile(profile1)
     assertThat(profilesViewModel.editedCurrentProfile.value, `is`(profile1))
-}
+  }
 
-@Test
-fun resetProfileEditionStateClearsStates() {
+  @Test
+  fun resetProfileEditionStateClearsStates() {
     profilesViewModel.saveEditedProfile(profile1)
     profilesViewModel.setPictureChangeState(ProfilesViewModel.ProfilePictureState.TO_UPLOAD)
 
     profilesViewModel.resetProfileEditionState()
 
     assertThat(profilesViewModel.editedCurrentProfile.value, `is`(nullValue()))
-    assertThat(profilesViewModel.pictureChangeState.value, `is`(ProfilesViewModel.ProfilePictureState.UNCHANGED))
+    assertThat(
+        profilesViewModel.pictureChangeState.value,
+        `is`(ProfilesViewModel.ProfilePictureState.UNCHANGED))
     assertThat(profilesViewModel.tempProfilePictureBitmap.value, `is`(nullValue()))
-}
+  }
 
-@Test
-fun processCroppedImageUpdatesState() {
+  @Test
+  fun processCroppedImageUpdatesState() {
     val mockBitmap = mock(Bitmap::class.java)
     whenever(mockBitmap.width).thenReturn(100)
     whenever(mockBitmap.height).thenReturn(100)
@@ -458,7 +457,8 @@ fun processCroppedImageUpdatesState() {
     profilesViewModel.processCroppedImage(mockBitmap)
 
     assertThat(profilesViewModel.tempProfilePictureBitmap.value, `is`(mockBitmap))
-    assertThat(profilesViewModel.pictureChangeState.value, `is`(ProfilesViewModel.ProfilePictureState.TO_UPLOAD))
-}
-
+    assertThat(
+        profilesViewModel.pictureChangeState.value,
+        `is`(ProfilesViewModel.ProfilePictureState.TO_UPLOAD))
+  }
 }
