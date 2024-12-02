@@ -22,6 +22,7 @@ private const val SEND_MEETING_REQUEST = "sendMeetingRequest"
 private const val SEND_MEETING_RESPONSE = "sendMeetingResponse"
 private const val SEND_MEETING_CONFIRMATION = "sendMeetingConfirmation"
 private const val SEND_MEETING_CANCELLATION = "sendMeetingCancellation"
+private const val SEND_ENGAGEMENT_NOTIFICATION = "sendEngagementNotification"
 private const val FIVE_HUNDRED_METERS_IN_KM = 0.5
 private const val EARTH_RADIUS_IN_KM = 6371.0
 /*
@@ -217,6 +218,23 @@ class MeetingRequestViewModel(
           )
       try {
         val result = functions.getHttpsCallable(SEND_MEETING_CANCELLATION).call(data).await()
+      } catch (e: Exception) {
+        Log.e("FIREBASE ERROR", "Error sending message", e)
+      }
+    }
+  }
+
+  fun engagementNotification(targetToken: String, tag: String) {
+    viewModelScope.launch {
+      val data =
+          hashMapOf(
+              "targetToken" to targetToken,
+              "senderUID" to senderUID,
+              "senderName" to senderName,
+              "message" to tag,
+          )
+      try {
+        val result = functions.getHttpsCallable(SEND_ENGAGEMENT_NOTIFICATION).call(data).await()
       } catch (e: Exception) {
         Log.e("FIREBASE ERROR", "Error sending message", e)
       }

@@ -56,7 +56,6 @@ class MeetingRequestService : FirebaseMessagingService() {
           MeetingRequestManager.meetingRequestViewModel?.setMeetingConfirmation(
               targetToken = senderToken,
               newMessage = "The meeting with ${MeetingRequestManager.ourName} is cancelled !")
-          MeetingRequestManager.meetingRequestViewModel?.sendMeetingConfirmation()
         }
       }
       "MEETING CONFIRMATION" -> {
@@ -71,6 +70,12 @@ class MeetingRequestService : FirebaseMessagingService() {
         showNotification("Cancelled meeting with $name", "Reason : You went too far away")
         MeetingRequestManager.meetingRequestViewModel?.removeFromMeetingRequestInbox(senderUid)
         MeetingRequestManager.meetingRequestViewModel?.removeFromMeetingRequestSent(senderUid)
+      }
+      "ENGAGEMENT NOTIFICATION" -> {
+        val name = remoteMessage.data["senderName"] ?: "null"
+        showNotification(
+            "A person with similar interests is close by !",
+            "The user $name has the common tag : $message")
       }
     }
   }
