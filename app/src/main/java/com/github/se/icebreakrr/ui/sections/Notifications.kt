@@ -29,9 +29,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.github.se.icebreakrr.model.message.MeetingRequestViewModel
-import com.github.se.icebreakrr.model.profile.Gender
 import com.github.se.icebreakrr.model.profile.ProfilesViewModel
-import com.github.se.icebreakrr.model.sort.SortOption
 import com.github.se.icebreakrr.ui.navigation.BottomNavigationMenu
 import com.github.se.icebreakrr.ui.navigation.LIST_TOP_LEVEL_DESTINATIONS
 import com.github.se.icebreakrr.ui.navigation.NavigationActions
@@ -88,68 +86,62 @@ fun NotificationScreen(
             notificationCount = inboxCardList.value.size)
       },
       content = { innerPadding ->
-        Column (modifier =
-         Modifier.padding(innerPadding)
-            .padding(horizontal = HORIZONTAL_PADDING)) {
-            MeetingRequestOptionDropdown(
-                selectedOption = meetingRequestOption,
-                onOptionSelected = {meetingRequestOption = it},
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp))
-            if (meetingRequestOption == MeetingRequestOption.INBOX) {
-                LazyColumn(
-                    modifier =
-                        Modifier.padding()
-                            .padding(horizontal = HORIZONTAL_PADDING)
-                            .testTag("notificationScroll")) {
-                      item {
-                        Text(
-                            text = MEETING_REQUEST_MSG,
-                            fontWeight = FontWeight.Bold,
-                            modifier =
-                                Modifier.padding(vertical = TEXT_VERTICAL_PADDING)
-                                    .testTag("notificationFirstText"))
-                        Column(verticalArrangement = Arrangement.spacedBy(CARD_SPACING)) {
-                            inboxCardList.value.forEach { p ->
-                            ProfileCard(
-                                p.key,
-                                onclick = {
-                                  if (isNetworkAvailableWithContext(context)) {
-                                    navigationActions.navigateTo(
-                                        Screen.INBOX_PROFILE_VIEW + "?userId=${p.key.uid}")
-                                  } else {
-                                    showNoInternetToast(context)
-                                  }
-                                })
-                          }
-                        }
-                      }
-                    }
-            }
-            if (meetingRequestOption == MeetingRequestOption.SENT) {
-                LazyColumn(
-                    modifier =
+        Column(modifier = Modifier.padding(innerPadding).padding(horizontal = HORIZONTAL_PADDING)) {
+          MeetingRequestOptionDropdown(
+              selectedOption = meetingRequestOption,
+              onOptionSelected = { meetingRequestOption = it },
+              modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp))
+          if (meetingRequestOption == MeetingRequestOption.INBOX) {
+            LazyColumn(
+                modifier =
                     Modifier.padding()
                         .padding(horizontal = HORIZONTAL_PADDING)
                         .testTag("notificationScroll")) {
-                    item {
-                        Text(
-                            text = MEETING_REQUEST_SENT,
-                            fontWeight = FontWeight.Bold,
-                            modifier =
+                  item {
+                    Text(
+                        text = MEETING_REQUEST_MSG,
+                        fontWeight = FontWeight.Bold,
+                        modifier =
                             Modifier.padding(vertical = TEXT_VERTICAL_PADDING)
                                 .testTag("notificationFirstText"))
-                        Column(verticalArrangement = Arrangement.spacedBy(CARD_SPACING)) {
-                            sentCardList.value.forEach { p ->
-                                ProfileCard(
-                                    profile = p,
-                                    onclick = {},
-                                    greyedOut = true
-                                )
-                            }
-                        }
+                    Column(verticalArrangement = Arrangement.spacedBy(CARD_SPACING)) {
+                      inboxCardList.value.forEach { p ->
+                        ProfileCard(
+                            p.key,
+                            onclick = {
+                              if (isNetworkAvailableWithContext(context)) {
+                                navigationActions.navigateTo(
+                                    Screen.INBOX_PROFILE_VIEW + "?userId=${p.key.uid}")
+                              } else {
+                                showNoInternetToast(context)
+                              }
+                            })
+                      }
                     }
+                  }
                 }
-            }
+          }
+          if (meetingRequestOption == MeetingRequestOption.SENT) {
+            LazyColumn(
+                modifier =
+                    Modifier.padding()
+                        .padding(horizontal = HORIZONTAL_PADDING)
+                        .testTag("notificationScroll")) {
+                  item {
+                    Text(
+                        text = MEETING_REQUEST_SENT,
+                        fontWeight = FontWeight.Bold,
+                        modifier =
+                            Modifier.padding(vertical = TEXT_VERTICAL_PADDING)
+                                .testTag("notificationFirstText"))
+                    Column(verticalArrangement = Arrangement.spacedBy(CARD_SPACING)) {
+                      sentCardList.value.forEach { p ->
+                        ProfileCard(profile = p, onclick = {}, greyedOut = true)
+                      }
+                    }
+                  }
+                }
+          }
         }
       })
 }
@@ -160,68 +152,67 @@ fun MeetingRequestOptionDropdown(
     onOptionSelected: (MeetingRequestOption) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    var expanded by remember { mutableStateOf(false) }
+  var expanded by remember { mutableStateOf(false) }
 
-    // List of all options excluding the selected one
-    val otherOptions = MeetingRequestOption.values().filter { it != selectedOption }
+  // List of all options excluding the selected one
+  val otherOptions = MeetingRequestOption.values().filter { it != selectedOption }
 
-    Column(modifier = modifier) {
-        // Selected option with a dropdown indicator
-        Row(
-            modifier =
+  Column(modifier = modifier) {
+    // Selected option with a dropdown indicator
+    Row(
+        modifier =
             Modifier.fillMaxWidth()
                 .clickable { expanded = !expanded }
                 .padding(COLUMN_HORIZONTAL_PADDING)
                 .testTag("SortOptionsDropdown_Selected"),
-            verticalAlignment = Alignment.CenterVertically) {
-            Text(
-                text =
-                "Meeting Request: ${
+        verticalAlignment = Alignment.CenterVertically) {
+          Text(
+              text =
+                  "Meeting Request: ${
                     selectedOption.name.replace("_", " ").lowercase()
                         .replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.ROOT) else it.toString() }
                 }",
-                fontSize = TEXT_SMALL_SIZE,
-                modifier =
-                Modifier.weight(1f) // Pushes the arrow to the end
-                    .testTag("MeetingRequestOptionsDropdown_Text"))
-            Icon(
-                imageVector =
-                if (expanded) Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown,
-                contentDescription = if (expanded) "Collapse" else "Expand",
-                modifier = Modifier.testTag("MeetingRequestOptionsDropdown_Arrow"))
+              fontSize = TEXT_SMALL_SIZE,
+              modifier =
+                  Modifier.weight(1f) // Pushes the arrow to the end
+                      .testTag("MeetingRequestOptionsDropdown_Text"))
+          Icon(
+              imageVector =
+                  if (expanded) Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown,
+              contentDescription = if (expanded) "Collapse" else "Expand",
+              modifier = Modifier.testTag("MeetingRequestOptionsDropdown_Arrow"))
         }
 
-        if (expanded) {
-            otherOptions.forEach { option ->
-                Row(
-                    modifier =
-                    Modifier.fillMaxWidth()
-                        .clickable {
-                            expanded = false
-                            onOptionSelected(option)
-                        }
-                        .padding(
-                            start = COLUMN_VERTICAL_PADDING,
-                            top = SORT_TOP_PADDING,
-                            bottom = COLUMN_HORIZONTAL_PADDING)
-                        .testTag("MeetingRequestOptionsDropdown_Option_${option.name}"),
-                ) {
-                    Text(
-                        text =
-                        option.name.replace("_", " ").lowercase().replaceFirstChar {
-                            if (it.isLowerCase()) it.titlecase(Locale.ROOT) else it.toString()
-                        },
-                        fontSize = TEXT_SMALL_SIZE,
-                        color = Color.Gray
-                    )
-                }
-            }
+    if (expanded) {
+      otherOptions.forEach { option ->
+        Row(
+            modifier =
+                Modifier.fillMaxWidth()
+                    .clickable {
+                      expanded = false
+                      onOptionSelected(option)
+                    }
+                    .padding(
+                        start = COLUMN_VERTICAL_PADDING,
+                        top = SORT_TOP_PADDING,
+                        bottom = COLUMN_HORIZONTAL_PADDING)
+                    .testTag("MeetingRequestOptionsDropdown_Option_${option.name}"),
+        ) {
+          Text(
+              text =
+                  option.name.replace("_", " ").lowercase().replaceFirstChar {
+                    if (it.isLowerCase()) it.titlecase(Locale.ROOT) else it.toString()
+                  },
+              fontSize = TEXT_SMALL_SIZE,
+              color = Color.Gray)
         }
+      }
     }
+  }
 }
 
 enum class MeetingRequestOption {
-    INBOX,
-    SENT,
-    CHOOSE_LOCATION
+  INBOX,
+  SENT,
+  CHOOSE_LOCATION
 }

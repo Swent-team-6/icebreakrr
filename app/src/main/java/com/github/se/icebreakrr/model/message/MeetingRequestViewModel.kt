@@ -309,8 +309,8 @@ class MeetingRequestViewModel(
   /** Refreshes the content of the inbox to have it available locally */
   fun updateInboxOfMessages() {
     profilesViewModel.getSelfProfileAndThen() {
-        profilesViewModel.getInboxOfSelfProfile()
-        profilesViewModel.getMessageCancellationUsers()
+      profilesViewModel.getInboxOfSelfProfile()
+      profilesViewModel.getMessageCancellationUsers()
     }
   }
 

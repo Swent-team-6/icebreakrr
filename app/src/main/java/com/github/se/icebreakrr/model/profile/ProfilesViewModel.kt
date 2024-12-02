@@ -518,13 +518,13 @@ open class ProfilesViewModel(
   private fun getSentUsers(sentUserUid: List<String>) {
     _loading.value = true
     repository.getMultipleProfiles(
-      sentUserUid,
-      onSuccess = { profileList ->
-        _sentProfiles.value = profileList
-        _loading.value = false
-        _isConnected.value = true
-      },
-      onFailure = { e -> handleError(e) })
+        sentUserUid,
+        onSuccess = { profileList ->
+          _sentProfiles.value = profileList
+          _loading.value = false
+          _isConnected.value = true
+        },
+        onFailure = { e -> handleError(e) })
   }
 
   /** Fetches all the users that our profile has been in contact with (received or sent messages) */
@@ -574,13 +574,13 @@ open class ProfilesViewModel(
   fun getSelfProfileAndThen(andThen: () -> Unit) {
     _loadingSelf.value = true
     repository.getProfileByUid(
-      auth.currentUser?.uid ?: "null",
-      onSuccess = { profile ->
-        _selfProfile.value = profile
-        _loadingSelf.value = false
-        andThen()
-      },
-      onFailure = { e -> handleError(e) })
+        auth.currentUser?.uid ?: "null",
+        onSuccess = { profile ->
+          _selfProfile.value = profile
+          _loadingSelf.value = false
+          andThen()
+        },
+        onFailure = { e -> handleError(e) })
   }
 
   /** Get the geoHash of our profile */
