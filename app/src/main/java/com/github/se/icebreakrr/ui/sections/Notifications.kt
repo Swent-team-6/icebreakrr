@@ -1,6 +1,7 @@
 package com.github.se.icebreakrr.ui.sections
 
 import android.annotation.SuppressLint
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
@@ -31,7 +32,7 @@ private val HORIZONTAL_PADDING = 7.dp
 private val TEXT_VERTICAL_PADDING = 16.dp
 private val CARD_SPACING = 16.dp
 private const val MEETING_REQUEST_MSG = "Pending meeting requests"
-private const val MEETING_REQUEST_ACCEPTED = "Meeting Request Accepted !"
+private const val MEETING_REQUEST_LOCATION_PENDING = "Choose location"
 
 /**
  * Composable function for displaying the notification screen.
@@ -49,7 +50,9 @@ fun NotificationScreen(
 ) {
   meetingRequestViewModel.updateInboxOfMessages()
   val cardList = profileViewModel.inboxItems.collectAsState()
+  val pendingLocation = profileViewModel.pendingLocalisations.collectAsState()
   val context = LocalContext.current
+  Log.d("TESTEST", "[NotificationScreen] size of cardList (inboxItems) : ${cardList}")
   Scaffold(
       modifier = Modifier.testTag("notificationScreen"),
       topBar = { TopBar("Inbox") },
@@ -62,7 +65,7 @@ fun NotificationScreen(
             },
             tabList = LIST_TOP_LEVEL_DESTINATIONS,
             selectedItem = Route.NOTIFICATIONS,
-            notificationCount = cardList.value.size)
+            notificationCount = cardList.value.size + pendingLocation.value.size)
       },
       content = { innerPadding ->
         LazyColumn(
@@ -85,6 +88,28 @@ fun NotificationScreen(
                           if (isNetworkAvailableWithContext(context)) {
                             navigationActions.navigateTo(
                                 Screen.INBOX_PROFILE_VIEW + "?userId=${p.key.uid}")
+                          } else {
+                            showNoInternetToast(context)
+                          }
+                        })
+                  }
+                }
+              }
+              item {
+                Text(
+                    text = MEETING_REQUEST_LOCATION_PENDING,
+                    fontWeight = FontWeight.Bold,
+                    modifier =
+                        Modifier.padding(vertical = TEXT_VERTICAL_PADDING)
+                            .testTag("notificationSecondText"))
+                Column(verticalArrangement = Arrangement.spacedBy(CARD_SPACING)) {
+                  pendingLocation.value.forEach { p ->
+                    ProfileCard(
+                        p,
+                        onclick = {
+                          if (isNetworkAvailableWithContext(context)) {
+                            navigationActions.navigateTo(
+                                Screen.MAP_MEETING_LOCATION_SCREEN + "?userId=${p.uid}")
                           } else {
                             showNoInternetToast(context)
                           }

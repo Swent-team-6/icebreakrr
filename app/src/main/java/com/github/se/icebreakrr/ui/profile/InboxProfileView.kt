@@ -1,5 +1,6 @@
 package com.github.se.icebreakrr.ui.profile
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -118,14 +119,17 @@ fun InboxProfileViewScreen(
             {
               acceptDeclineCode(
                   meetingRequestViewModel, navigationActions, profile.uid, true, profile.fcmToken)
+                Toast.makeText(
+                    context,
+                    "You've accepted the request, " +
+                            profile.name +
+                            " is choosing the location of your meeting!",
+                    Toast.LENGTH_SHORT)
+                    .show()
             },
             {
               acceptDeclineCode(
-                  meetingRequestViewModel,
-                  navigationActions,
-                  profile.uid,
-                  false,
-                  profile.fcmToken!!)
+                  meetingRequestViewModel, navigationActions, profile.uid, false, profile.fcmToken)
             })
         InfoSection(profile = profile, tagsViewModel = tagsViewModel)
       }

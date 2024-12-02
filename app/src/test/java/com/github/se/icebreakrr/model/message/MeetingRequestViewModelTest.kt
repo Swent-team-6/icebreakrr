@@ -165,7 +165,7 @@ class MeetingRequestViewModelTest {
     }
     profilesViewModel.getSelfProfile()
     meetingRequestViewModel.setMeetingConfirmation(
-        targetToken = profile2.fcmToken ?: "null", newMessage = message)
+        targetToken = profile2.fcmToken ?: "null", newLocation = message)
     assert(meetingRequestViewModel.meetingConfirmationState.message == message)
     assert(
         (meetingRequestViewModel.meetingConfirmationState.targetToken) ==
@@ -383,7 +383,7 @@ class MeetingRequestViewModelTest {
       onSuccess(profile1)
     }
     profilesViewModel.getSelfProfile()
-    meetingRequestViewModel.addToMeetingRequestInbox("2", "hello")
+    meetingRequestViewModel.addToMeetingRequestInbox("2", "hello") {}
     verify(profilesRepository).getProfileByUid(eq("1"), any(), any())
     verify(profilesRepository).updateProfile(eq(updatedProfile1), any(), any())
   }

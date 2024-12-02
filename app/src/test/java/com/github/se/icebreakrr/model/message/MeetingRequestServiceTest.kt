@@ -44,7 +44,7 @@ class MeetingRequestServiceTest {
     meetingRequestService.onMessageReceived(mockRemoteMessage)
 
     // Verify that ViewModel methods were called
-    verify(mockMeetingRequestViewModel)?.addToMeetingRequestInbox("1", "hello")
+    verify(mockMeetingRequestViewModel)?.addToMeetingRequestInbox("1", "hello") {}
     verify(mockMeetingRequestViewModel)?.updateInboxOfMessages()
   }
 }

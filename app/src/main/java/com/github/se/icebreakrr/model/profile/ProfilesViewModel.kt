@@ -70,6 +70,13 @@ open class ProfilesViewModel(
   private val _isConnected = MutableStateFlow(true)
   open var isConnected: StateFlow<Boolean> = _isConnected
 
+  private val _pendingLocalisations = MutableStateFlow<List<Profile>>(emptyList())
+  open var pendingLocalisations: StateFlow<List<Profile>> = _pendingLocalisations
+
+  private val _chosenLocalisations =
+      MutableStateFlow<Map<Profile, Pair<Double, Double>>>(emptyMap())
+  open var chosenLocalisations: StateFlow<Map<Profile, Pair<Double, Double>>> = _chosenLocalisations
+
   fun updateIsConnected(boolean: Boolean) {
     _isConnected.value = boolean
     repository.checkConnectionPeriodically({})
@@ -221,10 +228,19 @@ open class ProfilesViewModel(
    *
    * @param profile The profile with updated information.
    */
-  fun updateProfile(profile: Profile) {
+  fun updateProfile(profile: Profile, onComplete: () -> Unit) {
     _loading.value = true
+    _selfProfile.value = profile
     repository.updateProfile(
-        profile, onSuccess = { _loading.value = false }, onFailure = { e -> handleError(e) })
+        profile,
+        onSuccess = {
+          _loading.value = false
+          onComplete()
+        },
+        onFailure = { e ->
+          handleError(e)
+          Log.d("TESTEST", "failed to update profile")
+        })
   }
 
   /**
@@ -349,7 +365,7 @@ open class ProfilesViewModel(
       ProfilePictureState.TO_UPLOAD ->
           validateAndUploadProfilePicture(context) { url ->
             val newProfile = _editedCurrentProfile.value!!.copy(profilePictureUrl = url)
-            updateProfile(newProfile)
+            updateProfile(newProfile) {}
             _selfProfile.value = newProfile
             // todo: "_selectedProfile.value = newProfile" needs to be removed when all the other
             // personal profile views are updated to use the selfProfile instead of the
@@ -361,13 +377,13 @@ open class ProfilesViewModel(
       TO_DELETE ->
           deleteCurrentUserProfilePicture() {
             val newProfile = _editedCurrentProfile.value?.copy(profilePictureUrl = null)
-            updateProfile(newProfile!!)
+            updateProfile(newProfile!!) {}
             _selfProfile.value = newProfile
             _selectedProfile.value = newProfile // todo: same as above
             resetProfileEditionState()
           }
       else -> {
-        updateProfile(_editedCurrentProfile.value!!)
+        updateProfile(_editedCurrentProfile.value!!) {}
         _selfProfile.value = _editedCurrentProfile.value
         _selectedProfile.value = _editedCurrentProfile.value // todo: same as above
         resetProfileEditionState()
@@ -411,7 +427,7 @@ open class ProfilesViewModel(
     _selfProfile.update { currentProfile ->
       currentProfile?.copy(hasBlocked = currentProfile.hasBlocked + uid)
     }
-    updateProfile(selfProfile.value!!)
+    updateProfile(selfProfile.value!!) {}
   }
 
   /**
@@ -423,7 +439,7 @@ open class ProfilesViewModel(
     _selfProfile.update { currentProfile ->
       currentProfile?.copy(hasBlocked = currentProfile.hasBlocked.filter { it != uid })
     }
-    updateProfile(selfProfile.value!!)
+    updateProfile(selfProfile.value!!) {}
     getBlockedUsers()
   }
 
@@ -439,7 +455,7 @@ open class ProfilesViewModel(
         currentProfile?.copy(
             reports = currentProfile.reports.plus(_selfProfile.value!!.uid to reason))
       }
-      updateProfile(_selectedProfile.value!!)
+      updateProfile(_selectedProfile.value!!) {}
     }
   }
 
@@ -465,7 +481,7 @@ open class ProfilesViewModel(
     _selfProfile.update { currentProfile ->
       currentProfile?.copy(hasAlreadyMet = currentProfile.hasAlreadyMet + uid)
     }
-    updateProfile(selfProfile.value!!)
+    updateProfile(selfProfile.value!!) {}
   }
 
   /**
@@ -477,7 +493,7 @@ open class ProfilesViewModel(
     _selfProfile.update { currentProfile ->
       currentProfile?.copy(hasAlreadyMet = currentProfile.hasAlreadyMet.filter { it != uid })
     }
-    updateProfile(selfProfile.value!!)
+    updateProfile(selfProfile.value!!) {}
     getBlockedUsers()
   }
 
@@ -497,12 +513,53 @@ open class ProfilesViewModel(
    *
    * @param inboxUserUid: The list of UID of the profiles that have sent a message to our user inbox
    */
-  private fun getInboxUsers(inboxUserUid: List<String>) {
+  private fun getInboxUsers(inboxUserUid: List<String>, onComplete: () -> Unit) {
     _loading.value = true
     repository.getMultipleProfiles(
         inboxUserUid,
         onSuccess = { profileList ->
           _inboxProfiles.value = profileList
+          _loading.value = false
+          _isConnected.value = true
+          onComplete()
+        },
+        onFailure = { e ->
+          handleError(e)
+          Log.d("TESTEST", "error in get inbox users : ${error.value?.message}")
+        })
+  }
+
+  private fun getPendingLocationUsers(inboxUserUid: List<String>) {
+    _loading.value = true
+    repository.getMultipleProfiles(
+        inboxUserUid,
+        onSuccess = { profileList ->
+          _pendingLocalisations.value = profileList
+          _loading.value = false
+          _isConnected.value = true
+        },
+        onFailure = { e -> handleError(e) })
+  }
+
+  private fun getChosenLocations(
+      inboxUserUid: Map<String, Pair<Double, Double>>,
+  ) {
+    _loading.value = true
+    repository.getMultipleProfiles(
+        inboxUserUid.map { it.key },
+        onSuccess = { profileList ->
+          val profileLookup = profileList.associateBy { it.uid }
+          _chosenLocalisations.value =
+              inboxUserUid
+                  .mapNotNull { (uid, coordinates) ->
+                    val profile = profileLookup[uid]
+                    if (profile != null) {
+                      profile to coordinates
+                    } else {
+                      null
+                    }
+                  }
+                  .toMap()
           _loading.value = false
           _isConnected.value = true
         },
@@ -516,9 +573,52 @@ open class ProfilesViewModel(
       val uidsMessageList = inboxUidList.toList()
       val uidsList = uidsMessageList.map { it.first }
       val messageList = uidsMessageList.map { it.second }
-      getInboxUsers(uidsList)
-      _inboxItems.value = _inboxProfiles.value.filterNotNull().zip(messageList).toMap()
+      getInboxUsers(uidsList) {
+        _inboxItems.value =
+            _inboxProfiles.value.filterNotNull().zip(messageList).toMap().toMutableMap()
+      }
     }
+  }
+
+  fun getInboxOfPendingLocations() {
+    val pendingLocationUid = selfProfile.value?.meetingRequestPendingLocation
+    if (pendingLocationUid != null) {
+      getPendingLocationUsers(pendingLocationUid)
+    }
+  }
+
+  fun getChosenLocations() {
+    val chosenLocationsUid = selfProfile.value?.meetingRequestChosenLocalisation
+    if (chosenLocationsUid != null) {
+      getChosenLocations(chosenLocationsUid)
+    }
+  }
+
+  fun addPendingLocation(newUid: String) {
+    updateProfile(
+        _selfProfile.value?.copy(
+            meetingRequestPendingLocation =
+                _selfProfile.value?.meetingRequestPendingLocation?.plus(newUid)
+                    ?: emptyList())!!) {}
+  }
+
+  fun removeChosenLocalisation(uid: String) {
+    updateProfile(
+        _selfProfile.value?.copy(
+            meetingRequestChosenLocalisation =
+                _selfProfile.value?.meetingRequestChosenLocalisation?.filter { it.key != uid }
+                    ?: emptyMap())!!) {}
+  }
+
+  fun confirmMeetingLocation(uid: String, loc: Pair<Double, Double>) {
+    updateProfile(
+        _selfProfile.value?.copy(
+            meetingRequestChosenLocalisation =
+                _selfProfile.value?.meetingRequestChosenLocalisation?.plus(uid to loc)
+                    ?: emptyMap(),
+            meetingRequestPendingLocation =
+                _selfProfile.value?.meetingRequestPendingLocation?.filter { it != uid }
+                    ?: emptyList())!!) {}
   }
 
   /** Fetches the current user's profile from the repository. */

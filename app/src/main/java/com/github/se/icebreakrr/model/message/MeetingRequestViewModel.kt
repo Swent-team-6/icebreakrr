@@ -73,7 +73,7 @@ class MeetingRequestViewModel(
     val currentProfile = profilesViewModel.getSelfProfileValue()
     if (currentProfile != null) {
       val updatedProfile = currentProfile.copy(fcmToken = newToken)
-      profilesViewModel.updateProfile(updatedProfile)
+      profilesViewModel.updateProfile(updatedProfile) {}
     }
   }
   /**
@@ -109,17 +109,14 @@ class MeetingRequestViewModel(
    * Sets the message of the meeting confirmation
    *
    * @param targetToken: the FCM token of the target user
-   * @param newMessage: the response message we want to send
+   * @param newLocation: the chosen location to send in the form "latitude, longitude"
    */
-  fun setMeetingConfirmation(targetToken: String, newMessage: String) {
-    val location = profilesViewModel.getSelfGeoHash()
-    if (location != null) {
-      meetingConfirmationState =
-          meetingConfirmationState.copy(
-              targetToken = targetToken, message = newMessage, location = location)
-    } else {
-      Log.e("MEETING CONFIRMATION", "geohash null for sender profile")
-    }
+  fun setMeetingConfirmation(targetToken: String, newLocation: String) {
+    meetingConfirmationState =
+        meetingConfirmationState.copy(
+            targetToken = targetToken,
+            message = "meeting request successfull",
+            location = newLocation)
   }
 
   /** Send a meeting request to the target user, by calling a Firebase Cloud Function */
@@ -191,7 +188,7 @@ class MeetingRequestViewModel(
         profilesViewModel.selfProfile.value?.copy(
             meetingRequestSent = currentMeetingRequestSent + receiverUID)
     if (updatedProfile != null) {
-      profilesViewModel.updateProfile(updatedProfile)
+      profilesViewModel.updateProfile(updatedProfile) {}
     } else {
       Log.e("SENT MEETING REQUEST", "Adding the new meeting request to our sent list failed")
     }
@@ -209,7 +206,7 @@ class MeetingRequestViewModel(
     val updatedProfile =
         profilesViewModel.selfProfile.value?.copy(meetingRequestSent = updatedMeetingRequestSend)
     if (updatedProfile != null) {
-      profilesViewModel.updateProfile(updatedProfile)
+      profilesViewModel.updateProfile(updatedProfile) {}
     } else {
       Log.e("SENT MEETING REQUEST", "Removing the meeting request of our sent list failed")
     }
@@ -221,14 +218,14 @@ class MeetingRequestViewModel(
    * @param senderUID: the uid of the sender
    * @param message: the received message
    */
-  fun addToMeetingRequestInbox(senderUID: String, message: String) {
+  fun addToMeetingRequestInbox(senderUID: String, message: String, onComplete: () -> Unit) {
     val currentMeetingRequestInbox =
         profilesViewModel.selfProfile.value?.meetingRequestInbox ?: mapOf()
     val updatedProfile =
         profilesViewModel.selfProfile.value?.copy(
             meetingRequestInbox = currentMeetingRequestInbox + (senderUID to message))
     if (updatedProfile != null) {
-      profilesViewModel.updateProfile(updatedProfile)
+      profilesViewModel.updateProfile(updatedProfile) { onComplete() }
     } else {
       Log.e("INBOX MEETING REQUEST", "Adding the new meeting request to our inbox list failed")
     }
@@ -246,7 +243,7 @@ class MeetingRequestViewModel(
     val updatedProfile =
         profilesViewModel.selfProfile.value?.copy(meetingRequestInbox = updatedMeetingRequestInbox)
     if (updatedProfile != null) {
-      profilesViewModel.updateProfile(updatedProfile)
+      profilesViewModel.updateProfile(updatedProfile) {}
     } else {
       Log.e("INBOX MEETING REQUEST", "Removing the meeting request in our inbox list failed")
     }
@@ -256,5 +253,23 @@ class MeetingRequestViewModel(
   fun updateInboxOfMessages() {
     profilesViewModel.getSelfProfile()
     profilesViewModel.getInboxOfSelfProfile()
+    profilesViewModel.getInboxOfPendingLocations()
+  }
+
+  fun updateChosenLocalisations() {
+    profilesViewModel.getSelfProfile()
+    profilesViewModel.getChosenLocations()
+  }
+
+  fun addPendingLocation(newUid: String) {
+    profilesViewModel.addPendingLocation(newUid)
+  }
+
+  fun confirmMeetingLocation(uid: String, loc: Pair<Double, Double>) {
+    profilesViewModel.confirmMeetingLocation(uid, loc)
+  }
+
+  fun removeChosenLocalisation(uid: String) {
+    profilesViewModel.removeChosenLocalisation(uid)
   }
 }

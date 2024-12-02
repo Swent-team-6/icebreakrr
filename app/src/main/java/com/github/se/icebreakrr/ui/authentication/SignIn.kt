@@ -162,7 +162,7 @@ fun SignInScreen(
                         navigationActions.navigateTo(Screen.PROFILE_CREATION)
                       } else {
                         val updatedProfile = profile.copy(fcmToken = fcmToken)
-                        profilesViewModel.updateProfile(updatedProfile)
+                        profilesViewModel.updateProfile(updatedProfile) {}
                         navigationActions.navigateTo(TopLevelDestinations.AROUND_YOU)
                       }
                     }

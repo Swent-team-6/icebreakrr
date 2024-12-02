@@ -372,6 +372,22 @@ class ProfilesRepositoryFirestore(
               ?.filter { (key, value) -> key is String && value is String }
               ?.map { (key, value) -> key as String to value as String }
               ?.toMap() ?: mapOf()
+      val meetingRequestPendingLocation =
+          (document.get("meetingRequestPendingLocation") as? List<*>)?.filterIsInstance<String>()
+              ?: listOf()
+      val meetingRequestChosenLocation =
+          (document.get("meetingRequestChosenLocalisation") as? Map<*, *>)
+              ?.filter { (key, value) ->
+                key is String &&
+                    value is Map<*, *> &&
+                    value["latitude"] is Double &&
+                    value["longitude"] is Double
+              }
+              ?.map { (key, value) ->
+                key as String to
+                    Pair((value as Map<*, *>)["latitude"] as Double, value["longitude"] as Double)
+              }
+              ?.toMap() ?: mapOf()
       Profile(
           uid = uid,
           name = name,
@@ -388,7 +404,9 @@ class ProfilesRepositoryFirestore(
           hasAlreadyMet = hasAlreadyMet,
           reports = reports,
           meetingRequestSent = meetingRequestSent,
-          meetingRequestInbox = meetingRequestInbox)
+          meetingRequestInbox = meetingRequestInbox,
+          meetingRequestPendingLocation = meetingRequestPendingLocation,
+          meetingRequestChosenLocalisation = meetingRequestChosenLocation)
     } catch (e: Exception) {
       Log.e("ProfileRepositoryFirestore", "Error converting document to Profile", e)
       null

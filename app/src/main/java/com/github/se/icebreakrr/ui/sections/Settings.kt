@@ -109,7 +109,9 @@ fun SettingsScreen(
             },
             tabList = LIST_TOP_LEVEL_DESTINATIONS,
             selectedItem = Route.SETTINGS,
-            notificationCount = myProfile.value?.meetingRequestInbox?.size ?: 0)
+            notificationCount =
+                (myProfile.value?.meetingRequestInbox?.size ?: 0) +
+                    (myProfile.value?.meetingRequestPendingLocation?.size ?: 0))
       },
   ) { innerPadding ->
     Column(

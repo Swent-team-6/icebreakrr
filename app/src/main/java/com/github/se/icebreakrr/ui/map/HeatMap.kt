@@ -136,7 +136,6 @@ fun HeatMap(
               Log.w("HeatMap", "No valid locations to display on the heatmap.")
             }
           }
-
           GoogleMap(
               modifier = Modifier.fillMaxSize().padding(paddingValues).testTag("googleMap"),
               cameraPositionState = cameraPositionState,
