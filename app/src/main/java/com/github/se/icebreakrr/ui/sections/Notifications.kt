@@ -31,7 +31,7 @@ private val HORIZONTAL_PADDING = 7.dp
 private val TEXT_VERTICAL_PADDING = 16.dp
 private val CARD_SPACING = 16.dp
 private const val MEETING_REQUEST_MSG = "Pending meeting requests"
-private const val MEETING_REQUEST_ACCEPTED = "Meeting Request Accepted !"
+private const val MEETING_REQUEST_SENT = "Meeting request sent"
 
 /**
  * Composable function for displaying the notification screen.
@@ -48,7 +48,8 @@ fun NotificationScreen(
     meetingRequestViewModel: MeetingRequestViewModel
 ) {
   meetingRequestViewModel.updateInboxOfMessages()
-  val cardList = profileViewModel.inboxItems.collectAsState()
+  val inboxCardList = profileViewModel.inboxItems.collectAsState()
+  val sentCardList = profileViewModel.sentItems.collectAsState()
   val context = LocalContext.current
   Scaffold(
       modifier = Modifier.testTag("notificationScreen"),
@@ -62,36 +63,61 @@ fun NotificationScreen(
             },
             tabList = LIST_TOP_LEVEL_DESTINATIONS,
             selectedItem = Route.NOTIFICATIONS,
-            notificationCount = cardList.value.size)
+            notificationCount = inboxCardList.value.size)
       },
       content = { innerPadding ->
-        LazyColumn(
-            modifier =
+        Column () {
+            LazyColumn(
+                modifier =
+                    Modifier.padding(innerPadding)
+                        .padding(horizontal = HORIZONTAL_PADDING)
+                        .testTag("notificationScroll")) {
+                  item {
+                    Text(
+                        text = MEETING_REQUEST_MSG,
+                        fontWeight = FontWeight.Bold,
+                        modifier =
+                            Modifier.padding(vertical = TEXT_VERTICAL_PADDING)
+                                .testTag("notificationFirstText"))
+                    Column(verticalArrangement = Arrangement.spacedBy(CARD_SPACING)) {
+                        inboxCardList.value.forEach { p ->
+                        ProfileCard(
+                            p.key,
+                            onclick = {
+                              if (isNetworkAvailableWithContext(context)) {
+                                navigationActions.navigateTo(
+                                    Screen.INBOX_PROFILE_VIEW + "?userId=${p.key.uid}")
+                              } else {
+                                showNoInternetToast(context)
+                              }
+                            })
+                      }
+                    }
+                  }
+                }
+            LazyColumn(
+                modifier =
                 Modifier.padding(innerPadding)
                     .padding(horizontal = HORIZONTAL_PADDING)
                     .testTag("notificationScroll")) {
-              item {
-                Text(
-                    text = MEETING_REQUEST_MSG,
-                    fontWeight = FontWeight.Bold,
-                    modifier =
+                item {
+                    Text(
+                        text = MEETING_REQUEST_SENT,
+                        fontWeight = FontWeight.Bold,
+                        modifier =
                         Modifier.padding(vertical = TEXT_VERTICAL_PADDING)
                             .testTag("notificationFirstText"))
-                Column(verticalArrangement = Arrangement.spacedBy(CARD_SPACING)) {
-                  cardList.value.forEach { p ->
-                    ProfileCard(
-                        p.key,
-                        onclick = {
-                          if (isNetworkAvailableWithContext(context)) {
-                            navigationActions.navigateTo(
-                                Screen.INBOX_PROFILE_VIEW + "?userId=${p.key.uid}")
-                          } else {
-                            showNoInternetToast(context)
-                          }
-                        })
-                  }
+                    Column(verticalArrangement = Arrangement.spacedBy(CARD_SPACING)) {
+                        sentCardList.value.forEach { p ->
+                            ProfileCard(
+                                profile = p,
+                                onclick = {},
+                                greyedOut = true
+                            )
+                        }
+                    }
                 }
-              }
             }
+        }
       })
 }

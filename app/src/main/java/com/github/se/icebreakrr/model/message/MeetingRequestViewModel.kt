@@ -22,7 +22,8 @@ private const val SEND_MEETING_REQUEST = "sendMeetingRequest"
 private const val SEND_MEETING_RESPONSE = "sendMeetingResponse"
 private const val SEND_MEETING_CONFIRMATION = "sendMeetingConfirmation"
 private const val SEND_MEETING_CANCELLATION = "sendMeetingCancellation"
-
+private const val FIVE_HUNDRED_METERS_IN_KM = 0.5
+private const val EARTH_RADIUS_IN_KM = 6371.0
 /*
    Class that manages the interaction between messages, the Profile backend and the user of the app
 */
@@ -205,7 +206,7 @@ class MeetingRequestViewModel(
   }
 
   /** Send a meeting cancellation in the case of distance cancellation or time cancellation */
-  fun sendMeetingCancellation() {
+  private fun sendMeetingCancellation() {
     viewModelScope.launch {
       val data =
           hashMapOf(
@@ -231,13 +232,11 @@ class MeetingRequestViewModel(
   fun addToMeetingRequestSent(receiverUID: String) {
     val currentMeetingRequestSent =
         profilesViewModel.selfProfile.value?.meetingRequestSent ?: listOf()
-      Log.d("CURRENT SENT", currentMeetingRequestSent.toString())
     if (!currentMeetingRequestSent.contains(receiverUID)) {
       val updatedProfile =
           profilesViewModel.selfProfile.value?.copy(
               meetingRequestSent = currentMeetingRequestSent + receiverUID)
       if (updatedProfile != null) {
-          Log.d("NEW SENT", updatedProfile.meetingRequestSent.toString())
         profilesViewModel.updateProfile(updatedProfile)
       } else {
         Log.e("SENT MEETING REQUEST", "Adding the new meeting request to our sent list failed")
@@ -253,13 +252,11 @@ class MeetingRequestViewModel(
   fun removeFromMeetingRequestSent(receiverUID: String) {
     val currentMeetingRequestSent =
         profilesViewModel.selfProfile.value?.meetingRequestSent ?: listOf()
-      Log.d("CURRENT SENT", currentMeetingRequestSent.toString())
     if (currentMeetingRequestSent.contains(receiverUID)) {
       val updatedMeetingRequestSend = currentMeetingRequestSent.filter { it != receiverUID }
       val updatedProfile =
           profilesViewModel.selfProfile.value?.copy(meetingRequestSent = updatedMeetingRequestSend)
       if (updatedProfile != null) {
-          Log.d("NEW SENT", updatedProfile.meetingRequestSent.toString())
         profilesViewModel.updateProfile(updatedProfile)
       } else {
         Log.e("SENT MEETING REQUEST", "Removing the meeting request of our sent list failed")
@@ -276,13 +273,11 @@ class MeetingRequestViewModel(
   fun addToMeetingRequestInbox(senderUID: String, message: String) {
     val currentMeetingRequestInbox =
         profilesViewModel.selfProfile.value?.meetingRequestInbox ?: mapOf()
-      Log.d("CURRENT INBOX", currentMeetingRequestInbox.toString())
     if (!currentMeetingRequestInbox.keys.contains(senderUID)) {
       val updatedProfile =
           profilesViewModel.selfProfile.value?.copy(
               meetingRequestInbox = currentMeetingRequestInbox + (senderUID to message))
       if (updatedProfile != null) {
-        Log.d("NEW INBOX", updatedProfile.meetingRequestInbox.toString())
         profilesViewModel.updateProfile(updatedProfile)
       } else {
         Log.e("INBOX MEETING REQUEST", "Adding the new meeting request to our inbox list failed")
@@ -298,14 +293,12 @@ class MeetingRequestViewModel(
   fun removeFromMeetingRequestInbox(senderUID: String) {
     val currentMeetingRequestInbox =
         profilesViewModel.selfProfile.value?.meetingRequestInbox ?: mapOf()
-      Log.d("CURRENT INBOX", currentMeetingRequestInbox.toString())
     if (currentMeetingRequestInbox.keys.contains(senderUID)) {
       val updatedMeetingRequestInbox = currentMeetingRequestInbox.filterKeys { it != senderUID }
       val updatedProfile =
           profilesViewModel.selfProfile.value?.copy(
               meetingRequestInbox = updatedMeetingRequestInbox)
       if (updatedProfile != null) {
-        Log.d("NEW INBOX", updatedProfile.meetingRequestInbox.toString())
         profilesViewModel.updateProfile(updatedProfile)
       } else {
         Log.e("INBOX MEETING REQUEST", "Removing the meeting request in our inbox list failed")
@@ -322,21 +315,17 @@ class MeetingRequestViewModel(
   }
 
   fun meetingDistanceCancellation() {
-    Log.d("CANCELLATION CALL", "called")
     val selfProfile = profilesViewModel.selfProfile.value
     val originPoint = selfProfile?.location ?: GeoPoint(0.0, 0.0)
     updateInboxOfMessages()
     val contactUsers = profilesViewModel.getCancellationMessageProfile()
-    Log.d("CONTACT USERS", contactUsers.toString())
     val distances =
         contactUsers.map {
           distanceBetweenGeoPoints(it.location ?: GeoPoint(0.0, 0.0), originPoint)
         }
-    Log.d("DISTANCE LIST", distances.toString())
     val mapUserDistance = contactUsers.zip(distances).toMap()
     mapUserDistance.forEach {
-      Log.d("Cancellation distance ", "distance :  ${it.value}")
-      if (it.value >= 0.5) {
+      if (it.value >= FIVE_HUNDRED_METERS_IN_KM) {
         removeFromMeetingRequestInbox(it.key.uid)
         removeFromMeetingRequestSent(it.key.uid)
         val targetToken = it.key.fcmToken ?: "null"
@@ -352,7 +341,7 @@ class MeetingRequestViewModel(
   }
 
   private fun distanceBetweenGeoPoints(point1: GeoPoint, point2: GeoPoint): Double {
-    val earthRadius = 6371.0 // in km
+    val earthRadius = EARTH_RADIUS_IN_KM
 
     val lat1 = point1.latitude
     val lon1 = point1.longitude
@@ -368,6 +357,6 @@ class MeetingRequestViewModel(
 
     val c = 2 * atan2(sqrt(a), sqrt(1 - a))
 
-    return earthRadius * c // in km
+    return earthRadius * c
   }
 }
