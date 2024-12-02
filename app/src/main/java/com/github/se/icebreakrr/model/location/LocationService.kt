@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.location.Location
 import android.os.Looper
 import android.util.Log
+import com.github.se.icebreakrr.model.message.MeetingRequestManager
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationAvailability
 import com.google.android.gms.location.LocationCallback
@@ -35,6 +36,7 @@ class LocationService(private val fusedLocationProviderClient: FusedLocationProv
                 lastKnownLocation!!.distanceTo(newLocation) > UPDATE_DISTANCE_METERS) {
               lastKnownLocation = newLocation
               onLocationUpdate?.invoke(newLocation) // Invoke callback with new location
+              MeetingRequestManager.meetingRequestViewModel?.meetingDistanceCancellation()
             }
           }
         }

@@ -41,6 +41,8 @@ open class ProfilesViewModel(
   private val _filteredProfiles = MutableStateFlow<List<Profile>>(emptyList())
   val filteredProfiles: StateFlow<List<Profile>> = _filteredProfiles
 
+  private val _cancellationMessageProfile = MutableStateFlow<List<Profile>>(emptyList())
+
   private val _selectedProfile = MutableStateFlow<Profile?>(null)
   open val selectedProfile: StateFlow<Profile?> = _selectedProfile
 
@@ -509,6 +511,22 @@ open class ProfilesViewModel(
         onFailure = { e -> handleError(e) })
   }
 
+  /** Fetches all the users that our profile has been in contact with (received or sent messages) */
+  fun getMessageCancellationUsers() {
+    _loading.value = true
+    val allContactedUsers =
+        (selfProfile.value?.meetingRequestInbox?.map { it.key } ?: listOf()) +
+            (selfProfile.value?.meetingRequestSent ?: listOf())
+    repository.getMultipleProfiles(
+        allContactedUsers,
+        onSuccess = { profileList ->
+          _cancellationMessageProfile.value = profileList
+          _loading.value = false
+          _isConnected.value = true
+        },
+        onFailure = { e -> handleError(e) })
+  }
+
   /** Get the inbox of our user */
   fun getInboxOfSelfProfile() {
     val inboxUidList = selfProfile.value?.meetingRequestInbox
@@ -541,6 +559,11 @@ open class ProfilesViewModel(
   /** Get the profile of our current user */
   fun getSelfProfileValue(): Profile? {
     return selfProfile.value
+  }
+
+  /** Get the cancellation messages of the different profiles */
+  fun getCancellationMessageProfile(): List<Profile> {
+    return _cancellationMessageProfile.value
   }
 
   /**

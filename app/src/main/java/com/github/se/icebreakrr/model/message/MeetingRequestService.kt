@@ -19,6 +19,7 @@ class MeetingRequestService : FirebaseMessagingService() {
   private val MSG_RESPONSE_ACCEPTED = " accepted your meeting request!"
   private val MSG_RESPONSE_REJECTED = " rejected your meeting request :("
   private val MSG_CONFIRMATION = "Meeting confirmation from : "
+  private val MSG_REQUEST = "Meeting request received"
   private val NOTIFICATION_ID = 0
 
   /**
@@ -36,6 +37,7 @@ class MeetingRequestService : FirebaseMessagingService() {
       "MEETING REQUEST" -> {
         MeetingRequestManager.meetingRequestViewModel?.addToMeetingRequestInbox(senderUid, message)
         MeetingRequestManager.meetingRequestViewModel?.updateInboxOfMessages()
+        showNotification(MSG_REQUEST, "")
       }
       "MEETING RESPONSE" -> {
         val name = remoteMessage.data["senderName"] ?: "null"
@@ -63,6 +65,12 @@ class MeetingRequestService : FirebaseMessagingService() {
         val geoHash = GeoHash.fromGeohashString(hashedLocation)
         val location = geoHash.boundingBox.center
         showNotification(MSG_CONFIRMATION + name, location.toString())
+      }
+      "MEETING CANCELLATION" -> {
+        val name = remoteMessage.data["senderName"] ?: "null"
+        showNotification("Cancelled meeting with $name", "Reason : You went too far away")
+        MeetingRequestManager.meetingRequestViewModel?.removeFromMeetingRequestInbox(senderUid)
+        MeetingRequestManager.meetingRequestViewModel?.removeFromMeetingRequestSent(senderUid)
       }
     }
   }
