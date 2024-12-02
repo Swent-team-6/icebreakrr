@@ -551,6 +551,19 @@ open class ProfilesViewModel(
         onFailure = { e -> handleError(e) })
   }
 
+  /** Fetches the current user's profile from the repository. */
+  fun getSelfProfileAndThen(andThen: () -> Unit) {
+    _loadingSelf.value = true
+    repository.getProfileByUid(
+      auth.currentUser?.uid ?: "null",
+      onSuccess = { profile ->
+        _selfProfile.value = profile
+        _loadingSelf.value = false
+        andThen()
+      },
+      onFailure = { e -> handleError(e) })
+  }
+
   /** Get the geoHash of our profile */
   fun getSelfGeoHash(): String? {
     return selfProfile.value?.geohash
