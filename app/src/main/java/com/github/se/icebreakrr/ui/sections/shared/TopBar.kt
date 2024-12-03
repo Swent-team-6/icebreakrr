@@ -51,7 +51,7 @@ fun TopBar(s: String, needBackButton: Boolean = false, backButtonOnClick: () -> 
       modifier =
           Modifier.background(TOP_BAR_BACKGROUND_COLOR)
               .fillMaxWidth()
-              .heightIn(TOP_BAR_HEIGHT)
+              .heightIn(if (s.length < 15) TOP_BAR_HEIGHT else 60.dp)
               .testTag("topBar")) {
         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
           if (needBackButton) {
@@ -68,9 +68,10 @@ fun TopBar(s: String, needBackButton: Boolean = false, backButtonOnClick: () -> 
                       modifier = Modifier.size(BACK_BUTTON_ICON_SIZE))
                 }
           }
+            val topBarSize = if (s.length < 15) TOP_BAR_TEXT_SIZE else 25.sp
           Text(
               text = s,
-              fontSize = TOP_BAR_TEXT_SIZE,
+              fontSize = topBarSize,
               color = TOP_BAR_TEXT_COLOR,
               fontWeight = FontWeight.Bold,
               textAlign = TextAlign.Center,
