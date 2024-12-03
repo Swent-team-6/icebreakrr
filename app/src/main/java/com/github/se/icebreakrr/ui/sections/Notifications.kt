@@ -52,6 +52,10 @@ private val COLUMN_HORIZONTAL_PADDING = 8.dp
 private val SORT_TOP_PADDING = 4.dp
 private val TEXT_SMALL_SIZE = 16.sp
 private val TEXT_WEIGHT = 1f
+private val DROPDOWN_HORIZONTAL_PADDING = 16.dp
+private val DROPDOWN_VERTICAL_PADDING = 8.dp
+private const val UNDERSCORE = "_"
+private const val SPACE = " "
 
 /**
  * Composable function for displaying the notification screen.
@@ -67,7 +71,7 @@ fun NotificationScreen(
     profileViewModel: ProfilesViewModel,
     meetingRequestViewModel: MeetingRequestViewModel
 ) {
-  meetingRequestViewModel.updateInboxOfMessages()
+  meetingRequestViewModel.updateInboxOfMessagesAndThen(){}
   val inboxCardList = profileViewModel.inboxItems.collectAsState()
   val sentCardList = profileViewModel.sentItems.collectAsState()
   val context = LocalContext.current
@@ -91,7 +95,7 @@ fun NotificationScreen(
           MeetingRequestOptionDropdown(
               selectedOption = meetingRequestOption,
               onOptionSelected = { meetingRequestOption = it },
-              modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp))
+              modifier = Modifier.fillMaxWidth().padding(horizontal = DROPDOWN_HORIZONTAL_PADDING, vertical = DROPDOWN_VERTICAL_PADDING))
           if (meetingRequestOption == MeetingRequestOption.INBOX) {
             LazyColumn(
                 modifier =
@@ -161,6 +165,7 @@ fun NotificationScreen(
  *   request display option.
  * @param modifier A [Modifier] applied to the container of the dropdown for customization.
  */
+
 @Composable
 fun MeetingRequestOptionDropdown(
     selectedOption: MeetingRequestOption,
@@ -182,7 +187,7 @@ fun MeetingRequestOptionDropdown(
           Text(
               text =
                   "Meeting Request: ${
-                    selectedOption.name.replace("_", " ").lowercase()
+                    selectedOption.name.replace(UNDERSCORE, SPACE).lowercase()
                         .replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.ROOT) else it.toString() }
                 }",
               fontSize = TEXT_SMALL_SIZE,
@@ -211,7 +216,7 @@ fun MeetingRequestOptionDropdown(
         ) {
           Text(
               text =
-                  meetingRequestOption.name.replace("_", " ").lowercase().replaceFirstChar {
+                  meetingRequestOption.name.replace(UNDERSCORE, SPACE).lowercase().replaceFirstChar {
                     if (it.isLowerCase()) it.titlecase(Locale.ROOT) else it.toString()
                   },
               fontSize = TEXT_SMALL_SIZE,

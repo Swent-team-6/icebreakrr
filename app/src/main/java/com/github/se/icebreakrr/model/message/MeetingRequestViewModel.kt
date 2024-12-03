@@ -164,6 +164,7 @@ class MeetingRequestViewModel(
           hashMapOf(
               "targetToken" to meetingRequestState.targetToken,
               "senderUID" to senderUID,
+              "senderName" to senderName,
               "message" to meetingRequestState.message,
           )
       try {
@@ -336,10 +337,11 @@ class MeetingRequestViewModel(
   }
 
   /** Refreshes the content of the inbox to have it available locally */
-  fun updateInboxOfMessages() {
+  fun updateInboxOfMessagesAndThen(andThen : () -> Unit) {
     profilesViewModel.getSelfProfileAndThen() {
       profilesViewModel.getInboxOfSelfProfile()
       profilesViewModel.getMessageCancellationUsers()
+      andThen()
     }
   }
 
@@ -350,27 +352,28 @@ class MeetingRequestViewModel(
   fun meetingDistanceCancellation() {
     val selfProfile = profilesViewModel.selfProfile.value
     val originPoint = selfProfile?.location ?: GeoPoint(0.0, 0.0)
-    updateInboxOfMessages()
-    val contactUsers = profilesViewModel.getCancellationMessageProfile()
-    val distances =
-        contactUsers.map {
-          distanceBetweenGeoPoints(it.location ?: GeoPoint(0.0, 0.0), originPoint)
-        }
-    val mapUserDistance = contactUsers.zip(distances).toMap()
-    mapUserDistance.forEach {
-      if (it.value >= FIVE_HUNDRED_METERS_IN_KM) {
-        removeFromMeetingRequestInbox(it.key.uid)
-        removeFromMeetingRequestSent(it.key.uid)
-        val targetToken = it.key.fcmToken ?: "null"
-        val targetName = it.key.name
-        setMeetingCancellation(
-            targetToken, CancellationType.DISTANCE, targetName) // targeted to other user
-        sendMeetingCancellation()
-        setMeetingCancellation(senderToken, CancellationType.DISTANCE, it.key.name)
-        sendMeetingCancellation()
-        Log.d("MEETING REQUEST CANCELLED !", "meeting with ${it.key.name} cancelled")
+    updateInboxOfMessagesAndThen()
+      {
+          val contactUsers = profilesViewModel.getCancellationMessageProfile()
+          val distances =
+              contactUsers.map {
+                distanceBetweenGeoPoints(it.location ?: GeoPoint(0.0, 0.0), originPoint)
+              }
+          val mapUserDistance = contactUsers.zip(distances).toMap()
+          mapUserDistance.forEach {
+            if (it.value >= FIVE_HUNDRED_METERS_IN_KM) {
+              removeFromMeetingRequestInbox(it.key.uid)
+              removeFromMeetingRequestSent(it.key.uid)
+              val targetToken = it.key.fcmToken ?: "null"
+              val targetName = it.key.name
+              setMeetingCancellation(
+                  targetToken, CancellationType.DISTANCE, targetName) // targeted to other user
+              sendMeetingCancellation()
+              setMeetingCancellation(senderToken, CancellationType.DISTANCE, it.key.name)
+              sendMeetingCancellation()
+            }
+          }
       }
-    }
   }
 
   /**
