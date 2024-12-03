@@ -155,11 +155,9 @@ fun MeetingRequestOptionDropdown(
 ) {
   var expanded by remember { mutableStateOf(false) }
 
-  // List of all options excluding the selected one
   val otherOptions = MeetingRequestOption.values().filter { it != selectedOption }
 
   Column(modifier = modifier) {
-    // Selected option with a dropdown indicator
     Row(
         modifier =
             Modifier.fillMaxWidth()
@@ -174,9 +172,7 @@ fun MeetingRequestOptionDropdown(
                         .replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.ROOT) else it.toString() }
                 }",
               fontSize = TEXT_SMALL_SIZE,
-              modifier =
-                  Modifier.weight(TEXT_WEIGHT)
-                      .testTag("MeetingRequestOptionsDropdown_Text"))
+              modifier = Modifier.weight(TEXT_WEIGHT).testTag("MeetingRequestOptionsDropdown_Text"))
           Icon(
               imageVector =
                   if (expanded) Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown,
@@ -201,7 +197,7 @@ fun MeetingRequestOptionDropdown(
         ) {
           Text(
               text =
-              meetingRequestOption.name.replace("_", " ").lowercase().replaceFirstChar {
+                  meetingRequestOption.name.replace("_", " ").lowercase().replaceFirstChar {
                     if (it.isLowerCase()) it.titlecase(Locale.ROOT) else it.toString()
                   },
               fontSize = TEXT_SMALL_SIZE,

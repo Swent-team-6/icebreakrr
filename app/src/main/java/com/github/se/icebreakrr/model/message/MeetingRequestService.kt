@@ -53,7 +53,8 @@ class MeetingRequestService : FirebaseMessagingService() {
               newMessage = "The meeting with ${MeetingRequestManager.ourName} is confirmed !")
           MeetingRequestManager.meetingRequestViewModel?.sendMeetingConfirmation()
           Log.d("ENGAGEMENT NOTIF", "Ayayayayyayyy")
-          MeetingRequestManager.meetingRequestViewModel?.engagementNotification(senderToken, "Football")
+          MeetingRequestManager.meetingRequestViewModel?.engagementNotification(
+              senderToken, "Football")
         } else {
           showNotification(name + MSG_RESPONSE_REJECTED, "")
           MeetingRequestManager.meetingRequestViewModel?.setMeetingConfirmation(
