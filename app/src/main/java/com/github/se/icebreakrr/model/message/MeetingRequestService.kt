@@ -3,7 +3,6 @@ package com.github.se.icebreakrr.model.message
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
-import android.util.Log
 import androidx.core.app.NotificationCompat
 import ch.hsr.geohash.GeoHash
 import com.github.se.icebreakrr.R
@@ -52,9 +51,6 @@ class MeetingRequestService : FirebaseMessagingService() {
               targetToken = senderToken,
               newMessage = "The meeting with ${MeetingRequestManager.ourName} is confirmed !")
           MeetingRequestManager.meetingRequestViewModel?.sendMeetingConfirmation()
-          Log.d("ENGAGEMENT NOTIF", "Ayayayayyayyy")
-          MeetingRequestManager.meetingRequestViewModel?.engagementNotification(
-              senderToken, "Football")
         } else {
           showNotification(name + MSG_RESPONSE_REJECTED, "")
           MeetingRequestManager.meetingRequestViewModel?.setMeetingConfirmation(
