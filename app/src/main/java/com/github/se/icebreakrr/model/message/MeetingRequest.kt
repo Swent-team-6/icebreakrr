@@ -25,3 +25,12 @@ data class MeetingConfirmation(
     val message: String = "",
     val location: String = ""
 )
+
+/*
+The message sent to cancel a meeting request
+*/
+data class MeetingCancellation(
+    val targetToken: String = "",
+    val nameTargetUser: String = "",
+    val message: String = "",
+)

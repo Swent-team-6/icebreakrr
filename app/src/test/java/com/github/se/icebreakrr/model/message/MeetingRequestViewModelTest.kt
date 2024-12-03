@@ -407,7 +407,7 @@ class MeetingRequestViewModelTest {
       val onSuccess = it.getArgument<(Profile) -> Unit>(1)
       onSuccess(profile1)
     }
-    meetingRequestViewModel.updateInboxOfMessages()
+    meetingRequestViewModel.updateInboxOfMessagesAndThen() {}
     verify(profilesRepository).getProfileByUid(eq("1"), any(), any())
   }
 }

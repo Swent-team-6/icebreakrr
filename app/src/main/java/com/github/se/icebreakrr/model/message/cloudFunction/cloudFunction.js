@@ -1,16 +1,14 @@
 /**
-Those functions are used as in the Firebase Cloud functions we have set up in our Firebase (the one here are just for documentation)
-*/
-
 const functions = require('firebase-functions/v2');
 const admin = require('firebase-admin');
 
 admin.initializeApp();
 
-// The function used to send the meeting request package
 exports.sendMeetingRequest = functions.https.onRequest(async (request, response) => {
     console.log('Received Request Body:', request.body);
+    // Access the data object within the request body
     const { targetToken, senderUID, message} = request.body.data;
+    // Validate input
     if (!targetToken || !message || !senderUID) {
         console.error('Missing targetToken or body or senderUid');
         response.status(400).json({ data: { error: 'Token or message or senderUid' } }); // Wrap error in data
@@ -37,10 +35,11 @@ exports.sendMeetingRequest = functions.https.onRequest(async (request, response)
     }
 });
 
-// The function used to send the meeting response package
 exports.sendMeetingResponse = functions.https.onRequest(async (request, response) => {
     console.log('Received Request Body:', request.body);
+    // Access the data object within the request body
     const { targetToken, senderToken, senderUID, senderName, message, accepted} = request.body.data;
+    // Validate input
     if (!targetToken || !senderToken || !message || !senderUID || !senderName || !accepted) {
         console.error('Missing targetToken or body or senderUid');
         response.status(400).json({ data: { error: 'Token or message or senderUid' } }); // Wrap error in data
@@ -70,10 +69,11 @@ exports.sendMeetingResponse = functions.https.onRequest(async (request, response
     }
 });
 
-// The function used to send the meeting confirmation package
 exports.sendMeetingConfirmation = functions.https.onRequest(async (request, response) => {
     console.log('Received Request Body:', request.body);
+    // Access the data object within the request body
     const { targetToken, senderUID, senderName, message, location} = request.body.data;
+    // Validate input
     if (!targetToken || !senderUID || !senderName || !message || !location) {
         console.error('Missing targetToken or body or senderUid');
         response.status(400).json({ data: { error: 'Token or message or senderUid' } }); // Wrap error in data
@@ -101,3 +101,68 @@ exports.sendMeetingConfirmation = functions.https.onRequest(async (request, resp
         response.status(500).json({ data: { error: `Error sending message: ${error.message}` } }); // Wrap error in data
     }
 });
+
+exports.sendMeetingCancellation = functions.https.onRequest(async (request, response) => {
+    console.log('Received Request Body:', request.body);
+    // Access the data object within the request body
+    const { targetToken, senderUID, senderName, message} = request.body.data;
+    // Validate input
+    if (!targetToken || !senderUID || !senderName || !message) {
+        console.error('Missing targetToken or body or senderUid');
+        response.status(400).json({ data: { error: 'Token or message or senderUid' } }); // Wrap error in data
+        return;
+    }
+
+    const payload = {
+        data: {
+            title: 'MEETING CANCELLATION',
+            senderUID: senderUID,
+            senderName: senderName,
+            message: message,
+        }
+    };
+
+    try {
+        await admin.messaging().send({
+            token: targetToken,
+            data: payload.data
+        });
+        response.status(200).json({ data: { message: 'Message sent successfully!' } }); // Wrap success message in data
+    } catch (error) {
+        console.error('Error sending message:', error.message);
+        response.status(500).json({ data: { error: `Error sending message: ${error.message}` } }); // Wrap error in data
+    }
+});
+
+exports.sendEngagementNotification = functions.https.onRequest(async (request, response) => {
+    console.log('Received Request Body:', request.body);
+    // Access the data object within the request body
+    const { targetToken,senderUID, senderName, message} = request.body.data;
+    // Validate input
+    if (!targetToken || !senderUID || !senderName || !message) {
+        console.error('Missing targetToken or body or senderUid');
+        response.status(400).json({ data: { error: 'Token or message or senderUid' } }); // Wrap error in data
+        return;
+    }
+
+    const payload = {
+        data: {
+            title: 'ENGAGEMENT NOTIFICATION',
+            senderUID: senderUID, // Not used
+            senderName: senderName,
+            message: message,
+        }
+    };
+
+    try {
+        await admin.messaging().send({
+            token: targetToken,
+            data: payload.data
+        });
+        response.status(200).json({ data: { message: 'Message sent successfully!' } }); // Wrap success message in data
+    } catch (error) {
+        console.error('Error sending message:', error.message);
+        response.status(500).json({ data: { error: `Error sending message: ${error.message}` } }); // Wrap error in data
+    }
+});
+*/

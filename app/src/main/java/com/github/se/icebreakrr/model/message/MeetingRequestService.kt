@@ -3,6 +3,7 @@ package com.github.se.icebreakrr.model.message
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
+import android.util.Log
 import androidx.core.app.NotificationCompat
 import com.github.se.icebreakrr.R
 import com.google.firebase.messaging.FirebaseMessagingService
@@ -18,6 +19,9 @@ class MeetingRequestService : FirebaseMessagingService() {
   private val MSG_RESPONSE_ACCEPTED = " accepted your meeting request!"
   private val MSG_RESPONSE_REJECTED = " rejected your meeting request :("
   private val MSG_CONFIRMATION = " has chosen the location for your meeting!"
+  private val MSG_REQUEST = "Meeting request received!"
+  private val DISTANCE_REASON_CANCELLATION = "Reason : You went too far away"
+  private val DEFAULT_REASON_CANCELLATION = "Reason : Unknown"
   private val NOTIFICATION_ID = 0
   private val MSG_CONFIRMATION_INFO = "Go to your heatmap to see the pin!"
 
@@ -34,10 +38,12 @@ class MeetingRequestService : FirebaseMessagingService() {
 
     when (title) {
       "MEETING REQUEST" -> {
+        val name = remoteMessage.data["senderName"] ?: "null"
         MeetingRequestManager.meetingRequestViewModel?.addToMeetingRequestInbox(
             senderUid, message) {
-              MeetingRequestManager.meetingRequestViewModel?.updateInboxOfMessages()
+              MeetingRequestManager.meetingRequestViewModel?.updateInboxOfMessages() {}
             }
+        showNotification(MSG_REQUEST, "from : $name")
       }
       "MEETING RESPONSE" -> {
         val name = remoteMessage.data["senderName"] ?: "null"
@@ -47,8 +53,9 @@ class MeetingRequestService : FirebaseMessagingService() {
         MeetingRequestManager.meetingRequestViewModel?.removeFromMeetingRequestSent(senderUid)
         if (accepted) {
           showNotification(name + MSG_RESPONSE_ACCEPTED, "")
-          MeetingRequestManager.meetingRequestViewModel?.addPendingLocation(senderUid)
-          MeetingRequestManager.meetingRequestViewModel?.updateInboxOfMessages()
+          MeetingRequestManager.meetingRequestViewModel?.addPendingLocation(senderUid) {
+            MeetingRequestManager.meetingRequestViewModel?.updateInboxOfMessages() {}
+          }
         } else {
           showNotification(name + MSG_RESPONSE_REJECTED, "")
         }
@@ -62,6 +69,24 @@ class MeetingRequestService : FirebaseMessagingService() {
         MeetingRequestManager.meetingRequestViewModel?.confirmMeetingLocation(
             senderUid, Pair(latitudeString.toDouble(), longitudeString.toDouble()))
         showNotification(name + MSG_CONFIRMATION, MSG_CONFIRMATION_INFO)
+      }
+      "MEETING CANCELLATION" -> {
+        val name = remoteMessage.data["senderName"] ?: "null"
+        Log.d("CANCELLATION REASON", message)
+        val stringReason =
+            when (message) {
+              "distance" -> DISTANCE_REASON_CANCELLATION
+              else -> DEFAULT_REASON_CANCELLATION
+            }
+        showNotification("Cancelled meeting with $name", stringReason)
+        MeetingRequestManager.meetingRequestViewModel?.removeFromMeetingRequestInbox(senderUid)
+        MeetingRequestManager.meetingRequestViewModel?.removeFromMeetingRequestSent(senderUid)
+      }
+      "ENGAGEMENT NOTIFICATION" -> {
+        val name = remoteMessage.data["senderName"] ?: "null"
+        showNotification(
+            "A person with similar interests is close by !",
+            "The user $name has the common tag : $message")
       }
     }
   }
