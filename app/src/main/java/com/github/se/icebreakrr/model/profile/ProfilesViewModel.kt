@@ -34,12 +34,18 @@ open class ProfilesViewModel(
   open val profiles: StateFlow<List<Profile>> = _profiles
 
   private val _inboxProfiles = MutableStateFlow<List<Profile?>>(emptyList())
+  private val _sentProfiles = MutableStateFlow<List<Profile?>>(emptyList())
 
   private val _inboxItems = MutableStateFlow<Map<Profile, String>>(emptyMap())
   open val inboxItems: StateFlow<Map<Profile, String>> = _inboxItems
 
+  private val _sentItems = MutableStateFlow<List<Profile>>(emptyList())
+  open val sentItems: StateFlow<List<Profile>> = _sentItems
+
   private val _filteredProfiles = MutableStateFlow<List<Profile>>(emptyList())
   val filteredProfiles: StateFlow<List<Profile>> = _filteredProfiles
+
+  private val _cancellationMessageProfile = MutableStateFlow<List<Profile>>(emptyList())
 
   private val _selectedProfile = MutableStateFlow<Profile?>(null)
   open val selectedProfile: StateFlow<Profile?> = _selectedProfile
@@ -481,6 +487,7 @@ open class ProfilesViewModel(
     getBlockedUsers()
   }
 
+  /** Gets the Already Met users */
   fun getAlreadyMetUsers() {
     _loading.value = true
     repository.getMultipleProfiles(
@@ -508,16 +515,51 @@ open class ProfilesViewModel(
         },
         onFailure = { e -> handleError(e) })
   }
+  /**
+   * Fetches all the users to which we sent messages to
+   *
+   * @param sentUserUid: The list of uid of the users we sent a meeting request to
+   */
+  private fun getSentUsers(sentUserUid: List<String>) {
+    _loading.value = true
+    repository.getMultipleProfiles(
+        sentUserUid,
+        onSuccess = { profileList ->
+          _sentProfiles.value = profileList
+          _loading.value = false
+          _isConnected.value = true
+        },
+        onFailure = { e -> handleError(e) })
+  }
+
+  /** Fetches all the users that our profile has been in contact with (received or sent messages) */
+  fun getMessageCancellationUsers() {
+    _loading.value = true
+    val allContactedUsers =
+        (selfProfile.value?.meetingRequestInbox?.map { it.key } ?: listOf()) +
+            (selfProfile.value?.meetingRequestSent ?: listOf())
+    repository.getMultipleProfiles(
+        allContactedUsers,
+        onSuccess = { profileList ->
+          _cancellationMessageProfile.value = profileList
+          _loading.value = false
+          _isConnected.value = true
+        },
+        onFailure = { e -> handleError(e) })
+  }
 
   /** Get the inbox of our user */
   fun getInboxOfSelfProfile() {
     val inboxUidList = selfProfile.value?.meetingRequestInbox
-    if (inboxUidList != null) {
+    val sentUidList = selfProfile.value?.meetingRequestSent
+    if (inboxUidList != null && sentUidList != null) {
       val uidsMessageList = inboxUidList.toList()
       val uidsList = uidsMessageList.map { it.first }
       val messageList = uidsMessageList.map { it.second }
       getInboxUsers(uidsList)
+      getSentUsers(sentUidList)
       _inboxItems.value = _inboxProfiles.value.filterNotNull().zip(messageList).toMap()
+      _sentItems.value = _sentProfiles.value.filterNotNull()
     }
   }
 
@@ -533,6 +575,19 @@ open class ProfilesViewModel(
         onFailure = { e -> handleError(e) })
   }
 
+  /** Fetches the current user's profile from the repository. */
+  fun getSelfProfileAndThen(andThen: () -> Unit) {
+    _loadingSelf.value = true
+    repository.getProfileByUid(
+        auth.currentUser?.uid ?: "null",
+        onSuccess = { profile ->
+          _selfProfile.value = profile
+          _loadingSelf.value = false
+          andThen()
+        },
+        onFailure = { e -> handleError(e) })
+  }
+
   /** Get the geoHash of our profile */
   fun getSelfGeoHash(): String? {
     return selfProfile.value?.geohash
@@ -541,6 +596,11 @@ open class ProfilesViewModel(
   /** Get the profile of our current user */
   fun getSelfProfileValue(): Profile? {
     return selfProfile.value
+  }
+
+  /** Get the cancellation messages of the different profiles */
+  fun getCancellationMessageProfile(): List<Profile> {
+    return _cancellationMessageProfile.value
   }
 
   /**

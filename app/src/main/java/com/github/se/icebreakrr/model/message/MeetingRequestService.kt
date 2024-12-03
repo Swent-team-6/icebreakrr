@@ -3,6 +3,7 @@ package com.github.se.icebreakrr.model.message
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
+import android.util.Log
 import androidx.core.app.NotificationCompat
 import ch.hsr.geohash.GeoHash
 import com.github.se.icebreakrr.R
@@ -19,6 +20,9 @@ class MeetingRequestService : FirebaseMessagingService() {
   private val MSG_RESPONSE_ACCEPTED = " accepted your meeting request!"
   private val MSG_RESPONSE_REJECTED = " rejected your meeting request :("
   private val MSG_CONFIRMATION = "Meeting confirmation from : "
+  private val MSG_REQUEST = "Meeting request received!"
+  private val DISTANCE_REASON_CANCELLATION = "Reason : You went too far away"
+  private val DEFAULT_REASON_CANCELLATION = "Reason : Unknown"
   private val NOTIFICATION_ID = 0
 
   /**
@@ -34,8 +38,10 @@ class MeetingRequestService : FirebaseMessagingService() {
 
     when (title) {
       "MEETING REQUEST" -> {
+        val name = remoteMessage.data["senderName"] ?: "null"
         MeetingRequestManager.meetingRequestViewModel?.addToMeetingRequestInbox(senderUid, message)
-        MeetingRequestManager.meetingRequestViewModel?.updateInboxOfMessages()
+        MeetingRequestManager.meetingRequestViewModel?.updateInboxOfMessagesAndThen() {}
+        showNotification(MSG_REQUEST, "from : $name")
       }
       "MEETING RESPONSE" -> {
         val name = remoteMessage.data["senderName"] ?: "null"
@@ -54,7 +60,6 @@ class MeetingRequestService : FirebaseMessagingService() {
           MeetingRequestManager.meetingRequestViewModel?.setMeetingConfirmation(
               targetToken = senderToken,
               newMessage = "The meeting with ${MeetingRequestManager.ourName} is cancelled !")
-          MeetingRequestManager.meetingRequestViewModel?.sendMeetingConfirmation()
         }
       }
       "MEETING CONFIRMATION" -> {
@@ -63,6 +68,24 @@ class MeetingRequestService : FirebaseMessagingService() {
         val geoHash = GeoHash.fromGeohashString(hashedLocation)
         val location = geoHash.boundingBox.center
         showNotification(MSG_CONFIRMATION + name, location.toString())
+      }
+      "MEETING CANCELLATION" -> {
+        val name = remoteMessage.data["senderName"] ?: "null"
+        Log.d("CANCELLATION REASON", message)
+        val stringReason =
+            when (message) {
+              "distance" -> DISTANCE_REASON_CANCELLATION
+              else -> DEFAULT_REASON_CANCELLATION
+            }
+        showNotification("Cancelled meeting with $name", stringReason)
+        MeetingRequestManager.meetingRequestViewModel?.removeFromMeetingRequestInbox(senderUid)
+        MeetingRequestManager.meetingRequestViewModel?.removeFromMeetingRequestSent(senderUid)
+      }
+      "ENGAGEMENT NOTIFICATION" -> {
+        val name = remoteMessage.data["senderName"] ?: "null"
+        showNotification(
+            "A person with similar interests is close by !",
+            "The user $name has the common tag : $message")
       }
     }
   }
