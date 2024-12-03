@@ -487,6 +487,7 @@ open class ProfilesViewModel(
     getBlockedUsers()
   }
 
+  /** Gets the Already Met users */
   fun getAlreadyMetUsers() {
     _loading.value = true
     repository.getMultipleProfiles(
@@ -514,7 +515,11 @@ open class ProfilesViewModel(
         },
         onFailure = { e -> handleError(e) })
   }
-
+  /**
+   * Fetches all the users to which we sent messages to
+   *
+   * @param sentUserUid: The list of uid of the users we sent a meeting request to
+   */
   private fun getSentUsers(sentUserUid: List<String>) {
     _loading.value = true
     repository.getMultipleProfiles(

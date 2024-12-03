@@ -1,3 +1,4 @@
+/**
 const functions = require('firebase-functions/v2');
 const admin = require('firebase-admin');
 
@@ -164,3 +165,4 @@ exports.sendEngagementNotification = functions.https.onRequest(async (request, r
         response.status(500).json({ data: { error: `Error sending message: ${error.message}` } }); // Wrap error in data
     }
 });
+*/

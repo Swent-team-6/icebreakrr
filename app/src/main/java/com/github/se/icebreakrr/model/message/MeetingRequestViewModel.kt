@@ -121,6 +121,13 @@ class MeetingRequestViewModel(
             targetToken = targetToken, message = newMessage, accepted = accepted)
   }
 
+  /**
+   * Sets the message of the meeting cancellation
+   *
+   * @param targetToken: the FCM token of the target user
+   * @param cancellationReason: the reason for the cancellation of the meeting request
+   * @param otherUserName: the name of the other user
+   */
   fun setMeetingCancellation(
       targetToken: String,
       cancellationReason: CancellationType,
@@ -224,6 +231,10 @@ class MeetingRequestViewModel(
     }
   }
 
+  /**
+   * Send an engagement notification to make the use more engaged in the app and get news about the
+   * people around him
+   */
   fun engagementNotification(targetToken: String, tag: String) {
     viewModelScope.launch {
       val data =
@@ -332,6 +343,10 @@ class MeetingRequestViewModel(
     }
   }
 
+  /**
+   * Computes the distance between the user and all his contacts and cancels the meeting requests if
+   * the contact is too far away
+   */
   fun meetingDistanceCancellation() {
     val selfProfile = profilesViewModel.selfProfile.value
     val originPoint = selfProfile?.location ?: GeoPoint(0.0, 0.0)
@@ -358,6 +373,12 @@ class MeetingRequestViewModel(
     }
   }
 
+  /**
+   * Function computing the euclidean distance between two points
+   *
+   * @param point1: the first point
+   * @param point2: the second point
+   */
   private fun distanceBetweenGeoPoints(point1: GeoPoint, point2: GeoPoint): Double {
     val earthRadius = EARTH_RADIUS_IN_KM
 

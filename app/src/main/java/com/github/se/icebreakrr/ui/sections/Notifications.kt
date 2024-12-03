@@ -147,6 +147,20 @@ fun NotificationScreen(
       })
 }
 
+/**
+ * A composable dropdown menu that allows the user to select the display about the meeting requests
+ * (inspired by the SortOptionDropdown).
+ *
+ * This dropdown displays the currently selected meeting request display option and provides a list
+ * of other available options when expanded. The user can select a new meeting request display
+ * option from the list, which triggers the provided callback to handle the selection.
+ *
+ * @param selectedOption The currently selected meeting request display option, displayed at the top
+ *   of the dropdown.
+ * @param onOptionSelected A callback function that is triggered when the user selects a new meeting
+ *   request display option.
+ * @param modifier A [Modifier] applied to the container of the dropdown for customization.
+ */
 @Composable
 fun MeetingRequestOptionDropdown(
     selectedOption: MeetingRequestOption,
@@ -208,6 +222,7 @@ fun MeetingRequestOptionDropdown(
   }
 }
 
+/** The enumeration of all the options available for meeting request displays */
 enum class MeetingRequestOption {
   INBOX,
   SENT,
