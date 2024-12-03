@@ -26,6 +26,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavBackStackEntry
+import com.github.se.icebreakrr.model.location.LocationViewModel
 import com.github.se.icebreakrr.model.message.MeetingRequestViewModel
 import com.github.se.icebreakrr.model.profile.ProfilesViewModel
 import com.github.se.icebreakrr.ui.navigation.NavigationActions
@@ -33,10 +34,13 @@ import com.github.se.icebreakrr.ui.navigation.Route
 import com.github.se.icebreakrr.ui.sections.DEFAULT_USER_LATITUDE
 import com.github.se.icebreakrr.ui.sections.DEFAULT_USER_LONGITUDE
 import com.github.se.icebreakrr.ui.sections.shared.TopBar
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.Circle
+import com.google.maps.android.compose.DragState
 import com.google.maps.android.compose.GoogleMap
+import com.google.maps.android.compose.MapUiSettings
 import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.rememberCameraPositionState
@@ -47,7 +51,8 @@ fun LocationSelectorMapScreen(
     profilesViewModel: ProfilesViewModel,
     navigationActions: NavigationActions,
     meetingRequestViewModel: MeetingRequestViewModel,
-    navBackStackEntry: NavBackStackEntry
+    navBackStackEntry: NavBackStackEntry,
+    locationViewModel: LocationViewModel
 ) {
   val configuration = LocalConfiguration.current
   val screenHeight = configuration.screenHeightDp
@@ -63,15 +68,17 @@ fun LocationSelectorMapScreen(
   val profileId = navBackStackEntry.arguments?.getString("userId")
   val profile = profilesViewModel.selectedProfile.collectAsState()
   val context = LocalContext.current
-  var buttonOffset by remember { mutableStateOf(Offset.Zero) }
+  val lastKnownLocation = locationViewModel.lastKnownLocation.collectAsState()
+  var mapLoaded by remember { mutableStateOf(false) }
 
   LaunchedEffect(Unit) {
-    profilesViewModel.getSelfProfile()
+    profilesViewModel.getSelfProfile(){}
     profilesViewModel.getProfileByUid(profileId ?: "null")
+    markerState = MarkerState(position = LatLng(lastKnownLocation.value?.latitude?: DEFAULT_USER_LATITUDE, lastKnownLocation.value?.longitude?: DEFAULT_USER_LONGITUDE))
   }
 
   val cameraPositionState = rememberCameraPositionState {
-    position = CameraPosition.fromLatLngZoom(LatLng(centerLatitude, centerLongitude), 15F)
+    position = CameraPosition.fromLatLngZoom(LatLng(centerLatitude, centerLongitude), 16F)
   }
 
   Scaffold(
@@ -83,8 +90,7 @@ fun LocationSelectorMapScreen(
               cameraPositionState = cameraPositionState,
               onMapClick = { latLong ->
                 if (LatLng(centerLatitude, centerLongitude).sphericalDistance(latLong) < 500) {
-                  markerState = MarkerState(position = latLong)
-                  showConfirmButton = true
+                  markerState?.position = latLong
                 } else {
                   Toast.makeText(
                           context,
@@ -93,39 +99,42 @@ fun LocationSelectorMapScreen(
                       .show()
                 }
               },
+              onMapLoaded = {mapLoaded = true},
+              onMapLongClick = {markerState?.position = it },
+              uiSettings = MapUiSettings(zoomControlsEnabled = false)
           ) {
-            Circle(
-                LatLng(centerLatitude, centerLongitude),
-                radius = 500.0,
-                fillColor = Color(0x11FFFFFF),
-                strokeColor = Color.Black,
-                strokeWidth = 2f)
-            markerState?.let { state ->
-              Marker(state = state, title = "Selected Position", onClick = { true })
-            }
+              if (mapLoaded){
+                  Circle(
+                      LatLng(centerLatitude, centerLongitude),
+                      radius = 500.0,
+                      fillColor = Color(0x11FFFFFF),
+                      strokeColor = Color.Black,
+                      strokeWidth = 2f)
+                      Marker(state = markerState!!, title = "Selected Position", onClick = { true },
+                          draggable = true)
+                  }
+              }
           }
-
-          if (showConfirmButton) {
-            FloatingActionButton(
-                onClick = {
-                  showConfirmButton = false
+      if (mapLoaded){
+          FloatingActionButton(
+              onClick = {
                   meetingRequestViewModel.confirmMeetingLocation(
                       profileId!!,
                       Pair(markerState?.position?.latitude!!, markerState?.position?.longitude!!))
                   meetingRequestViewModel.setMeetingConfirmation(
                       profile.value?.fcmToken!!,
                       markerState?.position?.latitude!!.toString() +
-                          ", " +
-                          markerState?.position?.longitude!!.toString())
+                              ", " +
+                              markerState?.position?.longitude!!.toString())
                   meetingRequestViewModel.sendMeetingConfirmation()
                   navigationActions.navigateTo(Route.HEAT_MAP)
-                },
-                modifier =
-                    Modifier.absoluteOffset(x = (screenWidth - 75).dp, y = (screenHeight - 170).dp)
-                        .size(60.dp)) {
-                  Icon(Icons.Default.Check, contentDescription = "Confirm Pin")
-                }
+              },
+              modifier =
+              Modifier.absoluteOffset(x = (screenWidth - 75).dp, y = (screenHeight - 75).dp)
+                  .size(60.dp)) {
+              Icon(Icons.Default.Check, contentDescription = "Confirm Pin")
           }
-        }
       }
+
+  }
 }

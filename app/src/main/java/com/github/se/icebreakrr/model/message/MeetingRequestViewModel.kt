@@ -276,7 +276,7 @@ class MeetingRequestViewModel(
    *
    * @param receiverUID: the uid of the target user
    */
-  fun removeFromMeetingRequestSent(receiverUID: String) {
+  fun removeFromMeetingRequestSent(receiverUID: String, onComplete: () -> Unit) {
     val currentMeetingRequestSent =
         profilesViewModel.selfProfile.value?.meetingRequestSent ?: listOf()
     if (currentMeetingRequestSent.contains(receiverUID)) {
@@ -284,7 +284,9 @@ class MeetingRequestViewModel(
       val updatedProfile =
           profilesViewModel.selfProfile.value?.copy(meetingRequestSent = updatedMeetingRequestSend)
       if (updatedProfile != null) {
-        profilesViewModel.updateProfile(updatedProfile) {}
+        profilesViewModel.updateProfile(updatedProfile) {
+            onComplete()
+        }
       } else {
         Log.e("SENT MEETING REQUEST", "Removing the meeting request of our sent list failed")
       }
@@ -337,7 +339,10 @@ class MeetingRequestViewModel(
   fun updateInboxOfMessages(onComplete: () -> Unit) {
     profilesViewModel.getSelfProfile() {
       profilesViewModel.getInboxOfSelfProfile() {
-        profilesViewModel.getMessageCancellationUsers() { onComplete() }
+        profilesViewModel.getMessageCancellationUsers() {
+            profilesViewModel.getInboxOfPendingLocations(){
+                onComplete()
+            } }
       }
     }
   }
@@ -375,7 +380,7 @@ class MeetingRequestViewModel(
       mapUserDistance.forEach {
         if (it.value >= FIVE_HUNDRED_METERS_IN_KM) {
           removeFromMeetingRequestInbox(it.key.uid)
-          removeFromMeetingRequestSent(it.key.uid)
+          removeFromMeetingRequestSent(it.key.uid){}
           val targetToken = it.key.fcmToken ?: "null"
           val targetName = it.key.name
           setMeetingCancellation(

@@ -50,11 +50,12 @@ class MeetingRequestService : FirebaseMessagingService() {
         val accepted = remoteMessage.data["accepted"]?.toBoolean() ?: false
         val senderToken = remoteMessage.data["senderToken"] ?: "null"
 
-        MeetingRequestManager.meetingRequestViewModel?.removeFromMeetingRequestSent(senderUid)
+        MeetingRequestManager.meetingRequestViewModel?.removeFromMeetingRequestSent(senderUid){
+          MeetingRequestManager.meetingRequestViewModel?.updateInboxOfMessages() {}
+        }
         if (accepted) {
           showNotification(name + MSG_RESPONSE_ACCEPTED, "")
           MeetingRequestManager.meetingRequestViewModel?.addPendingLocation(senderUid) {
-            MeetingRequestManager.meetingRequestViewModel?.updateInboxOfMessages() {}
           }
         } else {
           showNotification(name + MSG_RESPONSE_REJECTED, "")
@@ -80,7 +81,7 @@ class MeetingRequestService : FirebaseMessagingService() {
             }
         showNotification("Cancelled meeting with $name", stringReason)
         MeetingRequestManager.meetingRequestViewModel?.removeFromMeetingRequestInbox(senderUid)
-        MeetingRequestManager.meetingRequestViewModel?.removeFromMeetingRequestSent(senderUid)
+        MeetingRequestManager.meetingRequestViewModel?.removeFromMeetingRequestSent(senderUid){}
       }
       "ENGAGEMENT NOTIFICATION" -> {
         val name = remoteMessage.data["senderName"] ?: "null"

@@ -537,14 +537,16 @@ open class ProfilesViewModel(
         })
   }
 
-  private fun getPendingLocationUsers(inboxUserUid: List<String>) {
+  private fun getPendingLocationUsers(inboxUserUid: List<String>, onComplete: () -> Unit) {
     _loading.value = true
     repository.getMultipleProfiles(
         inboxUserUid,
         onSuccess = { profileList ->
           _pendingLocalisations.value = profileList
+            Log.d("TESTEST", "profile view model pending location size : ${profileList.size}")
           _loading.value = false
           _isConnected.value = true
+          onComplete()
         },
         onFailure = { e -> handleError(e) })
   }
@@ -626,10 +628,12 @@ open class ProfilesViewModel(
     }
   }
 
-  fun getInboxOfPendingLocations() {
+  fun getInboxOfPendingLocations(onComplete: () -> Unit) {
     val pendingLocationUid = selfProfile.value?.meetingRequestPendingLocation
     if (pendingLocationUid != null) {
-      getPendingLocationUsers(pendingLocationUid)
+      getPendingLocationUsers(pendingLocationUid){
+          onComplete()
+      }
     }
   }
 

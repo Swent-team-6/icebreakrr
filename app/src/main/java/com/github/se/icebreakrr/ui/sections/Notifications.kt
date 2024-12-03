@@ -1,8 +1,10 @@
 package com.github.se.icebreakrr.ui.sections
 
 import android.annotation.SuppressLint
+import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -30,6 +32,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.github.se.icebreakrr.model.message.MeetingRequestViewModel
 import com.github.se.icebreakrr.model.profile.ProfilesViewModel
+import com.github.se.icebreakrr.ui.navigation.Badge
 import com.github.se.icebreakrr.ui.navigation.BottomNavigationMenu
 import com.github.se.icebreakrr.ui.navigation.LIST_TOP_LEVEL_DESTINATIONS
 import com.github.se.icebreakrr.ui.navigation.NavigationActions
@@ -78,6 +81,7 @@ fun NotificationScreen(
   val pendingLocation = profileViewModel.pendingLocalisations.collectAsState()
   val context = LocalContext.current
   var meetingRequestOption by remember { mutableStateOf(MeetingRequestOption.INBOX) }
+  Log.d("TESTEST", "pending size notification : ${pendingLocation.value.size}")
   Scaffold(
       modifier = Modifier.testTag("notificationScreen"),
       topBar = { TopBar("Inbox") },
@@ -96,12 +100,14 @@ fun NotificationScreen(
         Column(modifier = Modifier.padding(innerPadding).padding(horizontal = HORIZONTAL_PADDING)) {
           MeetingRequestOptionDropdown(
               selectedOption = meetingRequestOption,
-              onOptionSelected = { meetingRequestOption = it },
+              onOptionSelected = { meetingRequestOption = it},
               modifier =
                   Modifier.fillMaxWidth()
                       .padding(
                           horizontal = DROPDOWN_HORIZONTAL_PADDING,
-                          vertical = DROPDOWN_VERTICAL_PADDING))
+                          vertical = DROPDOWN_VERTICAL_PADDING),
+              pendingLocationsSize = pendingLocation.value.size,
+              inboxSize = inboxCardList.value.size)
           when (meetingRequestOption) {
             MeetingRequestOption.INBOX -> {
               LazyColumn(
@@ -175,7 +181,7 @@ fun NotificationScreen(
                                 navigationActions.navigateTo(
                                     Screen.MAP_MEETING_LOCATION_SCREEN + "?userId=${p.uid}")
                               },
-                              greyedOut = true)
+                              greyedOut = false)
                         }
                       }
                     }
@@ -204,7 +210,9 @@ fun NotificationScreen(
 fun MeetingRequestOptionDropdown(
     selectedOption: MeetingRequestOption,
     onOptionSelected: (MeetingRequestOption) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    pendingLocationsSize: Int,
+    inboxSize: Int
 ) {
   var expanded by remember { mutableStateOf(false) }
 
@@ -231,7 +239,26 @@ fun MeetingRequestOptionDropdown(
                   if (expanded) Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown,
               contentDescription = "Icon of the MeetingRequest option dropdown menu",
               modifier = Modifier.testTag("MeetingRequestOptionsDropdown_Arrow"))
+        if (!expanded) {
+            when (selectedOption){
+                MeetingRequestOption.SENT -> {
+                    if (pendingLocationsSize + inboxSize > 0){
+                        Badge(count = pendingLocationsSize + inboxSize)
+                    }
+                }
+                MeetingRequestOption.INBOX -> {
+                    if (pendingLocationsSize > 0){
+                        Badge(count = pendingLocationsSize)
+                    }
+                }
+                MeetingRequestOption.CHOOSE_LOCATION -> {
+                    if (inboxSize > 0){
+                        Badge(count = inboxSize)
+                    }
+                }
+            }
         }
+    }
 
     if (expanded) {
       otherOptions.forEach { meetingRequestOption ->
@@ -258,6 +285,19 @@ fun MeetingRequestOptionDropdown(
                       },
               fontSize = TEXT_SMALL_SIZE,
               color = Color.Gray)
+            when (meetingRequestOption){
+                MeetingRequestOption.CHOOSE_LOCATION ->{
+                    if (pendingLocationsSize > 0){
+                         Badge(count = pendingLocationsSize)
+                    }
+                }
+                MeetingRequestOption.INBOX -> {
+                    if (inboxSize > 0){
+                        Badge(count = inboxSize)
+                    }
+                }
+                MeetingRequestOption.SENT -> {}
+            }
         }
       }
     }
