@@ -51,6 +51,7 @@ private val COLUMN_VERTICAL_PADDING = 16.dp
 private val COLUMN_HORIZONTAL_PADDING = 8.dp
 private val SORT_TOP_PADDING = 4.dp
 private val TEXT_SMALL_SIZE = 16.sp
+private val TEXT_WEIGHT = 1f
 
 /**
  * Composable function for displaying the notification screen.
@@ -164,7 +165,7 @@ fun MeetingRequestOptionDropdown(
             Modifier.fillMaxWidth()
                 .clickable { expanded = !expanded }
                 .padding(COLUMN_HORIZONTAL_PADDING)
-                .testTag("SortOptionsDropdown_Selected"),
+                .testTag("MeetingRequestOptionsDropdown_Selected"),
         verticalAlignment = Alignment.CenterVertically) {
           Text(
               text =
@@ -174,33 +175,33 @@ fun MeetingRequestOptionDropdown(
                 }",
               fontSize = TEXT_SMALL_SIZE,
               modifier =
-                  Modifier.weight(1f) // Pushes the arrow to the end
+                  Modifier.weight(TEXT_WEIGHT)
                       .testTag("MeetingRequestOptionsDropdown_Text"))
           Icon(
               imageVector =
                   if (expanded) Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown,
-              contentDescription = if (expanded) "Collapse" else "Expand",
+              contentDescription = "Icon of the MeetingRequest option dropdown menu",
               modifier = Modifier.testTag("MeetingRequestOptionsDropdown_Arrow"))
         }
 
     if (expanded) {
-      otherOptions.forEach { option ->
+      otherOptions.forEach { meetingRequestOption ->
         Row(
             modifier =
                 Modifier.fillMaxWidth()
                     .clickable {
                       expanded = false
-                      onOptionSelected(option)
+                      onOptionSelected(meetingRequestOption)
                     }
                     .padding(
                         start = COLUMN_VERTICAL_PADDING,
                         top = SORT_TOP_PADDING,
                         bottom = COLUMN_HORIZONTAL_PADDING)
-                    .testTag("MeetingRequestOptionsDropdown_Option_${option.name}"),
+                    .testTag("MeetingRequestOptionsDropdown_Option_${meetingRequestOption.name}"),
         ) {
           Text(
               text =
-                  option.name.replace("_", " ").lowercase().replaceFirstChar {
+              meetingRequestOption.name.replace("_", " ").lowercase().replaceFirstChar {
                     if (it.isLowerCase()) it.titlecase(Locale.ROOT) else it.toString()
                   },
               fontSize = TEXT_SMALL_SIZE,
