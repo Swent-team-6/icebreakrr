@@ -40,7 +40,7 @@ class MeetingRequestService : FirebaseMessagingService() {
       "MEETING REQUEST" -> {
         val name = remoteMessage.data["senderName"] ?: "null"
         MeetingRequestManager.meetingRequestViewModel?.addToMeetingRequestInbox(senderUid, message)
-        MeetingRequestManager.meetingRequestViewModel?.updateInboxOfMessagesAndThen(){}
+        MeetingRequestManager.meetingRequestViewModel?.updateInboxOfMessagesAndThen() {}
         showNotification(MSG_REQUEST, "from : $name")
       }
       "MEETING RESPONSE" -> {
@@ -72,10 +72,11 @@ class MeetingRequestService : FirebaseMessagingService() {
       "MEETING CANCELLATION" -> {
         val name = remoteMessage.data["senderName"] ?: "null"
         Log.d("CANCELLATION REASON", message)
-        val stringReason = when(message){
-          "distance" -> DISTANCE_REASON_CANCELLATION
-          else -> DEFAULT_REASON_CANCELLATION
-        }
+        val stringReason =
+            when (message) {
+              "distance" -> DISTANCE_REASON_CANCELLATION
+              else -> DEFAULT_REASON_CANCELLATION
+            }
         showNotification("Cancelled meeting with $name", stringReason)
         MeetingRequestManager.meetingRequestViewModel?.removeFromMeetingRequestInbox(senderUid)
         MeetingRequestManager.meetingRequestViewModel?.removeFromMeetingRequestSent(senderUid)

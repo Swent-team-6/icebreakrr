@@ -71,7 +71,7 @@ fun NotificationScreen(
     profileViewModel: ProfilesViewModel,
     meetingRequestViewModel: MeetingRequestViewModel
 ) {
-  meetingRequestViewModel.updateInboxOfMessagesAndThen(){}
+  meetingRequestViewModel.updateInboxOfMessagesAndThen() {}
   val inboxCardList = profileViewModel.inboxItems.collectAsState()
   val sentCardList = profileViewModel.sentItems.collectAsState()
   val context = LocalContext.current
@@ -95,7 +95,11 @@ fun NotificationScreen(
           MeetingRequestOptionDropdown(
               selectedOption = meetingRequestOption,
               onOptionSelected = { meetingRequestOption = it },
-              modifier = Modifier.fillMaxWidth().padding(horizontal = DROPDOWN_HORIZONTAL_PADDING, vertical = DROPDOWN_VERTICAL_PADDING))
+              modifier =
+                  Modifier.fillMaxWidth()
+                      .padding(
+                          horizontal = DROPDOWN_HORIZONTAL_PADDING,
+                          vertical = DROPDOWN_VERTICAL_PADDING))
           if (meetingRequestOption == MeetingRequestOption.INBOX) {
             LazyColumn(
                 modifier =
@@ -165,7 +169,6 @@ fun NotificationScreen(
  *   request display option.
  * @param modifier A [Modifier] applied to the container of the dropdown for customization.
  */
-
 @Composable
 fun MeetingRequestOptionDropdown(
     selectedOption: MeetingRequestOption,
@@ -216,9 +219,12 @@ fun MeetingRequestOptionDropdown(
         ) {
           Text(
               text =
-                  meetingRequestOption.name.replace(UNDERSCORE, SPACE).lowercase().replaceFirstChar {
-                    if (it.isLowerCase()) it.titlecase(Locale.ROOT) else it.toString()
-                  },
+                  meetingRequestOption.name
+                      .replace(UNDERSCORE, SPACE)
+                      .lowercase()
+                      .replaceFirstChar {
+                        if (it.isLowerCase()) it.titlecase(Locale.ROOT) else it.toString()
+                      },
               fontSize = TEXT_SMALL_SIZE,
               color = Color.Gray)
         }
