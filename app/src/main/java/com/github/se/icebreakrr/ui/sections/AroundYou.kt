@@ -46,6 +46,8 @@ import com.github.se.icebreakrr.R
 import com.github.se.icebreakrr.data.AppDataStore
 import com.github.se.icebreakrr.model.filter.FilterViewModel
 import com.github.se.icebreakrr.model.location.LocationViewModel
+import com.github.se.icebreakrr.model.message.MeetingRequestManager.meetingRequestViewModel
+import com.github.se.icebreakrr.model.notification.EngagementNotificationManager
 import com.github.se.icebreakrr.model.profile.Gender
 import com.github.se.icebreakrr.model.profile.ProfilesViewModel
 import com.github.se.icebreakrr.model.sort.SortOption
@@ -67,8 +69,6 @@ import com.github.se.icebreakrr.utils.NetworkUtils.showNoInternetToast
 import com.google.firebase.firestore.GeoPoint
 import java.util.Locale
 import kotlinx.coroutines.delay
-import com.github.se.icebreakrr.model.notification.EngagementNotificationManager
-import com.github.se.icebreakrr.model.message.MeetingRequestManager.meetingRequestViewModel
 
 // Constants for layout dimensions
 private val COLUMN_VERTICAL_PADDING = 16.dp
@@ -121,15 +121,14 @@ fun AroundYouScreen(
 
   // Create the engagement notification manager
   val engagementManager = remember {
-      meetingRequestViewModel?.let { 
-          EngagementNotificationManager(
-              profilesViewModel = profilesViewModel,
-              meetingRequestViewModel = it,
-              appDataStore = appDataStore,
-              context = context,
-              filterViewModel = filterViewModel
-          )
-      }
+    meetingRequestViewModel?.let {
+      EngagementNotificationManager(
+          profilesViewModel = profilesViewModel,
+          meetingRequestViewModel = it,
+          appDataStore = appDataStore,
+          context = context,
+          filterViewModel = filterViewModel)
+    }
   }
 
   // Start monitoring when the screen is active and we have location permission
@@ -138,7 +137,7 @@ fun AroundYouScreen(
       profilesViewModel.updateIsConnected(false)
     } else if (hasLocationPermission) {
       // Start engagement notifications
-        engagementManager?.startMonitoring()
+      engagementManager?.startMonitoring()
 
       while (true) {
         // Call the profile fetch function
@@ -155,11 +154,7 @@ fun AroundYouScreen(
   }
 
   // Stop monitoring when the screen is disposed
-  DisposableEffect(Unit) {
-    onDispose {
-        engagementManager?.stopMonitoring()
-    }
-  }
+  DisposableEffect(Unit) { onDispose { engagementManager?.stopMonitoring() } }
 
   // Generate the sorted profile list based on the selected sortOption
   val sortOption = sortViewModel.selectedSortOption.collectAsState()
