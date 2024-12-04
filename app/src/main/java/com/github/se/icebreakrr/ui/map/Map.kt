@@ -67,7 +67,7 @@ private val GRADIENT_START_POINTS =
 val gradient = Gradient(GRADIENT_COLORS, GRADIENT_START_POINTS)
 
 @Composable
-fun HeatMap(
+fun MapScreen(
     navigationActions: NavigationActions,
     profilesViewModel: ProfilesViewModel,
     locationViewModel: LocationViewModel,
@@ -86,12 +86,12 @@ fun HeatMap(
       bottomBar = {
         BottomNavigationMenu(
             onTabSelect = { route ->
-              if (route.route != Route.HEAT_MAP) {
+              if (route.route != Route.MAP) {
                 navigationActions.navigateTo(route)
               }
             },
             tabList = LIST_TOP_LEVEL_DESTINATIONS,
-            selectedItem = Route.HEAT_MAP,
+            selectedItem = Route.MAP,
             notificationCount = myProfile.value?.meetingRequestInbox?.size ?: 0)
       }) { paddingValues ->
         if (userLocation.value == null) {
