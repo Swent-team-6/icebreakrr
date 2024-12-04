@@ -3,6 +3,8 @@ package com.github.se.icebreakrr.ui.profile
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -59,7 +61,13 @@ fun ProfileView(
                 ProfileHeader(profile, navigationActions, true, profilesViewModel, false) {
                   navigationActions.navigateTo(Screen.PROFILE_EDIT)
                 }
-                InfoSection(profile, tagsViewModel)
+
+                // Scrollable information section
+                Column(
+                    modifier = Modifier.fillMaxWidth().verticalScroll(rememberScrollState()),
+                    horizontalAlignment = Alignment.CenterHorizontally) {
+                      InfoSection(profile, tagsViewModel)
+                    }
               }
         }
       })

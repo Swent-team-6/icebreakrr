@@ -10,9 +10,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -28,6 +32,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavBackStackEntry
 import com.github.se.icebreakrr.R
@@ -100,39 +105,44 @@ fun OtherProfileView(
                 sendRequest = false
               }
             }
-            InfoSection(profile, tagsViewModel)
 
-            // Add spacer for some padding
-            Spacer(modifier = Modifier.height(BUTTON_VERTICAL_PADDING))
+            // Scrollable content
+            Column(modifier = Modifier.fillMaxWidth().verticalScroll(rememberScrollState())) {
+              InfoSection(profile, tagsViewModel)
 
-            // Already met button
-            Button(
-                onClick = {
-                  if (isNetworkAvailableWithContext(context)) {
-                    profilesViewModel.addAlreadyMet(profile.uid)
-                    meetingRequestViewModel.removeChosenLocalisation(profile.uid)
-                    Toast.makeText(context, R.string.Already_Met_Button_Success, Toast.LENGTH_SHORT)
-                        .show()
-                    profilesViewModel.getSelfProfile {}
-                    navigationActions.goBack()
-                  } else {
-                    showNoInternetToast(context = context)
+              // Add spacer for some padding
+              Spacer(modifier = Modifier.height(BUTTON_VERTICAL_PADDING))
+
+              // Already met button
+              Button(
+                  onClick = {
+                    if (isNetworkAvailableWithContext(context)) {
+                      profilesViewModel.addAlreadyMet(profile.uid)
+                      meetingRequestViewModel.removeChosenLocalisation(profile.uid)Toast.makeText(
+                              context, R.string.Already_Met_Button_Success, Toast.LENGTH_SHORT)
+                          .show()
+                      profilesViewModel.getSelfProfile{}
+                      navigationActions.goBack()
+                    } else {
+                      showNoInternetToast(context = context)
+                    }
+                  },
+                  colors =
+                      ButtonDefaults.buttonColors(
+                          containerColor = MaterialTheme.colorScheme.primary),
+                  modifier =
+                      Modifier.fillMaxWidth()
+                          .padding(MET_BUTTON_HORIZTONAL_PADDING)
+                          .align(Alignment.CenterHorizontally)
+                          .testTag("alreadyMetButton")) {
+                    Text(
+                        text = stringResource(R.string.Already_Met_Button_Text),
+                        color = MaterialTheme.colorScheme.onPrimary)
                   }
-                },
-                colors =
-                    ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
-                modifier =
-                    Modifier.fillMaxWidth()
-                        .padding(MET_BUTTON_HORIZTONAL_PADDING)
-                        .align(Alignment.CenterHorizontally)
-                        .testTag("alreadyMetButton")) {
-                  Text(
-                      text = stringResource(R.string.Already_Met_Button_Text),
-                      color = MaterialTheme.colorScheme.onPrimary)
-                }
 
-            // Add bottom padding
-            Spacer(modifier = Modifier.height(BUTTON_VERTICAL_PADDING))
+              // Add bottom padding
+              Spacer(modifier = Modifier.height(BUTTON_VERTICAL_PADDING))
+            }
           }
 
       // this displays the request messaging system
