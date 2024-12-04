@@ -1,5 +1,6 @@
 package com.github.se.icebreakrr.ui.navigation
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -48,6 +49,9 @@ fun BottomNavigationMenu(
     notificationCount: Int,
     heatMapCount: Int
 ) {
+  Log.d(
+      "TESTEST",
+      "bottom navigation menu badge notification count : ${notificationCount}, heat map count : ${heatMapCount}")
   NavigationBar(
       modifier = Modifier.fillMaxWidth().height(60.dp).testTag("bottomNavigationMenu"),
       containerColor = IceBreakrrBlue,
@@ -58,10 +62,10 @@ fun BottomNavigationMenu(
                 Box {
                   Icon(tab.icon, contentDescription = stringResource(id = tab.textId))
                   if (tab.route == Route.NOTIFICATIONS && notificationCount > 0) {
-                    Badge(count = notificationCount)
+                    Badge(notificationCount, "badgeNotification")
                   }
-                  if (tab.route == Route.HEAT_MAP && heatMapCount > 0){
-                      Badge(count = heatMapCount)
+                  if (tab.route == Route.HEAT_MAP && heatMapCount > 0) {
+                    Badge(heatMapCount, "badgeHeatmap")
                   }
                 }
               },
@@ -86,16 +90,18 @@ fun BottomNavigationMenu(
  * @param count : number of pending notifications
  */
 @Composable
-fun Badge(count: Int) {
+fun Badge(count: Int, tag: String) {
   Box(
       modifier =
           Modifier.offset(x = BADGE_OFFSET_X.dp, y = (BADGE_OFFSET_Y).dp)
               .size(BADGE_SIZE.dp)
-              .background(Color.Red, shape = CircleShape),
+              .background(Color.Red, shape = CircleShape)
+              .testTag(tag),
       contentAlignment = Alignment.Center) {
         Text(
             text = count.toString(),
             color = Color.White,
-            style = androidx.compose.material3.MaterialTheme.typography.labelSmall)
+            style = androidx.compose.material3.MaterialTheme.typography.labelSmall,
+            modifier = Modifier.testTag(tag))
       }
 }

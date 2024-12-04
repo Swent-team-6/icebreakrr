@@ -76,7 +76,8 @@ class MeetingRequestViewModel(
     this.senderToken = senderToken
     this.senderUID = senderUID
     this.senderName = senderName
-    Log.d("TESTEST", "init values. token : ${senderToken}, UID : ${senderUID}, name : ${senderName}")
+    Log.d(
+        "TESTEST", "init values. token : ${senderToken}, UID : ${senderUID}, name : ${senderName}")
   }
 
   /**
@@ -150,9 +151,7 @@ class MeetingRequestViewModel(
   fun setMeetingConfirmation(targetToken: String, newLocation: String, newMessage: String) {
     meetingConfirmationState =
         meetingConfirmationState.copy(
-            targetToken = targetToken,
-            message = if (newLocation.isNotEmpty()) newMessage else "|",
-            location = newLocation)
+            targetToken = targetToken, message = newMessage, location = newLocation)
   }
 
   /** Send a meeting request to the target user, by calling a Firebase Cloud Function */
@@ -285,9 +284,7 @@ class MeetingRequestViewModel(
       val updatedProfile =
           profilesViewModel.selfProfile.value?.copy(meetingRequestSent = updatedMeetingRequestSend)
       if (updatedProfile != null) {
-        profilesViewModel.updateProfile(updatedProfile) {
-            onComplete()
-        }
+        profilesViewModel.updateProfile(updatedProfile) { onComplete() }
       } else {
         Log.e("SENT MEETING REQUEST", "Removing the meeting request of our sent list failed")
       }
@@ -341,14 +338,13 @@ class MeetingRequestViewModel(
     profilesViewModel.getSelfProfile() {
       profilesViewModel.getInboxOfSelfProfile() {
         profilesViewModel.getMessageCancellationUsers() {
-            profilesViewModel.getInboxOfPendingLocations(){
-                onComplete()
-            } }
+          profilesViewModel.getInboxOfPendingLocations() { onComplete() }
+        }
       }
     }
   }
 
-  fun updateChosenLocalisations() {
+  private fun updateChosenLocalisations() {
     profilesViewModel.getSelfProfile() { profilesViewModel.getChosenLocations() }
   }
 
@@ -357,9 +353,7 @@ class MeetingRequestViewModel(
   }
 
   fun confirmMeetingLocation(uid: String, locAndMessage: Pair<String, Pair<Double, Double>>) {
-    profilesViewModel.confirmMeetingLocation(uid, locAndMessage){
-        updateChosenLocalisations()
-    }
+    profilesViewModel.confirmMeetingLocation(uid, locAndMessage) { updateChosenLocalisations() }
   }
 
   fun removeChosenLocalisation(uid: String) {
@@ -383,7 +377,7 @@ class MeetingRequestViewModel(
       mapUserDistance.forEach {
         if (it.value >= FIVE_HUNDRED_METERS_IN_KM) {
           removeFromMeetingRequestInbox(it.key.uid)
-          removeFromMeetingRequestSent(it.key.uid){}
+          removeFromMeetingRequestSent(it.key.uid) {}
           val targetToken = it.key.fcmToken ?: "null"
           val targetName = it.key.name
           setMeetingCancellation(

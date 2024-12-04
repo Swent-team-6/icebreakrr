@@ -1,10 +1,8 @@
 package com.github.se.icebreakrr.ui.sections
 
 import android.annotation.SuppressLint
-import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -95,13 +93,13 @@ fun NotificationScreen(
             tabList = LIST_TOP_LEVEL_DESTINATIONS,
             selectedItem = Route.NOTIFICATIONS,
             notificationCount = inboxCardList.value.size + pendingLocation.value.size,
-            heatMapCount = myProfile.value?.meetingRequestChosenLocalisation?.size?:0)
+            heatMapCount = myProfile.value?.meetingRequestChosenLocalisation?.size ?: 0)
       },
       content = { innerPadding ->
         Column(modifier = Modifier.padding(innerPadding).padding(horizontal = HORIZONTAL_PADDING)) {
           MeetingRequestOptionDropdown(
               selectedOption = meetingRequestOption,
-              onOptionSelected = { meetingRequestOption = it},
+              onOptionSelected = { meetingRequestOption = it },
               modifier =
                   Modifier.fillMaxWidth()
                       .padding(
@@ -240,26 +238,26 @@ fun MeetingRequestOptionDropdown(
                   if (expanded) Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown,
               contentDescription = "Icon of the MeetingRequest option dropdown menu",
               modifier = Modifier.testTag("MeetingRequestOptionsDropdown_Arrow"))
-        if (!expanded) {
-            when (selectedOption){
-                MeetingRequestOption.SENT -> {
-                    if (pendingLocationsSize + inboxSize > 0){
-                        Badge(count = pendingLocationsSize + inboxSize)
-                    }
+          if (!expanded) {
+            when (selectedOption) {
+              MeetingRequestOption.SENT -> {
+                if (pendingLocationsSize + inboxSize > 0) {
+                  Badge(pendingLocationsSize + inboxSize, "badgeSent")
                 }
-                MeetingRequestOption.INBOX -> {
-                    if (pendingLocationsSize > 0){
-                        Badge(count = pendingLocationsSize)
-                    }
+              }
+              MeetingRequestOption.INBOX -> {
+                if (pendingLocationsSize > 0) {
+                  Badge(pendingLocationsSize, "badgeInbox")
                 }
-                MeetingRequestOption.CHOOSE_LOCATION -> {
-                    if (inboxSize > 0){
-                        Badge(count = inboxSize)
-                    }
+              }
+              MeetingRequestOption.CHOOSE_LOCATION -> {
+                if (inboxSize > 0) {
+                  Badge(inboxSize, "badgePendingAndInbox")
                 }
+              }
             }
+          }
         }
-    }
 
     if (expanded) {
       otherOptions.forEach { meetingRequestOption ->
@@ -286,19 +284,19 @@ fun MeetingRequestOptionDropdown(
                       },
               fontSize = TEXT_SMALL_SIZE,
               color = Color.Gray)
-            when (meetingRequestOption){
-                MeetingRequestOption.CHOOSE_LOCATION ->{
-                    if (pendingLocationsSize > 0){
-                         Badge(count = pendingLocationsSize)
-                    }
-                }
-                MeetingRequestOption.INBOX -> {
-                    if (inboxSize > 0){
-                        Badge(count = inboxSize)
-                    }
-                }
-                MeetingRequestOption.SENT -> {}
+          when (meetingRequestOption) {
+            MeetingRequestOption.CHOOSE_LOCATION -> {
+              if (pendingLocationsSize > 0) {
+                Badge(pendingLocationsSize, "badgeChooseLocation")
+              }
             }
+            MeetingRequestOption.INBOX -> {
+              if (inboxSize > 0) {
+                Badge(inboxSize, "badgeInbox")
+              }
+            }
+            MeetingRequestOption.SENT -> {}
+          }
         }
       }
     }

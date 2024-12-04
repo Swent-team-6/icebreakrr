@@ -111,7 +111,7 @@ fun OtherProfileView(
                     meetingRequestViewModel.removeChosenLocalisation(profile.uid)
                     Toast.makeText(context, R.string.Already_Met_Button_Success, Toast.LENGTH_SHORT)
                         .show()
-                    profilesViewModel.getSelfProfile(){}
+                    profilesViewModel.getSelfProfile() {}
                     navigationActions.goBack()
                   } else {
                     showNoInternetToast(context = context)

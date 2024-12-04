@@ -55,7 +55,7 @@ fun UnblockProfileScreen(
       isLoading = isLoading,
       isConnected = isConnected,
       onRefresh = { profilesViewModel.getBlockedUsers() },
-      additionalRefreshAction = { profilesViewModel.getSelfProfile(){} },
+      additionalRefreshAction = { profilesViewModel.getSelfProfile() {} },
       showConfirmDialog = profileToUnblock != null,
       confirmDialogTitle = stringResource(R.string.unblock_confirm),
       confirmDialogMessage =
@@ -73,5 +73,5 @@ fun UnblockProfileScreen(
       periodicRefreshAction = { profilesViewModel.getBlockedUsers() },
       isTestMode = isTestMode,
       notificationCount = inboxItems.value?.meetingRequestInbox?.size ?: 0,
-      heatMapCount = inboxItems.value?.meetingRequestChosenLocalisation?.size?:0)
+      heatMapCount = inboxItems.value?.meetingRequestChosenLocalisation?.size ?: 0)
 }

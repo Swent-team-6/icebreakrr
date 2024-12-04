@@ -67,7 +67,9 @@ class NotificationTest {
           fcmToken = "TokenUser1",
           geohash = "LocationProfile1",
           meetingRequestSent = listOf(),
-          meetingRequestInbox = mapOf())
+          meetingRequestInbox = mapOf(),
+          meetingRequestPendingLocation = listOf(),
+          meetingRequestChosenLocalisation = mapOf())
 
   private val profile2 =
       Profile(
@@ -212,6 +214,48 @@ class NotificationTest {
 
     composeTestRule.onNodeWithTag("navItem_${R.string.around_you}").performClick()
     verify(navigationActions).navigateTo(TopLevelDestinations.AROUND_YOU)
+  }
+
+  @Test
+  fun badgeDisplayWhen1PendingAnd1Inbox() {
+    val updatedProfile =
+        profile1.copy(
+            meetingRequestPendingLocation = listOf("2"),
+            meetingRequestInbox = mapOf("2" to "Hey, wanna meat?"))
+    `when`(mockProfilesRepository.getProfileByUid(eq("1"), any(), any())).thenAnswer {
+      val onSuccess = it.getArgument<(Profile) -> Unit>(1)
+      onSuccess(updatedProfile)
+    }
+    `when`(mockProfilesRepository.getMultipleProfiles(any(), any(), any())).thenAnswer {
+      val onSuccess = it.getArgument<(List<Profile>) -> Unit>(1)
+      onSuccess(listOf(profile2))
+    }
+    composeTestRule.setContent {
+      NotificationScreen(navigationActions, profilesViewModel, meetingRequestViewModel)
+    }
+    composeTestRule.waitForIdle()
+    composeTestRule.onNodeWithTag("profileCard").assertIsDisplayed()
+    composeTestRule
+        .onNodeWithTag("MeetingRequestOptionsDropdown_Selected")
+        .assertIsDisplayed()
+        .performClick()
+    composeTestRule
+        .onNodeWithTag("MeetingRequestOptionsDropdown_Option_CHOOSE_LOCATION")
+        .assertIsDisplayed()
+        .performClick()
+    composeTestRule.onNodeWithTag("profileCard").assertIsDisplayed()
+    composeTestRule
+        .onNodeWithTag("MeetingRequestOptionsDropdown_Selected")
+        .assertIsDisplayed()
+        .performClick()
+    composeTestRule
+        .onNodeWithTag("MeetingRequestOptionsDropdown_Option_SENT")
+        .assertIsDisplayed()
+        .performClick()
+    composeTestRule
+        .onNodeWithTag("MeetingRequestOptionsDropdown_Selected")
+        .assertIsDisplayed()
+        .performClick()
   }
 
   // Helper function to create a mock profile

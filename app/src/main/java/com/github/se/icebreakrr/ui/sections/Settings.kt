@@ -112,7 +112,7 @@ fun SettingsScreen(
             notificationCount =
                 (myProfile.value?.meetingRequestInbox?.size ?: 0) +
                     (myProfile.value?.meetingRequestPendingLocation?.size ?: 0),
-            heatMapCount = myProfile.value?.meetingRequestChosenLocalisation?.size?:0)
+            heatMapCount = myProfile.value?.meetingRequestChosenLocalisation?.size ?: 0)
       },
   ) { innerPadding ->
     Column(

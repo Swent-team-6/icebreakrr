@@ -68,7 +68,7 @@ fun TopBar(s: String, needBackButton: Boolean = false, backButtonOnClick: () -> 
                       modifier = Modifier.size(BACK_BUTTON_ICON_SIZE))
                 }
           }
-            val topBarSize = if (s.length < 15) TOP_BAR_TEXT_SIZE else 25.sp
+          val topBarSize = if (s.length < 15) TOP_BAR_TEXT_SIZE else 25.sp
           Text(
               text = s,
               fontSize = topBarSize,

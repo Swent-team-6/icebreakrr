@@ -23,6 +23,7 @@ import org.hamcrest.CoreMatchers.`is`
 import org.hamcrest.CoreMatchers.nullValue
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.After
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -32,6 +33,7 @@ import org.mockito.Mockito.mock
 import org.mockito.Mockito.mockStatic
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
+import org.mockito.Mockito.`when`
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.whenever
@@ -65,7 +67,11 @@ class ProfilesViewModelTest {
           catchPhrase = "Just a friendly guy",
           description = "I love meeting new people.",
           tags = listOf("friendly", "outgoing"),
-          profilePictureUrl = "http://example.com/profile.jpg")
+          profilePictureUrl = "http://example.com/profile.jpg",
+          meetingRequestInbox = mapOf(),
+          meetingRequestPendingLocation = listOf(),
+          meetingRequestChosenLocalisation = mapOf(),
+          meetingRequestSent = listOf())
 
   private val profile2 =
       Profile(
@@ -190,7 +196,7 @@ class ProfilesViewModelTest {
 
   @Test
   fun updateProfileCallsRepository() = runBlocking {
-    profilesViewModel.updateProfile(profile1)
+    profilesViewModel.updateProfile(profile1) {}
 
     verify(profilesRepository).updateProfile(eq(profile1), any(), any())
   }
@@ -252,7 +258,7 @@ class ProfilesViewModelTest {
       onFailure(exception)
     }
 
-    profilesViewModel.updateProfile(profile1)
+    profilesViewModel.updateProfile(profile1) {}
 
     assertThat(profilesViewModel.error.value, `is`(exception))
   }
@@ -460,5 +466,56 @@ class ProfilesViewModelTest {
     assertThat(
         profilesViewModel.pictureChangeState.value,
         `is`(ProfilesViewModel.ProfilePictureState.TO_UPLOAD))
+  }
+
+  @Test
+  fun confirmMeetingLocationTest() {
+    val updatedProfile = profile1.copy(meetingRequestPendingLocation = listOf("2"))
+    val finalProfile =
+        profile1.copy(
+            meetingRequestPendingLocation = listOf(),
+            meetingRequestChosenLocalisation =
+                mapOf("2" to Pair("we can meat here", Pair(5.0, 6.0))))
+    profilesViewModel.updateProfile(updatedProfile) {}
+    profilesViewModel.confirmMeetingLocation("2", Pair("we can meat here", Pair(5.0, 6.0))) {}
+    verify(profilesRepository).updateProfile(eq(finalProfile), any(), any())
+  }
+
+  @Test
+  fun removeChosenLocationTest() {
+    val updatedProfile =
+        profile1.copy(
+            meetingRequestChosenLocalisation =
+                mapOf("2" to Pair("we can meat here", Pair(5.0, 6.0))))
+    val finalProfile = profile1.copy(meetingRequestChosenLocalisation = mapOf())
+    profilesViewModel.updateProfile(updatedProfile) {}
+    profilesViewModel.removeChosenLocalisation("2")
+    verify(profilesRepository).updateProfile(eq(finalProfile), any(), any())
+  }
+
+  @Test
+  fun addPendingLocationTest() {
+    val finalProfile = profile1.copy(meetingRequestPendingLocation = listOf("2"))
+    profilesViewModel.updateProfile(profile1) {}
+    profilesViewModel.addPendingLocation("2") {
+      verify(profilesRepository).updateProfile(eq(finalProfile), any(), any())
+    }
+  }
+
+  @Test
+  fun getChosenLocationTest() {
+    val updatedProfile =
+        profile1.copy(
+            meetingRequestChosenLocalisation =
+                mapOf("2" to Pair("we can meat here", Pair(5.0, 6.0))))
+    `when`(profilesRepository.getMultipleProfiles(any(), any(), any())).thenAnswer {
+      val onSuccess = it.getArgument<(List<Profile>) -> Unit>(1)
+      onSuccess(listOf(profile2))
+    }
+    profilesViewModel.updateProfile(updatedProfile) {}
+    profilesViewModel.getChosenLocations()
+    assertEquals(
+        profilesViewModel.chosenLocalisations.value,
+        mapOf(profile2 to Pair("we can meat here", Pair(5.0, 6.0))))
   }
 }

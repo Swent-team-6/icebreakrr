@@ -50,13 +50,12 @@ class MeetingRequestService : FirebaseMessagingService() {
         val accepted = remoteMessage.data["accepted"]?.toBoolean() ?: false
         val senderToken = remoteMessage.data["senderToken"] ?: "null"
 
-        MeetingRequestManager.meetingRequestViewModel?.removeFromMeetingRequestSent(senderUid){
+        MeetingRequestManager.meetingRequestViewModel?.removeFromMeetingRequestSent(senderUid) {
           MeetingRequestManager.meetingRequestViewModel?.updateInboxOfMessages() {}
         }
         if (accepted) {
           showNotification(name + MSG_RESPONSE_ACCEPTED, "")
-          MeetingRequestManager.meetingRequestViewModel?.addPendingLocation(senderUid) {
-          }
+          MeetingRequestManager.meetingRequestViewModel?.addPendingLocation(senderUid) {}
         } else {
           showNotification(name + MSG_RESPONSE_REJECTED, "")
         }
@@ -69,7 +68,8 @@ class MeetingRequestService : FirebaseMessagingService() {
         val latitudeString = locationString.split(", ")[0]
         val longitudeString = locationString.split(", ")[1]
         MeetingRequestManager.meetingRequestViewModel?.confirmMeetingLocation(
-            senderUid, Pair(newMessage, Pair(latitudeString.toDouble(), longitudeString.toDouble())))
+            senderUid,
+            Pair(newMessage, Pair(latitudeString.toDouble(), longitudeString.toDouble())))
         showNotification(name + MSG_CONFIRMATION, MSG_CONFIRMATION_INFO)
       }
       "MEETING CANCELLATION" -> {
@@ -82,7 +82,7 @@ class MeetingRequestService : FirebaseMessagingService() {
             }
         showNotification("Cancelled meeting with $name", stringReason)
         MeetingRequestManager.meetingRequestViewModel?.removeFromMeetingRequestInbox(senderUid)
-        MeetingRequestManager.meetingRequestViewModel?.removeFromMeetingRequestSent(senderUid){}
+        MeetingRequestManager.meetingRequestViewModel?.removeFromMeetingRequestSent(senderUid) {}
       }
       "ENGAGEMENT NOTIFICATION" -> {
         val name = remoteMessage.data["senderName"] ?: "null"
