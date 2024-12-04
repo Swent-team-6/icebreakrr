@@ -73,6 +73,7 @@ geohashJava = "1.4.0"
 playServicesMaps = "19.0.0"
 mapsCompose = "4.3.3"
 mapsComposeUtils = "4.3.0"
+coreKtxVersion = "1.6.1"
 
 [libraries]
 #Google
@@ -152,6 +153,7 @@ androidx-datastore-core-android = { group = "androidx.datastore", name = "datast
 #Utils
 geohashJava = { module = "ch.hsr:geohash", version.ref = "geohashJava" }
 play-services-maps = { group = "com.google.android.gms", name = "play-services-maps", version.ref = "playServicesMaps" }
+core-ktx = { group = "androidx.test", name = "core-ktx", version.ref = "coreKtxVersion" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
