@@ -73,5 +73,6 @@ fun AlreadyMetScreen(
       selectedProfile = profileToUnmeet,
       periodicRefreshAction = { profilesViewModel.getAlreadyMetUsers() },
       isTestMode = isTestMode,
-      notificationCount = inboxItems.value?.meetingRequestInbox?.size ?: 0)
+      notificationCount = inboxItems.value?.meetingRequestInbox?.size ?: 0,
+      heatMapCount = inboxItems.value?.meetingRequestChosenLocalisation?.size?:0)
 }

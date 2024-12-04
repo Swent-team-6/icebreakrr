@@ -76,6 +76,7 @@ class MeetingRequestViewModel(
     this.senderToken = senderToken
     this.senderUID = senderUID
     this.senderName = senderName
+    Log.d("TESTEST", "init values. token : ${senderToken}, UID : ${senderUID}, name : ${senderName}")
   }
 
   /**
@@ -146,11 +147,11 @@ class MeetingRequestViewModel(
    * @param targetToken: the FCM token of the target user
    * @param newLocation: the chosen location to send in the form "latitude, longitude"
    */
-  fun setMeetingConfirmation(targetToken: String, newLocation: String) {
+  fun setMeetingConfirmation(targetToken: String, newLocation: String, newMessage: String) {
     meetingConfirmationState =
         meetingConfirmationState.copy(
             targetToken = targetToken,
-            message = "meeting request successfull",
+            message = if (newLocation.isNotEmpty()) newMessage else "|",
             location = newLocation)
   }
 
@@ -355,8 +356,10 @@ class MeetingRequestViewModel(
     profilesViewModel.addPendingLocation(newUid) { onComplete() }
   }
 
-  fun confirmMeetingLocation(uid: String, loc: Pair<Double, Double>) {
-    profilesViewModel.confirmMeetingLocation(uid, loc)
+  fun confirmMeetingLocation(uid: String, locAndMessage: Pair<String, Pair<Double, Double>>) {
+    profilesViewModel.confirmMeetingLocation(uid, locAndMessage){
+        updateChosenLocalisations()
+    }
   }
 
   fun removeChosenLocalisation(uid: String) {

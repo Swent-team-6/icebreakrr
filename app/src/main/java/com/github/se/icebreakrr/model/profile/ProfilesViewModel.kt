@@ -80,8 +80,8 @@ open class ProfilesViewModel(
   open var pendingLocalisations: StateFlow<List<Profile>> = _pendingLocalisations
 
   private val _chosenLocalisations =
-      MutableStateFlow<Map<Profile, Pair<Double, Double>>>(emptyMap())
-  open var chosenLocalisations: StateFlow<Map<Profile, Pair<Double, Double>>> = _chosenLocalisations
+      MutableStateFlow<Map<Profile, Pair<String, Pair<Double, Double>>>>(emptyMap())
+  open var chosenLocalisations: StateFlow<Map<Profile, Pair<String, Pair<Double, Double>>>> = _chosenLocalisations
 
   fun updateIsConnected(boolean: Boolean) {
     _isConnected.value = boolean
@@ -543,7 +543,6 @@ open class ProfilesViewModel(
         inboxUserUid,
         onSuccess = { profileList ->
           _pendingLocalisations.value = profileList
-            Log.d("TESTEST", "profile view model pending location size : ${profileList.size}")
           _loading.value = false
           _isConnected.value = true
           onComplete()
@@ -552,7 +551,7 @@ open class ProfilesViewModel(
   }
 
   private fun getChosenLocations(
-      inboxUserUid: Map<String, Pair<Double, Double>>,
+      inboxUserUid: Map<String, Pair<String, Pair<Double, Double>>>,
   ) {
     _loading.value = true
     repository.getMultipleProfiles(
@@ -661,7 +660,7 @@ open class ProfilesViewModel(
                     ?: emptyMap())!!) {}
   }
 
-  fun confirmMeetingLocation(uid: String, loc: Pair<Double, Double>) {
+  fun confirmMeetingLocation(uid: String, loc: Pair<String, Pair<Double, Double>>, onComplete: () -> Unit) {
     updateProfile(
         _selfProfile.value?.copy(
             meetingRequestChosenLocalisation =
@@ -669,7 +668,7 @@ open class ProfilesViewModel(
                     ?: emptyMap(),
             meetingRequestPendingLocation =
                 _selfProfile.value?.meetingRequestPendingLocation?.filter { it != uid }
-                    ?: emptyList())!!) {}
+                    ?: emptyList())!!) {onComplete()}
   }
 
   /** Fetches the current user's profile from the repository. */

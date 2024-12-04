@@ -63,12 +63,13 @@ class MeetingRequestService : FirebaseMessagingService() {
       }
       "MEETING CONFIRMATION" -> {
         val name = remoteMessage.data["senderName"] ?: "null"
-        val senderUid = remoteMessage.data["senderUID"] ?: "null"
+        val mewSenderUid = remoteMessage.data["senderUID"] ?: "null"
         val locationString = remoteMessage.data["location"] ?: "null"
+        val newMessage = remoteMessage.data["message"] ?: ""
         val latitudeString = locationString.split(", ")[0]
         val longitudeString = locationString.split(", ")[1]
         MeetingRequestManager.meetingRequestViewModel?.confirmMeetingLocation(
-            senderUid, Pair(latitudeString.toDouble(), longitudeString.toDouble()))
+            senderUid, Pair(newMessage, Pair(latitudeString.toDouble(), longitudeString.toDouble())))
         showNotification(name + MSG_CONFIRMATION, MSG_CONFIRMATION_INFO)
       }
       "MEETING CANCELLATION" -> {

@@ -72,5 +72,6 @@ fun UnblockProfileScreen(
       selectedProfile = profileToUnblock,
       periodicRefreshAction = { profilesViewModel.getBlockedUsers() },
       isTestMode = isTestMode,
-      notificationCount = inboxItems.value?.meetingRequestInbox?.size ?: 0)
+      notificationCount = inboxItems.value?.meetingRequestInbox?.size ?: 0,
+      heatMapCount = inboxItems.value?.meetingRequestChosenLocalisation?.size?:0)
 }

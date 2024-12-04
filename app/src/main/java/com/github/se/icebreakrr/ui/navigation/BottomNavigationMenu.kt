@@ -45,7 +45,8 @@ fun BottomNavigationMenu(
     onTabSelect: (TopLevelDestination) -> Unit,
     tabList: List<TopLevelDestination>,
     selectedItem: String,
-    notificationCount: Int
+    notificationCount: Int,
+    heatMapCount: Int
 ) {
   NavigationBar(
       modifier = Modifier.fillMaxWidth().height(60.dp).testTag("bottomNavigationMenu"),
@@ -58,6 +59,9 @@ fun BottomNavigationMenu(
                   Icon(tab.icon, contentDescription = stringResource(id = tab.textId))
                   if (tab.route == Route.NOTIFICATIONS && notificationCount > 0) {
                     Badge(count = notificationCount)
+                  }
+                  if (tab.route == Route.HEAT_MAP && heatMapCount > 0){
+                      Badge(count = heatMapCount)
                   }
                 }
               },

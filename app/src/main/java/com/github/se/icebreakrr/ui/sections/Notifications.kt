@@ -81,7 +81,7 @@ fun NotificationScreen(
   val pendingLocation = profileViewModel.pendingLocalisations.collectAsState()
   val context = LocalContext.current
   var meetingRequestOption by remember { mutableStateOf(MeetingRequestOption.INBOX) }
-  Log.d("TESTEST", "pending size notification : ${pendingLocation.value.size}")
+  val myProfile = profileViewModel.selfProfile.collectAsState()
   Scaffold(
       modifier = Modifier.testTag("notificationScreen"),
       topBar = { TopBar("Inbox") },
@@ -94,7 +94,8 @@ fun NotificationScreen(
             },
             tabList = LIST_TOP_LEVEL_DESTINATIONS,
             selectedItem = Route.NOTIFICATIONS,
-            notificationCount = inboxCardList.value.size + pendingLocation.value.size)
+            notificationCount = inboxCardList.value.size + pendingLocation.value.size,
+            heatMapCount = myProfile.value?.meetingRequestChosenLocalisation?.size?:0)
       },
       content = { innerPadding ->
         Column(modifier = Modifier.padding(innerPadding).padding(horizontal = HORIZONTAL_PADDING)) {

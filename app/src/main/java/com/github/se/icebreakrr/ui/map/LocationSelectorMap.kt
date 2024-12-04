@@ -19,6 +19,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -72,8 +73,6 @@ fun LocationSelectorMapScreen(
     locationViewModel: LocationViewModel
 ) {
   val configuration = LocalConfiguration.current
-  val screenHeight = configuration.screenHeightDp
-  val screenWidth = configuration.screenWidthDp
 
   val loadingSelfProfile = profilesViewModel.loadingSelf.collectAsState()
   val centerLatitude =
@@ -107,15 +106,14 @@ fun LocationSelectorMapScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(150.dp).background(
-                        color = IceBreakrrBlue
-                        ),
-                contentAlignment = Alignment.Center
+                        color = IceBreakrrBlue),
             ) {
-                // Adjusted OutlinedTextField Modifier
                 TextField(
                     value = stringQuery,
                     onValueChange = {
-                        stringQuery = it
+                        if (it.length < 113){
+                            stringQuery = it
+                        }
                     },
                     label = { Text("Add Details...", modifier = Modifier.testTag("labelTagSelector")) },
                     placeholder = {
@@ -126,34 +124,26 @@ fun LocationSelectorMapScreen(
                         .fillMaxSize().shadow(
                             elevation = 8.dp, // Adjust shadow intensity
                             shape = androidx.compose.foundation.shape.RoundedCornerShape(8.dp) // Optional: Rounded corners
-                        ) // Reduces the width to leave space for the FAB
+                        ),
+                    trailingIcon = {
+                    }// Reduces the width to leave space for the FAB
                 )
-                FloatingActionButton(
-                    onClick = {
-                        meetingRequestViewModel.confirmMeetingLocation(
-                            profileId!!,
-                            Pair(markerState?.position?.latitude!!, markerState?.position?.longitude!!)
-                        )
-                        meetingRequestViewModel.setMeetingConfirmation(
-                            profile.value?.fcmToken!!,
-                            markerState?.position?.latitude!!.toString() +
-                                    ", " +
-                                    markerState?.position?.longitude!!.toString()
-                        )
-                        meetingRequestViewModel.sendMeetingConfirmation()
-                        navigationActions.navigateTo(Route.HEAT_MAP)
-                    },
+                IconButton(onClick = {
+                    meetingRequestViewModel.confirmMeetingLocation(
+                        profileId!!,
+                        Pair(stringQuery, Pair(markerState?.position?.latitude!!, markerState?.position?.longitude!!)))
+                    meetingRequestViewModel.setMeetingConfirmation(
+                        profile.value?.fcmToken!!,
+                        markerState?.position?.latitude!!.toString() +
+                                ", " +
+                                markerState?.position?.longitude!!.toString(), stringQuery
+                    )
+                    meetingRequestViewModel.sendMeetingConfirmation()
+                    navigationActions.navigateTo(Route.HEAT_MAP)},
                     modifier = Modifier
-                        .size(40.dp)
-                        .zIndex(1f)
                         .align(Alignment.BottomEnd)
-                        .padding(bottom = 9.dp, end = 17.dp)
-                        .background(Color.Transparent)
-                        .shadow(elevation = 0.dp, shape = RectangleShape),
-                    shape = RectangleShape,
-                    elevation = FloatingActionButtonDefaults.elevation(0.dp, 0.dp, 0.dp, 0.dp)
-                ) {
-                    Icon(Icons.Default.Check, contentDescription = "Confirm Pin")
+                        .padding(end = 16.dp, bottom = 8.dp)) {
+                    Icon(Icons.Default.Check, contentDescription = "Confirm")
                 }
             }
         }

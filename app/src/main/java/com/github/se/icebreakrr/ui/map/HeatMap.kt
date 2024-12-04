@@ -92,7 +92,8 @@ fun HeatMap(
             },
             tabList = LIST_TOP_LEVEL_DESTINATIONS,
             selectedItem = Route.HEAT_MAP,
-            notificationCount = myProfile.value?.meetingRequestInbox?.size ?: 0)
+            notificationCount = myProfile.value?.meetingRequestInbox?.size ?: 0,
+            heatMapCount = myProfile.value?.meetingRequestChosenLocalisation?.size?:0)
       }) { paddingValues ->
         if (userLocation.value == null) {
           // Show loading box when location is not available
