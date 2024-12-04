@@ -1,6 +1,5 @@
 package com.github.se.icebreakrr.ui.map
 
-import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -10,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.Icon
@@ -28,7 +28,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
@@ -52,6 +51,17 @@ import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.rememberCameraPositionState
 import com.google.maps.android.ktx.utils.sphericalDistance
 
+private const val DEFAULT_ZOOM = 16F
+private const val BOTTOM_BAR_HEIGHT = 150
+private const val TEXTFIELD_MAX_CHAR = 113
+private const val TEXT_FIELD_VERTICAL_PADDING = 8
+private const val TEXT_FIELD_HORIZONTAL_PADDING = 16
+private const val TEXT_FIELD_ELEVATION = 8
+private const val TEXT_FIELD_ROUNDED_CORNER = 8
+private const val MAX_DISTANCE_MEETING_POINT = 500
+private const val COLOR_INSIDE_CIRCLE = 0x11FFFFFF
+private const val CIRCLE_STROKE = 2f
+
 @Composable
 fun LocationSelectorMapScreen(
     profilesViewModel: ProfilesViewModel,
@@ -61,8 +71,6 @@ fun LocationSelectorMapScreen(
     locationViewModel: LocationViewModel,
     isTesting: Boolean
 ) {
-  val configuration = LocalConfiguration.current
-
   val loadingSelfProfile = profilesViewModel.loadingSelf.collectAsState()
   val centerLatitude =
       profilesViewModel.selfProfile.value?.location?.latitude ?: DEFAULT_USER_LATITUDE
@@ -76,8 +84,6 @@ fun LocationSelectorMapScreen(
   var mapLoaded by remember { mutableStateOf(false) }
   var stringQuery by remember { mutableStateOf("") }
 
-  Log.d("TESTEST", "profile Id : ${profileId}")
-
   LaunchedEffect(Unit) {
     profilesViewModel.getSelfProfile() {}
     profilesViewModel.getProfileByUid(profileId ?: "null")
@@ -90,7 +96,7 @@ fun LocationSelectorMapScreen(
   }
 
   val cameraPositionState = rememberCameraPositionState {
-    position = CameraPosition.fromLatLngZoom(LatLng(centerLatitude, centerLongitude), 16F)
+    position = CameraPosition.fromLatLngZoom(LatLng(centerLatitude, centerLongitude), DEFAULT_ZOOM)
   }
 
   Scaffold(
@@ -101,35 +107,30 @@ fun LocationSelectorMapScreen(
         Box(
             modifier =
                 Modifier.fillMaxWidth()
-                    .height(150.dp)
+                    .height(BOTTOM_BAR_HEIGHT.dp)
                     .background(color = IceBreakrrBlue)
                     .testTag("addTextAndSendLocationBox"),
         ) {
           TextField(
               value = stringQuery,
               onValueChange = {
-                if (it.length < 113) {
+                if (it.length < TEXTFIELD_MAX_CHAR) {
                   stringQuery = it
                 }
               },
               label = { Text("Add Details...", modifier = Modifier.testTag("labelTagSelector")) },
-              placeholder = { Text("", modifier = Modifier.testTag("placeholderTagSelector")) },
               modifier =
                   Modifier.padding(
-                          start = 16.dp,
-                          end = 16.dp,
-                          top = 8.dp,
-                          bottom = 8.dp) // Adds padding on the left
+                          start = TEXT_FIELD_HORIZONTAL_PADDING.dp,
+                          end = TEXT_FIELD_HORIZONTAL_PADDING.dp,
+                          top = TEXT_FIELD_VERTICAL_PADDING.dp,
+                          bottom = TEXT_FIELD_VERTICAL_PADDING.dp)
                       .fillMaxSize()
                       .shadow(
-                          elevation = 8.dp, // Adjust shadow intensity
-                          shape =
-                              androidx.compose.foundation.shape.RoundedCornerShape(
-                                  8.dp) // Optional: Rounded corners
-                          )
+                          elevation = TEXT_FIELD_ELEVATION.dp,
+                          shape = RoundedCornerShape(TEXT_FIELD_ROUNDED_CORNER.dp))
                       .testTag("addDetailsTextField"),
-              trailingIcon = {} // Reduces the width to leave space for the FAB
-              )
+          )
           IconButton(
               onClick = {
                 if (mapLoaded || isTesting) {
@@ -152,7 +153,9 @@ fun LocationSelectorMapScreen(
               },
               modifier =
                   Modifier.align(Alignment.BottomEnd)
-                      .padding(end = 16.dp, bottom = 8.dp)
+                      .padding(
+                          end = TEXT_FIELD_HORIZONTAL_PADDING.dp,
+                          bottom = TEXT_FIELD_VERTICAL_PADDING.dp)
                       .testTag("buttonSendMessageLocation")) {
                 Icon(Icons.Default.Check, contentDescription = "Confirm")
               }
@@ -164,7 +167,8 @@ fun LocationSelectorMapScreen(
                 modifier = Modifier.fillMaxSize().padding(paddingValues).testTag("normalMap"),
                 cameraPositionState = cameraPositionState,
                 onMapClick = { latLong ->
-                  if (LatLng(centerLatitude, centerLongitude).sphericalDistance(latLong) < 500) {
+                  if (LatLng(centerLatitude, centerLongitude).sphericalDistance(latLong) <
+                      MAX_DISTANCE_MEETING_POINT) {
                     markerState?.position = latLong
                   } else {
                     Toast.makeText(
@@ -180,10 +184,10 @@ fun LocationSelectorMapScreen(
                   if (mapLoaded) {
                     Circle(
                         LatLng(centerLatitude, centerLongitude),
-                        radius = 500.0,
-                        fillColor = Color(0x11FFFFFF),
+                        radius = MAX_DISTANCE_MEETING_POINT.toDouble(),
+                        fillColor = Color(COLOR_INSIDE_CIRCLE),
                         strokeColor = Color.Black,
-                        strokeWidth = 2f)
+                        strokeWidth = CIRCLE_STROKE)
                     Marker(
                         state = markerState!!,
                         title = "Selected Position",

@@ -76,8 +76,6 @@ class MeetingRequestViewModel(
     this.senderToken = senderToken
     this.senderUID = senderUID
     this.senderName = senderName
-    Log.d(
-        "TESTEST", "init values. token : ${senderToken}, UID : ${senderUID}, name : ${senderName}")
   }
 
   /**
@@ -147,6 +145,7 @@ class MeetingRequestViewModel(
    *
    * @param targetToken: the FCM token of the target user
    * @param newLocation: the chosen location to send in the form "latitude, longitude"
+   * @param newMessage : message sent when choosing location
    */
   fun setMeetingConfirmation(targetToken: String, newLocation: String, newMessage: String) {
     meetingConfirmationState =
@@ -333,7 +332,11 @@ class MeetingRequestViewModel(
     }
   }
 
-  /** Refreshes the content of the inbox to have it available locally */
+  /**
+   * Refreshes the content of the inbox to have it available locally
+   *
+   * @param onComplete : callback function to remove racing conditions
+   */
   fun updateInboxOfMessages(onComplete: () -> Unit) {
     profilesViewModel.getSelfProfile() {
       profilesViewModel.getInboxOfSelfProfile() {
@@ -344,18 +347,40 @@ class MeetingRequestViewModel(
     }
   }
 
+  /**
+   * private functions called when we have set the meeting confirmation It fetches the chosen
+   * locations from the database
+   */
   private fun updateChosenLocalisations() {
     profilesViewModel.getSelfProfile() { profilesViewModel.getChosenLocations() }
   }
 
+  /**
+   * function used to add a pending location. Called when someone accepts your meeting request
+   *
+   * @param newUid: uid of the user that accepted your request
+   * @param onComplete: callback function to avoid race conditions
+   */
   fun addPendingLocation(newUid: String, onComplete: () -> Unit) {
     profilesViewModel.addPendingLocation(newUid) { onComplete() }
   }
 
+  /**
+   * method called when you receive a meeting confirmation
+   *
+   * @param uid : uid of the user with whom you want to have a meeting
+   * @param locAndMessage : variable that contains the uid of the other user, the message he sent
+   *   you and the location he has chosen
+   */
   fun confirmMeetingLocation(uid: String, locAndMessage: Pair<String, Pair<Double, Double>>) {
     profilesViewModel.confirmMeetingLocation(uid, locAndMessage) { updateChosenLocalisations() }
   }
 
+  /**
+   * function that we need to call when two people have met
+   *
+   * @param uid : uid of the user you have met
+   */
   fun removeChosenLocalisation(uid: String) {
     profilesViewModel.removeChosenLocalisation(uid)
   }

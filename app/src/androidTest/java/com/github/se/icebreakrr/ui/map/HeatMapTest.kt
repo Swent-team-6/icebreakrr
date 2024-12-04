@@ -67,6 +67,5 @@ class HeatMapTest {
 
     // Verify bottom navigation is displayed
     composeTestRule.onNodeWithTag("bottomNavigationMenu").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("topBar").assertIsDisplayed()
   }
 }

@@ -235,6 +235,7 @@ open class ProfilesViewModel(
    * Updates an existing profile in the repository.
    *
    * @param profile The profile with updated information.
+   * @param onComplete : callback to avoid racing conditions
    */
   fun updateProfile(profile: Profile, onComplete: () -> Unit) {
     _loading.value = true
@@ -245,10 +246,7 @@ open class ProfilesViewModel(
           _loading.value = false
           onComplete()
         },
-        onFailure = { e ->
-          handleError(e)
-          Log.d("TESTEST", "failed to update profile")
-        })
+        onFailure = { e -> handleError(e) })
   }
 
   /**
@@ -257,7 +255,6 @@ open class ProfilesViewModel(
    * @param uid The unique ID of the user whose profile is being retrieved.
    */
   fun getProfileByUid(uid: String) {
-    Log.d("TESTEST", "get profile by uid : ${uid}")
     _loading.value = true
     repository.getProfileByUid(
         uid,
@@ -522,9 +519,9 @@ open class ProfilesViewModel(
    * Fetches all the profiles that send a message to our profile
    *
    * @param inboxUserUid: The list of UID of the profiles that have sent a message to our user inbox
+   * @param onComplete : callback to avoid racing conditions
    */
   private fun getInboxUsers(inboxUserUid: List<String>, onComplete: () -> Unit) {
-    Log.d("TESTEST", "get inbox user : ${inboxUserUid}")
     _loading.value = true
     repository.getMultipleProfiles(
         inboxUserUid,
@@ -534,17 +531,20 @@ open class ProfilesViewModel(
           _isConnected.value = true
           onComplete()
         },
-        onFailure = { e ->
-          handleError(e)
-          Log.d("TESTEST", "error in get inbox users : ${error.value?.message}")
-        })
+        onFailure = { e -> handleError(e) })
   }
 
-  private fun getPendingLocationUsers(inboxUserUid: List<String>, onComplete: () -> Unit) {
+  /**
+   * Function that get a list of uids in the database and update the observable variable
+   * _pendingLocalisations
+   *
+   * @param pendingUserUid : list of users to fetch from database
+   * @param onComplete : callback function to avoid race conditions
+   */
+  private fun getPendingLocationUsers(pendingUserUid: List<String>, onComplete: () -> Unit) {
     _loading.value = true
-    Log.d("TESTEST", "get pending location users : ${inboxUserUid}")
     repository.getMultipleProfiles(
-        inboxUserUid,
+        pendingUserUid,
         onSuccess = { profileList ->
           _pendingLocalisations.value = profileList
           _loading.value = false
@@ -553,7 +553,13 @@ open class ProfilesViewModel(
         },
         onFailure = { e -> handleError(e) })
   }
-
+  /**
+   * Function that get a list of uids in the database and update the observable variable
+   * _¨chosenLocations
+   *
+   * @param inboxUserUid : list of users to fetch from database with the message and localisation
+   *   they have sent
+   */
   private fun getChosenLocations(
       inboxUserUid: Map<String, Pair<String, Pair<Double, Double>>>,
   ) {
@@ -582,6 +588,7 @@ open class ProfilesViewModel(
    * Fetches all the users to which we sent messages to
    *
    * @param sentUserUid: The list of uid of the users we sent a meeting request to
+   * @param onComplete : callback to avoir racing conditions
    */
   private fun getSentUsers(sentUserUid: List<String>, onComplete: () -> Unit) {
     _loading.value = true
@@ -596,7 +603,11 @@ open class ProfilesViewModel(
         onFailure = { e -> handleError(e) })
   }
 
-  /** Fetches all the users that our profile has been in contact with (received or sent messages) */
+  /**
+   * Fetches all the users that our profile has been in contact with (received or sent messages)
+   *
+   * @param onComplete : callback to avoid racing conditions
+   */
   fun getMessageCancellationUsers(onComplete: () -> Unit) {
     _loading.value = true
     val allContactedUsers =
@@ -613,7 +624,11 @@ open class ProfilesViewModel(
         onFailure = { e -> handleError(e) })
   }
 
-  /** Get the inbox of our user */
+  /**
+   * Get the inbox of our user
+   *
+   * @param onComplete : callback to avoid race conditions
+   */
   fun getInboxOfSelfProfile(onComplete: () -> Unit) {
     val inboxUidList = selfProfile.value?.meetingRequestInbox
     val sentUidList = selfProfile.value?.meetingRequestSent
@@ -631,6 +646,11 @@ open class ProfilesViewModel(
     }
   }
 
+  /**
+   * function that fetches the pending profiles in the databse from the local self profile
+   *
+   * @param onComplete : callback used to avoid race conditions
+   */
   fun getInboxOfPendingLocations(onComplete: () -> Unit) {
     val pendingLocationUid = selfProfile.value?.meetingRequestPendingLocation
     if (pendingLocationUid != null) {
@@ -638,6 +658,7 @@ open class ProfilesViewModel(
     }
   }
 
+  /** function that fetches the profiles in the database from the local self profile */
   fun getChosenLocations() {
     val chosenLocationsUid = selfProfile.value?.meetingRequestChosenLocalisation
     if (chosenLocationsUid != null) {
@@ -645,6 +666,12 @@ open class ProfilesViewModel(
     }
   }
 
+  /**
+   * adds a user uid in our pending location
+   *
+   * @param newUid : uid to add
+   * @param onComplete : callaback to avoid racing conditions
+   */
   fun addPendingLocation(newUid: String, onComplete: () -> Unit) {
     updateProfile(
         _selfProfile.value?.copy(
@@ -654,6 +681,12 @@ open class ProfilesViewModel(
         }
   }
 
+  /**
+   * remove a chosen locations (called when you already met a person after having decided of a
+   * meeting)
+   *
+   * @param uid : uid of the user you have met
+   */
   fun removeChosenLocalisation(uid: String) {
     updateProfile(
         _selfProfile.value?.copy(
@@ -662,6 +695,13 @@ open class ProfilesViewModel(
                     ?: emptyMap())!!) {}
   }
 
+  /**
+   * called when we have selected the meeting point after the request has been accepted. It adds a
+   * new mapping in the chosen localisation and remove the user from the pending locations
+   *
+   * @param uid : uid with whom you confirmed the location
+   * @param loc : contains the message and the localisation chosen
+   */
   fun confirmMeetingLocation(
       uid: String,
       loc: Pair<String, Pair<Double, Double>>,
@@ -679,7 +719,11 @@ open class ProfilesViewModel(
         }
   }
 
-  /** Fetches the current user's profile from the repository. */
+  /**
+   * Fetches the current user's profile from the repository.
+   *
+   * @param onComplete : callback to avoid racing conditions
+   */
   fun getSelfProfile(onComplete: () -> Unit) {
     _loadingSelf.value = true
     repository.getProfileByUid(
@@ -690,11 +734,6 @@ open class ProfilesViewModel(
           onComplete()
         },
         onFailure = { e -> handleError(e) })
-  }
-
-  /** Get the geoHash of our profile */
-  fun getSelfGeoHash(): String? {
-    return selfProfile.value?.geohash
   }
 
   /** Get the profile of our current user */
