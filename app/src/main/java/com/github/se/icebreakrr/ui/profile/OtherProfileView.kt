@@ -107,7 +107,7 @@ fun OtherProfileView(
             }
 
             // Scrollable content
-            Column(modifier = Modifier.fillMaxWidth().verticalScroll(rememberScrollState())) {
+            Column(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
               InfoSection(profile, tagsViewModel)
 
               // Add spacer for some padding

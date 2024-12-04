@@ -1,6 +1,7 @@
 package com.github.se.icebreakrr.ui.profile
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
@@ -64,7 +65,7 @@ fun ProfileView(
 
                 // Scrollable information section
                 Column(
-                    modifier = Modifier.fillMaxWidth().verticalScroll(rememberScrollState()),
+                    modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()),
                     horizontalAlignment = Alignment.CenterHorizontally) {
                       InfoSection(profile, tagsViewModel)
                     }
