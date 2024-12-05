@@ -1,4 +1,4 @@
-/**
+
 const functions = require('firebase-functions/v2');
 const admin = require('firebase-admin');
 
@@ -74,7 +74,7 @@ exports.sendMeetingConfirmation = functions.https.onRequest(async (request, resp
     // Access the data object within the request body
     const { targetToken, senderUID, senderName, message, location} = request.body.data;
     // Validate input
-    if (!targetToken || !senderUID || !senderName || !message || !location) {
+    if (!targetToken || !senderUID || !senderName || !location) {
         console.error('Missing targetToken or body or senderUid');
         response.status(400).json({ data: { error: 'Token or message or senderUid' } }); // Wrap error in data
         return;
@@ -165,4 +165,4 @@ exports.sendEngagementNotification = functions.https.onRequest(async (request, r
         response.status(500).json({ data: { error: `Error sending message: ${error.message}` } }); // Wrap error in data
     }
 });
-*/
+

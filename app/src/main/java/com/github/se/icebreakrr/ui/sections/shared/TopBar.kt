@@ -26,16 +26,19 @@ import androidx.compose.ui.unit.sp
 import com.github.se.icebreakrr.ui.theme.IceBreakrrBlue
 
 // Define constants for layout dimensions
-private val TOP_BAR_HEIGHT = 90.dp
+private val TOP_BAR_HEIGHT_1LINE = 90.dp
 private val BACK_BUTTON_PADDING_START = 8.dp
 private val BACK_BUTTON_SIZE = 48.dp
 private val BACK_BUTTON_ICON_SIZE = 32.dp
 
 // Define constants for font sizes and colors
-private val TOP_BAR_TEXT_SIZE = 40.sp
+private val TOP_BAR_TEXT_SIZE_BIG = 40.sp
+private val TOP_BAR_TEXT_SIZE_SMALL = 25.sp
 private val TOP_BAR_TEXT_COLOR = Color.White
 private val TOP_BAR_BACKGROUND_COLOR = IceBreakrrBlue
 private val TITLE_TEXT_WEIGHT = 1f
+private const val MAX_CHAR_ONE_LINE = 15
+private val TOP_BAR_HEIGHT_2LINES = 60.dp
 
 /**
  * Displays the TopBar of each screen, used to show to the user in which screen he is
@@ -51,7 +54,8 @@ fun TopBar(s: String, needBackButton: Boolean = false, backButtonOnClick: () -> 
       modifier =
           Modifier.background(TOP_BAR_BACKGROUND_COLOR)
               .fillMaxWidth()
-              .heightIn(TOP_BAR_HEIGHT)
+              .heightIn(
+                  if (s.length < MAX_CHAR_ONE_LINE) TOP_BAR_HEIGHT_1LINE else TOP_BAR_HEIGHT_2LINES)
               .testTag("topBar")) {
         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
           if (needBackButton) {
@@ -68,9 +72,11 @@ fun TopBar(s: String, needBackButton: Boolean = false, backButtonOnClick: () -> 
                       modifier = Modifier.size(BACK_BUTTON_ICON_SIZE))
                 }
           }
+          val topBarSize =
+              if (s.length < MAX_CHAR_ONE_LINE) TOP_BAR_TEXT_SIZE_BIG else TOP_BAR_TEXT_SIZE_SMALL
           Text(
               text = s,
-              fontSize = TOP_BAR_TEXT_SIZE,
+              fontSize = topBarSize,
               color = TOP_BAR_TEXT_COLOR,
               fontWeight = FontWeight.Bold,
               textAlign = TextAlign.Center,

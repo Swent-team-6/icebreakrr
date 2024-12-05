@@ -1,6 +1,7 @@
 package com.github.se.icebreakrr.ui.sections
 
 import android.annotation.SuppressLint
+import android.content.Context
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -29,7 +30,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.github.se.icebreakrr.model.message.MeetingRequestViewModel
+import com.github.se.icebreakrr.model.profile.Profile
 import com.github.se.icebreakrr.model.profile.ProfilesViewModel
+import com.github.se.icebreakrr.ui.navigation.Badge
 import com.github.se.icebreakrr.ui.navigation.BottomNavigationMenu
 import com.github.se.icebreakrr.ui.navigation.LIST_TOP_LEVEL_DESTINATIONS
 import com.github.se.icebreakrr.ui.navigation.NavigationActions
@@ -56,6 +59,7 @@ private val DROPDOWN_HORIZONTAL_PADDING = 16.dp
 private val DROPDOWN_VERTICAL_PADDING = 8.dp
 private const val UNDERSCORE = "_"
 private const val SPACE = " "
+private const val MEETING_REQUEST_LOCATION_PENDING = "Choose location"
 
 /**
  * Composable function for displaying the notification screen.
@@ -71,11 +75,13 @@ fun NotificationScreen(
     profileViewModel: ProfilesViewModel,
     meetingRequestViewModel: MeetingRequestViewModel
 ) {
-  meetingRequestViewModel.updateInboxOfMessagesAndThen() {}
+  meetingRequestViewModel.updateInboxOfMessages {}
   val inboxCardList = profileViewModel.inboxItems.collectAsState()
   val sentCardList = profileViewModel.sentItems.collectAsState()
+  val pendingLocation = profileViewModel.pendingLocalisations.collectAsState()
   val context = LocalContext.current
   var meetingRequestOption by remember { mutableStateOf(MeetingRequestOption.INBOX) }
+  val myProfile = profileViewModel.selfProfile.collectAsState()
   Scaffold(
       modifier = Modifier.testTag("notificationScreen"),
       topBar = { TopBar("Inbox") },
@@ -88,7 +94,8 @@ fun NotificationScreen(
             },
             tabList = LIST_TOP_LEVEL_DESTINATIONS,
             selectedItem = Route.NOTIFICATIONS,
-            notificationCount = inboxCardList.value.size)
+            notificationCount = inboxCardList.value.size + pendingLocation.value.size,
+            heatMapCount = myProfile.value?.meetingRequestChosenLocalisation?.size ?: 0)
       },
       content = { innerPadding ->
         Column(modifier = Modifier.padding(innerPadding).padding(horizontal = HORIZONTAL_PADDING)) {
@@ -99,57 +106,30 @@ fun NotificationScreen(
                   Modifier.fillMaxWidth()
                       .padding(
                           horizontal = DROPDOWN_HORIZONTAL_PADDING,
-                          vertical = DROPDOWN_VERTICAL_PADDING))
-          if (meetingRequestOption == MeetingRequestOption.INBOX) {
-            LazyColumn(
-                modifier =
-                    Modifier.padding()
-                        .padding(horizontal = HORIZONTAL_PADDING)
-                        .testTag("notificationScroll")) {
-                  item {
-                    Text(
-                        text = MEETING_REQUEST_MSG,
-                        fontWeight = FontWeight.Bold,
-                        modifier =
-                            Modifier.padding(vertical = TEXT_VERTICAL_PADDING)
-                                .testTag("notificationFirstText"))
-                    Column(verticalArrangement = Arrangement.spacedBy(CARD_SPACING)) {
-                      inboxCardList.value.forEach { p ->
-                        ProfileCard(
-                            p.key,
-                            onclick = {
-                              if (isNetworkAvailableWithContext(context)) {
-                                navigationActions.navigateTo(
-                                    Screen.INBOX_PROFILE_VIEW + "?userId=${p.key.uid}")
-                              } else {
-                                showNoInternetToast(context)
-                              }
-                            })
-                      }
-                    }
-                  }
-                }
-          }
-          if (meetingRequestOption == MeetingRequestOption.SENT) {
-            LazyColumn(
-                modifier =
-                    Modifier.padding()
-                        .padding(horizontal = HORIZONTAL_PADDING)
-                        .testTag("notificationScroll")) {
-                  item {
-                    Text(
-                        text = MEETING_REQUEST_SENT,
-                        fontWeight = FontWeight.Bold,
-                        modifier =
-                            Modifier.padding(vertical = TEXT_VERTICAL_PADDING)
-                                .testTag("notificationFirstText"))
-                    Column(verticalArrangement = Arrangement.spacedBy(CARD_SPACING)) {
-                      sentCardList.value.forEach { p ->
-                        ProfileCard(profile = p, onclick = {}, greyedOut = true)
-                      }
-                    }
-                  }
-                }
+                          vertical = DROPDOWN_VERTICAL_PADDING),
+              pendingLocationsSize = pendingLocation.value.size,
+              inboxSize = inboxCardList.value.size)
+          when (meetingRequestOption) {
+            MeetingRequestOption.INBOX -> {
+              DisplayTextAndCard(
+                  MEETING_REQUEST_MSG,
+                  inboxCardList.value.map { it.key },
+                  Screen.INBOX_PROFILE_VIEW,
+                  context,
+                  navigationActions)
+            }
+            MeetingRequestOption.SENT -> {
+              DisplayTextAndCard(
+                  MEETING_REQUEST_SENT, sentCardList.value, "", context, navigationActions)
+            }
+            MeetingRequestOption.CHOOSE_LOCATION -> {
+              DisplayTextAndCard(
+                  MEETING_REQUEST_LOCATION_PENDING,
+                  pendingLocation.value,
+                  Screen.MAP_MEETING_LOCATION_SCREEN,
+                  context,
+                  navigationActions)
+            }
           }
         }
       })
@@ -173,7 +153,9 @@ fun NotificationScreen(
 fun MeetingRequestOptionDropdown(
     selectedOption: MeetingRequestOption,
     onOptionSelected: (MeetingRequestOption) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    pendingLocationsSize: Int,
+    inboxSize: Int
 ) {
   var expanded by remember { mutableStateOf(false) }
 
@@ -200,6 +182,25 @@ fun MeetingRequestOptionDropdown(
                   if (expanded) Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown,
               contentDescription = "Icon of the MeetingRequest option dropdown menu",
               modifier = Modifier.testTag("MeetingRequestOptionsDropdown_Arrow"))
+          if (!expanded) {
+            when (selectedOption) {
+              MeetingRequestOption.SENT -> {
+                if (pendingLocationsSize + inboxSize > 0) {
+                  Badge(pendingLocationsSize + inboxSize, "badgeSent")
+                }
+              }
+              MeetingRequestOption.INBOX -> {
+                if (pendingLocationsSize > 0) {
+                  Badge(pendingLocationsSize, "badgeInbox")
+                }
+              }
+              MeetingRequestOption.CHOOSE_LOCATION -> {
+                if (inboxSize > 0) {
+                  Badge(inboxSize, "badgePendingAndInbox")
+                }
+              }
+            }
+          }
         }
 
     if (expanded) {
@@ -227,6 +228,19 @@ fun MeetingRequestOptionDropdown(
                       },
               fontSize = TEXT_SMALL_SIZE,
               color = Color.Gray)
+          when (meetingRequestOption) {
+            MeetingRequestOption.CHOOSE_LOCATION -> {
+              if (pendingLocationsSize > 0) {
+                Badge(pendingLocationsSize, "badgeChooseLocation")
+              }
+            }
+            MeetingRequestOption.INBOX -> {
+              if (inboxSize > 0) {
+                Badge(inboxSize, "badgeInbox")
+              }
+            }
+            MeetingRequestOption.SENT -> {}
+          }
         }
       }
     }
@@ -238,4 +252,51 @@ enum class MeetingRequestOption {
   INBOX,
   SENT,
   CHOOSE_LOCATION
+}
+
+/**
+ * Function that shows the next saying on which inbox we are and the profile cards associate with it
+ *
+ * @param text: text to write over the cards
+ * @param profiles: profiles to show in cards
+ * @param onClick : function to call when we click on a card
+ */
+@Composable
+private fun DisplayTextAndCard(
+    text: String,
+    profiles: List<Profile>,
+    screenToNavigate: String,
+    context: Context,
+    navigationActions: NavigationActions
+) {
+  LazyColumn(
+      modifier =
+          Modifier.padding()
+              .padding(horizontal = HORIZONTAL_PADDING)
+              .testTag("notificationScroll")) {
+        item {
+          Text(
+              text = text,
+              fontWeight = FontWeight.Bold,
+              modifier =
+                  Modifier.padding(vertical = TEXT_VERTICAL_PADDING)
+                      .testTag("notificationFirstText"))
+          Column(verticalArrangement = Arrangement.spacedBy(CARD_SPACING)) {
+            profiles.forEach { p ->
+              ProfileCard(
+                  profile = p,
+                  onclick = {
+                    if (screenToNavigate != "") {
+                      if (isNetworkAvailableWithContext(context)) {
+                        navigationActions.navigateTo(screenToNavigate + "?userId=${p.uid}")
+                      } else {
+                        showNoInternetToast(context)
+                      }
+                    }
+                  },
+                  greyedOut = false)
+            }
+          }
+        }
+      }
 }

@@ -93,7 +93,8 @@ fun ProfileListScreen(
     selectedProfile: Profile? = null,
     periodicRefreshAction: (() -> Unit)? = null,
     isTestMode: Boolean = false,
-    notificationCount: Int
+    notificationCount: Int,
+    heatMapCount: Int
 ) {
   LaunchedEffect(isConnected.value) {
     if (!isTestMode && !isNetworkAvailable()) {
@@ -139,7 +140,8 @@ fun ProfileListScreen(
             },
             tabList = LIST_TOP_LEVEL_DESTINATIONS,
             selectedItem = Route.UNBLOCK_PROFILE,
-            notificationCount = notificationCount)
+            notificationCount = notificationCount,
+            heatMapCount = heatMapCount)
       },
       topBar = { TopBar(title, true) { navigationActions.goBack() } },
       content = { innerPadding ->
