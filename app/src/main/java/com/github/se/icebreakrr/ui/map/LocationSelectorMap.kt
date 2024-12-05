@@ -160,7 +160,7 @@ fun LocationSelectorMapScreen(
                     Toast.makeText(context, "Could not send meeting location", Toast.LENGTH_SHORT)
                         .show()
                   }
-                  navigationActions.navigateTo(Route.HEAT_MAP)
+                  navigationActions.navigateTo(Route.MAP)
                 }
               },
               modifier =

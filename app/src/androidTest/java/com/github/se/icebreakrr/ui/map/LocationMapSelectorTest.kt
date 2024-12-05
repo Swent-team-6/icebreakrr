@@ -174,6 +174,6 @@ class LocationMapSelectorTest {
                     "Let's meet on the second floor",
                     Pair(DEFAULT_USER_LATITUDE, DEFAULT_USER_LONGITUDE))))
     verify(mockFunctions).getHttpsCallable("sendMeetingConfirmation")
-    verify(mockNavigationActions).navigateTo(Route.HEAT_MAP)
+    verify(mockNavigationActions).navigateTo(Route.MAP)
   }
 }

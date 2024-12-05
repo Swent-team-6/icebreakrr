@@ -38,8 +38,8 @@ import com.github.se.icebreakrr.ui.map.LocationSelectorMapScreen
 import com.github.se.icebreakrr.ui.navigation.NavigationActions
 import com.github.se.icebreakrr.ui.navigation.Route
 import com.github.se.icebreakrr.ui.navigation.Screen
-import com.github.se.icebreakrr.ui.profile.MapScreen
 import com.github.se.icebreakrr.ui.profile.InboxProfileViewScreen
+import com.github.se.icebreakrr.ui.profile.MapScreen
 import com.github.se.icebreakrr.ui.profile.OtherProfileView
 import com.github.se.icebreakrr.ui.profile.ProfileEditingScreen
 import com.github.se.icebreakrr.ui.profile.ProfileView
@@ -387,9 +387,7 @@ fun IcebreakrrNavHost(
           startDestination = Screen.MAP,
           route = Route.MAP,
       ) {
-        composable(Screen.MAP) {
-          MapScreen(navigationActions, profileViewModel, locationViewModel)
-        }
+        composable(Screen.MAP) { MapScreen(navigationActions, profileViewModel, locationViewModel) }
       }
     }
   }

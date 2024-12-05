@@ -60,7 +60,7 @@ fun BottomNavigationMenu(
                   if (tab.route == Route.NOTIFICATIONS && notificationCount > 0) {
                     Badge(notificationCount, "badgeNotification")
                   }
-                  if (tab.route == Route.HEAT_MAP && heatMapCount > 0) {
+                  if (tab.route == Route.MAP && heatMapCount > 0) {
                     Badge(heatMapCount, "badgeHeatmap")
                   }
                 }
