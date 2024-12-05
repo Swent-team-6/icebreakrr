@@ -40,8 +40,8 @@ import com.github.se.icebreakrr.ui.map.LocationSelectorMapScreen
 import com.github.se.icebreakrr.ui.navigation.NavigationActions
 import com.github.se.icebreakrr.ui.navigation.Route
 import com.github.se.icebreakrr.ui.navigation.Screen
-import com.github.se.icebreakrr.ui.profile.HeatMap
 import com.github.se.icebreakrr.ui.profile.InboxProfileViewScreen
+import com.github.se.icebreakrr.ui.profile.MapScreen
 import com.github.se.icebreakrr.ui.profile.OtherProfileView
 import com.github.se.icebreakrr.ui.profile.ProfileEditingScreen
 import com.github.se.icebreakrr.ui.profile.ProfileView
@@ -406,12 +406,10 @@ fun IcebreakrrNavHost(
       }
 
       navigation(
-          startDestination = Screen.HEAT_MAP,
-          route = Route.HEAT_MAP,
+          startDestination = Screen.MAP,
+          route = Route.MAP,
       ) {
-        composable(Screen.HEAT_MAP) {
-          HeatMap(navigationActions, profileViewModel, locationViewModel)
-        }
+        composable(Screen.MAP) { MapScreen(navigationActions, profileViewModel, locationViewModel) }
       }
     }
   }
