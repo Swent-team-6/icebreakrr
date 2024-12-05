@@ -140,7 +140,8 @@ fun OtherProfileView(
                   modifier =
                       Modifier.fillMaxWidth()
                           .padding(BUTTONS_HORIZONTAL_PADDING)
-                          .align(Alignment.CenterHorizontally)) {
+                          .align(Alignment.CenterHorizontally)
+                          .testTag("aiButton")) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.Center,
@@ -227,50 +228,55 @@ fun BottomSheet(aiState: AiViewModel.UiState, onDismissRequest: () -> Unit) {
   ModalBottomSheet(
       sheetState = sheetState,
       onDismissRequest = onDismissRequest,
-  ) {
-    Column(
-        modifier =
-            Modifier.fillMaxWidth().heightIn(min = MIN_SHEET_HEIGHT).padding(SHEET_INNER_PADDING),
-        verticalArrangement = Arrangement.Top,
-        horizontalAlignment = Alignment.Start) {
-          // Header
-          Text(
-              text = "Here is a possible starter:",
-              fontWeight = FontWeight.Bold,
-              fontSize = TextUnit(25f, TextUnitType.Sp),
-              lineHeight = TextUnit(30f, TextUnitType.Sp))
-
-          Spacer(modifier = Modifier.height(16.dp))
-
-          // Content
-          when (aiState) {
-            is AiViewModel.UiState.Success -> {
+      modifier = Modifier.testTag("aiBottomSheet")) {
+        Column(
+            modifier =
+                Modifier.fillMaxWidth()
+                    .heightIn(min = MIN_SHEET_HEIGHT)
+                    .padding(SHEET_INNER_PADDING),
+            verticalArrangement = Arrangement.Top,
+            horizontalAlignment = Alignment.Start) {
+              // Header
               Text(
-                  text = "\"${aiState.data}\"",
-                  fontWeight = FontWeight.Normal,
-                  fontSize = TextUnit(20f, TextUnitType.Sp),
-                  lineHeight = TextUnit(25f, TextUnitType.Sp))
-            }
-            is AiViewModel.UiState.Loading -> {
-              Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator()
+                  text = "Here is a possible starter:",
+                  fontWeight = FontWeight.Bold,
+                  fontSize = TextUnit(25f, TextUnitType.Sp),
+                  lineHeight = TextUnit(30f, TextUnitType.Sp))
+
+              Spacer(modifier = Modifier.height(16.dp))
+
+              // Content
+              when (aiState) {
+                is AiViewModel.UiState.Success -> {
+                  Text(
+                      text = "\"${aiState.data}\"",
+                      fontWeight = FontWeight.Normal,
+                      fontSize = TextUnit(20f, TextUnitType.Sp),
+                      lineHeight = TextUnit(25f, TextUnitType.Sp),
+                      modifier = Modifier.testTag("aiResponse"))
+                }
+                is AiViewModel.UiState.Loading -> {
+                  Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator(modifier = Modifier.testTag("aiLoading"))
+                  }
+                }
+                is AiViewModel.UiState.Error -> {
+                  Text(
+                      text = "\"${aiState.message}\"",
+                      fontWeight = FontWeight.Normal,
+                      fontSize = TextUnit(20f, TextUnitType.Sp),
+                      lineHeight = TextUnit(25f, TextUnitType.Sp),
+                      modifier = Modifier.testTag("aiError"))
+                }
+                else -> {
+                  Text(
+                      text = "An unknown error occurred",
+                      fontWeight = FontWeight.Normal,
+                      fontSize = TextUnit(20f, TextUnitType.Sp),
+                      lineHeight = TextUnit(25f, TextUnitType.Sp),
+                      modifier = Modifier.testTag("aiUnknownError"))
+                }
               }
             }
-            is AiViewModel.UiState.Error -> {
-              Text(
-                  text = "\"${aiState.message}\"",
-                  fontWeight = FontWeight.Normal,
-                  fontSize = TextUnit(20f, TextUnitType.Sp),
-                  lineHeight = TextUnit(25f, TextUnitType.Sp))
-            }
-            else -> {
-              Text(
-                  text = "An unknown error occurred",
-                  fontWeight = FontWeight.Normal,
-                  fontSize = TextUnit(20f, TextUnitType.Sp),
-                  lineHeight = TextUnit(25f, TextUnitType.Sp))
-            }
-          }
-        }
-  }
+      }
 }

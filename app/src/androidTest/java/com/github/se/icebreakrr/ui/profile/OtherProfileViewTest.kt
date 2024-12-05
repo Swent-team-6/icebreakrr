@@ -6,6 +6,7 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.github.se.icebreakrr.mock.MockProfileViewModel
 import com.github.se.icebreakrr.mock.getMockedProfiles
@@ -23,11 +24,14 @@ import com.github.se.icebreakrr.ui.navigation.NavigationActions
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.functions.FirebaseFunctions
+import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.mock
+import org.mockito.Mockito.`when`
+import org.mockito.kotlin.any
 import org.mockito.kotlin.verify
 
 @RunWith(AndroidJUnit4::class)
@@ -296,5 +300,55 @@ class OtherProfileViewTest {
     composeTestRule.onNodeWithText("Report").performClick()
 
     composeTestRule.onNodeWithTag("alertDialogReportBlock").assertIsNotDisplayed()
+  }
+
+  @Test
+  fun aiButtonDisplaysBottomSheetWithResponse() = runTest {
+    fakeProfilesViewModel.setLoading(false)
+    fakeProfilesViewModel.setSelectedProfile(Profile.getMockedProfiles()[0])
+
+    composeTestRule.setContent {
+      OtherProfileView(
+          fakeProfilesViewModel,
+          tagsViewModel,
+          aiViewModel,
+          meetingRequestViewModel,
+          navigationActions,
+          null)
+    }
+
+    `when`(mockAiRepository.generateResponse(any())).thenReturn("Test response")
+
+    composeTestRule.onNodeWithTag("aiButton").performScrollTo().assertIsDisplayed()
+    composeTestRule.onNodeWithTag("aiButton").performClick()
+    composeTestRule.waitForIdle()
+
+    composeTestRule.onNodeWithTag("aiBottomSheet").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("aiResponse").assertIsDisplayed()
+  }
+
+  @Test
+  fun aiButtonDisplaysBottomSheetWithErrorMessage() = runTest {
+    fakeProfilesViewModel.setLoading(false)
+    fakeProfilesViewModel.setSelectedProfile(Profile.getMockedProfiles()[0])
+
+    composeTestRule.setContent {
+      OtherProfileView(
+          fakeProfilesViewModel,
+          tagsViewModel,
+          aiViewModel,
+          meetingRequestViewModel,
+          navigationActions,
+          null)
+    }
+
+    `when`(mockAiRepository.generateResponse(any())).thenThrow(RuntimeException("Test exception"))
+
+    composeTestRule.onNodeWithTag("aiButton").performScrollTo().assertIsDisplayed()
+    composeTestRule.onNodeWithTag("aiButton").performClick()
+    composeTestRule.waitForIdle()
+
+    composeTestRule.onNodeWithTag("aiBottomSheet").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("aiError").assertIsDisplayed()
   }
 }
