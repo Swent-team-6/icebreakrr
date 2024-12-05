@@ -11,7 +11,6 @@ import com.github.se.icebreakrr.model.profile.ProfilesViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -57,10 +56,10 @@ class EngagementNotificationManager(
 
     notificationJob =
         scope.launch {
-          while (true) {
-            checkNearbyUsersForCommonTags()
-            delay(CHECK_INTERVAL)
-          }
+          // while (true) {
+          checkNearbyUsersForCommonTags()
+          // delay(CHECK_INTERVAL)
+          // }
         }
   }
 
