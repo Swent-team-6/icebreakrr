@@ -30,6 +30,7 @@
     <string name="unblock_confirm">Unblock ?</string>
     <string name="unblock_confirm_message">Are you sure you want to unblock %1$s?</string>
 
+    <string name="AI_button">See Discussion Starters</string>
     <string name="Already_Met_Button_Text">"I Already Met This Person"</string>
     <string name="Already_Met_Settings_Button">People You Already Met</string>
     <string name="Already_Met_Button_Success">You successfully added this user to your already met list</string>

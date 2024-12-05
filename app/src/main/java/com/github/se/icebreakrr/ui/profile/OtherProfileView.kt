@@ -3,22 +3,31 @@ package com.github.se.icebreakrr.ui.profile
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -32,7 +41,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.TextUnit
+import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavBackStackEntry
 import com.github.se.icebreakrr.R
@@ -54,8 +65,10 @@ import com.github.se.icebreakrr.utils.NetworkUtils.showNoInternetToast
  * @param navigationActions Actions to navigate between screens.
  */
 private val ALPHA = 0.5f
-private val MET_BUTTON_HORIZTONAL_PADDING = 16.dp
+private val BUTTONS_HORIZONTAL_PADDING = 16.dp
 private val BUTTON_VERTICAL_PADDING = 16.dp
+private val SHEET_INNER_PADDING = 16.dp
+private val MIN_SHEET_HEIGHT = 400.dp
 private const val USER_ALREADY_SEND_REQUEST_TOAST_MESSAGE =
     "this user has already send you a meeting request!"
 
@@ -70,6 +83,7 @@ fun OtherProfileView(
 ) {
   var sendRequest by remember { mutableStateOf(false) }
   var writtenMessage by remember { mutableStateOf("") }
+  var bottomSheetVisible by remember { mutableStateOf(false) }
   // retrieving user id from navigation params
   val profileId = navBackStackEntry?.arguments?.getString("userId")
   val context = LocalContext.current
@@ -83,6 +97,11 @@ fun OtherProfileView(
 
   val isLoading = profilesViewModel.loading.collectAsState(initial = true).value
   val profile = profilesViewModel.selectedProfile.collectAsState().value
+
+  // todo: replace these two values by actual AI viewmodel flows
+  val isAILoading = false
+  val aiSuggestion =
+      "Hey Botond! As a fellow lover of details, I can appreciate your game strategy on the tennis court—let's rally some ideas about how we can serve up solutions for climate change and immigration reform!"
 
   Scaffold(modifier = Modifier.fillMaxSize().testTag("aroundYouProfileScreen")) { paddingValues ->
     if (isLoading) {
@@ -113,6 +132,29 @@ fun OtherProfileView(
               // Add spacer for some padding
               Spacer(modifier = Modifier.height(BUTTON_VERTICAL_PADDING))
 
+              // Ai button
+              Button(
+                  onClick = { bottomSheetVisible = true },
+                  colors =
+                      ButtonDefaults.buttonColors(
+                          containerColor = MaterialTheme.colorScheme.primary),
+                  modifier =
+                      Modifier.fillMaxWidth()
+                          .padding(BUTTONS_HORIZONTAL_PADDING)
+                          .align(Alignment.CenterHorizontally)) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically) {
+                          Text(text = stringResource(R.string.AI_button), color = Color.White)
+                          Spacer(modifier = Modifier.width(8.dp))
+
+                          Icon(
+                              imageVector = Icons.Filled.Warning,
+                              contentDescription = "AI icon") // todo: replace by AI icon
+                    }
+                  }
+
               // Already met button
               Button(
                   onClick = {
@@ -132,7 +174,7 @@ fun OtherProfileView(
                           containerColor = MaterialTheme.colorScheme.primary),
                   modifier =
                       Modifier.fillMaxWidth()
-                          .padding(MET_BUTTON_HORIZTONAL_PADDING)
+                          .padding(BUTTONS_HORIZONTAL_PADDING)
                           .align(Alignment.CenterHorizontally)
                           .testTag("alreadyMetButton")) {
                     Text(
@@ -168,6 +210,52 @@ fun OtherProfileView(
                   onCancelClick = { sendRequest = false })
             }
       }
+
+      // this displays the bottom sheet
+      if (bottomSheetVisible) {
+        BottomSheet(isLoading = isAILoading, aiSuggestion = aiSuggestion) {
+          bottomSheetVisible = false
+        }
+      }
     }
+  }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun BottomSheet(isLoading: Boolean, aiSuggestion: String, onDismissRequest: () -> Unit) {
+  val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+
+  ModalBottomSheet(
+      sheetState = sheetState,
+      onDismissRequest = onDismissRequest,
+  ) {
+    Column(
+        modifier =
+            Modifier.fillMaxWidth().heightIn(min = MIN_SHEET_HEIGHT).padding(SHEET_INNER_PADDING),
+        verticalArrangement = Arrangement.Top,
+        horizontalAlignment = Alignment.Start) {
+          // Header
+          Text(
+              text = "Here is a possible starter:",
+              fontWeight = FontWeight.Bold,
+              fontSize = TextUnit(25f, TextUnitType.Sp),
+              lineHeight = TextUnit(30f, TextUnitType.Sp))
+
+          Spacer(modifier = Modifier.height(16.dp))
+
+          // Content
+          if (!isLoading) {
+            Text(
+                text = "\"$aiSuggestion\"",
+                fontWeight = FontWeight.Normal,
+                fontSize = TextUnit(20f, TextUnitType.Sp),
+                lineHeight = TextUnit(25f, TextUnitType.Sp))
+          } else {
+            Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+              CircularProgressIndicator()
+            }
+          }
+        }
   }
 }
