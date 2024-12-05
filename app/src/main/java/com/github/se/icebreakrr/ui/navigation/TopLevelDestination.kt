@@ -27,6 +27,7 @@ object Route {
   const val CROP = "Crop"
   const val UNBLOCK_PROFILE = "UnblockProfile"
   const val HEAT_MAP = "Heatmap"
+  const val MAP_MEETING_LOCATION = "Map Meeting Location"
 }
 
 object Screen {
@@ -44,6 +45,7 @@ object Screen {
   const val HEAT_MAP = "Heatmap Screen"
   const val ALREADY_MET = "Already Met Screen"
   const val INBOX_PROFILE_VIEW = "Inbox Profile View Screen"
+  const val MAP_MEETING_LOCATION_SCREEN = "Map Meeting Location Screen"
 }
 
 object TopLevelDestinations {
