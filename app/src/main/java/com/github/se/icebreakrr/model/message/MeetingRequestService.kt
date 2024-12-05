@@ -114,17 +114,17 @@ class MeetingRequestService : FirebaseMessagingService() {
             .apply { description = "Channel for messaging notifications" }
     notificationManager.createNotificationChannel(channel)
 
-    val notificationBuilder =
-        createNotificationBuilder(title, message)
+    val notificationBuilder = createNotificationBuilder(title, message)
 
     notificationManager.notify(NOTIFICATION_ID, notificationBuilder.build())
   }
+
   fun createNotificationBuilder(title: String, message: String): NotificationCompat.Builder {
     return NotificationCompat.Builder(this, MSG_CHANNEL_ID)
-      .setSmallIcon(R.drawable.ic_launcher_foreground) // Replace with app icon
-      .setContentTitle(title)
-      .setContentText(message)
-      .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-      .setAutoCancel(true)
+        .setSmallIcon(R.drawable.ic_launcher_foreground) // Replace with app icon
+        .setContentTitle(title)
+        .setContentText(message)
+        .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+        .setAutoCancel(true)
   }
 }

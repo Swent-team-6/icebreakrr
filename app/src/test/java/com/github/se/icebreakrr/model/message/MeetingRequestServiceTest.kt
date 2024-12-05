@@ -1,19 +1,14 @@
 package com.github.se.icebreakrr.model.message
 
-import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
 import android.content.res.Resources
 import androidx.core.app.NotificationCompat
-import androidx.test.core.app.ApplicationProvider
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.ArgumentCaptor
 import org.mockito.Mockito.*
 import org.mockito.junit.MockitoJUnitRunner
-import org.robolectric.Robolectric
-import org.robolectric.Shadows.shadowOf
 
 @RunWith(MockitoJUnitRunner::class)
 class MeetingRequestServiceTest {
@@ -33,9 +28,12 @@ class MeetingRequestServiceTest {
     mockContext = mock(Context::class.java)
     mockResources = mock(Resources::class.java)
     mockBuilder = mock(NotificationCompat.Builder::class.java)
-    doReturn(mockNotificationManager).`when`(meetingRequestService).getSystemService(Context.NOTIFICATION_SERVICE)
-    doReturn(mockBuilder).`when`(meetingRequestService).createNotificationBuilder(anyString(), anyString())
-
+    doReturn(mockNotificationManager)
+        .`when`(meetingRequestService)
+        .getSystemService(Context.NOTIFICATION_SERVICE)
+    doReturn(mockBuilder)
+        .`when`(meetingRequestService)
+        .createNotificationBuilder(anyString(), anyString())
 
     // Inject the mock ViewModel
     MeetingRequestManager.meetingRequestViewModel = mockMeetingRequestViewModel
@@ -59,7 +57,7 @@ class MeetingRequestServiceTest {
   }
 
   @Test
-  fun showNotificationTest(){
+  fun showNotificationTest() {
     // Arrange
     val title = "Test Title"
     val message = "Test Message"
@@ -70,5 +68,4 @@ class MeetingRequestServiceTest {
     // Assert that the NotificationManager is called with correct parameters
     verify(mockNotificationManager).notify(eq(0), any())
   }
-
 }
