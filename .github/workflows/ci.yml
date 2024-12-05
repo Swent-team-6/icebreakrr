@@ -86,6 +86,7 @@ jobs:
       - name: Create and populate local.properties
         run: |
           echo "MAPS_API_KEY=${{ secrets.MAPS_API_KEY }}" > ./local.properties
+          echo "CHATGPT_API_KEY=${{ secrets.CHATGPT_API_KEY }}" > ./local.properties
 
       # Create keystore/debug.keystore file
       - name: Create file debug keystore
@@ -103,6 +104,7 @@ jobs:
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
           MAPS_API_KEY: ${{ secrets.MAPS_API_KEY }}
+          CHATGPT_API_KEY: ${{ secrets.CHATGPT_API_KEY }}
 
       # Run Unit tests
       - name: Run tests
@@ -114,6 +116,7 @@ jobs:
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
           MAPS_API_KEY: ${{ secrets.MAPS_API_KEY }}
+          CHATGPT_API_KEY: ${{ secrets.CHATGPT_API_KEY }}
 
       # Run connected tests on the emulator
       - name: run tests
@@ -131,6 +134,7 @@ jobs:
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
           MAPS_API_KEY: ${{ secrets.MAPS_API_KEY }}
+          CHATGPT_API_KEY: ${{ secrets.CHATGPT_API_KEY }}
 
       # This step generates the coverage report which will be uploaded to sonar
       - name: Generate Coverage Report
