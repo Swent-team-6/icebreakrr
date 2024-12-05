@@ -338,7 +338,7 @@ class MeetingRequestViewModel(
 
   /** Refreshes the content of the inbox to have it available locally */
   fun updateInboxOfMessagesAndThen(andThen: () -> Unit) {
-    profilesViewModel.getSelfProfileAndThen() {
+    profilesViewModel.getSelfProfileAndThen {
       profilesViewModel.getInboxOfSelfProfile()
       profilesViewModel.getMessageCancellationUsers()
       andThen()
@@ -352,7 +352,7 @@ class MeetingRequestViewModel(
   fun meetingDistanceCancellation() {
     val selfProfile = profilesViewModel.selfProfile.value
     val originPoint = selfProfile?.location ?: GeoPoint(0.0, 0.0)
-    updateInboxOfMessagesAndThen() {
+    updateInboxOfMessagesAndThen {
       val contactUsers = profilesViewModel.getCancellationMessageProfile()
       val distances =
           contactUsers.map {

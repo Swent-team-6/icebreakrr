@@ -40,7 +40,7 @@ class MeetingRequestService : FirebaseMessagingService() {
       "MEETING REQUEST" -> {
         val name = remoteMessage.data["senderName"] ?: "null"
         MeetingRequestManager.meetingRequestViewModel?.addToMeetingRequestInbox(senderUid, message)
-        MeetingRequestManager.meetingRequestViewModel?.updateInboxOfMessagesAndThen() {}
+        MeetingRequestManager.meetingRequestViewModel?.updateInboxOfMessagesAndThen {}
         showNotification(MSG_REQUEST, "from : $name")
       }
       "MEETING RESPONSE" -> {

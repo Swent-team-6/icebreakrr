@@ -17,7 +17,8 @@ import org.mockito.kotlin.*
 class FirebaseAuthTest {
 
   private val testDispatcher = TestCoroutineDispatcher()
-  private val testScope = TestCoroutineScope(testDispatcher)
+  private val testScope =
+      createTestCoroutineScope(TestCoroutineDispatcher() + TestCoroutineExceptionHandler() + testDispatcher)
 
   private lateinit var mockFirebaseAuth: FirebaseAuth
   private lateinit var mockFirebaseUser: FirebaseUser

@@ -73,7 +73,7 @@ fun NotificationScreen(
     profileViewModel: ProfilesViewModel,
     meetingRequestViewModel: MeetingRequestViewModel
 ) {
-  meetingRequestViewModel.updateInboxOfMessagesAndThen() {}
+  meetingRequestViewModel.updateInboxOfMessagesAndThen {}
   val inboxCardList = profileViewModel.inboxItems.collectAsState()
   val sentCardList = profileViewModel.sentItems.collectAsState()
   val context = LocalContext.current

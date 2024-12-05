@@ -58,7 +58,7 @@ open class ProfilesViewModel(
   open val editedCurrentProfile: StateFlow<Profile?> = _editedCurrentProfile
 
   // This stores the state of the modification during the profile edition
-  private val _pictureChangeState = MutableStateFlow(ProfilePictureState.UNCHANGED)
+  private val _pictureChangeState = MutableStateFlow(UNCHANGED)
   open val pictureChangeState: StateFlow<ProfilePictureState> = _pictureChangeState
 
   private val _loading = MutableStateFlow(false)
@@ -332,7 +332,7 @@ open class ProfilesViewModel(
   fun resetProfileEditionState() {
     clearTempProfilePictureBitmap()
     clearEditedProfile()
-    _pictureChangeState.value = ProfilePictureState.UNCHANGED
+    _pictureChangeState.value = UNCHANGED
   }
 
   /**
@@ -365,7 +365,7 @@ open class ProfilesViewModel(
             resetProfileEditionState()
           }
       TO_DELETE ->
-          deleteCurrentUserProfilePicture() {
+          deleteCurrentUserProfilePicture {
             val newProfile = _editedCurrentProfile.value?.copy(profilePictureUrl = null)
             updateProfile(newProfile!!)
             _selfProfile.value = newProfile

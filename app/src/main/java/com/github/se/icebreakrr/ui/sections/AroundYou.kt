@@ -186,7 +186,7 @@ fun AroundYouScreen(
               },
               modifier = Modifier.fillMaxSize(),
               content = {
-                if (isConnected.value) {
+                if (!isConnected.value) {
                   EmptyProfilePrompt(
                       label = stringResource(id = R.string.no_internet),
                       testTag = "noConnectionPrompt")
