@@ -39,6 +39,7 @@
     <string name="unmeet_confirm_message">Remove from your already met list?</string>
     <string name="unmeet_yes">Yes</string>
     <string name="unmeet_no">No</string>
+    <string name="here_is_a_possible_starter">Here is a possible starter:</string>
 
     <string name="blocked_profiles">Blocked Profiles</string>
 

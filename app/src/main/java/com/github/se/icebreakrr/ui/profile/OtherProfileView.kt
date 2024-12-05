@@ -69,6 +69,11 @@ private val BUTTONS_HORIZONTAL_PADDING = 16.dp
 private val BUTTON_VERTICAL_PADDING = 16.dp
 private val SHEET_INNER_PADDING = 16.dp
 private val MIN_SHEET_HEIGHT = 400.dp
+private val HEADER_FONT_SIZE = 25f
+private val HEADER_LINE_HEIGHT = 30f
+private val CONTENT_FONT_SIZE = 20f
+private val CONTENT_LINE_HEIGHT = 25f
+private val ICON_SPACING = 8.dp
 private const val USER_ALREADY_SEND_REQUEST_TOAST_MESSAGE =
     "this user has already send you a meeting request!"
 
@@ -139,15 +144,17 @@ fun OtherProfileView(
                           containerColor = MaterialTheme.colorScheme.primary),
                   modifier =
                       Modifier.fillMaxWidth()
-                          .padding(BUTTONS_HORIZONTAL_PADDING)
+                          .padding(horizontal = BUTTONS_HORIZONTAL_PADDING)
                           .align(Alignment.CenterHorizontally)
                           .testTag("aiButton")) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.Center,
                         verticalAlignment = Alignment.CenterVertically) {
-                          Text(text = stringResource(R.string.AI_button), color = Color.White)
-                          Spacer(modifier = Modifier.width(8.dp))
+                          Text(
+                              text = stringResource(R.string.AI_button),
+                              color = MaterialTheme.colorScheme.onPrimary)
+                          Spacer(modifier = Modifier.width(ICON_SPACING))
 
                           Icon(
                               imageVector = Icons.Filled.Warning,
@@ -238,10 +245,10 @@ fun BottomSheet(aiState: AiViewModel.UiState, onDismissRequest: () -> Unit) {
             horizontalAlignment = Alignment.Start) {
               // Header
               Text(
-                  text = "Here is a possible starter:",
+                  text = stringResource(R.string.here_is_a_possible_starter),
                   fontWeight = FontWeight.Bold,
-                  fontSize = TextUnit(25f, TextUnitType.Sp),
-                  lineHeight = TextUnit(30f, TextUnitType.Sp))
+                  fontSize = TextUnit(HEADER_FONT_SIZE, TextUnitType.Sp),
+                  lineHeight = TextUnit(HEADER_LINE_HEIGHT, TextUnitType.Sp))
 
               Spacer(modifier = Modifier.height(16.dp))
 
@@ -251,8 +258,8 @@ fun BottomSheet(aiState: AiViewModel.UiState, onDismissRequest: () -> Unit) {
                   Text(
                       text = "\"${aiState.data}\"",
                       fontWeight = FontWeight.Normal,
-                      fontSize = TextUnit(20f, TextUnitType.Sp),
-                      lineHeight = TextUnit(25f, TextUnitType.Sp),
+                      fontSize = TextUnit(CONTENT_FONT_SIZE, TextUnitType.Sp),
+                      lineHeight = TextUnit(CONTENT_LINE_HEIGHT, TextUnitType.Sp),
                       modifier = Modifier.testTag("aiResponse"))
                 }
                 is AiViewModel.UiState.Loading -> {
@@ -264,16 +271,16 @@ fun BottomSheet(aiState: AiViewModel.UiState, onDismissRequest: () -> Unit) {
                   Text(
                       text = "\"${aiState.message}\"",
                       fontWeight = FontWeight.Normal,
-                      fontSize = TextUnit(20f, TextUnitType.Sp),
-                      lineHeight = TextUnit(25f, TextUnitType.Sp),
+                      fontSize = TextUnit(CONTENT_FONT_SIZE, TextUnitType.Sp),
+                      lineHeight = TextUnit(CONTENT_LINE_HEIGHT, TextUnitType.Sp),
                       modifier = Modifier.testTag("aiError"))
                 }
                 else -> {
                   Text(
                       text = "An unknown error occurred",
                       fontWeight = FontWeight.Normal,
-                      fontSize = TextUnit(20f, TextUnitType.Sp),
-                      lineHeight = TextUnit(25f, TextUnitType.Sp),
+                      fontSize = TextUnit(CONTENT_FONT_SIZE, TextUnitType.Sp),
+                      lineHeight = TextUnit(CONTENT_LINE_HEIGHT, TextUnitType.Sp),
                       modifier = Modifier.testTag("aiUnknownError"))
                 }
               }
