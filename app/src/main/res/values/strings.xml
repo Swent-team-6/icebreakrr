@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">SampleApp</string>
+    <string name="app_name">IceBreakrr</string>
     <string name="title_activity_main">MainActivity</string>
     <string name="title_activity_second">SecondActivity</string>
     <string name="default_web_client_id">579784939748-6e63a67fhpe0r74ik3qapu6kd4hm04r9.apps.googleusercontent.com</string>
@@ -45,5 +45,15 @@
     <string name="ask_to_toggle_location">Activate location sharing in the app settings!</string>
     <string name="ask_to_give_location_permission">Precise location permission is required to show profiles. Activate it in your phone settings</string>
     <string name="no_one_around">There is no one around. Try moving!</string>
+
+    <string name="meeting_request_pending">Pending meeting requests</string>
+    <string name="meeting_request_sent">Meeting request sent</string>
+
+    <string name="filter">Filter</string>
+    <string name="gender">Gender</string>
+    <string name="gender_men">Men</string>
+    <string name="gender_women">Women</string>
+    <string name="gender_other">Other</string>
+    <string name="age_range">Age Range</string>
 
 </resources>

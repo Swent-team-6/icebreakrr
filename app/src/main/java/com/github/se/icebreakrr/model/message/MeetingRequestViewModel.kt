@@ -361,7 +361,7 @@ class MeetingRequestViewModel(
    * locations from the database
    */
   private fun getChosenLocalisations() {
-    profilesViewModel.getSelfProfile() { profilesViewModel.getChosenLocationsUsers() }
+    profilesViewModel.getSelfProfile { profilesViewModel.getChosenLocationsUsers() }
   }
 
   /**
@@ -387,9 +387,9 @@ class MeetingRequestViewModel(
    * @param onComplete : callback function to remove racing conditions
    */
   fun updateInboxOfMessages(onComplete: () -> Unit) {
-    profilesViewModel.getSelfProfile() {
-      profilesViewModel.getInboxOfSelfProfile() {
-        profilesViewModel.getMessageCancellationUsers() { onComplete() }
+    profilesViewModel.getSelfProfile {
+      profilesViewModel.getInboxOfSelfProfile {
+        profilesViewModel.getMessageCancellationUsers { onComplete() }
       }
     }
   }
@@ -401,7 +401,7 @@ class MeetingRequestViewModel(
   fun meetingDistanceCancellation() {
     val selfProfile = profilesViewModel.selfProfile.value
     val originPoint = selfProfile?.location ?: GeoPoint(0.0, 0.0)
-    updateInboxOfMessages() {
+    updateInboxOfMessages {
       val contactUsers = profilesViewModel.getCancellationMessageProfile()
       val distances =
           contactUsers.map {

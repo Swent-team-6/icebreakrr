@@ -13,19 +13,18 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.github.se.icebreakrr.ui.theme.MeetDark
 
 private val WIDTH = 312.dp
 private val HEIGHT_MAJOR = 254.dp
@@ -58,7 +57,7 @@ fun SendRequestScreen(
           Modifier.padding(PADDING_MAJOR)
               .width(WIDTH)
               .height(HEIGHT_MAJOR)
-              .background(color = Color.White, shape = BOX_SHAPE)) {
+              .background(color = MaterialTheme.colorScheme.surface, shape = BOX_SHAPE)) {
         Column(
             verticalArrangement = Arrangement.spacedBy(SPACING, Alignment.CenterVertically),
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -83,7 +82,7 @@ fun SendRequestScreen(
                               fontSize = FONTSIZE_1,
                               lineHeight = LINE_HEIGHT_1,
                               fontWeight = FONT_WEIGHT,
-                              color = MeetDark,
+                              color = MaterialTheme.colorScheme.onSurface,
                           ))
                   Text(
                       text =
@@ -95,7 +94,7 @@ fun SendRequestScreen(
                               fontSize = FONTSIZE_2,
                               lineHeight = LINE_HEIGHT_2,
                               fontWeight = FONT_WEIGHT,
-                              color = MeetDark,
+                              color = MaterialTheme.colorScheme.onSurface,
                               letterSpacing = LETTER_SPACING,
                           ))
                 }

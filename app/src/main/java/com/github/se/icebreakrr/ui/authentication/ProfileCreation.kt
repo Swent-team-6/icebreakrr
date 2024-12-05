@@ -300,7 +300,7 @@ fun ProfileCreationScreen(
               FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
                 if (task.isSuccessful) {
                   val fcmToken = task.result
-                  calendar.time = selectedDate.value!!
+                  calendar.time = selectedDate.value
                   val newProfile =
                       Profile(
                           uid = user.uid,

@@ -41,7 +41,7 @@ class MeetingRequestService : FirebaseMessagingService() {
       "MEETING REQUEST" -> {
         MeetingRequestManager.meetingRequestViewModel?.addToMeetingRequestInbox(
             senderUid, message) {
-              MeetingRequestManager.meetingRequestViewModel?.updateInboxOfMessages() {}
+              MeetingRequestManager.meetingRequestViewModel?.updateInboxOfMessages {}
             }
         showNotification(MSG_REQUEST, "from : $senderName")
       }
@@ -49,7 +49,7 @@ class MeetingRequestService : FirebaseMessagingService() {
         val accepted = remoteMessage.data["accepted"]?.toBoolean() ?: false
 
         MeetingRequestManager.meetingRequestViewModel?.removeFromMeetingRequestSent(senderUid) {
-          MeetingRequestManager.meetingRequestViewModel?.updateInboxOfMessages() {}
+          MeetingRequestManager.meetingRequestViewModel?.updateInboxOfMessages {}
         }
         if (accepted) {
           showNotification(senderName + MSG_RESPONSE_ACCEPTED, "")

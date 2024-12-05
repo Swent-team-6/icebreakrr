@@ -33,8 +33,8 @@ class ProfileCreationTest {
 
   @Before
   fun setUp() {
-    navigationActions = Mockito.mock(NavigationActions::class.java)
-    mockProfilesRepository = Mockito.mock(ProfilesRepository::class.java)
+    navigationActions = mock(NavigationActions::class.java)
+    mockProfilesRepository = mock(ProfilesRepository::class.java)
 
     tagsViewModel =
         TagsViewModel(

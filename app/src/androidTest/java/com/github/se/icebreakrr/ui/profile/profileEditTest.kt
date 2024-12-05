@@ -21,7 +21,6 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.Mockito
 import org.mockito.Mockito.mock
 import org.mockito.kotlin.verify
 
@@ -38,8 +37,8 @@ class ProfileEditingScreenTest {
 
   @Before
   fun setUp() {
-    navigationActions = Mockito.mock(NavigationActions::class.java)
-    mockProfilesRepository = Mockito.mock(ProfilesRepository::class.java)
+    navigationActions = mock(NavigationActions::class.java)
+    mockProfilesRepository = mock(ProfilesRepository::class.java)
 
     tagsViewModel =
         TagsViewModel(

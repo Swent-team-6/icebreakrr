@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -17,7 +18,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import com.github.se.icebreakrr.model.location.LocationViewModel
 import com.github.se.icebreakrr.model.profile.ProfilesViewModel
@@ -101,7 +101,7 @@ fun HeatMap(
               modifier =
                   Modifier.fillMaxSize()
                       .padding(paddingValues)
-                      .background(Color.LightGray)
+                      .background(MaterialTheme.colorScheme.surfaceVariant)
                       .testTag("loadingBox"),
               contentAlignment = Alignment.Center) {
                 CircularProgressIndicator()

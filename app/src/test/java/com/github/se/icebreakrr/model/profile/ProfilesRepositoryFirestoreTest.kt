@@ -321,9 +321,8 @@ class ProfilesRepositoryFirestoreTest {
     `when`(mockQuery.get())
         .thenReturn(
             Tasks.forException(
-                com.google.firebase.firestore.FirebaseFirestoreException(
-                    "Unavailable",
-                    com.google.firebase.firestore.FirebaseFirestoreException.Code.UNAVAILABLE)))
+                FirebaseFirestoreException(
+                    "Unavailable", FirebaseFirestoreException.Code.UNAVAILABLE)))
 
     profilesRepositoryFirestore.checkConnectionPeriodically {}
 

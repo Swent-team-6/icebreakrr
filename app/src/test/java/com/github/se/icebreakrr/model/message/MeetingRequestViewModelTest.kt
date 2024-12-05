@@ -187,7 +187,7 @@ class MeetingRequestViewModelTest {
       val onSuccess = it.getArgument<(Profile) -> Unit>(1)
       onSuccess(profile1)
     }
-    profilesViewModel.getSelfProfile() {}
+    profilesViewModel.getSelfProfile {}
     meetingRequestViewModel.setMeetingConfirmation(
         targetToken = profile2.fcmToken ?: "null", newLocation = newLocation, newMessage = message)
     assert(meetingRequestViewModel.meetingConfirmationState.message == message)
@@ -205,7 +205,7 @@ class MeetingRequestViewModelTest {
       val onSuccess = it.getArgument<(Profile) -> Unit>(1)
       onSuccess(profile1)
     }
-    profilesViewModel.getSelfProfile() {}
+    profilesViewModel.getSelfProfile {}
 
     meetingRequestViewModel.onRemoteTokenChange(newToken)
 
@@ -430,7 +430,7 @@ class MeetingRequestViewModelTest {
       val onSuccess = it.getArgument<(Profile) -> Unit>(1)
       onSuccess(profile1)
     }
-    profilesViewModel.getSelfProfile() {}
+    profilesViewModel.getSelfProfile {}
     meetingRequestViewModel.addToMeetingRequestSent(profile2.uid)
     verify(profilesRepository).getProfileByUid(eq("1"), any(), any())
     verify(profilesRepository).updateProfile(eq(updatedProfile1), any(), any())
@@ -443,7 +443,7 @@ class MeetingRequestViewModelTest {
       val onSuccess = it.getArgument<(Profile) -> Unit>(1)
       onSuccess(updatedProfile1)
     }
-    profilesViewModel.getSelfProfile() {}
+    profilesViewModel.getSelfProfile {}
     meetingRequestViewModel.removeFromMeetingRequestSent("2") {}
     verify(profilesRepository).getProfileByUid(eq("1"), any(), any())
     verify(profilesRepository).updateProfile(eq(profile1), any(), any())
@@ -456,7 +456,7 @@ class MeetingRequestViewModelTest {
       val onSuccess = it.getArgument<(Profile) -> Unit>(1)
       onSuccess(profile1)
     }
-    profilesViewModel.getSelfProfile() {}
+    profilesViewModel.getSelfProfile {}
     meetingRequestViewModel.addToMeetingRequestInbox("2", "hello") {}
     verify(profilesRepository).getProfileByUid(eq("1"), any(), any())
     verify(profilesRepository).updateProfile(eq(updatedProfile1), any(), any())
@@ -469,7 +469,7 @@ class MeetingRequestViewModelTest {
       val onSuccess = it.getArgument<(Profile) -> Unit>(1)
       onSuccess(updatedProfile1)
     }
-    profilesViewModel.getSelfProfile() {}
+    profilesViewModel.getSelfProfile {}
     meetingRequestViewModel.removeFromMeetingRequestInbox("2")
     verify(profilesRepository).getProfileByUid(eq("1"), any(), any())
     verify(profilesRepository).updateProfile(eq(profile1), any(), any())
@@ -481,7 +481,7 @@ class MeetingRequestViewModelTest {
       val onSuccess = it.getArgument<(Profile) -> Unit>(1)
       onSuccess(profile1)
     }
-    meetingRequestViewModel.updateInboxOfMessages() {}
+    meetingRequestViewModel.updateInboxOfMessages {}
     verify(profilesRepository).getProfileByUid(eq("1"), any(), any())
   }
 }

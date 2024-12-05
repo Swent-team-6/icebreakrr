@@ -89,7 +89,7 @@ fun InboxProfileViewScreen(
     val profileId = navBackStackEntry?.arguments?.getString("userId")
     if (profileId != null || isTesting) {
       profilesViewModel.getProfileByUid(profileId ?: "")
-      meetingRequestViewModel.updateInboxOfMessages() {}
+      meetingRequestViewModel.updateInboxOfMessages {}
     }
   }
 
@@ -158,7 +158,7 @@ fun acceptDeclineCode(
   meetingRequestViewModel.setMeetingResponse(fcm, "accepting/decline request", accepted)
   meetingRequestViewModel.sendMeetingResponse()
   meetingRequestViewModel.removeFromMeetingRequestInbox(uid)
-  meetingRequestViewModel.updateInboxOfMessages() {}
+  meetingRequestViewModel.updateInboxOfMessages {}
   navigationActions.goBack()
 }
 

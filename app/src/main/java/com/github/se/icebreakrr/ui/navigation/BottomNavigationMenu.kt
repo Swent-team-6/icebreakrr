@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Badge
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
@@ -20,7 +21,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.github.se.icebreakrr.ui.theme.IceBreakrrBlue
 
 private const val BADGE_OFFSET_X = 10
 private const val BADGE_OFFSET_Y = -5
@@ -50,8 +50,7 @@ fun BottomNavigationMenu(
 ) {
   NavigationBar(
       modifier = Modifier.fillMaxWidth().height(60.dp).testTag("bottomNavigationMenu"),
-      containerColor = IceBreakrrBlue,
-      contentColor = Color.Gray) {
+      containerColor = MaterialTheme.colorScheme.primary) {
         tabList.forEach { tab ->
           NavigationBarItem(
               icon = {
@@ -70,11 +69,11 @@ fun BottomNavigationMenu(
               onClick = { onTabSelect(tab) },
               colors =
                   NavigationBarItemDefaults.colors(
-                      selectedIconColor = Color.Gray,
-                      unselectedIconColor = Color.White,
-                      selectedTextColor = Color.White,
-                      unselectedTextColor = Color.White,
-                  ),
+                      selectedIconColor = MaterialTheme.colorScheme.onPrimary,
+                      unselectedIconColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                      selectedTextColor = MaterialTheme.colorScheme.onPrimary,
+                      unselectedTextColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                      indicatorColor = Color.Transparent),
               modifier = Modifier.testTag("navItem_${tab.textId}"))
         }
       }
@@ -97,7 +96,7 @@ fun Badge(count: Int, tag: String) {
         Text(
             text = count.toString(),
             color = Color.White,
-            style = androidx.compose.material3.MaterialTheme.typography.labelSmall,
+            style = MaterialTheme.typography.labelSmall,
             modifier = Modifier.testTag(tag))
       }
 }

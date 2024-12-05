@@ -23,6 +23,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -34,7 +35,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
@@ -61,9 +61,6 @@ import com.github.se.icebreakrr.ui.navigation.TopLevelDestinations
 import com.github.se.icebreakrr.ui.sections.DEFAULT_RADIUS
 import com.github.se.icebreakrr.ui.sections.DEFAULT_USER_LATITUDE
 import com.github.se.icebreakrr.ui.sections.DEFAULT_USER_LONGITUDE
-import com.github.se.icebreakrr.ui.theme.IceBreakrrBlue
-import com.github.se.icebreakrr.ui.theme.SignInDarkBlue
-import com.github.se.icebreakrr.ui.theme.SignInMiddleBlue
 import com.github.se.icebreakrr.utils.NetworkUtils
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
@@ -177,8 +174,6 @@ fun SignInScreen(
           onAuthError = { user = null })
 
   // Define a linear gradient with the provided colors
-  val gradientBrush =
-      Brush.linearGradient(colors = listOf(IceBreakrrBlue, SignInMiddleBlue, SignInDarkBlue))
 
   // Add this to collect the auth token state
   val hasAuthToken = appDataStore.hasAuthToken.collectAsState(initial = false)
@@ -188,7 +183,7 @@ fun SignInScreen(
       content = { paddingValues ->
         Column(
             modifier =
-                Modifier.background(brush = gradientBrush)
+                Modifier.background(MaterialTheme.colorScheme.primary)
                     .fillMaxSize()
                     .padding(vertical = verticalPadding)
                     .padding(paddingValues),
@@ -197,16 +192,22 @@ fun SignInScreen(
         ) {
           Text(
               modifier = Modifier.testTag("loginTitle"),
-              text = "IceBreakrr",
+              text = stringResource(R.string.app_name),
               style =
                   TextStyle(
                       fontSize = TITLE_FONT_SIZE.sp,
                       lineHeight = TITLE_LINE_HEIGHT.sp,
                       fontWeight = FontWeight(TITLE_FONT_WEIGHT),
-                      color = Color.White,
+                      color = MaterialTheme.colorScheme.onPrimary,
                       textAlign = TextAlign.Center,
                       letterSpacing = TITLE_LETTER_SPACING.sp,
                   ))
+
+          // Add the app icon here
+          Image(
+              painter = painterResource(id = R.drawable.turtle),
+              contentDescription = "App Icon",
+              modifier = Modifier.size(170.dp))
 
           // Authenticate With Google Button
           GoogleSignInButton(

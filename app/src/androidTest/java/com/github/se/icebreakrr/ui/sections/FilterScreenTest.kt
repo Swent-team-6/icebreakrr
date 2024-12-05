@@ -19,6 +19,7 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performSemanticsAction
 import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
+import androidx.compose.ui.unit.dp
 import androidx.test.espresso.Espresso
 import com.github.se.icebreakrr.model.filter.FilterViewModel
 import com.github.se.icebreakrr.model.profile.ProfilePicRepositoryStorage
@@ -382,7 +383,9 @@ class FilterScreenTest {
       GenderButton(
           selected = selected.value,
           onClick = { selected.value = !selected.value },
-          label = label.value)
+          label = label.value,
+          buttonWidth = 100.dp,
+          buttonHeight = 50.dp)
     }
 
     // Test unselected state
