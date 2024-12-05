@@ -21,7 +21,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.github.se.icebreakrr.ui.theme.IceBreakrrBlue
 
 private const val BADGE_OFFSET_X = 10
 private const val BADGE_OFFSET_Y = -5
@@ -70,8 +69,7 @@ fun BottomNavigationMenu(
                       unselectedIconColor = MaterialTheme.colorScheme.onPrimaryContainer,
                       selectedTextColor = MaterialTheme.colorScheme.onPrimary,
                       unselectedTextColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                      indicatorColor = Color.Transparent
-                  ),
+                      indicatorColor = Color.Transparent),
               modifier = Modifier.testTag("navItem_${tab.textId}"))
         }
       }
@@ -96,5 +94,3 @@ fun Badge(count: Int) {
             style = MaterialTheme.typography.labelSmall)
       }
 }
-
-

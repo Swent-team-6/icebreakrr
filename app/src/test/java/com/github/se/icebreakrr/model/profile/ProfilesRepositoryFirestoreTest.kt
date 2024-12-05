@@ -322,8 +322,7 @@ class ProfilesRepositoryFirestoreTest {
         .thenReturn(
             Tasks.forException(
                 FirebaseFirestoreException(
-                    "Unavailable",
-                    FirebaseFirestoreException.Code.UNAVAILABLE)))
+                    "Unavailable", FirebaseFirestoreException.Code.UNAVAILABLE)))
 
     profilesRepositoryFirestore.checkConnectionPeriodically {}
 

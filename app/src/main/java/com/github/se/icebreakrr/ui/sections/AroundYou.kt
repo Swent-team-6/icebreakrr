@@ -35,7 +35,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
@@ -169,10 +168,12 @@ fun AroundYouScreen(
           SortOptionsDropdown(
               selectedOption = sortOption.value,
               onOptionSelected = { sortViewModel.updateSortOption(it) },
-              modifier = Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.primaryContainer)
-                  .padding(
-                      horizontal = DROPDOWN_HORIZONTAL_PADDING,
-                      vertical = DROPDOWN_VERTICAL_PADDING))
+              modifier =
+                  Modifier.fillMaxWidth()
+                      .background(MaterialTheme.colorScheme.primaryContainer)
+                      .padding(
+                          horizontal = DROPDOWN_HORIZONTAL_PADDING,
+                          vertical = DROPDOWN_VERTICAL_PADDING))
 
           // Profile List
           PullToRefreshBox(
@@ -291,17 +292,16 @@ fun SortOptionsDropdown(
                     }
                     .padding(COLUMN_HORIZONTAL_PADDING)
                     .testTag("SortOptionsDropdown_Option_${option.name}"),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-          Text(
-              text =
-                  option.name.replace("_", " ").lowercase().replaceFirstChar {
-                    if (it.isLowerCase()) it.titlecase(Locale.ROOT) else it.toString()
-                  },
-              fontSize = TEXT_SMALL_SIZE,
-              color = MaterialTheme.colorScheme.onSecondary // Differentiate it visually
-              )
-        }
+            verticalAlignment = Alignment.CenterVertically) {
+              Text(
+                  text =
+                      option.name.replace("_", " ").lowercase().replaceFirstChar {
+                        if (it.isLowerCase()) it.titlecase(Locale.ROOT) else it.toString()
+                      },
+                  fontSize = TEXT_SMALL_SIZE,
+                  color = MaterialTheme.colorScheme.onSecondary // Differentiate it visually
+                  )
+            }
       }
     }
   }

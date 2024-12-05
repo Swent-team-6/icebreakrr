@@ -24,7 +24,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
@@ -98,7 +97,8 @@ fun NotificationScreen(
               selectedOption = meetingRequestOption,
               onOptionSelected = { meetingRequestOption = it },
               modifier =
-                  Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.primaryContainer)
+                  Modifier.fillMaxWidth()
+                      .background(MaterialTheme.colorScheme.primaryContainer)
                       .padding(
                           horizontal = DROPDOWN_HORIZONTAL_PADDING,
                           vertical = DROPDOWN_VERTICAL_PADDING))

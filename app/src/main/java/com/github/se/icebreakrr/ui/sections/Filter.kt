@@ -44,7 +44,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
@@ -276,10 +275,9 @@ fun FilterScreen(
         TopAppBar(
             title = {
               Text(
-                  "Filter", 
+                  "Filter",
                   color = MaterialTheme.colorScheme.onPrimary,
-                  modifier = Modifier.testTag("FilterTopBarTitle")
-              )
+                  modifier = Modifier.testTag("FilterTopBarTitle"))
             },
             modifier = Modifier.testTag("FilterTopBar"),
             navigationIcon = {
@@ -299,12 +297,11 @@ fun FilterScreen(
                         tint = MaterialTheme.colorScheme.onPrimary)
                   }
             },
-            colors = TopAppBarDefaults.topAppBarColors(
-                containerColor = MaterialTheme.colorScheme.primary,
-                navigationIconContentColor = MaterialTheme.colorScheme.onPrimary,
-                titleContentColor = MaterialTheme.colorScheme.onPrimary
-            )
-        )
+            colors =
+                TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    navigationIconContentColor = MaterialTheme.colorScheme.onPrimary,
+                    titleContentColor = MaterialTheme.colorScheme.onPrimary))
       }) { innerPadding ->
         Box(
             modifier =
@@ -523,34 +520,28 @@ fun GenderButton(
     buttonWidth: Dp,
     buttonHeight: Dp
 ) {
-    Button(
-        onClick = onClick,
-        modifier = Modifier
-            .width(buttonWidth)
-            .height(buttonHeight)
-            .testTag("GenderButton$label")
-            .semantics { this.selected = selected },
-        colors = ButtonDefaults.buttonColors(
-            containerColor = if (selected) 
-                MaterialTheme.colorScheme.primary 
-            else 
-                MaterialTheme.colorScheme.surfaceVariant,
-            contentColor = if (selected) 
-                MaterialTheme.colorScheme.onPrimary 
-            else 
-                MaterialTheme.colorScheme.onSurfaceVariant
-        ),
-        shape = RoundedCornerShape(CORNER_RADIUS.dp)
-    ) {
+  Button(
+      onClick = onClick,
+      modifier =
+          Modifier.width(buttonWidth).height(buttonHeight).testTag("GenderButton$label").semantics {
+            this.selected = selected
+          },
+      colors =
+          ButtonDefaults.buttonColors(
+              containerColor =
+                  if (selected) MaterialTheme.colorScheme.primary
+                  else MaterialTheme.colorScheme.surfaceVariant,
+              contentColor =
+                  if (selected) MaterialTheme.colorScheme.onPrimary
+                  else MaterialTheme.colorScheme.onSurfaceVariant),
+      shape = RoundedCornerShape(CORNER_RADIUS.dp)) {
         Text(
             text = label,
-            color = if (selected) 
-                MaterialTheme.colorScheme.onPrimary 
-            else 
-                MaterialTheme.colorScheme.onSurfaceVariant,
-            fontSize = (buttonHeight.value * textSizeFactor).sp
-        )
-    }
+            color =
+                if (selected) MaterialTheme.colorScheme.onPrimary
+                else MaterialTheme.colorScheme.onSurfaceVariant,
+            fontSize = (buttonHeight.value * textSizeFactor).sp)
+      }
 }
 
 /**
@@ -677,7 +668,9 @@ fun RadiusSlider(radius: Int, onDistanceChange: (Int) -> Unit) {
         steps = ALLOWED_VALUES.size - 2,
         modifier = Modifier.padding(horizontal = (2 * DEFAULT_PADDING).dp).testTag("RadiusSlider"),
         colors =
-            SliderDefaults.colors(thumbColor = MaterialTheme.colorScheme.primary, activeTrackColor = MaterialTheme.colorScheme.primary))
+            SliderDefaults.colors(
+                thumbColor = MaterialTheme.colorScheme.primary,
+                activeTrackColor = MaterialTheme.colorScheme.primary))
   }
 }
 
@@ -711,8 +704,12 @@ fun FilterActionButton(
               modifier = Modifier.width(buttonWidth).height(buttonHeight).testTag("ResetButton"),
               colors =
                   ButtonDefaults.buttonColors(
-                      containerColor = MaterialTheme.colorScheme.surfaceVariant, contentColor = MaterialTheme.colorScheme.onSurfaceVariant)) {
-                Text("Reset", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = buttonTextSize)
+                      containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                      contentColor = MaterialTheme.colorScheme.onSurfaceVariant)) {
+                Text(
+                    "Reset",
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    fontSize = buttonTextSize)
               }
 
           // Filter Button
@@ -724,8 +721,13 @@ fun FilterActionButton(
                   ButtonDefaults.buttonColors(
                       containerColor = MaterialTheme.colorScheme.primary,
                       contentColor = MaterialTheme.colorScheme.onPrimary,
-                      disabledContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = FILTER_ACTION_BUTTON_ALPHA))) {
-                Text("Filter", color = MaterialTheme.colorScheme.onPrimary, fontSize = buttonTextSize)
+                      disabledContainerColor =
+                          MaterialTheme.colorScheme.primary.copy(
+                              alpha = FILTER_ACTION_BUTTON_ALPHA))) {
+                Text(
+                    "Filter",
+                    color = MaterialTheme.colorScheme.onPrimary,
+                    fontSize = buttonTextSize)
               }
         }
   }

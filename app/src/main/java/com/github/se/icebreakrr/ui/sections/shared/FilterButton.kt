@@ -10,7 +10,6 @@ import androidx.compose.ui.platform.testTag
 import com.github.se.icebreakrr.ui.navigation.NavigationActions
 import com.github.se.icebreakrr.ui.navigation.Screen
 import com.github.se.icebreakrr.ui.theme.FilterIcon
-import com.github.se.icebreakrr.ui.theme.IceBreakrrBlue
 
 /**
  * Displays the filter action button used in the Around You screen

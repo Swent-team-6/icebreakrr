@@ -58,5 +58,5 @@ fun TopBar(s: String, needBackButton: Boolean = false, backButtonOnClick: () -> 
             Spacer(modifier = Modifier.width(BACK_BUTTON_SIZE))
           }
         }
-    }
+      }
 }

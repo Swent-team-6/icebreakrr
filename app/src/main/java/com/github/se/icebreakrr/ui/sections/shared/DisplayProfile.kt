@@ -99,12 +99,15 @@ fun InfoSection(profile: Profile, tagsViewModel: TagsViewModel) {
         Column(
             modifier = Modifier.padding(COLUMN_PADDING),
             verticalArrangement = Arrangement.spacedBy(VERTICAL_ARRANGEMENT)) {
-              Text(text = "Description", style = TextStyle(
-                  fontSize = 14.sp,
-                  lineHeight = 20.sp,
-                  fontWeight = FontWeight.W500,
-                  color = MaterialTheme.colorScheme.secondary,
-                  letterSpacing = 0.1.sp))
+              Text(
+                  text = "Description",
+                  style =
+                      TextStyle(
+                          fontSize = 14.sp,
+                          lineHeight = 20.sp,
+                          fontWeight = FontWeight.W500,
+                          color = MaterialTheme.colorScheme.secondary,
+                          letterSpacing = 0.1.sp))
               ProfileDescription(profile.description)
             }
 
@@ -112,12 +115,15 @@ fun InfoSection(profile: Profile, tagsViewModel: TagsViewModel) {
         Column(
             modifier = Modifier.padding(COLUMN_PADDING),
             verticalArrangement = Arrangement.spacedBy(VERTICAL_ARRANGEMENT)) {
-              Text(text = "Tags", style = TextStyle(
-                  fontSize = 14.sp,
-                  lineHeight = 20.sp,
-                  fontWeight = FontWeight.W500,
-                  color = MaterialTheme.colorScheme.secondary,
-                  letterSpacing = 0.1.sp))
+              Text(
+                  text = "Tags",
+                  style =
+                      TextStyle(
+                          fontSize = 14.sp,
+                          lineHeight = 20.sp,
+                          fontWeight = FontWeight.W500,
+                          color = MaterialTheme.colorScheme.secondary,
+                          letterSpacing = 0.1.sp))
               TagsSection(userTags)
             }
       }
@@ -303,7 +309,9 @@ fun ProfileHeader(
                                     showReportOptions = false
                                     selectedReportType = null
                                   }) {
-                                    Text(stringResource(R.string.cancel), color = MaterialTheme.colorScheme.error)
+                                    Text(
+                                        stringResource(R.string.cancel),
+                                        color = MaterialTheme.colorScheme.error)
                                   }
                               TextButton(
                                   onClick = {
@@ -334,7 +342,9 @@ fun ProfileHeader(
                                     showBlockConfirmation = false
                                     blockReportModal = false
                                   }) {
-                                    Text(stringResource(R.string.cancel), color = MaterialTheme.colorScheme.error)
+                                    Text(
+                                        stringResource(R.string.cancel),
+                                        color = MaterialTheme.colorScheme.error)
                                   }
                               TextButton(
                                   onClick = {
@@ -362,7 +372,9 @@ fun ProfileHeader(
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically) {
                               TextButton(onClick = { blockReportModal = false }) {
-                                Text(stringResource(R.string.cancel), color = MaterialTheme.colorScheme.error)
+                                Text(
+                                    stringResource(R.string.cancel),
+                                    color = MaterialTheme.colorScheme.error)
                               }
 
                               Row {
@@ -390,8 +402,7 @@ fun ProfileHeader(
 fun ProfileCatchPhrase(catchPhrase: String) {
   Text(
       text = catchPhrase,
-      style = TextStyle(
-          fontSize = 22.sp, lineHeight = 28.sp, fontWeight = FontWeight.W400),
+      style = TextStyle(fontSize = 22.sp, lineHeight = 28.sp, fontWeight = FontWeight.W400),
       color = MaterialTheme.colorScheme.onSecondary,
       textAlign = TextAlign.Left,
       maxLines = 2,
@@ -425,12 +436,13 @@ fun TagsSection(listOfTags: List<Pair<String, Color>>) {
 fun ProfileDescription(description: String) {
   Text(
       text = description,
-      style =  TextStyle(
-          fontSize = 16.sp,
-          lineHeight = 24.sp,
-          fontWeight = FontWeight.W500,
-          color = MaterialTheme.colorScheme.primary,
-          letterSpacing = 0.15.sp),
+      style =
+          TextStyle(
+              fontSize = 16.sp,
+              lineHeight = 24.sp,
+              fontWeight = FontWeight.W500,
+              color = MaterialTheme.colorScheme.primary,
+              letterSpacing = 0.15.sp),
       color = Color.Black.copy(alpha = ALPHA_DESCRIPTION),
       modifier = Modifier.padding(DESCRIPTION_PADDING).testTag("profileDescription"))
 }

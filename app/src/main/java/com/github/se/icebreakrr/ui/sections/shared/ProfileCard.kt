@@ -18,7 +18,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -66,9 +65,10 @@ fun ProfileCard(
   Card(
       onClick = onclick,
       shape = RoundedCornerShape(CARD_CORNER_RADIUS),
-      colors = CardDefaults.cardColors(
-          containerColor = MaterialTheme.colorScheme.primaryContainer,
-          contentColor = MaterialTheme.colorScheme.onSecondary),
+      colors =
+          CardDefaults.cardColors(
+              containerColor = MaterialTheme.colorScheme.primaryContainer,
+              contentColor = MaterialTheme.colorScheme.onSecondary),
       modifier = Modifier.fillMaxWidth().heightIn(max = CARD_MAX_HEIGHT).testTag("profileCard")) {
         Row(
             horizontalArrangement = Arrangement.spacedBy(IMAGE_SPACING),
@@ -97,7 +97,7 @@ fun ProfileCard(
                       // Profile name
                       Text(
                           text = profile.name,
-                                fontSize = NAME_FONT_SIZE,
+                          fontSize = NAME_FONT_SIZE,
                           fontWeight = FontWeight.Bold,
                           modifier = Modifier.weight(1f) // Push distance to the right
                           )
@@ -112,9 +112,7 @@ fun ProfileCard(
                       }
                     }
 
-                Text(
-                    text = "\"${profile.catchPhrase}\"",
-                    fontSize = CATCHPHRASE_FONT_SIZE)
+                Text(text = "\"${profile.catchPhrase}\"", fontSize = CATCHPHRASE_FONT_SIZE)
 
                 Spacer(modifier = Modifier.padding(TEXT_SPACER_PADDING))
 

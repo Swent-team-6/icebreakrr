@@ -121,12 +121,7 @@ fun InboxProfileViewScreen(
             },
             {
               acceptDeclineCode(
-                  meetingRequestViewModel,
-                  navigationActions,
-                  profile.uid,
-                  false,
-                  profile.fcmToken
-              )
+                  meetingRequestViewModel, navigationActions, profile.uid, false, profile.fcmToken)
             })
         InfoSection(profile = profile, tagsViewModel = tagsViewModel)
       }

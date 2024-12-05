@@ -32,7 +32,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
@@ -111,7 +110,10 @@ fun ProfileEditingScreen(
 
   if (isLoading) {
     Box(
-        modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surfaceVariant).testTag("loadingBox"),
+        modifier =
+            Modifier.fillMaxSize()
+                .background(MaterialTheme.colorScheme.surfaceVariant)
+                .testTag("loadingBox"),
         contentAlignment = Alignment.Center) {
           Text("Loading profile...", textAlign = TextAlign.Center)
         }
