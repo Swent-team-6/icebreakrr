@@ -6,6 +6,7 @@ import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatDelegate
@@ -24,6 +25,7 @@ import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
 import com.github.se.icebreakrr.config.LocalIsTesting
 import com.github.se.icebreakrr.data.AppDataStore
+import com.github.se.icebreakrr.model.ai.AiViewModel
 import com.github.se.icebreakrr.model.filter.FilterViewModel
 import com.github.se.icebreakrr.model.location.LocationRepositoryFirestore
 import com.github.se.icebreakrr.model.location.LocationService
@@ -119,6 +121,8 @@ class MainActivity : ComponentActivity() {
     // Initialize DataStore
     appDataStore = AppDataStore(context = this)
 
+    val chatGptApiKey = getChatGptApiKey()
+
     setContent {
       // Provide the `isTesting` flag to the entire composable tree
       CompositionLocalProvider(LocalIsTesting provides isTesting) {
@@ -130,6 +134,7 @@ class MainActivity : ComponentActivity() {
                 appDataStore,
                 locationViewModel,
                 firestore,
+                chatGptApiKey,
                 isTesting,
                 permissionManager)
           }
@@ -154,6 +159,17 @@ class MainActivity : ComponentActivity() {
     super.onStop()
     // Remove the AuthStateListener when the activity stops
     auth.removeAuthStateListener(authStateListener)
+  }
+
+  private fun getChatGptApiKey(): String {
+    return try {
+      val appInfo = packageManager.getApplicationInfo(packageName, PackageManager.GET_META_DATA)
+      appInfo.metaData?.getString("com.openai.chatgpt.API_KEY")
+          ?: throw Exception("API Key not found in AndroidManifest.xml")
+    } catch (e: Exception) {
+      Log.e("MainActivity", "Error retrieving API Key: ${e.message}")
+      ""
+    }
   }
 
   // TODO remove this and use the PermissionManager instead
@@ -188,6 +204,7 @@ fun IcebreakrrApp(
     appDataStore: AppDataStore,
     locationViewModel: LocationViewModel,
     firestore: FirebaseFirestore,
+    chatGptApiKey: String,
     isTesting: Boolean,
     permissionManager: IPermissionManager
 ) {
@@ -200,6 +217,8 @@ fun IcebreakrrApp(
       viewModel(factory = MeetingRequestViewModel.Companion.Factory(profileViewModel, functions))
   val sortViewModel: SortViewModel =
       viewModel(factory = SortViewModel.createFactory(profileViewModel))
+  val aiViewModel: AiViewModel =
+      viewModel(factory = AiViewModel.provideFactory(chatGptApiKey, profileViewModel))
   val meetingRequestViewModel = MeetingRequestManager.meetingRequestViewModel
   val startDestination = if (isTesting) Route.AROUND_YOU else Route.AUTH
 
@@ -214,6 +233,7 @@ fun IcebreakrrApp(
       startDestination,
       auth,
       permissionManager,
+      aiViewModel,
       isTesting)
 }
 
@@ -229,6 +249,7 @@ fun IcebreakrrNavHost(
     startDestination: String,
     auth: FirebaseAuth,
     permissionManager: IPermissionManager,
+    aiViewModel: AiViewModel,
     isTesting: Boolean
 ) {
   val navController = rememberNavController()
@@ -279,6 +300,7 @@ fun IcebreakrrNavHost(
           OtherProfileView(
               profileViewModel,
               tagsViewModel,
+              aiViewModel,
               meetingRequestViewModel,
               navigationActions,
               navBackStackEntry)
