@@ -21,6 +21,7 @@ import kotlinx.coroutines.launch
 
 private const val CHECK_INTERVAL = 5 * 60 * 1_000_000L // 5 minutes
 private val RADIUS = ALLOWED_VALUES[0]
+private const val NOTIFICATION_COOLDOWN = 4 * 60 * 60 * 1000L // 4 hours in milliseconds
 
 /**
  * Manages engagement notifications between users based on proximity and shared interests.
@@ -50,6 +51,7 @@ class EngagementNotificationManager(
 ) {
   private var notificationJob: Job? = null
   private val scope = CoroutineScope(Dispatchers.Main)
+  private val lastNotificationTimes = mutableMapOf<String, Long>()
 
   /** Start monitoring for nearby users with common tags */
   fun startMonitoring() {
@@ -79,25 +81,19 @@ class EngagementNotificationManager(
    * and processes them if the user is discoverable.
    */
   private fun checkNearbyUsersForCommonTags() {
-    profilesViewModel.getSelfProfile {}
-    val selfProfile = profilesViewModel.selfProfile.value ?: return
-    val selfLocation = selfProfile.location ?: return
+    profilesViewModel.getSelfProfile {
+      val selfProfile = profilesViewModel.selfProfile.value ?: return@getSelfProfile
+      val selfLocation = selfProfile.location ?: return@getSelfProfile
 
-    // Use the user's selected radius from FilterViewModel
-    profilesViewModel.getFilteredProfilesInRadius(
-        center = selfLocation,
-        radiusInMeters = RADIUS,
-        genders = filterViewModel.selectedGenders.value,
-        ageRange = filterViewModel.ageRange.value)
+      // Launch a coroutine to collect the filtered profiles
+      scope.launch {
+        // Only proceed if we are discoverable
+        if (!appDataStore.isDiscoverable.first()) return@launch
 
-    // Launch a coroutine to collect the filtered profiles
-    scope.launch {
-      // Only proceed if we are discoverable
-      if (!appDataStore.isDiscoverable.first()) return@launch
-
-      profilesViewModel.filteredProfiles.collectLatest { nearbyProfiles ->
-        // Process all nearby profiles
-        processNearbyProfiles(selfProfile, nearbyProfiles)
+        profilesViewModel.filteredProfiles.collectLatest { nearbyProfiles ->
+          // Process all nearby profiles
+          processNearbyProfiles(selfProfile, nearbyProfiles)
+        }
       }
     }
   }
@@ -114,10 +110,12 @@ class EngagementNotificationManager(
    */
   private fun processNearbyProfiles(selfProfile: Profile, nearbyProfiles: List<Profile>) {
     val selfTags = selfProfile.tags
-
     val newListMinusSelf = nearbyProfiles.filter { it != selfProfile }
 
     for (nearbyProfile in newListMinusSelf) {
+      // Skip if we've recently notified this user
+      val lastTime = lastNotificationTimes[nearbyProfile.uid] ?: 0L
+      if (System.currentTimeMillis() - lastTime < NOTIFICATION_COOLDOWN) continue
 
       // Find common tags
       val commonTags = selfTags.intersect(nearbyProfile.tags.toSet())
@@ -126,9 +124,10 @@ class EngagementNotificationManager(
         // Send notification for the first common tag
         val commonTag = commonTags.first()
         try {
-          // Send notification to other users - receiving device will check if it should show it
           meetingRequestViewModel.engagementNotification(
               targetToken = nearbyProfile.fcmToken ?: "null", tag = commonTag)
+          // Record notification time
+          lastNotificationTimes[nearbyProfile.uid] = System.currentTimeMillis()
         } catch (e: Exception) {
           Log.e("EngagementNotification", "Failed to send notification", e)
         }
