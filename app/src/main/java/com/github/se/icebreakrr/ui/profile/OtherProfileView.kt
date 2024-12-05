@@ -31,6 +31,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavBackStackEntry
 import com.github.se.icebreakrr.R
+import com.github.se.icebreakrr.model.ai.AiViewModel
 import com.github.se.icebreakrr.model.message.MeetingRequestViewModel
 import com.github.se.icebreakrr.model.profile.ProfilesViewModel
 import com.github.se.icebreakrr.model.tags.TagsViewModel
@@ -57,6 +58,7 @@ private const val USER_ALREADY_SEND_REQUEST_TOAST_MESSAGE =
 fun OtherProfileView(
     profilesViewModel: ProfilesViewModel,
     tagsViewModel: TagsViewModel,
+    aiViewModel: AiViewModel,
     meetingRequestViewModel: MeetingRequestViewModel,
     navigationActions: NavigationActions,
     navBackStackEntry: NavBackStackEntry?
