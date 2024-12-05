@@ -100,6 +100,12 @@ class MeetingRequestViewModelTest {
           message = "Meet me here !",
           location = profile1.geohash ?: "null")
 
+  private val meetingCancellationState =
+      MeetingCancellation(
+          targetToken = profile1.fcmToken ?: "null",
+          message = MeetingRequestViewModel.CancellationType.DISTANCE.toString(),
+          nameTargetUser = profile1.name)
+
   @Before
   fun setUp() {
     // Set up main dispatcher for coroutine testing
@@ -118,6 +124,8 @@ class MeetingRequestViewModelTest {
     `when`(functions.getHttpsCallable("sendMeetingRequest")).thenReturn(callableReference)
     `when`(functions.getHttpsCallable("sendMeetingResponse")).thenReturn(callableReference)
     `when`(functions.getHttpsCallable("sendMeetingConfirmation")).thenReturn(callableReference)
+    `when`(functions.getHttpsCallable("sendMeetingCancellation")).thenReturn(callableReference)
+    `when`(functions.getHttpsCallable("sendEngagementNotification")).thenReturn(callableReference)
     `when`(auth.currentUser).thenReturn(mockUser)
     `when`(mockUser.uid).thenReturn("1")
   }
@@ -154,6 +162,21 @@ class MeetingRequestViewModelTest {
     assert(meetingRequestViewModel.meetingResponseState.accepted)
     assert(
         (meetingRequestViewModel.meetingResponseState.targetToken) == (profile2.fcmToken ?: "null"))
+  }
+
+  @Test
+  fun onMeetingCancellationSetTest() = runBlocking {
+    val message = MeetingRequestViewModel.CancellationType.DISTANCE.toString()
+    println(message)
+    meetingRequestViewModel.setMeetingCancellation(
+        profile2.fcmToken ?: "null",
+        MeetingRequestViewModel.CancellationType.DISTANCE,
+        profile2.name)
+    assert(meetingRequestViewModel.meetingCancellationState.message == message)
+    assert(meetingRequestViewModel.meetingCancellationState.nameTargetUser == profile2.name)
+    assert(
+        (meetingRequestViewModel.meetingCancellationState.targetToken) ==
+            (profile2.fcmToken ?: "null"))
   }
 
   @Test
@@ -215,11 +238,6 @@ class MeetingRequestViewModelTest {
 
     `when`(callable.call(any())).thenReturn(callableTask) // This makes it chainable
 
-    val ourUid = profile1.uid
-    val ourToken = profile1.fcmToken ?: "null"
-    val ourName = profile1.name
-    meetingRequestViewModel.setInitialValues(
-        senderToken = ourToken, senderName = ourName, senderUID = ourUid)
     meetingRequestViewModel.meetingRequestState = meetingRequestState
 
     // Act: Call the method under test
@@ -253,11 +271,6 @@ class MeetingRequestViewModelTest {
 
     `when`(callable.call(any())).thenReturn(callableTask) // This makes it chainable
 
-    val ourUid = profile2.uid
-    val ourToken = profile2.fcmToken ?: "null"
-    val ourName = profile2.name
-    meetingRequestViewModel.setInitialValues(
-        senderToken = ourToken, senderName = ourName, senderUID = ourUid)
     meetingRequestViewModel.meetingResponseState = meetingResponseState
 
     // Act: Call the method under test
@@ -273,7 +286,7 @@ class MeetingRequestViewModelTest {
     val capturedData = argumentCaptor.value as Map<String, Any>
 
     assert(capturedData["targetToken"] == meetingResponseState.targetToken)
-    assert(capturedData["senderToken"] == profile2.fcmToken)
+    assert(capturedData["senderToken"] == profile1.fcmToken)
     assert(capturedData["senderUID"] == meetingRequestViewModel.senderUID)
     assert(capturedData["senderName"] == meetingRequestViewModel.senderName)
     assert(capturedData["accepted"] == "true")
@@ -293,11 +306,6 @@ class MeetingRequestViewModelTest {
 
     `when`(callable.call(any())).thenReturn(callableTask) // This makes it chainable
 
-    val ourUid = profile1.uid
-    val ourToken = profile1.fcmToken ?: "null"
-    val ourName = profile1.name
-    meetingRequestViewModel.setInitialValues(
-        senderToken = ourToken, senderName = ourName, senderUID = ourUid)
     meetingRequestViewModel.meetingConfirmationState = meetingConfirmationState
 
     // Act: Call the method under test
@@ -317,6 +325,71 @@ class MeetingRequestViewModelTest {
     assert(capturedData["senderName"] == meetingRequestViewModel.senderName)
     assert(capturedData["location"] == meetingConfirmationState.location)
     assert(capturedData["message"] == meetingConfirmationState.message)
+  }
+
+  @Test
+  fun testSendMeetingCancellationCorrectData() = runBlocking {
+    // Mock the callable function
+    val callableMock: HttpsCallableResult = mock(HttpsCallableResult::class.java)
+    val callableTask: Task<HttpsCallableResult> = Tasks.forResult(callableMock)
+    val callable = mock<HttpsCallableReference>()
+    meetingRequestViewModel.setInitialValues(
+        senderToken = profile1.fcmToken ?: "null",
+        senderUID = profile1.uid,
+        senderName = profile1.name)
+
+    `when`(callable.call(any())).thenReturn(callableTask) // This makes it chainable
+
+    meetingRequestViewModel.meetingCancellationState = meetingCancellationState
+
+    // Act: Call the method under test
+    meetingRequestViewModel.sendMeetingCancellation()
+    // Assert: Verify that the cloud function was called with the correct data
+    verify(functions).getHttpsCallable("sendMeetingCancellation")
+
+    // Capture the argument passed to `call`
+    val argumentCaptor =
+        ArgumentCaptor.forClass(Map::class.java) as ArgumentCaptor<Map<String, Any>>
+    verify(callableReference).call(argumentCaptor.capture())
+
+    val capturedData = argumentCaptor.value as Map<String, Any>
+
+    assert(capturedData["targetToken"] == meetingCancellationState.targetToken)
+    assert(capturedData["senderUID"] == profile1.uid)
+    assert(capturedData["senderName"] == meetingCancellationState.nameTargetUser)
+    assert(capturedData["message"] == meetingCancellationState.message)
+  }
+
+  @Test
+  fun testEngagementNotificationCorrectData() = runBlocking {
+    // Mock the callable function
+    val callableMock: HttpsCallableResult = mock(HttpsCallableResult::class.java)
+    val callableTask: Task<HttpsCallableResult> = Tasks.forResult(callableMock)
+    val callable = mock<HttpsCallableReference>()
+    meetingRequestViewModel.setInitialValues(
+        senderToken = profile1.fcmToken ?: "null",
+        senderUID = profile1.uid,
+        senderName = profile1.name)
+
+    `when`(callable.call(any())).thenReturn(callableTask) // This makes it chainable
+
+    // Act: Call the method under test
+    val tag = "Football"
+    meetingRequestViewModel.engagementNotification(profile2.fcmToken ?: "null", tag)
+    // Assert: Verify that the cloud function was called with the correct data
+    verify(functions).getHttpsCallable("sendEngagementNotification")
+
+    // Capture the argument passed to `call`
+    val argumentCaptor =
+        ArgumentCaptor.forClass(Map::class.java) as ArgumentCaptor<Map<String, Any>>
+    verify(callableReference).call(argumentCaptor.capture())
+
+    val capturedData = argumentCaptor.value as Map<String, Any>
+
+    assert(capturedData["targetToken"] == profile2.fcmToken)
+    assert(capturedData["senderUID"] == meetingRequestViewModel.senderUID)
+    assert(capturedData["senderName"] == meetingRequestViewModel.senderName)
+    assert(capturedData["message"] == tag)
   }
 
   @Test
