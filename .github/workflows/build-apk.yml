@@ -46,6 +46,7 @@ jobs:
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
           MAPS_API_KEY: ${{ secrets.MAPS_API_KEY }}
+          CHATGPT_API_KEY: ${{ secrets.CHATGPT_API_KEY }}
 
       - name: Upload Test Results
         uses: actions/upload-artifact@v3
@@ -60,6 +61,7 @@ jobs:
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
           MAPS_API_KEY: ${{ secrets.MAPS_API_KEY }}
+          CHATGPT_API_KEY: ${{ secrets.CHATGPT_API_KEY }}
 
       - name: Upload APK
         uses: actions/upload-artifact@v3
