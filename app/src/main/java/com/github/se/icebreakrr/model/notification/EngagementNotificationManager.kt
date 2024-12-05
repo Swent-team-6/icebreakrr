@@ -8,7 +8,6 @@ import com.github.se.icebreakrr.model.filter.FilterViewModel
 import com.github.se.icebreakrr.model.message.MeetingRequestViewModel
 import com.github.se.icebreakrr.model.profile.Profile
 import com.github.se.icebreakrr.model.profile.ProfilesViewModel
-import com.github.se.icebreakrr.ui.sections.ALLOWED_VALUES
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -20,7 +19,6 @@ import kotlinx.coroutines.launch
 // This file was written with the help of Cursor AI
 
 private const val CHECK_INTERVAL = 5 * 60 * 1_000_000L // 5 minutes
-private val RADIUS = ALLOWED_VALUES[0]
 private const val NOTIFICATION_COOLDOWN = 4 * 60 * 60 * 1000L // 4 hours in milliseconds
 
 /**
