@@ -26,6 +26,7 @@ if (localPropertiesFile.exists()) {
 }
 
 val mapsApiKey: String = localProperties.getProperty("MAPS_API_KEY") ?: ""
+val chatGptApiKey: String = localProperties.getProperty("CHATGPT_API_KEY") ?: ""
 
 android {
     namespace = "com.github.se.icebreakrr"
@@ -44,6 +45,7 @@ android {
         }
         testInstrumentationRunner = "com.github.se.CustomTestRunner"
         manifestPlaceholders["MAPS_API_KEY"] = System.getenv("MAPS_API_KEY") ?: mapsApiKey
+        manifestPlaceholders["CHATGPT_API_KEY"] = System.getenv("CHATGPT_API_KEY") ?: chatGptApiKey
     }
 
     signingConfigs {
@@ -171,6 +173,7 @@ dependencies {
     implementation(libs.geohashJava)
     implementation(libs.compose.cropper)
     implementation(libs.gson)
+    implementation(libs.json)
 
     implementation(libs.play.services.location)
     implementation(libs.coil.compose)
@@ -253,6 +256,7 @@ dependencies {
     androidTestImplementation(libs.mockito.kotlin)
 
     implementation(platform(libs.firebase.bom))
+    testImplementation(libs.mockwebserver)
 
     // Add these under the dependencies block
     implementation(libs.androidx.datastore.preferences)
