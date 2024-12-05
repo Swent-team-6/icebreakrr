@@ -1,6 +1,7 @@
 package com.github.se.icebreakrr.ui.sections
 
 import android.widget.Toast
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -208,6 +209,9 @@ fun ToggleOptionBox(
               .padding(vertical = BUTTON_PADDING)
               .height(TOGGLE_BOX_HEIGHT)
               .testTag(label),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.secondaryContainer,
+            contentColor = MaterialTheme.colorScheme.onPrimary),
       elevation = CardDefaults.cardElevation(defaultElevation = CARD_ELEVATION)) {
         Row(
             modifier = Modifier.fillMaxWidth().padding(CARD_PADDING),

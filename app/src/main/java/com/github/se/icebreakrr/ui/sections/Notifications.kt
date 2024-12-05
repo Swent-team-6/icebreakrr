@@ -1,6 +1,7 @@
 package com.github.se.icebreakrr.ui.sections
 
 import android.annotation.SuppressLint
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -12,6 +13,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -25,9 +27,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.github.se.icebreakrr.R
 import com.github.se.icebreakrr.model.message.MeetingRequestViewModel
 import com.github.se.icebreakrr.model.profile.ProfilesViewModel
 import com.github.se.icebreakrr.ui.navigation.BottomNavigationMenu
@@ -45,8 +49,6 @@ import java.util.Locale
 private val HORIZONTAL_PADDING = 7.dp
 private val TEXT_VERTICAL_PADDING = 16.dp
 private val CARD_SPACING = 16.dp
-private const val MEETING_REQUEST_MSG = "Pending meeting requests"
-private const val MEETING_REQUEST_SENT = "Meeting request sent"
 private val COLUMN_VERTICAL_PADDING = 16.dp
 private val COLUMN_HORIZONTAL_PADDING = 8.dp
 private val SORT_TOP_PADDING = 4.dp
@@ -91,12 +93,12 @@ fun NotificationScreen(
             notificationCount = inboxCardList.value.size)
       },
       content = { innerPadding ->
-        Column(modifier = Modifier.padding(innerPadding).padding(horizontal = HORIZONTAL_PADDING)) {
+        Column(modifier = Modifier.padding(innerPadding)) {
           MeetingRequestOptionDropdown(
               selectedOption = meetingRequestOption,
               onOptionSelected = { meetingRequestOption = it },
               modifier =
-                  Modifier.fillMaxWidth()
+                  Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.primaryContainer)
                       .padding(
                           horizontal = DROPDOWN_HORIZONTAL_PADDING,
                           vertical = DROPDOWN_VERTICAL_PADDING))
@@ -108,7 +110,7 @@ fun NotificationScreen(
                         .testTag("notificationScroll")) {
                   item {
                     Text(
-                        text = MEETING_REQUEST_MSG,
+                        text = stringResource(R.string.meeting_request_pending),
                         fontWeight = FontWeight.Bold,
                         modifier =
                             Modifier.padding(vertical = TEXT_VERTICAL_PADDING)
@@ -138,7 +140,7 @@ fun NotificationScreen(
                         .testTag("notificationScroll")) {
                   item {
                     Text(
-                        text = MEETING_REQUEST_SENT,
+                        text = stringResource(R.string.meeting_request_sent),
                         fontWeight = FontWeight.Bold,
                         modifier =
                             Modifier.padding(vertical = TEXT_VERTICAL_PADDING)
@@ -226,7 +228,7 @@ fun MeetingRequestOptionDropdown(
                         if (it.isLowerCase()) it.titlecase(Locale.ROOT) else it.toString()
                       },
               fontSize = TEXT_SMALL_SIZE,
-              color = Color.Gray)
+              color = MaterialTheme.colorScheme.secondaryContainer)
         }
       }
     }

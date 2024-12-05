@@ -11,6 +11,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -25,7 +27,6 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.github.se.icebreakrr.R
 import com.github.se.icebreakrr.model.profile.Profile
-import com.github.se.icebreakrr.ui.theme.grayedOut
 
 // Define constants for layout dimensions and other configurations
 private val CARD_CORNER_RADIUS = 14.dp
@@ -42,7 +43,6 @@ private val CATCHPHRASE_FONT_SIZE = 16.sp
 private val TAGS_FONT_SIZE = 16.sp
 
 // Define colors used
-private val GREYED_OUT_COLOR = grayedOut
 
 // Define math constants
 private val TAKE_TAGS = 5
@@ -66,6 +66,9 @@ fun ProfileCard(
   Card(
       onClick = onclick,
       shape = RoundedCornerShape(CARD_CORNER_RADIUS),
+      colors = CardDefaults.cardColors(
+          containerColor = MaterialTheme.colorScheme.primaryContainer,
+          contentColor = MaterialTheme.colorScheme.onSecondary),
       modifier = Modifier.fillMaxWidth().heightIn(max = CARD_MAX_HEIGHT).testTag("profileCard")) {
         Row(
             horizontalArrangement = Arrangement.spacedBy(IMAGE_SPACING),
@@ -87,7 +90,6 @@ fun ProfileCard(
                   verticalArrangement = Arrangement.Center,
                   horizontalAlignment = Alignment.Start,
               ) {
-                val textColor = if (greyedOut) GREYED_OUT_COLOR else Color.Unspecified
                 // Profile name with distance on the right
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -95,8 +97,7 @@ fun ProfileCard(
                       // Profile name
                       Text(
                           text = profile.name,
-                          color = textColor,
-                          fontSize = NAME_FONT_SIZE,
+                                fontSize = NAME_FONT_SIZE,
                           fontWeight = FontWeight.Bold,
                           modifier = Modifier.weight(1f) // Push distance to the right
                           )
@@ -105,7 +106,7 @@ fun ProfileCard(
                       profile.distanceToSelfProfile?.let { distance ->
                         Text(
                             text = "$distance m",
-                            color = textColor,
+                            color = MaterialTheme.colorScheme.onSecondary,
                             fontSize = CATCHPHRASE_FONT_SIZE, // Smaller font size
                             fontWeight = FontWeight.Normal)
                       }
@@ -113,7 +114,6 @@ fun ProfileCard(
 
                 Text(
                     text = "\"${profile.catchPhrase}\"",
-                    color = textColor,
                     fontSize = CATCHPHRASE_FONT_SIZE)
 
                 Spacer(modifier = Modifier.padding(TEXT_SPACER_PADDING))
@@ -121,7 +121,7 @@ fun ProfileCard(
                 if (!isSettings) {
                   // Display the first 5 tags in a string format
                   val tags = profile.tags.take(TAKE_TAGS).joinToString(" ") { "#$it" }
-                  Text(text = tags, fontSize = TAGS_FONT_SIZE, color = textColor)
+                  Text(text = tags, fontSize = TAGS_FONT_SIZE)
                 } else {
                   Text(text = "Tap to preview profile")
                 }

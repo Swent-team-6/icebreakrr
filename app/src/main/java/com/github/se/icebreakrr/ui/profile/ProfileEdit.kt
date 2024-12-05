@@ -111,7 +111,7 @@ fun ProfileEditingScreen(
 
   if (isLoading) {
     Box(
-        modifier = Modifier.fillMaxSize().background(Color.LightGray).testTag("loadingBox"),
+        modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surfaceVariant).testTag("loadingBox"),
         contentAlignment = Alignment.Center) {
           Text("Loading profile...", textAlign = TextAlign.Center)
         }

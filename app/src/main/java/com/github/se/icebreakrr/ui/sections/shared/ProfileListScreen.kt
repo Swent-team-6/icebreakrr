@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -32,7 +33,6 @@ import com.github.se.icebreakrr.ui.navigation.NavigationActions
 import com.github.se.icebreakrr.ui.navigation.Route
 import com.github.se.icebreakrr.ui.sections.shared.ProfileCard
 import com.github.se.icebreakrr.ui.sections.shared.TopBar
-import com.github.se.icebreakrr.ui.theme.messageTextColor
 import com.github.se.icebreakrr.utils.NetworkUtils.isNetworkAvailable
 import kotlinx.coroutines.delay
 
@@ -41,8 +41,6 @@ import kotlinx.coroutines.delay
 private val COLUMN_VERTICAL_PADDING = 16.dp
 private val COLUMN_HORIZONTAL_PADDING = 8.dp
 private val TEXT_SIZE_LARGE = 20.sp
-private val NO_CONNECTION_TEXT_COLOR = messageTextColor
-private val EMPTY_PROFILE_TEXT_COLOR = messageTextColor
 private const val REFRESH_INTERVAL = 10_000L
 
 /**
@@ -171,7 +169,7 @@ fun ProfileListScreen(
                                     text = emptyMessage,
                                     fontSize = TEXT_SIZE_LARGE,
                                     fontWeight = FontWeight.Bold,
-                                    color = EMPTY_PROFILE_TEXT_COLOR)
+                                    color = MaterialTheme.colorScheme.primary)
                               }
                         }
                       }

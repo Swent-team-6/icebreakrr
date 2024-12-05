@@ -18,6 +18,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -34,7 +35,6 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.PopupProperties
-import com.github.se.icebreakrr.ui.theme.extendedTagsColor
 
 // Define constants for commonly used dimensions and colors
 private val TAG_PADDING = 8.dp
@@ -47,7 +47,6 @@ private val DROP_DOWN_MENU_MAX_ITEMS = 5
 private val TAG_BOX_PADDING = 8.dp
 private val SELECTED_TAG_COLOR = Color.Red
 private val DEFAULT_TAG_BACKGROUND_COLOR = Color.Cyan
-private val EXTEND_TAG_COLOR = extendedTagsColor
 private val TAG_HORIZONTAL_PADDING = 12.dp
 private val TAG_VERTICAL_PADDING = 6.dp
 
@@ -120,7 +119,7 @@ fun ExtendTag(tagStyle: TagStyle, onClick: () -> Unit) {
           Modifier.padding(CLICKABLE_TAG_PADDING)
               .clickable(onClick = onClick)
               .testTag("testExtendTag"),
-      color = EXTEND_TAG_COLOR,
+      color = MaterialTheme.colorScheme.onPrimary,
       shape = RoundedCornerShape(CLICKABLE_TAG_CORNER_RADIUS)) {
         Text(
             text = "...",

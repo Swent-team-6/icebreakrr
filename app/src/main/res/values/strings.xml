@@ -46,4 +46,7 @@
     <string name="ask_to_give_location_permission">Precise location permission is required to show profiles. Activate it in your phone settings</string>
     <string name="no_one_around">There is no one around. Try moving!</string>
 
+    <string name="meeting_request_pending">Pending meeting requests</string>
+    <string name="meeting_request_sent">Meeting request sent</string>
+
 </resources>

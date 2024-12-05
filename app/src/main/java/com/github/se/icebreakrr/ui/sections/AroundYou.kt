@@ -2,6 +2,7 @@ package com.github.se.icebreakrr.ui.sections
 
 import android.annotation.SuppressLint
 import android.content.pm.PackageManager
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -18,6 +19,7 @@ import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults.Indicator
@@ -58,7 +60,6 @@ import com.github.se.icebreakrr.ui.navigation.Screen
 import com.github.se.icebreakrr.ui.sections.shared.FilterFloatingActionButton
 import com.github.se.icebreakrr.ui.sections.shared.ProfileCard
 import com.github.se.icebreakrr.ui.sections.shared.TopBar
-import com.github.se.icebreakrr.ui.theme.messageTextColor
 import com.github.se.icebreakrr.utils.IPermissionManager
 import com.github.se.icebreakrr.utils.NetworkUtils.isNetworkAvailable
 import com.github.se.icebreakrr.utils.NetworkUtils.isNetworkAvailableWithContext
@@ -73,9 +74,9 @@ private val COLUMN_HORIZONTAL_PADDING = 8.dp
 private val SORT_TOP_PADDING = 4.dp
 private val TEXT_SIZE_LARGE = 20.sp
 private val TEXT_SMALL_SIZE = 16.sp
-private val NO_CONNECTION_TEXT_COLOR = messageTextColor
-private val EMPTY_PROFILE_TEXT_COLOR = messageTextColor
 private const val REFRESH_DELAY = 10_000L
+private val DROPDOWN_HORIZONTAL_PADDING = 16.dp
+private val DROPDOWN_VERTICAL_PADDING = 8.dp
 
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -163,12 +164,15 @@ fun AroundYouScreen(
       content = { innerPadding ->
 
         // Wrapping dropdown and profile list in a Column
-        Column(modifier = Modifier.padding(innerPadding).fillMaxSize()) {
+        Column(modifier = Modifier.padding(innerPadding)) {
           // Sort Options Dropdown
           SortOptionsDropdown(
               selectedOption = sortOption.value,
               onOptionSelected = { sortViewModel.updateSortOption(it) },
-              modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp))
+              modifier = Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.primaryContainer)
+                  .padding(
+                      horizontal = DROPDOWN_HORIZONTAL_PADDING,
+                      vertical = DROPDOWN_VERTICAL_PADDING))
 
           // Profile List
           PullToRefreshBox(
@@ -182,7 +186,7 @@ fun AroundYouScreen(
               },
               modifier = Modifier.fillMaxSize(),
               content = {
-                if (!isConnected.value) {
+                if (isConnected.value) {
                   EmptyProfilePrompt(
                       label = stringResource(id = R.string.no_internet),
                       testTag = "noConnectionPrompt")
@@ -248,7 +252,7 @@ fun SortOptionsDropdown(
   // List of all options excluding the selected one
   val otherOptions = SortOption.values().filter { it != selectedOption }
 
-  Column(modifier = modifier) {
+  Column(modifier = modifier.background(MaterialTheme.colorScheme.primaryContainer)) {
     // Selected option with a dropdown indicator
     Row(
         modifier =
@@ -258,6 +262,7 @@ fun SortOptionsDropdown(
                 .testTag("SortOptionsDropdown_Selected"),
         verticalAlignment = Alignment.CenterVertically) {
           Text(
+              color = MaterialTheme.colorScheme.onSecondary,
               text =
                   "Sort by: ${
                     selectedOption.name.replace("_", " ").lowercase()
@@ -284,11 +289,9 @@ fun SortOptionsDropdown(
                       expanded = false
                       onOptionSelected(option)
                     }
-                    .padding(
-                        start = COLUMN_VERTICAL_PADDING,
-                        top = SORT_TOP_PADDING,
-                        bottom = COLUMN_HORIZONTAL_PADDING)
+                    .padding(COLUMN_HORIZONTAL_PADDING)
                     .testTag("SortOptionsDropdown_Option_${option.name}"),
+            verticalAlignment = Alignment.CenterVertically
         ) {
           Text(
               text =
@@ -296,7 +299,7 @@ fun SortOptionsDropdown(
                     if (it.isLowerCase()) it.titlecase(Locale.ROOT) else it.toString()
                   },
               fontSize = TEXT_SMALL_SIZE,
-              color = Color.Gray // Differentiate it visually
+              color = MaterialTheme.colorScheme.onSecondary // Differentiate it visually
               )
         }
       }
@@ -370,7 +373,7 @@ fun EmptyProfilePrompt(label: String, testTag: String) {
         text = label,
         fontSize = TEXT_SIZE_LARGE,
         fontWeight = FontWeight.Bold,
-        color = messageTextColor,
+        color = MaterialTheme.colorScheme.onSurface,
         textAlign = TextAlign.Center)
   }
 }

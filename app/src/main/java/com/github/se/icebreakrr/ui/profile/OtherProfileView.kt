@@ -123,7 +123,7 @@ fun OtherProfileView(
                         .padding(MET_BUTTON_HORIZTONAL_PADDING)
                         .align(Alignment.CenterHorizontally)
                         .testTag("alreadyMetButton")) {
-                  Text(text = stringResource(R.string.Already_Met_Button_Text), color = Color.White)
+                  Text(text = stringResource(R.string.Already_Met_Button_Text), color = MaterialTheme.colorScheme.onPrimary)
                 }
 
             // Add bottom padding

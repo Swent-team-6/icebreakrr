@@ -50,23 +50,6 @@ import com.github.se.icebreakrr.utils.NetworkUtils.showNoInternetToast
 // Constants
 private val INFO_SECTION_PADDING = 16.dp
 private val INFO_SECTION_SPACING = 11.dp
-private val CATCHPHRASE_TEXT_STYLE =
-    TextStyle(
-        fontSize = 22.sp, lineHeight = 28.sp, fontWeight = FontWeight.W400, color = IceBreakrrBlue)
-private val TITLE_TEXT_STYLE =
-    TextStyle(
-        fontSize = 14.sp,
-        lineHeight = 20.sp,
-        fontWeight = FontWeight.W500,
-        color = IceBreakrrBlue,
-        letterSpacing = 0.1.sp)
-private val DESCRIPTION_TEXT_STYLE =
-    TextStyle(
-        fontSize = 16.sp,
-        lineHeight = 24.sp,
-        fontWeight = FontWeight.W500,
-        color = IceBreakrrBlue,
-        letterSpacing = 0.15.sp)
 private val TAG_HEIGHT_DP = 50.dp
 private val REQUEST_BUTTON_SIZE = 55.dp
 private val REQUEST_BUTTON_ELEVATION = 8.dp
@@ -75,7 +58,6 @@ private val PROFILE_IMAGE_ASPECT_RATIO = 1f
 private val PROFILE_IMAGE_PADDING = 16.dp
 private val USERNAME_TEXT_STYLE =
     TextStyle(fontSize = 24.sp, fontWeight = FontWeight.Bold, color = Color.White)
-private val ALPHA_CATCHPHRASE = 0.8f
 private val ALPHA_DESCRIPTION = 0.9f
 private val DESCRIPTION_PADDING = 4.dp
 
@@ -117,7 +99,12 @@ fun InfoSection(profile: Profile, tagsViewModel: TagsViewModel) {
         Column(
             modifier = Modifier.padding(COLUMN_PADDING),
             verticalArrangement = Arrangement.spacedBy(VERTICAL_ARRANGEMENT)) {
-              Text(text = "Description", style = TITLE_TEXT_STYLE)
+              Text(text = "Description", style = TextStyle(
+                  fontSize = 14.sp,
+                  lineHeight = 20.sp,
+                  fontWeight = FontWeight.W500,
+                  color = MaterialTheme.colorScheme.secondary,
+                  letterSpacing = 0.1.sp))
               ProfileDescription(profile.description)
             }
 
@@ -125,7 +112,12 @@ fun InfoSection(profile: Profile, tagsViewModel: TagsViewModel) {
         Column(
             modifier = Modifier.padding(COLUMN_PADDING),
             verticalArrangement = Arrangement.spacedBy(VERTICAL_ARRANGEMENT)) {
-              Text(text = "Tags", style = TITLE_TEXT_STYLE)
+              Text(text = "Tags", style = TextStyle(
+                  fontSize = 14.sp,
+                  lineHeight = 20.sp,
+                  fontWeight = FontWeight.W500,
+                  color = MaterialTheme.colorScheme.secondary,
+                  letterSpacing = 0.1.sp))
               TagsSection(userTags)
             }
       }
@@ -172,7 +164,7 @@ fun ProfileHeader(
             contentScale = ContentScale.Crop,
             modifier =
                 Modifier.fillMaxSize()
-                    .background(Color.LightGray, CircleShape)
+                    .background(MaterialTheme.colorScheme.surfaceVariant, CircleShape)
                     .testTag("profilePicture"),
             placeholder = painterResource(id = R.drawable.nopp),
             error = painterResource(id = R.drawable.nopp))
@@ -232,7 +224,7 @@ fun ProfileHeader(
                     modifier =
                         Modifier.size(REQUEST_BUTTON_SIZE)
                             .shadow(REQUEST_BUTTON_ELEVATION, shape = CircleShape)
-                            .background(IceBreakrrBlue, CircleShape),
+                            .background(MaterialTheme.colorScheme.primary, CircleShape),
                     contentAlignment = Alignment.Center) {
                       IconButton(
                           onClick = {
@@ -292,7 +284,7 @@ fun ProfileHeader(
                                       reportType.displayName,
                                       color =
                                           if (selectedReportType == reportType) IceBreakrrBlue
-                                          else Color.Black)
+                                          else MaterialTheme.colorScheme.onSecondary)
                                 }
                           }
                         }
@@ -311,7 +303,7 @@ fun ProfileHeader(
                                     showReportOptions = false
                                     selectedReportType = null
                                   }) {
-                                    Text(stringResource(R.string.cancel))
+                                    Text(stringResource(R.string.cancel), color = MaterialTheme.colorScheme.error)
                                   }
                               TextButton(
                                   onClick = {
@@ -342,7 +334,7 @@ fun ProfileHeader(
                                     showBlockConfirmation = false
                                     blockReportModal = false
                                   }) {
-                                    Text(stringResource(R.string.cancel))
+                                    Text(stringResource(R.string.cancel), color = MaterialTheme.colorScheme.error)
                                   }
                               TextButton(
                                   onClick = {
@@ -370,7 +362,7 @@ fun ProfileHeader(
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically) {
                               TextButton(onClick = { blockReportModal = false }) {
-                                Text(stringResource(R.string.cancel))
+                                Text(stringResource(R.string.cancel), color = MaterialTheme.colorScheme.error)
                               }
 
                               Row {
@@ -398,8 +390,9 @@ fun ProfileHeader(
 fun ProfileCatchPhrase(catchPhrase: String) {
   Text(
       text = catchPhrase,
-      style = CATCHPHRASE_TEXT_STYLE,
-      color = Color.Black.copy(alpha = ALPHA_CATCHPHRASE),
+      style = TextStyle(
+          fontSize = 22.sp, lineHeight = 28.sp, fontWeight = FontWeight.W400),
+      color = MaterialTheme.colorScheme.onSecondary,
       textAlign = TextAlign.Left,
       maxLines = 2,
       overflow = TextOverflow.Ellipsis,
@@ -432,7 +425,12 @@ fun TagsSection(listOfTags: List<Pair<String, Color>>) {
 fun ProfileDescription(description: String) {
   Text(
       text = description,
-      style = DESCRIPTION_TEXT_STYLE,
+      style =  TextStyle(
+          fontSize = 16.sp,
+          lineHeight = 24.sp,
+          fontWeight = FontWeight.W500,
+          color = MaterialTheme.colorScheme.primary,
+          letterSpacing = 0.15.sp),
       color = Color.Black.copy(alpha = ALPHA_DESCRIPTION),
       modifier = Modifier.padding(DESCRIPTION_PADDING).testTag("profileDescription"))
 }
