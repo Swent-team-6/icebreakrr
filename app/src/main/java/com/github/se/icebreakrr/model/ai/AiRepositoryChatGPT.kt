@@ -43,28 +43,32 @@ class AiRepositoryChatGPT(
         validateRequest(request)
         try {
           // Construct the request body
-          val requestBody =
-              JSONObject()
-                  .apply {
-                    put("model", request.model)
-                    put(
-                        "messages",
-                        JSONArray().apply {
-                          put(
-                              JSONObject().apply {
-                                put("role", "system")
-                                put("content", request.systemPrompt)
-                              })
-                          put(
-                              JSONObject().apply {
-                                put("role", "user")
-                                put("content", request.userPrompt)
-                              })
-                        })
-                    put("temperature", request.temperature)
-                    put("max_tokens", request.maxTokens)
-                  }
-                  .toString()
+          val requestBody: String =
+              try {
+                JSONObject()
+                    .apply {
+                      put("model", request.model)
+                      put(
+                          "messages",
+                          JSONArray().apply {
+                            put(
+                                JSONObject().apply {
+                                  put("role", "system")
+                                  put("content", request.systemPrompt)
+                                })
+                            put(
+                                JSONObject().apply {
+                                  put("role", "user")
+                                  put("content", request.userPrompt)
+                                })
+                          })
+                      put("temperature", request.temperature)
+                      put("max_tokens", request.maxTokens)
+                    }
+                    .toString()
+              } catch (e: Exception) {
+                throw IllegalArgumentException("Failed to construct request body: ${e.message}", e)
+              }
 
           // Build the HTTP request
           val httpRequest =
@@ -88,16 +92,22 @@ class AiRepositoryChatGPT(
                         if (response.isSuccessful) {
                           val responseBody = response.body?.string()
                           if (responseBody != null) {
-                            val responseText =
-                                JSONObject(responseBody)
-                                    .getJSONArray("choices")
-                                    .getJSONObject(0)
-                                    .getJSONObject("message")
-                                    .getString("content")
-                            continuation.resumeWith(Result.success(responseText))
+                            try {
+                              val jsonObject = JSONObject(responseBody)
+                              val choicesArray = jsonObject.getJSONArray("choices")
+                              val firstChoice = choicesArray.getJSONObject(0)
+                              val messageObject = firstChoice.getJSONObject("message")
+                              val content = messageObject.getString("content")
+
+                              continuation.resumeWith(Result.success(content))
+                            } catch (e: Exception) {
+                              continuation.resumeWith(
+                                  Result.failure(
+                                      IOException("Invalid JSON response: ${e.message}", e)))
+                            }
                           } else {
                             continuation.resumeWith(
-                                Result.failure(IOException("Empty response from the server")))
+                                Result.failure(IOException("Null response from the server")))
                           }
                         } else {
                           continuation.resumeWith(
@@ -121,6 +131,9 @@ class AiRepositoryChatGPT(
   private fun validateRequest(request: AiRequest) {
     require(request.systemPrompt.isNotBlank()) { "System prompt cannot be blank." }
     require(request.userPrompt.isNotBlank()) { "User prompt cannot be blank." }
+    require(request.model.isNotBlank()) { "Model cannot be blank." }
     require(apiKey.isNotBlank()) { "API key cannot be blank." }
+    require(request.temperature in 0.0..1.0) { "Temperature must be between 0.0 and 1.0" }
+    require(request.maxTokens > 0) { "Max tokens must be greater than 0" }
   }
 }
