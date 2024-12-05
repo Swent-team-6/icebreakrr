@@ -301,7 +301,7 @@ class MeetingRequestViewModelTest {
     meetingRequestViewModel.meetingConfirmationState = meetingConfirmationState
 
     // Act: Call the method under test
-    meetingRequestViewModel.sendMeetingConfirmation()
+    meetingRequestViewModel.sendMeetingConfirmation {}
     // Assert: Verify that the cloud function was called with the correct data
     verify(functions).getHttpsCallable("sendMeetingConfirmation")
 

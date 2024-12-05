@@ -196,7 +196,7 @@ class ProfilesViewModelTest {
 
   @Test
   fun updateProfileCallsRepository() = runBlocking {
-    profilesViewModel.updateProfile(profile1) {}
+    profilesViewModel.updateProfile(profile1, {}) {}
 
     verify(profilesRepository).updateProfile(eq(profile1), any(), any())
   }
@@ -258,7 +258,7 @@ class ProfilesViewModelTest {
       onFailure(exception)
     }
 
-    profilesViewModel.updateProfile(profile1) {}
+    profilesViewModel.updateProfile(profile1, {}) {}
 
     assertThat(profilesViewModel.error.value, `is`(exception))
   }
@@ -476,8 +476,8 @@ class ProfilesViewModelTest {
             meetingRequestPendingLocation = listOf(),
             meetingRequestChosenLocalisation =
                 mapOf("2" to Pair("we can meat here", Pair(5.0, 6.0))))
-    profilesViewModel.updateProfile(updatedProfile) {}
-    profilesViewModel.confirmMeetingLocation("2", Pair("we can meat here", Pair(5.0, 6.0))) {}
+    profilesViewModel.updateProfile(updatedProfile, {}) {}
+    profilesViewModel.confirmMeetingLocation("2", Pair("we can meat here", Pair(5.0, 6.0)), {}) {}
     verify(profilesRepository).updateProfile(eq(finalProfile), any(), any())
   }
 
@@ -488,7 +488,7 @@ class ProfilesViewModelTest {
             meetingRequestChosenLocalisation =
                 mapOf("2" to Pair("we can meat here", Pair(5.0, 6.0))))
     val finalProfile = profile1.copy(meetingRequestChosenLocalisation = mapOf())
-    profilesViewModel.updateProfile(updatedProfile) {}
+    profilesViewModel.updateProfile(updatedProfile, {}) {}
     profilesViewModel.removeChosenLocalisation("2")
     verify(profilesRepository).updateProfile(eq(finalProfile), any(), any())
   }
@@ -496,7 +496,7 @@ class ProfilesViewModelTest {
   @Test
   fun addPendingLocationTest() {
     val finalProfile = profile1.copy(meetingRequestPendingLocation = listOf("2"))
-    profilesViewModel.updateProfile(profile1) {}
+    profilesViewModel.updateProfile(profile1, {}) {}
     profilesViewModel.addPendingLocation("2") {
       verify(profilesRepository).updateProfile(eq(finalProfile), any(), any())
     }
@@ -512,7 +512,7 @@ class ProfilesViewModelTest {
       val onSuccess = it.getArgument<(List<Profile>) -> Unit>(1)
       onSuccess(listOf(profile2))
     }
-    profilesViewModel.updateProfile(updatedProfile) {}
+    profilesViewModel.updateProfile(updatedProfile, {}) {}
     profilesViewModel.getChosenLocationsUsers()
     assertEquals(
         profilesViewModel.chosenLocalisations.value,
