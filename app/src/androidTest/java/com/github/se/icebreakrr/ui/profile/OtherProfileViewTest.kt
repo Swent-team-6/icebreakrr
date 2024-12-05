@@ -9,6 +9,8 @@ import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.github.se.icebreakrr.mock.MockProfileViewModel
 import com.github.se.icebreakrr.mock.getMockedProfiles
+import com.github.se.icebreakrr.model.ai.AiRepository
+import com.github.se.icebreakrr.model.ai.AiViewModel
 import com.github.se.icebreakrr.model.message.MeetingRequestViewModel
 import com.github.se.icebreakrr.model.profile.Profile
 import com.github.se.icebreakrr.model.profile.ProfilePicRepository
@@ -40,7 +42,8 @@ class OtherProfileViewTest {
   private lateinit var ppRepository: ProfilePicRepository
   private lateinit var ourUserId: String
   private lateinit var functions: FirebaseFunctions
-
+    private lateinit var mockAiRepository: AiRepository
+    private lateinit var aiViewModel: AiViewModel
   private lateinit var mockTagsRepository: TagsRepository
 
   @get:Rule val composeTestRule = createComposeRule()
@@ -63,6 +66,8 @@ class OtherProfileViewTest {
             TagsRepository(mock(FirebaseFirestore::class.java), mock(FirebaseAuth::class.java)))
 
     fakeProfilesViewModel = MockProfileViewModel()
+    mockAiRepository = mock(AiRepository::class.java)
+    aiViewModel = AiViewModel(mockAiRepository, profilesViewModel)
   }
 
   @Test
@@ -72,7 +77,12 @@ class OtherProfileViewTest {
 
     composeTestRule.setContent {
       OtherProfileView(
-          fakeProfilesViewModel, tagsViewModel, meetingRequestViewModel, navigationActions, null)
+          fakeProfilesViewModel,
+          tagsViewModel,
+          aiViewModel,
+          meetingRequestViewModel,
+          navigationActions,
+          null)
     }
 
     composeTestRule.onNodeWithTag("aroundYouProfileScreen").assertIsDisplayed()
@@ -94,7 +104,12 @@ class OtherProfileViewTest {
 
     composeTestRule.setContent {
       OtherProfileView(
-          fakeProfilesViewModel, tagsViewModel, meetingRequestViewModel, navigationActions, null)
+          fakeProfilesViewModel,
+          tagsViewModel,
+          aiViewModel,
+          meetingRequestViewModel,
+          navigationActions,
+          null)
     }
 
     composeTestRule.onNodeWithTag("goBackButton").performClick()
@@ -139,7 +154,12 @@ class OtherProfileViewTest {
 
     composeTestRule.setContent {
       OtherProfileView(
-          fakeProfilesViewModel, tagsViewModel, meetingRequestViewModel, navigationActions, null)
+          fakeProfilesViewModel,
+          tagsViewModel,
+          aiViewModel,
+          meetingRequestViewModel,
+          navigationActions,
+          null)
     }
 
     composeTestRule.onNodeWithTag("flagButton").assertIsDisplayed()
@@ -157,7 +177,12 @@ class OtherProfileViewTest {
 
     composeTestRule.setContent {
       OtherProfileView(
-          fakeProfilesViewModel, tagsViewModel, meetingRequestViewModel, navigationActions, null)
+          fakeProfilesViewModel,
+          tagsViewModel,
+          aiViewModel,
+          meetingRequestViewModel,
+          navigationActions,
+          null)
     }
 
     composeTestRule.onNodeWithTag("flagButton").performClick()
@@ -177,7 +202,12 @@ class OtherProfileViewTest {
 
     composeTestRule.setContent {
       OtherProfileView(
-          fakeProfilesViewModel, tagsViewModel, meetingRequestViewModel, navigationActions, null)
+          fakeProfilesViewModel,
+          tagsViewModel,
+          aiViewModel,
+          meetingRequestViewModel,
+          navigationActions,
+          null)
     }
 
     composeTestRule.onNodeWithTag("flagButton").performClick()
@@ -196,7 +226,12 @@ class OtherProfileViewTest {
 
     composeTestRule.setContent {
       OtherProfileView(
-          fakeProfilesViewModel, tagsViewModel, meetingRequestViewModel, navigationActions, null)
+          fakeProfilesViewModel,
+          tagsViewModel,
+          aiViewModel,
+          meetingRequestViewModel,
+          navigationActions,
+          null)
     }
 
     composeTestRule.onNodeWithTag("flagButton").performClick()
@@ -216,7 +251,12 @@ class OtherProfileViewTest {
 
     composeTestRule.setContent {
       OtherProfileView(
-          fakeProfilesViewModel, tagsViewModel, meetingRequestViewModel, navigationActions, null)
+          fakeProfilesViewModel,
+          tagsViewModel,
+          aiViewModel,
+          meetingRequestViewModel,
+          navigationActions,
+          null)
     }
 
     composeTestRule.onNodeWithTag("flagButton").performClick()
@@ -241,7 +281,12 @@ class OtherProfileViewTest {
 
     composeTestRule.setContent {
       OtherProfileView(
-          fakeProfilesViewModel, tagsViewModel, meetingRequestViewModel, navigationActions, null)
+          fakeProfilesViewModel,
+          tagsViewModel,
+          aiViewModel,
+          meetingRequestViewModel,
+          navigationActions,
+          null)
     }
 
     composeTestRule.onNodeWithTag("flagButton").performClick()
