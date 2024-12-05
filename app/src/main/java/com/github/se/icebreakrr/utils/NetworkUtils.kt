@@ -18,7 +18,7 @@ object NetworkUtils {
    * ConnectivityManager instance used to monitor network state. Initialized via [init] or
    * [setConnectivityManagerForTesting].
    */
-  public var connectivityManager: ConnectivityManager? = null
+  var connectivityManager: ConnectivityManager? = null
 
   /**
    * Initializes the NetworkUtils with the application context. Must be called before using other

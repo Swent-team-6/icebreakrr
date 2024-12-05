@@ -19,6 +19,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -211,6 +212,10 @@ fun ToggleOptionBox(
               .padding(vertical = BUTTON_PADDING)
               .height(TOGGLE_BOX_HEIGHT)
               .testTag(label),
+      colors =
+          CardDefaults.cardColors(
+              containerColor = MaterialTheme.colorScheme.secondaryContainer,
+              contentColor = MaterialTheme.colorScheme.onPrimary),
       elevation = CardDefaults.cardElevation(defaultElevation = CARD_ELEVATION)) {
         Row(
             modifier = Modifier.fillMaxWidth().padding(CARD_PADDING),
@@ -220,6 +225,11 @@ fun ToggleOptionBox(
               Switch(
                   checked = isChecked,
                   modifier = Modifier.testTag("switch$label"),
+                  colors =
+                      SwitchDefaults.colors()
+                          .copy(
+                              checkedThumbColor = MaterialTheme.colorScheme.primary,
+                              checkedTrackColor = MaterialTheme.colorScheme.onTertiary),
                   onCheckedChange = onCheckedChange)
             }
       }

@@ -215,7 +215,7 @@ class MeetingRequestViewModel(
   }
 
   /** Send a meeting cancellation in the case of distance cancellation or time cancellation */
-  private fun sendMeetingCancellation() {
+  fun sendMeetingCancellation() {
     viewModelScope.launch {
       val data =
           hashMapOf(
@@ -301,6 +301,7 @@ class MeetingRequestViewModel(
    * @param message: the received message
    */
   fun addToMeetingRequestInbox(senderUID: String, message: String, onComplete: () -> Unit) {
+    println("addToMeetingRequestInbox() called with senderUid: $senderUID and message: $message")
     val currentMeetingRequestInbox =
         profilesViewModel.selfProfile.value?.meetingRequestInbox ?: mapOf()
     if (!currentMeetingRequestInbox.keys.contains(senderUID)) {
@@ -360,7 +361,7 @@ class MeetingRequestViewModel(
    * locations from the database
    */
   private fun getChosenLocalisations() {
-    profilesViewModel.getSelfProfile() { profilesViewModel.getChosenLocationsUsers() }
+    profilesViewModel.getSelfProfile { profilesViewModel.getChosenLocationsUsers() }
   }
 
   /**
@@ -386,9 +387,9 @@ class MeetingRequestViewModel(
    * @param onComplete : callback function to remove racing conditions
    */
   fun updateInboxOfMessages(onComplete: () -> Unit) {
-    profilesViewModel.getSelfProfile() {
-      profilesViewModel.getInboxOfSelfProfile() {
-        profilesViewModel.getMessageCancellationUsers() { onComplete() }
+    profilesViewModel.getSelfProfile {
+      profilesViewModel.getInboxOfSelfProfile {
+        profilesViewModel.getMessageCancellationUsers { onComplete() }
       }
     }
   }
@@ -400,7 +401,7 @@ class MeetingRequestViewModel(
   fun meetingDistanceCancellation() {
     val selfProfile = profilesViewModel.selfProfile.value
     val originPoint = selfProfile?.location ?: GeoPoint(0.0, 0.0)
-    updateInboxOfMessages() {
+    updateInboxOfMessages {
       val contactUsers = profilesViewModel.getCancellationMessageProfile()
       val distances =
           contactUsers.map {

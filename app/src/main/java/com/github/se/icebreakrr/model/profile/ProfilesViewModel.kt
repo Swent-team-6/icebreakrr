@@ -140,7 +140,7 @@ open class ProfilesViewModel(
   init {
     repository.init {
       // Fetch profiles on initialization
-      getSelfProfile() {
+      getSelfProfile {
         getFilteredProfilesInRadius(
             GeoPoint(DEFAULT_USER_LATITUDE, DEFAULT_USER_LONGITUDE), DEFAULT_RADIUS)
       }
@@ -384,7 +384,7 @@ open class ProfilesViewModel(
             resetProfileEditionState()
           }
       TO_DELETE ->
-          deleteCurrentUserProfilePicture() {
+          deleteCurrentUserProfilePicture {
             val newProfile = _editedCurrentProfile.value?.copy(profilePictureUrl = null)
             updateProfile(newProfile!!, {}, {})
             _selfProfile.value = newProfile

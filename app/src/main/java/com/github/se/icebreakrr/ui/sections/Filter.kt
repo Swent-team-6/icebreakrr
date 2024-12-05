@@ -44,11 +44,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
@@ -59,6 +59,7 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.github.se.icebreakrr.R
 import com.github.se.icebreakrr.model.filter.FilterViewModel
 import com.github.se.icebreakrr.model.profile.Gender
 import com.github.se.icebreakrr.model.profile.ProfilesViewModel
@@ -67,8 +68,6 @@ import com.github.se.icebreakrr.ui.navigation.NavigationActions
 import com.github.se.icebreakrr.ui.sections.shared.UnsavedChangesDialog
 import com.github.se.icebreakrr.ui.sections.shared.handleSafeBackNavigation
 import com.github.se.icebreakrr.ui.tags.TagSelector
-import com.github.se.icebreakrr.ui.theme.Grey
-import com.github.se.icebreakrr.ui.theme.IceBreakrrBlue
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -102,10 +101,6 @@ const val DEFAULT_USER_LATITUDE = 46.51827 // Lausanne
 const val DEFAULT_USER_LONGITUDE = 6.619265 // Lausanne
 val TEXTS_PADDING = 8.dp
 val ALLOWED_VALUES = listOf(50, 100, 200, 300, 400, 500)
-
-// Custom colors
-val IcebreakrrBlue: Color = IceBreakrrBlue
-val IcebreakrrGrey: Color = Grey
 
 /**
  * Main composable for the Filter screen. Allows users to set and modify filtering criteria for
@@ -281,7 +276,10 @@ fun FilterScreen(
       topBar = {
         TopAppBar(
             title = {
-              Text("Filter", color = Color.White, modifier = Modifier.testTag("FilterTopBarTitle"))
+              Text(
+                  stringResource(R.string.filter),
+                  color = MaterialTheme.colorScheme.onPrimary,
+                  modifier = Modifier.testTag("FilterTopBarTitle"))
             },
             modifier = Modifier.testTag("FilterTopBar"),
             navigationIcon = {
@@ -298,10 +296,14 @@ fun FilterScreen(
                     Icon(
                         Icons.AutoMirrored.Filled.ArrowBack,
                         contentDescription = "Back",
-                        tint = Color.White)
+                        tint = MaterialTheme.colorScheme.onPrimary)
                   }
             },
-            colors = TopAppBarDefaults.topAppBarColors(containerColor = IcebreakrrBlue))
+            colors =
+                TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    navigationIconContentColor = MaterialTheme.colorScheme.onPrimary,
+                    titleContentColor = MaterialTheme.colorScheme.onPrimary))
       }) { innerPadding ->
         Box(
             modifier =
@@ -316,7 +318,7 @@ fun FilterScreen(
                   modifier =
                       Modifier.fillMaxSize().padding(innerPadding).padding(DEFAULT_PADDING.dp)) {
                     Text(
-                        "Gender",
+                        stringResource(R.string.gender),
                         fontSize = (screenHeight.value * titleFontSizeFactor).sp,
                         modifier =
                             Modifier.padding(vertical = TEXTS_PADDING).testTag("GenderTitle"))
@@ -327,30 +329,36 @@ fun FilterScreen(
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                       GenderButton(
+                          label = stringResource(R.string.gender_men),
                           selected = manSelected,
                           onClick = {
                             manSelected = !manSelected
                             isModified = checkModified()
                           },
-                          label = "Men")
+                          buttonWidth = buttonWidth,
+                          buttonHeight = buttonHeight)
                       GenderButton(
+                          label = stringResource(R.string.gender_women),
                           selected = womanSelected,
                           onClick = {
                             womanSelected = !womanSelected
                             isModified = checkModified()
                           },
-                          label = "Women")
+                          buttonWidth = buttonWidth,
+                          buttonHeight = buttonHeight)
                       GenderButton(
+                          label = stringResource(R.string.gender_other),
                           selected = otherSelected,
                           onClick = {
                             otherSelected = !otherSelected
                             isModified = checkModified()
                           },
-                          label = "Other")
+                          buttonWidth = buttonWidth,
+                          buttonHeight = buttonHeight)
                     }
 
                     Text(
-                        "Age Range",
+                        stringResource(R.string.age_range),
                         fontSize = (screenHeight.value * titleFontSizeFactor).sp,
                         modifier =
                             Modifier.padding(vertical = TEXTS_PADDING).testTag("AgeRangeTitle"))
@@ -500,18 +508,20 @@ fun FilterScreen(
 /**
  * Composable for a gender selection button with consistent styling.
  *
+ * @param label Text to display on the button
  * @param selected Whether this gender is currently selected
  * @param onClick Callback for when the button is clicked
- * @param label Text to display on the button
+ * @param buttonWidth Width for the button
+ * @param buttonHeight Height for the button
  */
 @Composable
-fun GenderButton(selected: Boolean, onClick: () -> Unit, label: String) {
-  val screenWidth = LocalConfiguration.current.screenWidthDp.dp
-  val screenHeight = LocalConfiguration.current.screenHeightDp.dp
-
-  val buttonWidth = screenWidth * GENDER_BUTTON_WIDTH_FACTOR
-  val buttonHeight = screenHeight * GENDER_BUTTON_HEIGHT_FACTOR
-
+fun GenderButton(
+    label: String,
+    selected: Boolean,
+    onClick: () -> Unit,
+    buttonWidth: Dp,
+    buttonHeight: Dp
+) {
   Button(
       onClick = onClick,
       modifier =
@@ -521,13 +531,18 @@ fun GenderButton(selected: Boolean, onClick: () -> Unit, label: String) {
       colors =
           ButtonDefaults.buttonColors(
               containerColor =
-                  if (selected) IcebreakrrBlue else MaterialTheme.colorScheme.surfaceVariant),
+                  if (selected) MaterialTheme.colorScheme.primary
+                  else MaterialTheme.colorScheme.surfaceVariant,
+              contentColor =
+                  if (selected) MaterialTheme.colorScheme.onPrimary
+                  else MaterialTheme.colorScheme.onSurfaceVariant),
       shape = RoundedCornerShape(CORNER_RADIUS.dp)) {
         Text(
             text = label,
-            color = if (selected) Color.White else MaterialTheme.colorScheme.onSurfaceVariant,
-            fontSize = (buttonHeight.value * textSizeFactor).sp,
-        )
+            color =
+                if (selected) MaterialTheme.colorScheme.onPrimary
+                else MaterialTheme.colorScheme.onSurfaceVariant,
+            fontSize = (buttonHeight.value * textSizeFactor).sp)
       }
 }
 
@@ -655,7 +670,9 @@ fun RadiusSlider(radius: Int, onDistanceChange: (Int) -> Unit) {
         steps = ALLOWED_VALUES.size - 2,
         modifier = Modifier.padding(horizontal = (2 * DEFAULT_PADDING).dp).testTag("RadiusSlider"),
         colors =
-            SliderDefaults.colors(thumbColor = IceBreakrrBlue, activeTrackColor = IceBreakrrBlue))
+            SliderDefaults.colors(
+                thumbColor = MaterialTheme.colorScheme.primary,
+                activeTrackColor = MaterialTheme.colorScheme.primary))
   }
 }
 
@@ -689,8 +706,12 @@ fun FilterActionButton(
               modifier = Modifier.width(buttonWidth).height(buttonHeight).testTag("ResetButton"),
               colors =
                   ButtonDefaults.buttonColors(
-                      containerColor = IcebreakrrGrey, contentColor = Color.White)) {
-                Text("Reset", color = Color.White, fontSize = buttonTextSize)
+                      containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                      contentColor = MaterialTheme.colorScheme.onSurfaceVariant)) {
+                Text(
+                    "Reset",
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    fontSize = buttonTextSize)
               }
 
           // Filter Button
@@ -700,11 +721,15 @@ fun FilterActionButton(
               modifier = Modifier.width(buttonWidth).height(buttonHeight).testTag("FilterButton"),
               colors =
                   ButtonDefaults.buttonColors(
-                      containerColor = IcebreakrrBlue,
-                      contentColor = Color.White,
+                      containerColor = MaterialTheme.colorScheme.primary,
+                      contentColor = MaterialTheme.colorScheme.onPrimary,
                       disabledContainerColor =
-                          IcebreakrrBlue.copy(alpha = FILTER_ACTION_BUTTON_ALPHA))) {
-                Text("Filter", color = Color.White, fontSize = buttonTextSize)
+                          MaterialTheme.colorScheme.primary.copy(
+                              alpha = FILTER_ACTION_BUTTON_ALPHA))) {
+                Text(
+                    "Filter",
+                    color = MaterialTheme.colorScheme.onPrimary,
+                    fontSize = buttonTextSize)
               }
         }
   }
