@@ -58,14 +58,11 @@ private val PROFILE_IMAGE_ASPECT_RATIO = 1f
 private val PROFILE_IMAGE_PADDING = 16.dp
 private val USERNAME_TEXT_STYLE =
     TextStyle(fontSize = 24.sp, fontWeight = FontWeight.Bold, color = Color.White)
-private val INFO_TEXT_STYLE = TextStyle(
-    fontSize = 14.sp,
-    lineHeight = 20.sp,
-    fontWeight = FontWeight.W500,
-    letterSpacing = 0.1.sp)
-private val CATCHPHRASE_TEXT_STYLE =
+private val INFO_TEXT_STYLE =
     TextStyle(
-        fontSize = 22.sp, lineHeight = 28.sp, fontWeight = FontWeight.W400)
+        fontSize = 14.sp, lineHeight = 20.sp, fontWeight = FontWeight.W500, letterSpacing = 0.1.sp)
+private val CATCHPHRASE_TEXT_STYLE =
+    TextStyle(fontSize = 22.sp, lineHeight = 28.sp, fontWeight = FontWeight.W400)
 
 private val DESCRIPTION_PADDING = 4.dp
 private val COLUMN_PADDING = 4.dp

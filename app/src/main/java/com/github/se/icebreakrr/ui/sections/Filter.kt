@@ -59,6 +59,7 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.github.se.icebreakrr.R
 import com.github.se.icebreakrr.model.filter.FilterViewModel
 import com.github.se.icebreakrr.model.profile.Gender
 import com.github.se.icebreakrr.model.profile.ProfilesViewModel
@@ -72,8 +73,6 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.GeoPoint
 import com.google.firebase.firestore.firestore
-import androidx.compose.ui.res.stringResource
-import com.github.se.icebreakrr.R
 
 // This file was written with the help of Cursor, Claude, ChatGPT
 

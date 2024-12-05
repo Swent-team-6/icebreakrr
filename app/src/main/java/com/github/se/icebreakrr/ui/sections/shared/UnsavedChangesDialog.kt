@@ -46,8 +46,16 @@ fun UnsavedChangesDialog(
         onDismissRequest = onDismiss,
         title = { Text("You are about to leave this page") },
         text = { Text("Your changes will not be saved.") },
-        confirmButton = { TextButton(onClick = onConfirm) { Text("Discard changes", color=MaterialTheme.colorScheme.error) } },
-        dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel", color=MaterialTheme.colorScheme.onSecondary) } },
+        confirmButton = {
+          TextButton(onClick = onConfirm) {
+            Text("Discard changes", color = MaterialTheme.colorScheme.error)
+          }
+        },
+        dismissButton = {
+          TextButton(onClick = onDismiss) {
+            Text("Cancel", color = MaterialTheme.colorScheme.onSecondary)
+          }
+        },
         modifier = modifier.testTag("alertDialog"))
   }
 }
