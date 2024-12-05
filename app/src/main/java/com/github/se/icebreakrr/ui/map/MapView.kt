@@ -200,12 +200,12 @@ fun MapScreen(
             }
           }
 
-            // Example of cleaning up profilesMeeting when no longer needed
-            DisposableEffect(Unit) {
-                onDispose {
-                    profilesMeeting.clear() // Clear the list when the composable is disposed
-                }
+          // Example of cleaning up profilesMeeting when no longer needed
+          DisposableEffect(Unit) {
+            onDispose {
+              profilesMeeting.clear() // Clear the list when the composable is disposed
             }
+          }
 
           GoogleMap(
               modifier = Modifier.fillMaxSize().padding(paddingValues).testTag("googleMap"),
@@ -308,7 +308,6 @@ fun MapScreen(
                   }
                 }
               }
-
             }
           }
         }
