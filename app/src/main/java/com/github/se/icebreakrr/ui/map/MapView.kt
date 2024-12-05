@@ -15,6 +15,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -114,6 +115,7 @@ fun MapScreen(
   // Fetch profiles for the UIDs
   LaunchedEffect(uidsToFetch) {
     if (uidsToFetch.isNotEmpty()) {
+      profilesMeeting.clear()
       uidsToFetch.forEach { uid ->
         profilesViewModel.getProfileByUidAndThen(uid) {
           // Add the profile to the list after fetching
@@ -197,6 +199,13 @@ fun MapScreen(
               Log.w("MapScreen", "No valid locations to display on the heatmap.")
             }
           }
+
+            // Example of cleaning up profilesMeeting when no longer needed
+            DisposableEffect(Unit) {
+                onDispose {
+                    profilesMeeting.clear() // Clear the list when the composable is disposed
+                }
+            }
 
           GoogleMap(
               modifier = Modifier.fillMaxSize().padding(paddingValues).testTag("googleMap"),
@@ -299,6 +308,7 @@ fun MapScreen(
                   }
                 }
               }
+
             }
           }
         }
@@ -320,6 +330,7 @@ fun MarkerOverlay(position: Offset, text: String) {
                     position.y.roundToInt() + 10)
               } // Center under the pin
               .size(overlayWidth, overlayHeight) // Set the size of the overlay
+              .testTag("markerOverlay")
               .background(
                   Color.Black.copy(alpha = 0.5f),
                   shape =
