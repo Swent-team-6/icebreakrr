@@ -29,23 +29,27 @@ class MeetingRequestService : FirebaseMessagingService() {
   /**
    * Checks if the application is currently running in the foreground.
    *
-   * This method uses the Android `ActivityManager` to retrieve a list of running app processes
-   * and checks if the current app's process is marked as being in the foreground.
+   * This method uses the Android `ActivityManager` to retrieve a list of running app processes and
+   * checks if the current app's process is marked as being in the foreground.
    *
    * @return `true` if the app is in the foreground, `false` otherwise.
    *
    * The method works by:
-   * 1. Obtaining the `ActivityManager` system service to access information about running app processes.
+   * 1. Obtaining the `ActivityManager` system service to access information about running app
+   *    processes.
    * 2. Retrieving the list of running app processes. If the list is null, it returns `false`.
-   * 3. Iterating over the list of running processes to find if the current app's process is in the foreground.
-   * 4. Comparing each process's importance level to `IMPORTANCE_FOREGROUND` and checking if the process name matches the app's package name.
-   * 5. Returning `true` if a match is found, indicating the app is in the foreground; otherwise, it returns `false`.
+   * 3. Iterating over the list of running processes to find if the current app's process is in the
+   *    foreground.
+   * 4. Comparing each process's importance level to `IMPORTANCE_FOREGROUND` and checking if the
+   *    process name matches the app's package name.
+   * 5. Returning `true` if a match is found, indicating the app is in the foreground; otherwise, it
+   *    returns `false`.
    */
   private fun isAppInForeground(): Boolean {
     val activityManager = getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
     val appProcesses = activityManager.runningAppProcesses ?: return false
     val packageName = packageName
-    
+
     for (appProcess in appProcesses) {
       if (appProcess.importance == ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND &&
           appProcess.processName == packageName) {
@@ -113,15 +117,17 @@ class MeetingRequestService : FirebaseMessagingService() {
       }
       "ENGAGEMENT NOTIFICATION" -> {
         // Only show engagement notifications if app is in background
-        // Commented out for now as the locations don't update in the background so the feature can't work until that is changed
-        //if (!isAppInForeground()) {
-          val name = remoteMessage.data["senderName"] ?: "null"
-          showNotification(
-              "A person with similar interests is close by !",
-              "The user $name has the common tag : $message")
-        //} else {
-        //  Log.d("NotificationDebug", "Skipping engagement notification because app is in foreground")
-        //}
+        // Commented out for now as the locations don't update in the background so the feature
+        // can't work until that is changed
+        // if (!isAppInForeground()) {
+        val name = remoteMessage.data["senderName"] ?: "null"
+        showNotification(
+            "A person with similar interests is close by !",
+            "The user $name has the common tag : $message")
+        // } else {
+        //  Log.d("NotificationDebug", "Skipping engagement notification because app is in
+        // foreground")
+        // }
       }
     }
   }

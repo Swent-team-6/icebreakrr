@@ -68,16 +68,16 @@ class EngagementNotificationManager(
     notificationJob = null
   }
 
-
-    /**
-     * Checks for nearby users with common tags and processes them for potential engagement notifications.
-     *
-     * This function retrieves the user's profile and location, then uses the filter settings to find
-     * nearby profiles within the specified radius. It launches a coroutine to collect these profiles
-     * and processes them if the user is discoverable.
-     */
+  /**
+   * Checks for nearby users with common tags and processes them for potential engagement
+   * notifications.
+   *
+   * This function retrieves the user's profile and location, then uses the filter settings to find
+   * nearby profiles within the specified radius. It launches a coroutine to collect these profiles
+   * and processes them if the user is discoverable.
+   */
   private fun checkNearbyUsersForCommonTags() {
-      profilesViewModel.getSelfProfile()
+    profilesViewModel.getSelfProfile()
     val selfProfile = profilesViewModel.selfProfile.value ?: return
     val selfLocation = selfProfile.location ?: return
 
@@ -100,20 +100,20 @@ class EngagementNotificationManager(
     }
   }
 
-    /**
-     * Processes a list of nearby profiles to find common tags and send engagement notifications.
-     *
-     * @param selfProfile The user's own profile containing their tags.
-     * @param nearbyProfiles A list of profiles that are within the user's selected radius.
-     *
-     * This function filters out the user's own profile from the list, then iterates over the remaining
-     * profiles to find common tags. If common tags are found, it sends a notification to the nearby
-     * user using the first common tag.
-     */
+  /**
+   * Processes a list of nearby profiles to find common tags and send engagement notifications.
+   *
+   * @param selfProfile The user's own profile containing their tags.
+   * @param nearbyProfiles A list of profiles that are within the user's selected radius.
+   *
+   * This function filters out the user's own profile from the list, then iterates over the
+   * remaining profiles to find common tags. If common tags are found, it sends a notification to
+   * the nearby user using the first common tag.
+   */
   private fun processNearbyProfiles(selfProfile: Profile, nearbyProfiles: List<Profile>) {
     val selfTags = selfProfile.tags
 
-      val newListMinusSelf = nearbyProfiles.filter{it != selfProfile}
+    val newListMinusSelf = nearbyProfiles.filter { it != selfProfile }
 
     for (nearbyProfile in newListMinusSelf) {
 
@@ -126,9 +126,7 @@ class EngagementNotificationManager(
         try {
           // Send notification to other users - receiving device will check if it should show it
           meetingRequestViewModel.engagementNotification(
-              targetToken = nearbyProfile.fcmToken ?: "null",
-              tag = commonTag
-          )
+              targetToken = nearbyProfile.fcmToken ?: "null", tag = commonTag)
         } catch (e: Exception) {
           Log.e("EngagementNotification", "Failed to send notification", e)
         }
