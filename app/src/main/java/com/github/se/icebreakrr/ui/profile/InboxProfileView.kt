@@ -130,13 +130,14 @@ fun InboxProfileViewScreen(
                         profile.uid,
                         true,
                         profile.fcmToken)
-                  Toast.makeText(
-                      context,
-                      "You've accepted the request, " +
-                          profile.name +
-                          " is choosing the location of your meeting!",
-                      Toast.LENGTH_SHORT)
-                  .show()},
+                    Toast.makeText(
+                            context,
+                            "You've accepted the request, " +
+                                profile.name +
+                                " is choosing the location of your meeting!",
+                            Toast.LENGTH_SHORT)
+                        .show()
+                  },
                   {
                     acceptDeclineCode(
                         meetingRequestViewModel,

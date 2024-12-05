@@ -160,10 +160,11 @@ fun OtherProfileView(
                   onClick = {
                     if (isNetworkAvailableWithContext(context)) {
                       profilesViewModel.addAlreadyMet(profile.uid)
-                      meetingRequestViewModel.removeChosenLocalisation(profile.uid)Toast.makeText(
+                      meetingRequestViewModel.removeChosenLocalisation(profile.uid)
+                      Toast.makeText(
                               context, R.string.Already_Met_Button_Success, Toast.LENGTH_SHORT)
                           .show()
-                      profilesViewModel.getSelfProfile{}
+                      profilesViewModel.getSelfProfile {}
                       navigationActions.goBack()
                     } else {
                       showNoInternetToast(context = context)
