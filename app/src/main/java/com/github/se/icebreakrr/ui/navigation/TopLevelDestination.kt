@@ -57,14 +57,13 @@ object TopLevelDestinations {
   val NOTIFICATIONS =
       TopLevelDestination(
           route = Route.NOTIFICATIONS, icon = NotificationsIcon, textId = R.string.notifications)
-  val HEATMAP =
-      TopLevelDestination(
-          route = Route.MAP, icon = Icons.TwoTone.LocationOn, textId = R.string.heatmap)
+  val MAP =
+      TopLevelDestination(route = Route.MAP, icon = Icons.TwoTone.LocationOn, textId = R.string.map)
 }
 
 val LIST_TOP_LEVEL_DESTINATIONS =
     listOf(
         TopLevelDestinations.SETTINGS,
         TopLevelDestinations.AROUND_YOU,
-        TopLevelDestinations.HEATMAP,
+        TopLevelDestinations.MAP,
         TopLevelDestinations.NOTIFICATIONS)

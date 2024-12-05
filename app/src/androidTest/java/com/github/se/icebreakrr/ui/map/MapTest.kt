@@ -10,7 +10,7 @@ import com.github.se.icebreakrr.model.profile.ProfilePicRepositoryStorage
 import com.github.se.icebreakrr.model.profile.ProfilesRepository
 import com.github.se.icebreakrr.model.profile.ProfilesViewModel
 import com.github.se.icebreakrr.ui.navigation.NavigationActions
-import com.github.se.icebreakrr.ui.profile.HeatMap
+import com.github.se.icebreakrr.ui.profile.MapScreen
 import com.github.se.icebreakrr.utils.IPermissionManager
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.storage.FirebaseStorage
@@ -21,7 +21,7 @@ import org.junit.runner.RunWith
 import org.mockito.Mockito.*
 
 @RunWith(AndroidJUnit4::class)
-class HeatMapTest {
+class MapTest {
 
   @get:Rule val composeTestRule = createComposeRule()
 
@@ -54,16 +54,20 @@ class HeatMapTest {
   }
 
   @Test
-  fun testHeatMapScreenDisplaysCorrectly() {
-    composeTestRule.setContent { HeatMap(navigationActions, profilesViewModel, locationViewModel) }
+  fun testMapScreenDisplaysCorrectly() {
+    composeTestRule.setContent {
+      MapScreen(navigationActions, profilesViewModel, locationViewModel)
+    }
 
     // Verify basic UI elements are displayed
-    composeTestRule.onNodeWithTag("heatMapScreen").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("MapScreen").assertIsDisplayed()
   }
 
   @Test
   fun testBottomNavigationDisplaysCorrectly() {
-    composeTestRule.setContent { HeatMap(navigationActions, profilesViewModel, locationViewModel) }
+    composeTestRule.setContent {
+      MapScreen(navigationActions, profilesViewModel, locationViewModel)
+    }
 
     // Verify bottom navigation is displayed
     composeTestRule.onNodeWithTag("bottomNavigationMenu").assertIsDisplayed()
