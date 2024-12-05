@@ -178,7 +178,10 @@ fun AroundYouScreen(
             },
             tabList = LIST_TOP_LEVEL_DESTINATIONS,
             selectedItem = Route.AROUND_YOU,
-            notificationCount = myProfile.value?.meetingRequestInbox?.size ?: 0)
+            notificationCount =
+                (myProfile.value?.meetingRequestInbox?.size ?: 0) +
+                    (myProfile.value?.meetingRequestPendingLocation?.size ?: 0),
+            heatMapCount = myProfile.value?.meetingRequestChosenLocalisation?.size ?: 0)
       },
       topBar = { TopBar("Around You") },
       content = { innerPadding ->

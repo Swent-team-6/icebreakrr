@@ -45,7 +45,9 @@ data class Profile(
     var hasAlreadyMet: List<String> = listOf(),
     var reports: Map<String, reportType> = mapOf(),
     val meetingRequestSent: List<String> = listOf(),
-    val meetingRequestInbox: Map<String, String> = mapOf()
+    val meetingRequestInbox: Map<String, String> = mapOf(),
+    val meetingRequestPendingLocation: List<String> = listOf(),
+    val meetingRequestChosenLocalisation: Map<String, Pair<String, Pair<Double, Double>>> = mapOf()
 ) {
   /**
    * Calculates the user's age based on their birth date.
