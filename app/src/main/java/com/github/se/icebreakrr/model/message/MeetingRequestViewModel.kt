@@ -8,14 +8,22 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.github.se.icebreakrr.model.profile.ProfilesViewModel
+import com.google.firebase.firestore.GeoPoint
 import com.google.firebase.functions.FirebaseFunctions
+import kotlin.math.atan2
+import kotlin.math.cos
+import kotlin.math.sin
+import kotlin.math.sqrt
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
 private const val SEND_MEETING_REQUEST = "sendMeetingRequest"
 private const val SEND_MEETING_RESPONSE = "sendMeetingResponse"
 private const val SEND_MEETING_CONFIRMATION = "sendMeetingConfirmation"
-
+private const val SEND_MEETING_CANCELLATION = "sendMeetingCancellation"
+private const val SEND_ENGAGEMENT_NOTIFICATION = "sendEngagementNotification"
+private const val FIVE_HUNDRED_METERS_IN_KM = 0.5
+private const val EARTH_RADIUS_IN_KM = 6371.0
 /*
    Class that manages the interaction between messages, the Profile backend and the user of the app
 */
@@ -28,6 +36,7 @@ class MeetingRequestViewModel(
   var meetingRequestState by mutableStateOf(MeetingRequest())
   var meetingResponseState by mutableStateOf(MeetingResponse())
   var meetingConfirmationState by mutableStateOf(MeetingConfirmation())
+  var meetingCancellationState by mutableStateOf(MeetingCancellation())
 
   var senderToken = ""
   var senderUID = ""
@@ -49,6 +58,12 @@ class MeetingRequestViewModel(
     }
   }
 
+  enum class CancellationType(val reason: String) {
+    DISTANCE("distance"),
+    TIME("time"),
+    BLOCKED("blocked"),
+    REPORTED("reported")
+  }
   /**
    * Set the initial values of the meeting VM that are needed to send messages
    *
@@ -73,7 +88,7 @@ class MeetingRequestViewModel(
     val currentProfile = profilesViewModel.getSelfProfileValue()
     if (currentProfile != null) {
       val updatedProfile = currentProfile.copy(fcmToken = newToken)
-      profilesViewModel.updateProfile(updatedProfile)
+      profilesViewModel.updateProfile(updatedProfile, {}, {})
     }
   }
   /**
@@ -106,20 +121,35 @@ class MeetingRequestViewModel(
   }
 
   /**
+   * Sets the message of the meeting cancellation
+   *
+   * @param targetToken: the FCM token of the target user
+   * @param cancellationReason: the reason for the cancellation of the meeting request
+   * @param otherUserName: the name of the other user
+   */
+  fun setMeetingCancellation(
+      targetToken: String,
+      cancellationReason: CancellationType,
+      otherUserName: String
+  ) {
+    meetingCancellationState =
+        meetingCancellationState.copy(
+            targetToken = targetToken,
+            message = cancellationReason.toString(),
+            nameTargetUser = otherUserName)
+  }
+
+  /**
    * Sets the message of the meeting confirmation
    *
    * @param targetToken: the FCM token of the target user
-   * @param newMessage: the response message we want to send
+   * @param newLocation: the chosen location to send in the form "latitude, longitude"
+   * @param newMessage : message sent when choosing location
    */
-  fun setMeetingConfirmation(targetToken: String, newMessage: String) {
-    val location = profilesViewModel.getSelfGeoHash()
-    if (location != null) {
-      meetingConfirmationState =
-          meetingConfirmationState.copy(
-              targetToken = targetToken, message = newMessage, location = location)
-    } else {
-      Log.e("MEETING CONFIRMATION", "geohash null for sender profile")
-    }
+  fun setMeetingConfirmation(targetToken: String, newLocation: String, newMessage: String) {
+    meetingConfirmationState =
+        meetingConfirmationState.copy(
+            targetToken = targetToken, message = newMessage, location = newLocation)
   }
 
   /** Send a meeting request to the target user, by calling a Firebase Cloud Function */
@@ -129,6 +159,7 @@ class MeetingRequestViewModel(
           hashMapOf(
               "targetToken" to meetingRequestState.targetToken,
               "senderUID" to senderUID,
+              "senderName" to senderName,
               "message" to meetingRequestState.message,
           )
       try {
@@ -160,8 +191,12 @@ class MeetingRequestViewModel(
     }
   }
 
-  /** Send a meeting confirmation to the target user, by calling a Firebase Cloud Function */
-  fun sendMeetingConfirmation() {
+  /**
+   * Send a meeting confirmation to the target user, by calling a Firebase Cloud Function
+   *
+   * @param onFailure: callback to propagate errors
+   */
+  fun sendMeetingConfirmation(onFailure: (Exception) -> Unit) {
     viewModelScope.launch {
       val data =
           hashMapOf(
@@ -172,6 +207,46 @@ class MeetingRequestViewModel(
               "location" to meetingConfirmationState.location)
       try {
         val result = functions.getHttpsCallable(SEND_MEETING_CONFIRMATION).call(data).await()
+      } catch (e: Exception) {
+        Log.e("FIREBASE ERROR", "Error sending message", e)
+        onFailure(e)
+      }
+    }
+  }
+
+  /** Send a meeting cancellation in the case of distance cancellation or time cancellation */
+  private fun sendMeetingCancellation() {
+    viewModelScope.launch {
+      val data =
+          hashMapOf(
+              "targetToken" to meetingCancellationState.targetToken,
+              "senderUID" to senderUID,
+              "senderName" to meetingCancellationState.nameTargetUser,
+              "message" to meetingCancellationState.message,
+          )
+      try {
+        val result = functions.getHttpsCallable(SEND_MEETING_CANCELLATION).call(data).await()
+      } catch (e: Exception) {
+        Log.e("FIREBASE ERROR", "Error sending message", e)
+      }
+    }
+  }
+
+  /**
+   * Send an engagement notification to make the use more engaged in the app and get news about the
+   * people around him
+   */
+  fun engagementNotification(targetToken: String, tag: String) {
+    viewModelScope.launch {
+      val data =
+          hashMapOf(
+              "targetToken" to targetToken,
+              "senderUID" to senderUID,
+              "senderName" to senderName,
+              "message" to tag,
+          )
+      try {
+        val result = functions.getHttpsCallable(SEND_ENGAGEMENT_NOTIFICATION).call(data).await()
       } catch (e: Exception) {
         Log.e("FIREBASE ERROR", "Error sending message", e)
       }
@@ -187,13 +262,15 @@ class MeetingRequestViewModel(
   fun addToMeetingRequestSent(receiverUID: String) {
     val currentMeetingRequestSent =
         profilesViewModel.selfProfile.value?.meetingRequestSent ?: listOf()
-    val updatedProfile =
-        profilesViewModel.selfProfile.value?.copy(
-            meetingRequestSent = currentMeetingRequestSent + receiverUID)
-    if (updatedProfile != null) {
-      profilesViewModel.updateProfile(updatedProfile)
-    } else {
-      Log.e("SENT MEETING REQUEST", "Adding the new meeting request to our sent list failed")
+    if (!currentMeetingRequestSent.contains(receiverUID)) {
+      val updatedProfile =
+          profilesViewModel.selfProfile.value?.copy(
+              meetingRequestSent = currentMeetingRequestSent + receiverUID)
+      if (updatedProfile != null) {
+        profilesViewModel.updateProfile(updatedProfile, {}, {})
+      } else {
+        Log.e("SENT MEETING REQUEST", "Adding the new meeting request to our sent list failed")
+      }
     }
   }
   /**
@@ -202,16 +279,18 @@ class MeetingRequestViewModel(
    *
    * @param receiverUID: the uid of the target user
    */
-  fun removeFromMeetingRequestSent(receiverUID: String) {
+  fun removeFromMeetingRequestSent(receiverUID: String, onComplete: () -> Unit) {
     val currentMeetingRequestSent =
         profilesViewModel.selfProfile.value?.meetingRequestSent ?: listOf()
-    val updatedMeetingRequestSend = currentMeetingRequestSent.filter { it != receiverUID }
-    val updatedProfile =
-        profilesViewModel.selfProfile.value?.copy(meetingRequestSent = updatedMeetingRequestSend)
-    if (updatedProfile != null) {
-      profilesViewModel.updateProfile(updatedProfile)
-    } else {
-      Log.e("SENT MEETING REQUEST", "Removing the meeting request of our sent list failed")
+    if (currentMeetingRequestSent.contains(receiverUID)) {
+      val updatedMeetingRequestSend = currentMeetingRequestSent.filter { it != receiverUID }
+      val updatedProfile =
+          profilesViewModel.selfProfile.value?.copy(meetingRequestSent = updatedMeetingRequestSend)
+      if (updatedProfile != null) {
+        profilesViewModel.updateProfile(updatedProfile, { onComplete() }, {})
+      } else {
+        Log.e("SENT MEETING REQUEST", "Removing the meeting request of our sent list failed")
+      }
     }
   }
 
@@ -221,16 +300,18 @@ class MeetingRequestViewModel(
    * @param senderUID: the uid of the sender
    * @param message: the received message
    */
-  fun addToMeetingRequestInbox(senderUID: String, message: String) {
+  fun addToMeetingRequestInbox(senderUID: String, message: String, onComplete: () -> Unit) {
     val currentMeetingRequestInbox =
         profilesViewModel.selfProfile.value?.meetingRequestInbox ?: mapOf()
-    val updatedProfile =
-        profilesViewModel.selfProfile.value?.copy(
-            meetingRequestInbox = currentMeetingRequestInbox + (senderUID to message))
-    if (updatedProfile != null) {
-      profilesViewModel.updateProfile(updatedProfile)
-    } else {
-      Log.e("INBOX MEETING REQUEST", "Adding the new meeting request to our inbox list failed")
+    if (!currentMeetingRequestInbox.keys.contains(senderUID)) {
+      val updatedProfile =
+          profilesViewModel.selfProfile.value?.copy(
+              meetingRequestInbox = currentMeetingRequestInbox + (senderUID to message))
+      if (updatedProfile != null) {
+        profilesViewModel.updateProfile(updatedProfile, { onComplete() }, {})
+      } else {
+        Log.e("INBOX MEETING REQUEST", "Adding the new meeting request to our inbox list failed")
+      }
     }
   }
 
@@ -242,19 +323,129 @@ class MeetingRequestViewModel(
   fun removeFromMeetingRequestInbox(senderUID: String) {
     val currentMeetingRequestInbox =
         profilesViewModel.selfProfile.value?.meetingRequestInbox ?: mapOf()
-    val updatedMeetingRequestInbox = currentMeetingRequestInbox.filterKeys { it != senderUID }
-    val updatedProfile =
-        profilesViewModel.selfProfile.value?.copy(meetingRequestInbox = updatedMeetingRequestInbox)
-    if (updatedProfile != null) {
-      profilesViewModel.updateProfile(updatedProfile)
-    } else {
-      Log.e("INBOX MEETING REQUEST", "Removing the meeting request in our inbox list failed")
+    if (currentMeetingRequestInbox.keys.contains(senderUID)) {
+      val updatedMeetingRequestInbox = currentMeetingRequestInbox.filterKeys { it != senderUID }
+      val updatedProfile =
+          profilesViewModel.selfProfile.value?.copy(
+              meetingRequestInbox = updatedMeetingRequestInbox)
+      if (updatedProfile != null) {
+        profilesViewModel.updateProfile(updatedProfile, {}, {})
+      } else {
+        Log.e("INBOX MEETING REQUEST", "Removing the meeting request in our inbox list failed")
+      }
     }
   }
 
-  /** Refreshes the content of the inbox to have it available locally */
-  fun updateInboxOfMessages() {
-    profilesViewModel.getSelfProfile()
-    profilesViewModel.getInboxOfSelfProfile()
+  /**
+   * function used to add a pending location. Called when someone accepts your meeting request
+   *
+   * @param newUid: uid of the user that accepted your request
+   * @param onComplete: callback function to avoid race conditions
+   */
+  fun addPendingLocation(newUid: String, onComplete: () -> Unit) {
+    profilesViewModel.addPendingLocation(newUid) { onComplete() }
+  }
+
+  /**
+   * function that we need to call when two people have met
+   *
+   * @param uid : uid of the user you have met
+   */
+  fun removeChosenLocalisation(uid: String) {
+    profilesViewModel.removeChosenLocalisation(uid)
+  }
+
+  /**
+   * private functions called when we have set the meeting confirmation It fetches the chosen
+   * locations from the database
+   */
+  private fun getChosenLocalisations() {
+    profilesViewModel.getSelfProfile() { profilesViewModel.getChosenLocationsUsers() }
+  }
+
+  /**
+   * method called when you receive a meeting confirmation
+   *
+   * @param uid : uid of the user with whom you want to have a meeting
+   * @param locAndMessage : variable that contains the uid of the other user, the message he sent
+   *   you and the location he has chosen,
+   * @param onFailure : callback to propagate errors
+   */
+  fun confirmMeetingLocation(
+      uid: String,
+      locAndMessage: Pair<String, Pair<Double, Double>>,
+      onFailure: (Exception) -> Unit
+  ) {
+    profilesViewModel.confirmMeetingLocation(
+        uid, locAndMessage, { getChosenLocalisations() }, { onFailure(it) })
+  }
+
+  /**
+   * Refreshes the content of the inbox to have it available locally
+   *
+   * @param onComplete : callback function to remove racing conditions
+   */
+  fun updateInboxOfMessages(onComplete: () -> Unit) {
+    profilesViewModel.getSelfProfile() {
+      profilesViewModel.getInboxOfSelfProfile() {
+        profilesViewModel.getMessageCancellationUsers() { onComplete() }
+      }
+    }
+  }
+
+  /**
+   * Computes the distance between the user and all his contacts and cancels the meeting requests if
+   * the contact is too far away
+   */
+  fun meetingDistanceCancellation() {
+    val selfProfile = profilesViewModel.selfProfile.value
+    val originPoint = selfProfile?.location ?: GeoPoint(0.0, 0.0)
+    updateInboxOfMessages() {
+      val contactUsers = profilesViewModel.getCancellationMessageProfile()
+      val distances =
+          contactUsers.map {
+            distanceBetweenGeoPoints(it.location ?: GeoPoint(0.0, 0.0), originPoint)
+          }
+      val mapUserDistance = contactUsers.zip(distances).toMap()
+      mapUserDistance.forEach {
+        if (it.value >= FIVE_HUNDRED_METERS_IN_KM) {
+          removeFromMeetingRequestInbox(it.key.uid)
+          removeFromMeetingRequestSent(it.key.uid) {}
+          val targetToken = it.key.fcmToken ?: "null"
+          val targetName = it.key.name
+          setMeetingCancellation(
+              targetToken, CancellationType.DISTANCE, targetName) // targeted to other user
+          sendMeetingCancellation()
+          setMeetingCancellation(senderToken, CancellationType.DISTANCE, it.key.name)
+          sendMeetingCancellation()
+        }
+      }
+    }
+  }
+
+  /**
+   * Function computing the euclidean distance between two points
+   *
+   * @param point1: the first point
+   * @param point2: the second point
+   */
+  private fun distanceBetweenGeoPoints(point1: GeoPoint, point2: GeoPoint): Double {
+    val earthRadius = EARTH_RADIUS_IN_KM
+
+    val lat1 = point1.latitude
+    val lon1 = point1.longitude
+    val lat2 = point2.latitude
+    val lon2 = point2.longitude
+
+    val dLat = Math.toRadians(lat2 - lat1)
+    val dLon = Math.toRadians(lon2 - lon1)
+
+    val a =
+        sin(dLat / 2) * sin(dLat / 2) +
+            cos(Math.toRadians(lat1)) * cos(Math.toRadians(lat2)) * sin(dLon / 2) * sin(dLon / 2)
+
+    val c = 2 * atan2(sqrt(a), sqrt(1 - a))
+
+    return earthRadius * c
   }
 }

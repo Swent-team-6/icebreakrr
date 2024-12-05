@@ -9,7 +9,6 @@ import android.widget.Toast
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.github.se.icebreakrr.model.profile.ProfilesViewModel.ProfilePictureState.TO_DELETE
-import com.github.se.icebreakrr.model.profile.ProfilesViewModel.ProfilePictureState.UNCHANGED
 import com.github.se.icebreakrr.ui.sections.DEFAULT_RADIUS
 import com.github.se.icebreakrr.ui.sections.DEFAULT_USER_LATITUDE
 import com.github.se.icebreakrr.ui.sections.DEFAULT_USER_LONGITUDE
@@ -34,12 +33,18 @@ open class ProfilesViewModel(
   open val profiles: StateFlow<List<Profile>> = _profiles
 
   private val _inboxProfiles = MutableStateFlow<List<Profile?>>(emptyList())
+  private val _sentProfiles = MutableStateFlow<List<Profile?>>(emptyList())
 
   private val _inboxItems = MutableStateFlow<Map<Profile, String>>(emptyMap())
   open val inboxItems: StateFlow<Map<Profile, String>> = _inboxItems
 
+  private val _sentItems = MutableStateFlow<List<Profile>>(emptyList())
+  open val sentItems: StateFlow<List<Profile>> = _sentItems
+
   private val _filteredProfiles = MutableStateFlow<List<Profile>>(emptyList())
   val filteredProfiles: StateFlow<List<Profile>> = _filteredProfiles
+
+  private val _cancellationMessageProfile = MutableStateFlow<List<Profile>>(emptyList())
 
   private val _selectedProfile = MutableStateFlow<Profile?>(null)
   open val selectedProfile: StateFlow<Profile?> = _selectedProfile
@@ -69,6 +74,14 @@ open class ProfilesViewModel(
 
   private val _isConnected = MutableStateFlow(true)
   open var isConnected: StateFlow<Boolean> = _isConnected
+
+  private val _pendingLocalisations = MutableStateFlow<List<Profile>>(emptyList())
+  open var pendingLocalisations: StateFlow<List<Profile>> = _pendingLocalisations
+
+  private val _chosenLocalisations =
+      MutableStateFlow<Map<Profile, Pair<String, Pair<Double, Double>>>>(emptyMap())
+  open var chosenLocalisations: StateFlow<Map<Profile, Pair<String, Pair<Double, Double>>>> =
+      _chosenLocalisations
 
   fun updateIsConnected(boolean: Boolean) {
     _isConnected.value = boolean
@@ -127,9 +140,10 @@ open class ProfilesViewModel(
   init {
     repository.init {
       // Fetch profiles on initialization
-      getFilteredProfilesInRadius(
-          GeoPoint(DEFAULT_USER_LATITUDE, DEFAULT_USER_LONGITUDE), DEFAULT_RADIUS)
-      getSelfProfile()
+      getSelfProfile() {
+        getFilteredProfilesInRadius(
+            GeoPoint(DEFAULT_USER_LATITUDE, DEFAULT_USER_LONGITUDE), DEFAULT_RADIUS)
+      }
     }
   }
 
@@ -220,11 +234,22 @@ open class ProfilesViewModel(
    * Updates an existing profile in the repository.
    *
    * @param profile The profile with updated information.
+   * @param onComplete : callback to avoid racing conditions
+   * @param onFailure: callback to propagate erorrs higher
    */
-  fun updateProfile(profile: Profile) {
+  fun updateProfile(profile: Profile, onComplete: () -> Unit, onFailure: (Exception) -> Unit) {
     _loading.value = true
+    _selfProfile.value = profile
     repository.updateProfile(
-        profile, onSuccess = { _loading.value = false }, onFailure = { e -> handleError(e) })
+        profile,
+        onSuccess = {
+          _loading.value = false
+          onComplete()
+        },
+        onFailure = { e ->
+          handleError(e)
+          onFailure(e)
+        })
   }
 
   /**
@@ -349,7 +374,7 @@ open class ProfilesViewModel(
       ProfilePictureState.TO_UPLOAD ->
           validateAndUploadProfilePicture(context) { url ->
             val newProfile = _editedCurrentProfile.value!!.copy(profilePictureUrl = url)
-            updateProfile(newProfile)
+            updateProfile(newProfile, {}, {})
             _selfProfile.value = newProfile
             // todo: "_selectedProfile.value = newProfile" needs to be removed when all the other
             // personal profile views are updated to use the selfProfile instead of the
@@ -361,13 +386,13 @@ open class ProfilesViewModel(
       TO_DELETE ->
           deleteCurrentUserProfilePicture() {
             val newProfile = _editedCurrentProfile.value?.copy(profilePictureUrl = null)
-            updateProfile(newProfile!!)
+            updateProfile(newProfile!!, {}, {})
             _selfProfile.value = newProfile
             _selectedProfile.value = newProfile // todo: same as above
             resetProfileEditionState()
           }
       else -> {
-        updateProfile(_editedCurrentProfile.value!!)
+        updateProfile(_editedCurrentProfile.value!!, {}, {})
         _selfProfile.value = _editedCurrentProfile.value
         _selectedProfile.value = _editedCurrentProfile.value // todo: same as above
         resetProfileEditionState()
@@ -411,7 +436,7 @@ open class ProfilesViewModel(
     _selfProfile.update { currentProfile ->
       currentProfile?.copy(hasBlocked = currentProfile.hasBlocked + uid)
     }
-    updateProfile(selfProfile.value!!)
+    updateProfile(selfProfile.value!!, {}, {})
   }
 
   /**
@@ -423,8 +448,7 @@ open class ProfilesViewModel(
     _selfProfile.update { currentProfile ->
       currentProfile?.copy(hasBlocked = currentProfile.hasBlocked.filter { it != uid })
     }
-    updateProfile(selfProfile.value!!)
-    getBlockedUsers()
+    updateProfile(selfProfile.value!!, { getBlockedUsers() }, {})
   }
 
   /**
@@ -439,7 +463,7 @@ open class ProfilesViewModel(
         currentProfile?.copy(
             reports = currentProfile.reports.plus(_selfProfile.value!!.uid to reason))
       }
-      updateProfile(_selectedProfile.value!!)
+      updateProfile(_selectedProfile.value!!, {}, {})
     }
   }
 
@@ -465,7 +489,7 @@ open class ProfilesViewModel(
     _selfProfile.update { currentProfile ->
       currentProfile?.copy(hasAlreadyMet = currentProfile.hasAlreadyMet + uid)
     }
-    updateProfile(selfProfile.value!!)
+    updateProfile(selfProfile.value!!, {}, {})
   }
 
   /**
@@ -477,10 +501,10 @@ open class ProfilesViewModel(
     _selfProfile.update { currentProfile ->
       currentProfile?.copy(hasAlreadyMet = currentProfile.hasAlreadyMet.filter { it != uid })
     }
-    updateProfile(selfProfile.value!!)
-    getBlockedUsers()
+    updateProfile(selfProfile.value!!, { getBlockedUsers() }, {})
   }
 
+  /** Gets the Already Met users */
   fun getAlreadyMetUsers() {
     _loading.value = true
     repository.getMultipleProfiles(
@@ -496,8 +520,9 @@ open class ProfilesViewModel(
    * Fetches all the profiles that send a message to our profile
    *
    * @param inboxUserUid: The list of UID of the profiles that have sent a message to our user inbox
+   * @param onComplete : callback to avoid racing conditions
    */
-  private fun getInboxUsers(inboxUserUid: List<String>) {
+  private fun getInboxUsers(inboxUserUid: List<String>, onComplete: () -> Unit) {
     _loading.value = true
     repository.getMultipleProfiles(
         inboxUserUid,
@@ -505,42 +530,215 @@ open class ProfilesViewModel(
           _inboxProfiles.value = profileList
           _loading.value = false
           _isConnected.value = true
+          onComplete()
         },
         onFailure = { e -> handleError(e) })
   }
 
-  /** Get the inbox of our user */
-  fun getInboxOfSelfProfile() {
+  /**
+   * Function that get a list of uids in the database and update the observable variable
+   * _pendingLocalisations
+   *
+   * @param pendingUserUid : list of users to fetch from database
+   * @param onComplete : callback function to avoid race conditions
+   */
+  private fun getPendingLocationUsers(pendingUserUid: List<String>, onComplete: () -> Unit) {
+    _loading.value = true
+    repository.getMultipleProfiles(
+        pendingUserUid,
+        onSuccess = { profileList ->
+          _pendingLocalisations.value = profileList
+          _loading.value = false
+          _isConnected.value = true
+          onComplete()
+        },
+        onFailure = { e -> handleError(e) })
+  }
+  /**
+   * Function that get a list of uids in the database and update the observable variable
+   * _¨chosenLocations
+   *
+   * @param inboxUserUid : list of users to fetch from database with the message and localisation
+   *   they have sent
+   */
+  private fun getChosenLocationsUsers(
+      inboxUserUid: Map<String, Pair<String, Pair<Double, Double>>>,
+  ) {
+    _loading.value = true
+    repository.getMultipleProfiles(
+        inboxUserUid.map { it.key },
+        onSuccess = { profileList ->
+          val profileLookup = profileList.associateBy { it.uid }
+          _chosenLocalisations.value =
+              inboxUserUid
+                  .mapNotNull { (uid, coordinates) ->
+                    val profile = profileLookup[uid]
+                    if (profile != null) {
+                      profile to coordinates
+                    } else {
+                      null
+                    }
+                  }
+                  .toMap()
+          _loading.value = false
+          _isConnected.value = true
+        },
+        onFailure = { e -> handleError(e) })
+  }
+  /**
+   * Fetches all the users to which we sent messages to
+   *
+   * @param sentUserUid: The list of uid of the users we sent a meeting request to
+   * @param onComplete : callback to avoir racing conditions
+   */
+  private fun getSentUsers(sentUserUid: List<String>, onComplete: () -> Unit) {
+    _loading.value = true
+    repository.getMultipleProfiles(
+        sentUserUid,
+        onSuccess = { profileList ->
+          _sentProfiles.value = profileList
+          _loading.value = false
+          _isConnected.value = true
+          onComplete()
+        },
+        onFailure = { e -> handleError(e) })
+  }
+
+  /**
+   * Fetches all the users that our profile has been in contact with (received or sent messages)
+   *
+   * @param onComplete : callback to avoid racing conditions
+   */
+  fun getMessageCancellationUsers(onComplete: () -> Unit) {
+    _loading.value = true
+    val allContactedUsers =
+        (selfProfile.value?.meetingRequestInbox?.map { it.key } ?: listOf()) +
+            (selfProfile.value?.meetingRequestSent ?: listOf())
+    repository.getMultipleProfiles(
+        allContactedUsers,
+        onSuccess = { profileList ->
+          _cancellationMessageProfile.value = profileList
+          _loading.value = false
+          _isConnected.value = true
+          onComplete()
+        },
+        onFailure = { e -> handleError(e) })
+  }
+
+  /**
+   * Get the inbox of our user
+   *
+   * @param onComplete : callback to avoid race conditions
+   */
+  fun getInboxOfSelfProfile(onComplete: () -> Unit) {
     val inboxUidList = selfProfile.value?.meetingRequestInbox
-    if (inboxUidList != null) {
+    val sentUidList = selfProfile.value?.meetingRequestSent
+    val pendingLocationUid = selfProfile.value?.meetingRequestPendingLocation
+    if (inboxUidList != null && sentUidList != null && pendingLocationUid != null) {
       val uidsMessageList = inboxUidList.toList()
       val uidsList = uidsMessageList.map { it.first }
       val messageList = uidsMessageList.map { it.second }
-      getInboxUsers(uidsList)
-      _inboxItems.value = _inboxProfiles.value.filterNotNull().zip(messageList).toMap()
+      getInboxUsers(uidsList) {
+        _inboxItems.value = _inboxProfiles.value.filterNotNull().zip(messageList).toMap()
+        getSentUsers(sentUidList) {
+          _sentItems.value = _sentProfiles.value.filterNotNull()
+          getPendingLocationUsers(pendingLocationUid) { onComplete() }
+        }
+      }
     }
   }
 
-  /** Fetches the current user's profile from the repository. */
-  fun getSelfProfile() {
+  /** function that fetches the profiles in the database from the local self profile */
+  fun getChosenLocationsUsers() {
+    val chosenLocationsUid = selfProfile.value?.meetingRequestChosenLocalisation
+    if (chosenLocationsUid != null) {
+      getChosenLocationsUsers(chosenLocationsUid)
+    }
+  }
+
+  /**
+   * adds a user uid in our pending location
+   *
+   * @param newUid : uid to add
+   * @param onComplete : callaback to avoid racing conditions
+   */
+  fun addPendingLocation(newUid: String, onComplete: () -> Unit) {
+    updateProfile(
+        _selfProfile.value?.copy(
+            meetingRequestPendingLocation =
+                _selfProfile.value?.meetingRequestPendingLocation?.plus(newUid) ?: emptyList())!!,
+        { onComplete() },
+        {})
+  }
+
+  /**
+   * remove a chosen locations (called when you already met a person after having decided of a
+   * meeting)
+   *
+   * @param uid : uid of the user you have met
+   */
+  fun removeChosenLocalisation(uid: String) {
+    updateProfile(
+        _selfProfile.value?.copy(
+            meetingRequestChosenLocalisation =
+                _selfProfile.value?.meetingRequestChosenLocalisation?.filter { it.key != uid }
+                    ?: emptyMap())!!,
+        {},
+        {})
+  }
+
+  /**
+   * called when we have selected the meeting point after the request has been accepted. It adds a
+   * new mapping in the chosen localisation and remove the user from the pending locations
+   *
+   * @param uid : uid with whom you confirmed the location
+   * @param loc : contains the message and the localisation chosen,
+   * @param onComplete : callback to avoid racing conditions
+   * @param onFailure : callback to propagate errors
+   */
+  fun confirmMeetingLocation(
+      uid: String,
+      loc: Pair<String, Pair<Double, Double>>,
+      onComplete: () -> Unit,
+      onFailure: (Exception) -> Unit
+  ) {
+    updateProfile(
+        _selfProfile.value?.copy(
+            meetingRequestChosenLocalisation =
+                _selfProfile.value?.meetingRequestChosenLocalisation?.plus(uid to loc)
+                    ?: emptyMap(),
+            meetingRequestPendingLocation =
+                _selfProfile.value?.meetingRequestPendingLocation?.filter { it != uid }
+                    ?: emptyList())!!,
+        { onComplete() },
+        { onFailure(it) })
+  }
+
+  /**
+   * Fetches the current user's profile from the repository.
+   *
+   * @param onComplete : callback to avoid racing conditions
+   */
+  fun getSelfProfile(onComplete: () -> Unit) {
     _loadingSelf.value = true
     repository.getProfileByUid(
         auth.currentUser?.uid ?: "null",
         onSuccess = { profile ->
           _selfProfile.value = profile
           _loadingSelf.value = false
+          onComplete()
         },
         onFailure = { e -> handleError(e) })
-  }
-
-  /** Get the geoHash of our profile */
-  fun getSelfGeoHash(): String? {
-    return selfProfile.value?.geohash
   }
 
   /** Get the profile of our current user */
   fun getSelfProfileValue(): Profile? {
     return selfProfile.value
+  }
+
+  /** Get the cancellation messages of the different profiles */
+  fun getCancellationMessageProfile(): List<Profile> {
+    return _cancellationMessageProfile.value
   }
 
   /**

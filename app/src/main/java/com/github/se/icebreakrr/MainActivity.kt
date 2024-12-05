@@ -36,6 +36,7 @@ import com.github.se.icebreakrr.model.profile.ProfilesViewModel
 import com.github.se.icebreakrr.model.sort.SortViewModel
 import com.github.se.icebreakrr.model.tags.TagsViewModel
 import com.github.se.icebreakrr.ui.authentication.SignInScreen
+import com.github.se.icebreakrr.ui.map.LocationSelectorMapScreen
 import com.github.se.icebreakrr.ui.navigation.NavigationActions
 import com.github.se.icebreakrr.ui.navigation.Route
 import com.github.se.icebreakrr.ui.navigation.Screen
@@ -349,6 +350,20 @@ fun IcebreakrrNavHost(
               navigationActions,
               tagsViewModel,
               meetingRequestViewModel,
+              isTesting)
+        } else {
+          throw IllegalStateException(
+              "The Meeting Request View Model shouldn't be null : Bad initialization")
+        }
+      }
+      composable(Screen.MAP_MEETING_LOCATION_SCREEN + "?userId={userId}") { navBackStackEntry ->
+        if (meetingRequestViewModel != null) {
+          LocationSelectorMapScreen(
+              profileViewModel,
+              navigationActions,
+              meetingRequestViewModel,
+              navBackStackEntry,
+              locationViewModel,
               isTesting)
         } else {
           throw IllegalStateException(
