@@ -39,6 +39,8 @@ class MeetingRequestService : FirebaseMessagingService() {
 
     when (title) {
       "MEETING REQUEST" -> {
+        println(message)
+        println(senderUid)
         MeetingRequestManager.meetingRequestViewModel?.addToMeetingRequestInbox(
             senderUid, message) {
               MeetingRequestManager.meetingRequestViewModel?.updateInboxOfMessages() {}

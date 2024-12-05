@@ -301,6 +301,7 @@ class MeetingRequestViewModel(
    * @param message: the received message
    */
   fun addToMeetingRequestInbox(senderUID: String, message: String, onComplete: () -> Unit) {
+    println("addToMeetingRequestInbox() called with senderUid: $senderUID and message: $message")
     val currentMeetingRequestInbox =
         profilesViewModel.selfProfile.value?.meetingRequestInbox ?: mapOf()
     if (!currentMeetingRequestInbox.keys.contains(senderUID)) {
