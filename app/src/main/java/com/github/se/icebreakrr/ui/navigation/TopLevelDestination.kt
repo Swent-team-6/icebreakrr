@@ -26,6 +26,7 @@ object Route {
   const val PROFILE_CREATION = "ProfileCreation"
   const val CROP = "Crop"
   const val UNBLOCK_PROFILE = "UnblockProfile"
+  const val MAP_MEETING_LOCATION = "Map Meeting Location"
   const val MAP = "MAP"
 }
 
@@ -44,6 +45,7 @@ object Screen {
   const val MAP = "Map Screen"
   const val ALREADY_MET = "Already Met Screen"
   const val INBOX_PROFILE_VIEW = "Inbox Profile View Screen"
+  const val MAP_MEETING_LOCATION_SCREEN = "Map Meeting Location Screen"
 }
 
 object TopLevelDestinations {
