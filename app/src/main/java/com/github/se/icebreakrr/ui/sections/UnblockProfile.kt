@@ -55,7 +55,7 @@ fun UnblockProfileScreen(
       isLoading = isLoading,
       isConnected = isConnected,
       onRefresh = { profilesViewModel.getBlockedUsers() },
-      additionalRefreshAction = { profilesViewModel.getSelfProfile() {} },
+      additionalRefreshAction = { profilesViewModel.getSelfProfile {} },
       showConfirmDialog = profileToUnblock != null,
       confirmDialogTitle = stringResource(R.string.unblock_confirm),
       confirmDialogMessage =

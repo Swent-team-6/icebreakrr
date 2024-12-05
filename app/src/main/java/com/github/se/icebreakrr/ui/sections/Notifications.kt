@@ -114,7 +114,7 @@ fun NotificationScreen(
           when (meetingRequestOption) {
             MeetingRequestOption.INBOX -> {
               DisplayTextAndCard(
-                  MEETING_REQUEST_MSG,
+                  stringResource(R.string.meeting_request_pending),
                   inboxCardList.value.map { it.key },
                   Screen.INBOX_PROFILE_VIEW,
                   context,
@@ -122,7 +122,7 @@ fun NotificationScreen(
             }
             MeetingRequestOption.SENT -> {
               DisplayTextAndCard(
-                  MEETING_REQUEST_SENT, sentCardList.value, "", context, navigationActions)
+                  stringResource(R.string.meeting_request_sent), sentCardList.value, "", context, navigationActions)
             }
             MeetingRequestOption.CHOOSE_LOCATION -> {
               DisplayTextAndCard(

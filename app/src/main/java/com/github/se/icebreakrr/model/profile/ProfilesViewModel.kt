@@ -57,7 +57,7 @@ open class ProfilesViewModel(
   open val editedCurrentProfile: StateFlow<Profile?> = _editedCurrentProfile
 
   // This stores the state of the modification during the profile edition
-  private val _pictureChangeState = MutableStateFlow(UNCHANGED)
+  private val _pictureChangeState = MutableStateFlow(ProfilePictureState.UNCHANGED)
   open val pictureChangeState: StateFlow<ProfilePictureState> = _pictureChangeState
 
   private val _loading = MutableStateFlow(false)
@@ -140,7 +140,7 @@ open class ProfilesViewModel(
   init {
     repository.init {
       // Fetch profiles on initialization
-      getSelfProfile() {
+      getSelfProfile {
         getFilteredProfilesInRadius(
             GeoPoint(DEFAULT_USER_LATITUDE, DEFAULT_USER_LONGITUDE), DEFAULT_RADIUS)
       }
@@ -351,7 +351,7 @@ open class ProfilesViewModel(
   fun resetProfileEditionState() {
     clearTempProfilePictureBitmap()
     clearEditedProfile()
-    _pictureChangeState.value = UNCHANGED
+    _pictureChangeState.value = ProfilePictureState.UNCHANGED
   }
 
   /**

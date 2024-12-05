@@ -23,8 +23,6 @@ private val BACK_BUTTON_ICON_SIZE = 32.dp
 // Define constants for font sizes and colors
 private val TOP_BAR_TEXT_SIZE_BIG = 40.sp
 private val TOP_BAR_TEXT_SIZE_SMALL = 25.sp
-private val TOP_BAR_TEXT_COLOR = Color.White
-private val TOP_BAR_BACKGROUND_COLOR = IceBreakrrBlue
 
 private val TITLE_TEXT_WEIGHT = 1f
 private const val MAX_CHAR_ONE_LINE = 15

@@ -86,7 +86,7 @@ fun LocationSelectorMapScreen(
   var stringQuery by remember { mutableStateOf("") }
 
   LaunchedEffect(Unit) {
-    profilesViewModel.getSelfProfile() {}
+    profilesViewModel.getSelfProfile {}
     profilesViewModel.getProfileByUid(profileId ?: "null")
     markerState =
         MarkerState(
@@ -155,7 +155,7 @@ fun LocationSelectorMapScreen(
                           ", " +
                           markerState?.position?.longitude!!.toString(),
                       stringQuery)
-                  meetingRequestViewModel.sendMeetingConfirmation() {
+                  meetingRequestViewModel.sendMeetingConfirmation {
                     Log.e("LocationSelectorMap", "Failed to sendMeetingLocation : ${it.message}")
                     Toast.makeText(context, "Could not send meeting location", Toast.LENGTH_SHORT)
                         .show()
