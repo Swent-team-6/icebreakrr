@@ -1,5 +1,6 @@
 package com.github.se.icebreakrr.ui.profile
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -88,7 +89,7 @@ fun InboxProfileViewScreen(
     val profileId = navBackStackEntry?.arguments?.getString("userId")
     if (profileId != null || isTesting) {
       profilesViewModel.getProfileByUid(profileId ?: "")
-      meetingRequestViewModel.updateInboxOfMessagesAndThen {}
+      meetingRequestViewModel.updateInboxOfMessages() {}
     }
   }
 
@@ -118,6 +119,13 @@ fun InboxProfileViewScreen(
             {
               acceptDeclineCode(
                   meetingRequestViewModel, navigationActions, profile.uid, true, profile.fcmToken)
+              Toast.makeText(
+                      context,
+                      "You've accepted the request, " +
+                          profile.name +
+                          " is choosing the location of your meeting!",
+                      Toast.LENGTH_SHORT)
+                  .show()
             },
             {
               acceptDeclineCode(
@@ -150,7 +158,7 @@ fun acceptDeclineCode(
   meetingRequestViewModel.setMeetingResponse(fcm, "accepting/decline request", accepted)
   meetingRequestViewModel.sendMeetingResponse()
   meetingRequestViewModel.removeFromMeetingRequestInbox(uid)
-  meetingRequestViewModel.updateInboxOfMessagesAndThen {}
+  meetingRequestViewModel.updateInboxOfMessages() {}
   navigationActions.goBack()
 }
 

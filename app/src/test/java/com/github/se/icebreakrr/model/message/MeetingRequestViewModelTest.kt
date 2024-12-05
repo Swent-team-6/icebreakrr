@@ -159,18 +159,19 @@ class MeetingRequestViewModelTest {
   @Test
   fun onMeetingConfirmationSetTest() = runBlocking {
     val message = "New Message"
+    val newLocation = "6.35838, 46.28495"
     `when`(profilesRepository.getProfileByUid(eq("1"), any(), any())).thenAnswer {
       val onSuccess = it.getArgument<(Profile) -> Unit>(1)
       onSuccess(profile1)
     }
-    profilesViewModel.getSelfProfile()
+    profilesViewModel.getSelfProfile() {}
     meetingRequestViewModel.setMeetingConfirmation(
-        targetToken = profile2.fcmToken ?: "null", newMessage = message)
+        targetToken = profile2.fcmToken ?: "null", newLocation = newLocation, newMessage = message)
     assert(meetingRequestViewModel.meetingConfirmationState.message == message)
     assert(
         (meetingRequestViewModel.meetingConfirmationState.targetToken) ==
             (profile2.fcmToken ?: "null"))
-    assert(profile1.geohash == meetingRequestViewModel.meetingConfirmationState.location)
+    assert(newLocation == meetingRequestViewModel.meetingConfirmationState.location)
   }
 
   @Test
@@ -181,7 +182,7 @@ class MeetingRequestViewModelTest {
       val onSuccess = it.getArgument<(Profile) -> Unit>(1)
       onSuccess(profile1)
     }
-    profilesViewModel.getSelfProfile()
+    profilesViewModel.getSelfProfile() {}
 
     meetingRequestViewModel.onRemoteTokenChange(newToken)
 
@@ -300,7 +301,7 @@ class MeetingRequestViewModelTest {
     meetingRequestViewModel.meetingConfirmationState = meetingConfirmationState
 
     // Act: Call the method under test
-    meetingRequestViewModel.sendMeetingConfirmation()
+    meetingRequestViewModel.sendMeetingConfirmation {}
     // Assert: Verify that the cloud function was called with the correct data
     verify(functions).getHttpsCallable("sendMeetingConfirmation")
 
@@ -356,7 +357,7 @@ class MeetingRequestViewModelTest {
       val onSuccess = it.getArgument<(Profile) -> Unit>(1)
       onSuccess(profile1)
     }
-    profilesViewModel.getSelfProfile()
+    profilesViewModel.getSelfProfile() {}
     meetingRequestViewModel.addToMeetingRequestSent(profile2.uid)
     verify(profilesRepository).getProfileByUid(eq("1"), any(), any())
     verify(profilesRepository).updateProfile(eq(updatedProfile1), any(), any())
@@ -369,8 +370,8 @@ class MeetingRequestViewModelTest {
       val onSuccess = it.getArgument<(Profile) -> Unit>(1)
       onSuccess(updatedProfile1)
     }
-    profilesViewModel.getSelfProfile()
-    meetingRequestViewModel.removeFromMeetingRequestSent("2")
+    profilesViewModel.getSelfProfile() {}
+    meetingRequestViewModel.removeFromMeetingRequestSent("2") {}
     verify(profilesRepository).getProfileByUid(eq("1"), any(), any())
     verify(profilesRepository).updateProfile(eq(profile1), any(), any())
   }
@@ -382,8 +383,8 @@ class MeetingRequestViewModelTest {
       val onSuccess = it.getArgument<(Profile) -> Unit>(1)
       onSuccess(profile1)
     }
-    profilesViewModel.getSelfProfile()
-    meetingRequestViewModel.addToMeetingRequestInbox("2", "hello")
+    profilesViewModel.getSelfProfile() {}
+    meetingRequestViewModel.addToMeetingRequestInbox("2", "hello") {}
     verify(profilesRepository).getProfileByUid(eq("1"), any(), any())
     verify(profilesRepository).updateProfile(eq(updatedProfile1), any(), any())
   }
@@ -395,7 +396,7 @@ class MeetingRequestViewModelTest {
       val onSuccess = it.getArgument<(Profile) -> Unit>(1)
       onSuccess(updatedProfile1)
     }
-    profilesViewModel.getSelfProfile()
+    profilesViewModel.getSelfProfile() {}
     meetingRequestViewModel.removeFromMeetingRequestInbox("2")
     verify(profilesRepository).getProfileByUid(eq("1"), any(), any())
     verify(profilesRepository).updateProfile(eq(profile1), any(), any())
@@ -407,7 +408,7 @@ class MeetingRequestViewModelTest {
       val onSuccess = it.getArgument<(Profile) -> Unit>(1)
       onSuccess(profile1)
     }
-    meetingRequestViewModel.updateInboxOfMessagesAndThen {}
+    meetingRequestViewModel.updateInboxOfMessages() {}
     verify(profilesRepository).getProfileByUid(eq("1"), any(), any())
   }
 }

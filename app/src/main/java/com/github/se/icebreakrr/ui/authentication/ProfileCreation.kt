@@ -312,7 +312,9 @@ fun ProfileCreationScreen(
                           tags = selectedTags,
                           fcmToken = fcmToken,
                           meetingRequestSent = listOf(),
-                          meetingRequestInbox = mapOf())
+                          meetingRequestInbox = mapOf(),
+                          meetingRequestPendingLocation = emptyList(),
+                          meetingRequestChosenLocalisation = emptyMap())
                   // Creates profile in DB
                   profilesViewModel.addNewProfile(newProfile)
                   // Navigate to AroundYou screen
