@@ -48,7 +48,7 @@ import com.github.se.icebreakrr.ui.sections.FilterScreen
 import com.github.se.icebreakrr.ui.sections.NotificationScreen
 import com.github.se.icebreakrr.ui.sections.SettingsScreen
 import com.github.se.icebreakrr.ui.sections.UnblockProfileScreen
-import com.github.se.icebreakrr.ui.theme.SampleAppTheme
+import com.github.se.icebreakrr.ui.theme.IceBreakrrTheme
 import com.github.se.icebreakrr.utils.IPermissionManager
 import com.github.se.icebreakrr.utils.NetworkUtils
 import com.github.se.icebreakrr.utils.PermissionManager
@@ -122,7 +122,7 @@ class MainActivity : ComponentActivity() {
     setContent {
       // Provide the `isTesting` flag to the entire composable tree
       CompositionLocalProvider(LocalIsTesting provides isTesting) {
-        SampleAppTheme {
+        IceBreakrrTheme  {
           Surface(modifier = Modifier.fillMaxSize()) {
             IcebreakrrApp(
                 auth,

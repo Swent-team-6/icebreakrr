@@ -13,13 +13,13 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.tooling.preview.Preview
 import com.github.se.icebreakrr.resources.C
-import com.github.se.icebreakrr.ui.theme.SampleAppTheme
+import com.github.se.icebreakrr.ui.theme.IceBreakrrTheme
 
 class SecondActivity : ComponentActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     setContent {
-      SampleAppTheme {
+      IceBreakrrTheme {
         // A surface container using the 'background' color from the theme
         Surface(
             modifier = Modifier.fillMaxSize().semantics { testTag = C.Tag.second_screen_container },
@@ -39,5 +39,5 @@ fun GreetingRobo(name: String, modifier: Modifier = Modifier) {
 @Preview(showBackground = true)
 @Composable
 fun GreetingPreview2() {
-  SampleAppTheme { GreetingRobo("Robolectric") }
+  IceBreakrrTheme { GreetingRobo("Robolectric") }
 }
