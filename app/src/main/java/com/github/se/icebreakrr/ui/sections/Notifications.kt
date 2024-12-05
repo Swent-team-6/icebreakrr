@@ -1,8 +1,8 @@
 package com.github.se.icebreakrr.ui.sections
 
 import android.annotation.SuppressLint
-import androidx.compose.foundation.background
 import android.content.Context
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -122,7 +122,11 @@ fun NotificationScreen(
             }
             MeetingRequestOption.SENT -> {
               DisplayTextAndCard(
-                  stringResource(R.string.meeting_request_sent), sentCardList.value, "", context, navigationActions)
+                  stringResource(R.string.meeting_request_sent),
+                  sentCardList.value,
+                  "",
+                  context,
+                  navigationActions)
             }
             MeetingRequestOption.CHOOSE_LOCATION -> {
               DisplayTextAndCard(
@@ -269,7 +273,6 @@ private fun DisplayTextAndCard(
     profiles: List<Profile>,
     screenToNavigate: String,
     context: Context,
-  
     navigationActions: NavigationActions
 ) {
   LazyColumn(
