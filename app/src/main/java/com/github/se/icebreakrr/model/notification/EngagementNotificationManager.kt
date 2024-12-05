@@ -3,6 +3,7 @@ package com.github.se.icebreakrr.model.notification
 import android.app.ActivityManager
 import android.content.Context
 import android.util.Log
+import androidx.annotation.VisibleForTesting
 import com.github.se.icebreakrr.data.AppDataStore
 import com.github.se.icebreakrr.model.filter.FilterViewModel
 import com.github.se.icebreakrr.model.message.MeetingRequestViewModel
@@ -133,4 +134,7 @@ class EngagementNotificationManager(
       }
     }
   }
+
+  // Add this method for testing purposes
+  @VisibleForTesting fun isMonitoring(): Boolean = notificationJob?.isActive == true
 }
