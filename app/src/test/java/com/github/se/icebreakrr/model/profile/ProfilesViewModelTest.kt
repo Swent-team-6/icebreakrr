@@ -513,7 +513,7 @@ class ProfilesViewModelTest {
       onSuccess(listOf(profile2))
     }
     profilesViewModel.updateProfile(updatedProfile) {}
-    profilesViewModel.getChosenLocations()
+    profilesViewModel.getChosenLocationsUsers()
     assertEquals(
         profilesViewModel.chosenLocalisations.value,
         mapOf(profile2 to Pair("we can meat here", Pair(5.0, 6.0))))

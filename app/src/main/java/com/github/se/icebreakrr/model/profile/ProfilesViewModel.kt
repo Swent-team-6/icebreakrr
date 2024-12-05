@@ -9,7 +9,6 @@ import android.widget.Toast
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.github.se.icebreakrr.model.profile.ProfilesViewModel.ProfilePictureState.TO_DELETE
-import com.github.se.icebreakrr.model.profile.ProfilesViewModel.ProfilePictureState.UNCHANGED
 import com.github.se.icebreakrr.ui.sections.DEFAULT_RADIUS
 import com.github.se.icebreakrr.ui.sections.DEFAULT_USER_LATITUDE
 import com.github.se.icebreakrr.ui.sections.DEFAULT_USER_LONGITUDE
@@ -562,7 +561,7 @@ open class ProfilesViewModel(
    * @param inboxUserUid : list of users to fetch from database with the message and localisation
    *   they have sent
    */
-  private fun getChosenLocations(
+  private fun getChosenLocationsUsers(
       inboxUserUid: Map<String, Pair<String, Pair<Double, Double>>>,
   ) {
     _loading.value = true
@@ -634,7 +633,8 @@ open class ProfilesViewModel(
   fun getInboxOfSelfProfile(onComplete: () -> Unit) {
     val inboxUidList = selfProfile.value?.meetingRequestInbox
     val sentUidList = selfProfile.value?.meetingRequestSent
-    if (inboxUidList != null && sentUidList != null) {
+    val pendingLocationUid = selfProfile.value?.meetingRequestPendingLocation
+    if (inboxUidList != null && sentUidList != null && pendingLocationUid != null) {
       val uidsMessageList = inboxUidList.toList()
       val uidsList = uidsMessageList.map { it.first }
       val messageList = uidsMessageList.map { it.second }
@@ -642,29 +642,17 @@ open class ProfilesViewModel(
         _inboxItems.value = _inboxProfiles.value.filterNotNull().zip(messageList).toMap()
         getSentUsers(sentUidList) {
           _sentItems.value = _sentProfiles.value.filterNotNull()
-          onComplete()
+          getPendingLocationUsers(pendingLocationUid) { onComplete() }
         }
       }
     }
   }
 
-  /**
-   * function that fetches the pending profiles in the databse from the local self profile
-   *
-   * @param onComplete : callback used to avoid race conditions
-   */
-  fun getInboxOfPendingLocations(onComplete: () -> Unit) {
-    val pendingLocationUid = selfProfile.value?.meetingRequestPendingLocation
-    if (pendingLocationUid != null) {
-      getPendingLocationUsers(pendingLocationUid) { onComplete() }
-    }
-  }
-
   /** function that fetches the profiles in the database from the local self profile */
-  fun getChosenLocations() {
+  fun getChosenLocationsUsers() {
     val chosenLocationsUid = selfProfile.value?.meetingRequestChosenLocalisation
     if (chosenLocationsUid != null) {
-      getChosenLocations(chosenLocationsUid)
+      getChosenLocationsUsers(chosenLocationsUid)
     }
   }
 

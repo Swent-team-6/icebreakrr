@@ -14,7 +14,6 @@ import kotlin.math.atan2
 import kotlin.math.cos
 import kotlin.math.sin
 import kotlin.math.sqrt
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
@@ -338,29 +337,6 @@ class MeetingRequestViewModel(
   }
 
   /**
-   * Refreshes the content of the inbox to have it available locally
-   *
-   * @param onComplete : callback function to remove racing conditions
-   */
-  fun updateInboxOfMessages(onComplete: () -> Unit) {
-    profilesViewModel.getSelfProfile() {
-      profilesViewModel.getInboxOfSelfProfile() {
-        profilesViewModel.getMessageCancellationUsers() {
-          profilesViewModel.getInboxOfPendingLocations() { onComplete() }
-        }
-      }
-    }
-  }
-
-  /**
-   * private functions called when we have set the meeting confirmation It fetches the chosen
-   * locations from the database
-   */
-  private fun updateChosenLocalisations() {
-    profilesViewModel.getSelfProfile() { profilesViewModel.getChosenLocations() }
-  }
-
-  /**
    * function used to add a pending location. Called when someone accepts your meeting request
    *
    * @param newUid: uid of the user that accepted your request
@@ -368,6 +344,23 @@ class MeetingRequestViewModel(
    */
   fun addPendingLocation(newUid: String, onComplete: () -> Unit) {
     profilesViewModel.addPendingLocation(newUid) { onComplete() }
+  }
+
+  /**
+   * function that we need to call when two people have met
+   *
+   * @param uid : uid of the user you have met
+   */
+  fun removeChosenLocalisation(uid: String) {
+    profilesViewModel.removeChosenLocalisation(uid)
+  }
+
+  /**
+   * private functions called when we have set the meeting confirmation It fetches the chosen
+   * locations from the database
+   */
+  private fun getChosenLocalisations() {
+    profilesViewModel.getSelfProfile() { profilesViewModel.getChosenLocationsUsers() }
   }
 
   /**
@@ -384,16 +377,20 @@ class MeetingRequestViewModel(
       onFailure: (Exception) -> Unit
   ) {
     profilesViewModel.confirmMeetingLocation(
-        uid, locAndMessage, { updateChosenLocalisations() }, { onFailure(it) })
+        uid, locAndMessage, { getChosenLocalisations() }, { onFailure(it) })
   }
 
   /**
-   * function that we need to call when two people have met
+   * Refreshes the content of the inbox to have it available locally
    *
-   * @param uid : uid of the user you have met
+   * @param onComplete : callback function to remove racing conditions
    */
-  fun removeChosenLocalisation(uid: String) {
-    profilesViewModel.removeChosenLocalisation(uid)
+  fun updateInboxOfMessages(onComplete: () -> Unit) {
+    profilesViewModel.getSelfProfile() {
+      profilesViewModel.getInboxOfSelfProfile() {
+        profilesViewModel.getMessageCancellationUsers() { onComplete() }
+      }
+    }
   }
 
   /**
