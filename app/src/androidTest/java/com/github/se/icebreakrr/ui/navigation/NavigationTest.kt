@@ -9,6 +9,8 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.github.se.icebreakrr.IcebreakrrNavHost
 import com.github.se.icebreakrr.data.AppDataStore
 import com.github.se.icebreakrr.mock.MockProfileViewModel
+import com.github.se.icebreakrr.model.ai.AiRepository
+import com.github.se.icebreakrr.model.ai.AiViewModel
 import com.github.se.icebreakrr.model.filter.FilterViewModel
 import com.github.se.icebreakrr.model.location.ILocationService
 import com.github.se.icebreakrr.model.location.LocationRepository
@@ -60,11 +62,11 @@ class NavigationTest {
   private lateinit var mockFilterViewModel: FilterViewModel
   private lateinit var testDataStore: DataStore<Preferences>
   private lateinit var appDataStore: AppDataStore
-
   private lateinit var mockLocationService: ILocationService
   private lateinit var mockLocationRepository: LocationRepository
   private lateinit var mockPermissionManager: IPermissionManager
-
+  private lateinit var mockAiRepository: AiRepository
+  private lateinit var aiViewModel: AiViewModel
   private lateinit var locationViewModel: LocationViewModel
 
   @Before
@@ -96,6 +98,8 @@ class NavigationTest {
     mockLocationService = mock(ILocationService::class.java)
     mockLocationRepository = mock(LocationRepository::class.java)
     mockPermissionManager = mock(IPermissionManager::class.java)
+    mockAiRepository = mock(AiRepository::class.java)
+    aiViewModel = AiViewModel(mockAiRepository, mockProfileViewModel)
 
     locationViewModel =
         LocationViewModel(mockLocationService, mockLocationRepository, mockPermissionManager)
@@ -123,6 +127,7 @@ class NavigationTest {
           Route.AUTH,
           mock(FirebaseAuth::class.java),
           mock(IPermissionManager::class.java),
+          aiViewModel,
           true)
     }
 
