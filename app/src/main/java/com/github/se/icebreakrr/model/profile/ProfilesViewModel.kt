@@ -236,8 +236,9 @@ open class ProfilesViewModel(
    *
    * @param profile The profile with updated information.
    * @param onComplete : callback to avoid racing conditions
+   * @param onFailure: callback to propagate erorrs higher
    */
-  fun updateProfile(profile: Profile, onComplete: () -> Unit) {
+  fun updateProfile(profile: Profile, onComplete: () -> Unit, onFailure: (Exception) -> Unit) {
     _loading.value = true
     _selfProfile.value = profile
     repository.updateProfile(
@@ -246,7 +247,10 @@ open class ProfilesViewModel(
           _loading.value = false
           onComplete()
         },
-        onFailure = { e -> handleError(e) })
+        onFailure = { e ->
+          handleError(e)
+          onFailure(e)
+        })
   }
 
   /**
@@ -371,7 +375,7 @@ open class ProfilesViewModel(
       ProfilePictureState.TO_UPLOAD ->
           validateAndUploadProfilePicture(context) { url ->
             val newProfile = _editedCurrentProfile.value!!.copy(profilePictureUrl = url)
-            updateProfile(newProfile) {}
+            updateProfile(newProfile, {}, {})
             _selfProfile.value = newProfile
             // todo: "_selectedProfile.value = newProfile" needs to be removed when all the other
             // personal profile views are updated to use the selfProfile instead of the
@@ -383,13 +387,13 @@ open class ProfilesViewModel(
       TO_DELETE ->
           deleteCurrentUserProfilePicture() {
             val newProfile = _editedCurrentProfile.value?.copy(profilePictureUrl = null)
-            updateProfile(newProfile!!) {}
+            updateProfile(newProfile!!, {}, {})
             _selfProfile.value = newProfile
             _selectedProfile.value = newProfile // todo: same as above
             resetProfileEditionState()
           }
       else -> {
-        updateProfile(_editedCurrentProfile.value!!) {}
+        updateProfile(_editedCurrentProfile.value!!, {}, {})
         _selfProfile.value = _editedCurrentProfile.value
         _selectedProfile.value = _editedCurrentProfile.value // todo: same as above
         resetProfileEditionState()
@@ -433,7 +437,7 @@ open class ProfilesViewModel(
     _selfProfile.update { currentProfile ->
       currentProfile?.copy(hasBlocked = currentProfile.hasBlocked + uid)
     }
-    updateProfile(selfProfile.value!!) {}
+    updateProfile(selfProfile.value!!, {}, {})
   }
 
   /**
@@ -445,8 +449,7 @@ open class ProfilesViewModel(
     _selfProfile.update { currentProfile ->
       currentProfile?.copy(hasBlocked = currentProfile.hasBlocked.filter { it != uid })
     }
-    updateProfile(selfProfile.value!!) {}
-    getBlockedUsers()
+    updateProfile(selfProfile.value!!, { getBlockedUsers() }, {})
   }
 
   /**
@@ -461,7 +464,7 @@ open class ProfilesViewModel(
         currentProfile?.copy(
             reports = currentProfile.reports.plus(_selfProfile.value!!.uid to reason))
       }
-      updateProfile(_selectedProfile.value!!) {}
+      updateProfile(_selectedProfile.value!!, {}, {})
     }
   }
 
@@ -487,7 +490,7 @@ open class ProfilesViewModel(
     _selfProfile.update { currentProfile ->
       currentProfile?.copy(hasAlreadyMet = currentProfile.hasAlreadyMet + uid)
     }
-    updateProfile(selfProfile.value!!) {}
+    updateProfile(selfProfile.value!!, {}, {})
   }
 
   /**
@@ -499,8 +502,7 @@ open class ProfilesViewModel(
     _selfProfile.update { currentProfile ->
       currentProfile?.copy(hasAlreadyMet = currentProfile.hasAlreadyMet.filter { it != uid })
     }
-    updateProfile(selfProfile.value!!) {}
-    getBlockedUsers()
+    updateProfile(selfProfile.value!!, { getBlockedUsers() }, {})
   }
 
   /** Gets the Already Met users */
@@ -676,9 +678,9 @@ open class ProfilesViewModel(
     updateProfile(
         _selfProfile.value?.copy(
             meetingRequestPendingLocation =
-                _selfProfile.value?.meetingRequestPendingLocation?.plus(newUid) ?: emptyList())!!) {
-          onComplete()
-        }
+                _selfProfile.value?.meetingRequestPendingLocation?.plus(newUid) ?: emptyList())!!,
+        { onComplete() },
+        {})
   }
 
   /**
@@ -692,7 +694,9 @@ open class ProfilesViewModel(
         _selfProfile.value?.copy(
             meetingRequestChosenLocalisation =
                 _selfProfile.value?.meetingRequestChosenLocalisation?.filter { it.key != uid }
-                    ?: emptyMap())!!) {}
+                    ?: emptyMap())!!,
+        {},
+        {})
   }
 
   /**
@@ -700,12 +704,15 @@ open class ProfilesViewModel(
    * new mapping in the chosen localisation and remove the user from the pending locations
    *
    * @param uid : uid with whom you confirmed the location
-   * @param loc : contains the message and the localisation chosen
+   * @param loc : contains the message and the localisation chosen,
+   * @param onComplete : callback to avoid racing conditions
+   * @param onFailure : callback to propagate errors
    */
   fun confirmMeetingLocation(
       uid: String,
       loc: Pair<String, Pair<Double, Double>>,
-      onComplete: () -> Unit
+      onComplete: () -> Unit,
+      onFailure: (Exception) -> Unit
   ) {
     updateProfile(
         _selfProfile.value?.copy(
@@ -714,9 +721,9 @@ open class ProfilesViewModel(
                     ?: emptyMap(),
             meetingRequestPendingLocation =
                 _selfProfile.value?.meetingRequestPendingLocation?.filter { it != uid }
-                    ?: emptyList())!!) {
-          onComplete()
-        }
+                    ?: emptyList())!!,
+        { onComplete() },
+        { onFailure(it) })
   }
 
   /**

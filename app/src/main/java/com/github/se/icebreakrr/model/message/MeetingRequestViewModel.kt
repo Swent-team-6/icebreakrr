@@ -89,7 +89,7 @@ class MeetingRequestViewModel(
     val currentProfile = profilesViewModel.getSelfProfileValue()
     if (currentProfile != null) {
       val updatedProfile = currentProfile.copy(fcmToken = newToken)
-      profilesViewModel.updateProfile(updatedProfile) {}
+      profilesViewModel.updateProfile(updatedProfile, {}, {})
     }
   }
   /**
@@ -192,8 +192,12 @@ class MeetingRequestViewModel(
     }
   }
 
-  /** Send a meeting confirmation to the target user, by calling a Firebase Cloud Function */
-  fun sendMeetingConfirmation() {
+  /**
+   * Send a meeting confirmation to the target user, by calling a Firebase Cloud Function
+   *
+   * @param onFailure: callback to propagate errors
+   */
+  fun sendMeetingConfirmation(onFailure: (Exception) -> Unit) {
     viewModelScope.launch {
       val data =
           hashMapOf(
@@ -206,6 +210,7 @@ class MeetingRequestViewModel(
         val result = functions.getHttpsCallable(SEND_MEETING_CONFIRMATION).call(data).await()
       } catch (e: Exception) {
         Log.e("FIREBASE ERROR", "Error sending message", e)
+        onFailure(e)
       }
     }
   }
@@ -263,7 +268,7 @@ class MeetingRequestViewModel(
           profilesViewModel.selfProfile.value?.copy(
               meetingRequestSent = currentMeetingRequestSent + receiverUID)
       if (updatedProfile != null) {
-        profilesViewModel.updateProfile(updatedProfile) {}
+        profilesViewModel.updateProfile(updatedProfile, {}, {})
       } else {
         Log.e("SENT MEETING REQUEST", "Adding the new meeting request to our sent list failed")
       }
@@ -283,7 +288,7 @@ class MeetingRequestViewModel(
       val updatedProfile =
           profilesViewModel.selfProfile.value?.copy(meetingRequestSent = updatedMeetingRequestSend)
       if (updatedProfile != null) {
-        profilesViewModel.updateProfile(updatedProfile) { onComplete() }
+        profilesViewModel.updateProfile(updatedProfile, { onComplete() }, {})
       } else {
         Log.e("SENT MEETING REQUEST", "Removing the meeting request of our sent list failed")
       }
@@ -304,7 +309,7 @@ class MeetingRequestViewModel(
           profilesViewModel.selfProfile.value?.copy(
               meetingRequestInbox = currentMeetingRequestInbox + (senderUID to message))
       if (updatedProfile != null) {
-        profilesViewModel.updateProfile(updatedProfile) { onComplete() }
+        profilesViewModel.updateProfile(updatedProfile, { onComplete() }, {})
       } else {
         Log.e("INBOX MEETING REQUEST", "Adding the new meeting request to our inbox list failed")
       }
@@ -325,7 +330,7 @@ class MeetingRequestViewModel(
           profilesViewModel.selfProfile.value?.copy(
               meetingRequestInbox = updatedMeetingRequestInbox)
       if (updatedProfile != null) {
-        profilesViewModel.updateProfile(updatedProfile) {}
+        profilesViewModel.updateProfile(updatedProfile, {}, {})
       } else {
         Log.e("INBOX MEETING REQUEST", "Removing the meeting request in our inbox list failed")
       }
@@ -370,10 +375,16 @@ class MeetingRequestViewModel(
    *
    * @param uid : uid of the user with whom you want to have a meeting
    * @param locAndMessage : variable that contains the uid of the other user, the message he sent
-   *   you and the location he has chosen
+   *   you and the location he has chosen,
+   * @param onFailure : callback to propagate errors
    */
-  fun confirmMeetingLocation(uid: String, locAndMessage: Pair<String, Pair<Double, Double>>) {
-    profilesViewModel.confirmMeetingLocation(uid, locAndMessage) { updateChosenLocalisations() }
+  fun confirmMeetingLocation(
+      uid: String,
+      locAndMessage: Pair<String, Pair<Double, Double>>,
+      onFailure: (Exception) -> Unit
+  ) {
+    profilesViewModel.confirmMeetingLocation(
+        uid, locAndMessage, { updateChosenLocalisations() }, { onFailure(it) })
   }
 
   /**

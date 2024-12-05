@@ -1,6 +1,7 @@
 package com.github.se.icebreakrr.ui.sections
 
 import android.annotation.SuppressLint
+import android.content.Context
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -29,6 +30,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.github.se.icebreakrr.model.message.MeetingRequestViewModel
+import com.github.se.icebreakrr.model.profile.Profile
 import com.github.se.icebreakrr.model.profile.ProfilesViewModel
 import com.github.se.icebreakrr.ui.navigation.Badge
 import com.github.se.icebreakrr.ui.navigation.BottomNavigationMenu
@@ -109,82 +111,24 @@ fun NotificationScreen(
               inboxSize = inboxCardList.value.size)
           when (meetingRequestOption) {
             MeetingRequestOption.INBOX -> {
-              LazyColumn(
-                  modifier =
-                      Modifier.padding()
-                          .padding(horizontal = HORIZONTAL_PADDING)
-                          .testTag("notificationScroll")) {
-                    item {
-                      Text(
-                          text = MEETING_REQUEST_MSG,
-                          fontWeight = FontWeight.Bold,
-                          modifier =
-                              Modifier.padding(vertical = TEXT_VERTICAL_PADDING)
-                                  .testTag("notificationFirstText"))
-                      Column(verticalArrangement = Arrangement.spacedBy(CARD_SPACING)) {
-                        inboxCardList.value.forEach { p ->
-                          ProfileCard(
-                              p.key,
-                              onclick = {
-                                if (isNetworkAvailableWithContext(context)) {
-                                  navigationActions.navigateTo(
-                                      Screen.INBOX_PROFILE_VIEW + "?userId=${p.key.uid}")
-                                } else {
-                                  showNoInternetToast(context)
-                                }
-                              })
-                        }
-                      }
-                    }
-                  }
+              DisplayTextAndCard(
+                  MEETING_REQUEST_MSG,
+                  inboxCardList.value.map { it.key },
+                  Screen.INBOX_PROFILE_VIEW,
+                  context,
+                  navigationActions)
             }
             MeetingRequestOption.SENT -> {
-              LazyColumn(
-                  modifier =
-                      Modifier.padding()
-                          .padding(horizontal = HORIZONTAL_PADDING)
-                          .testTag("notificationScroll")) {
-                    item {
-                      Text(
-                          text = MEETING_REQUEST_SENT,
-                          fontWeight = FontWeight.Bold,
-                          modifier =
-                              Modifier.padding(vertical = TEXT_VERTICAL_PADDING)
-                                  .testTag("notificationFirstText"))
-                      Column(verticalArrangement = Arrangement.spacedBy(CARD_SPACING)) {
-                        sentCardList.value.forEach { p ->
-                          ProfileCard(profile = p, onclick = {}, greyedOut = true)
-                        }
-                      }
-                    }
-                  }
+              DisplayTextAndCard(
+                  MEETING_REQUEST_SENT, sentCardList.value, "", context, navigationActions)
             }
             MeetingRequestOption.CHOOSE_LOCATION -> {
-              LazyColumn(
-                  modifier =
-                      Modifier.padding()
-                          .padding(horizontal = HORIZONTAL_PADDING)
-                          .testTag("notificationScroll")) {
-                    item {
-                      Text(
-                          text = MEETING_REQUEST_LOCATION_PENDING,
-                          fontWeight = FontWeight.Bold,
-                          modifier =
-                              Modifier.padding(vertical = TEXT_VERTICAL_PADDING)
-                                  .testTag("notificationFirstText"))
-                      Column(verticalArrangement = Arrangement.spacedBy(CARD_SPACING)) {
-                        pendingLocation.value.forEach { p ->
-                          ProfileCard(
-                              profile = p,
-                              onclick = {
-                                navigationActions.navigateTo(
-                                    Screen.MAP_MEETING_LOCATION_SCREEN + "?userId=${p.uid}")
-                              },
-                              greyedOut = false)
-                        }
-                      }
-                    }
-                  }
+              DisplayTextAndCard(
+                  MEETING_REQUEST_LOCATION_PENDING,
+                  pendingLocation.value,
+                  Screen.MAP_MEETING_LOCATION_SCREEN,
+                  context,
+                  navigationActions)
             }
           }
         }
@@ -308,4 +252,51 @@ enum class MeetingRequestOption {
   INBOX,
   SENT,
   CHOOSE_LOCATION
+}
+
+/**
+ * Function that shows the next saying on which inbox we are and the profile cards associate with it
+ *
+ * @param text: text to write over the cards
+ * @param profiles: profiles to show in cards
+ * @param onClick : function to call when we click on a card
+ */
+@Composable
+private fun DisplayTextAndCard(
+    text: String,
+    profiles: List<Profile>,
+    screenToNavigate: String,
+    context: Context,
+    navigationActions: NavigationActions
+) {
+  LazyColumn(
+      modifier =
+          Modifier.padding()
+              .padding(horizontal = HORIZONTAL_PADDING)
+              .testTag("notificationScroll")) {
+        item {
+          Text(
+              text = text,
+              fontWeight = FontWeight.Bold,
+              modifier =
+                  Modifier.padding(vertical = TEXT_VERTICAL_PADDING)
+                      .testTag("notificationFirstText"))
+          Column(verticalArrangement = Arrangement.spacedBy(CARD_SPACING)) {
+            profiles.forEach { p ->
+              ProfileCard(
+                  profile = p,
+                  onclick = {
+                    if (screenToNavigate != "") {
+                      if (isNetworkAvailableWithContext(context)) {
+                        navigationActions.navigateTo(screenToNavigate + "?userId=${p.uid}")
+                      } else {
+                        showNoInternetToast(context)
+                      }
+                    }
+                  },
+                  greyedOut = false)
+            }
+          }
+        }
+      }
 }

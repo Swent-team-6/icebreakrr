@@ -1,6 +1,5 @@
 package com.github.se.icebreakrr.ui.map
 
-import android.util.Log
 import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -111,8 +110,6 @@ class LocationMapSelectorTest {
             onSuccess(profile1Changeable)
           } else if (uid == "2") {
             onSuccess(profile2)
-          } else {
-            Log.d("TESTEST", "new uid : ${uid}")
           }
         }
     `when`(mockProfileRepository.updateProfile(anyOrNull(), anyOrNull(), anyOrNull())).thenAnswer {
@@ -127,8 +124,6 @@ class LocationMapSelectorTest {
           val uidList = it.getArgument<List<String>>(0)
           if (uidList == listOf("2")) {
             onSuccess(listOf(profile2))
-          } else {
-            Log.d("TESTEST", "new uid list : ${uidList}")
           }
         }
     `when`(mockAuth.currentUser).thenReturn(mockUser)

@@ -1,5 +1,6 @@
 package com.github.se.icebreakrr.ui.map
 
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -140,14 +141,25 @@ fun LocationSelectorMapScreen(
                           stringQuery,
                           Pair(
                               markerState?.position?.latitude!!,
-                              markerState?.position?.longitude!!)))
+                              markerState?.position?.longitude!!))) {
+                        Log.e(
+                            "LocationSelectorMap",
+                            "Failed to confirmMeetingLocation : ${it.message}")
+                        Toast.makeText(
+                                context, "Could not confirm meeting location", Toast.LENGTH_SHORT)
+                            .show()
+                      }
                   meetingRequestViewModel.setMeetingConfirmation(
                       profile.value?.fcmToken!!,
                       markerState?.position?.latitude!!.toString() +
                           ", " +
                           markerState?.position?.longitude!!.toString(),
                       stringQuery)
-                  meetingRequestViewModel.sendMeetingConfirmation()
+                  meetingRequestViewModel.sendMeetingConfirmation() {
+                    Log.e("LocationSelectorMap", "Failed to sendMeetingLocation : ${it.message}")
+                    Toast.makeText(context, "Could not send meeting location", Toast.LENGTH_SHORT)
+                        .show()
+                  }
                   navigationActions.navigateTo(Route.HEAT_MAP)
                 }
               },

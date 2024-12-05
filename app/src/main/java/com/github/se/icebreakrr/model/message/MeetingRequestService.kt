@@ -35,60 +35,53 @@ class MeetingRequestService : FirebaseMessagingService() {
     val senderUid = remoteMessage.data["senderUID"] ?: "null"
     val message = remoteMessage.data["message"] ?: "null"
     val title = remoteMessage.data["title"] ?: "null"
+    val senderName = remoteMessage.data["senderName"] ?: "null"
 
     when (title) {
       "MEETING REQUEST" -> {
-        val name = remoteMessage.data["senderName"] ?: "null"
         MeetingRequestManager.meetingRequestViewModel?.addToMeetingRequestInbox(
             senderUid, message) {
               MeetingRequestManager.meetingRequestViewModel?.updateInboxOfMessages() {}
             }
-        showNotification(MSG_REQUEST, "from : $name")
+        showNotification(MSG_REQUEST, "from : $senderName")
       }
       "MEETING RESPONSE" -> {
-        val name = remoteMessage.data["senderName"] ?: "null"
         val accepted = remoteMessage.data["accepted"]?.toBoolean() ?: false
-        val senderToken = remoteMessage.data["senderToken"] ?: "null"
 
         MeetingRequestManager.meetingRequestViewModel?.removeFromMeetingRequestSent(senderUid) {
           MeetingRequestManager.meetingRequestViewModel?.updateInboxOfMessages() {}
         }
         if (accepted) {
-          showNotification(name + MSG_RESPONSE_ACCEPTED, "")
+          showNotification(senderName + MSG_RESPONSE_ACCEPTED, "")
           MeetingRequestManager.meetingRequestViewModel?.addPendingLocation(senderUid) {}
         } else {
-          showNotification(name + MSG_RESPONSE_REJECTED, "")
+          showNotification(senderName + MSG_RESPONSE_REJECTED, "")
         }
       }
       "MEETING CONFIRMATION" -> {
-        val name = remoteMessage.data["senderName"] ?: "null"
-        val mewSenderUid = remoteMessage.data["senderUID"] ?: "null"
         val locationString = remoteMessage.data["location"] ?: "null"
-        val newMessage = remoteMessage.data["message"] ?: ""
         val latitudeString = locationString.split(", ")[0]
         val longitudeString = locationString.split(", ")[1]
         MeetingRequestManager.meetingRequestViewModel?.confirmMeetingLocation(
-            senderUid,
-            Pair(newMessage, Pair(latitudeString.toDouble(), longitudeString.toDouble())))
-        showNotification(name + MSG_CONFIRMATION, MSG_CONFIRMATION_INFO)
+            senderUid, Pair(message, Pair(latitudeString.toDouble(), longitudeString.toDouble()))) {
+              Log.e("MeetingRequestService", "error when confirmMeetingLocation : ${it.message}")
+            }
+        showNotification(senderName + MSG_CONFIRMATION, MSG_CONFIRMATION_INFO)
       }
       "MEETING CANCELLATION" -> {
-        val name = remoteMessage.data["senderName"] ?: "null"
-        Log.d("CANCELLATION REASON", message)
         val stringReason =
             when (message) {
               "distance" -> DISTANCE_REASON_CANCELLATION
               else -> DEFAULT_REASON_CANCELLATION
             }
-        showNotification("Cancelled meeting with $name", stringReason)
+        showNotification("Cancelled meeting with $senderName", stringReason)
         MeetingRequestManager.meetingRequestViewModel?.removeFromMeetingRequestInbox(senderUid)
         MeetingRequestManager.meetingRequestViewModel?.removeFromMeetingRequestSent(senderUid) {}
       }
       "ENGAGEMENT NOTIFICATION" -> {
-        val name = remoteMessage.data["senderName"] ?: "null"
         showNotification(
             "A person with similar interests is close by !",
-            "The user $name has the common tag : $message")
+            "The user $senderName has the common tag : $message")
       }
     }
   }
