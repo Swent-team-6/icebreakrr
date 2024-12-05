@@ -42,8 +42,8 @@ class OtherProfileViewTest {
   private lateinit var ppRepository: ProfilePicRepository
   private lateinit var ourUserId: String
   private lateinit var functions: FirebaseFunctions
-    private lateinit var mockAiRepository: AiRepository
-    private lateinit var aiViewModel: AiViewModel
+  private lateinit var mockAiRepository: AiRepository
+  private lateinit var aiViewModel: AiViewModel
   private lateinit var mockTagsRepository: TagsRepository
 
   @get:Rule val composeTestRule = createComposeRule()
