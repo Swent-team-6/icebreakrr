@@ -97,11 +97,7 @@ fun OtherProfileView(
 
   val isLoading = profilesViewModel.loading.collectAsState(initial = true).value
   val profile = profilesViewModel.selectedProfile.collectAsState().value
-
-  // todo: replace these two values by actual AI viewmodel flows
-  val isAILoading = false
-  val aiSuggestion =
-      "Hey Botond! As a fellow lover of details, I can appreciate your game strategy on the tennis court—let's rally some ideas about how we can serve up solutions for climate change and immigration reform!"
+  val aiState = aiViewModel.uiState.collectAsState().value
 
   Scaffold(modifier = Modifier.fillMaxSize().testTag("aroundYouProfileScreen")) { paddingValues ->
     if (isLoading) {
@@ -134,7 +130,10 @@ fun OtherProfileView(
 
               // Ai button
               Button(
-                  onClick = { bottomSheetVisible = true },
+                  onClick = {
+                    bottomSheetVisible = true
+                    aiViewModel.findDiscussionStarter()
+                  },
                   colors =
                       ButtonDefaults.buttonColors(
                           containerColor = MaterialTheme.colorScheme.primary),
@@ -214,9 +213,7 @@ fun OtherProfileView(
 
       // this displays the bottom sheet
       if (bottomSheetVisible) {
-        BottomSheet(isLoading = isAILoading, aiSuggestion = aiSuggestion) {
-          bottomSheetVisible = false
-        }
+        BottomSheet(aiState) { bottomSheetVisible = false }
       }
     }
   }
@@ -224,7 +221,7 @@ fun OtherProfileView(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun BottomSheet(isLoading: Boolean, aiSuggestion: String, onDismissRequest: () -> Unit) {
+fun BottomSheet(aiState: AiViewModel.UiState, onDismissRequest: () -> Unit) {
   val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
   ModalBottomSheet(
@@ -246,15 +243,32 @@ fun BottomSheet(isLoading: Boolean, aiSuggestion: String, onDismissRequest: () -
           Spacer(modifier = Modifier.height(16.dp))
 
           // Content
-          if (!isLoading) {
-            Text(
-                text = "\"$aiSuggestion\"",
-                fontWeight = FontWeight.Normal,
-                fontSize = TextUnit(20f, TextUnitType.Sp),
-                lineHeight = TextUnit(25f, TextUnitType.Sp))
-          } else {
-            Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-              CircularProgressIndicator()
+          when (aiState) {
+            is AiViewModel.UiState.Success -> {
+              Text(
+                  text = "\"${aiState.data}\"",
+                  fontWeight = FontWeight.Normal,
+                  fontSize = TextUnit(20f, TextUnitType.Sp),
+                  lineHeight = TextUnit(25f, TextUnitType.Sp))
+            }
+            is AiViewModel.UiState.Loading -> {
+              Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator()
+              }
+            }
+            is AiViewModel.UiState.Error -> {
+              Text(
+                  text = "\"${aiState.message}\"",
+                  fontWeight = FontWeight.Normal,
+                  fontSize = TextUnit(20f, TextUnitType.Sp),
+                  lineHeight = TextUnit(25f, TextUnitType.Sp))
+            }
+            else -> {
+              Text(
+                  text = "An unknown error occurred",
+                  fontWeight = FontWeight.Normal,
+                  fontSize = TextUnit(20f, TextUnitType.Sp),
+                  lineHeight = TextUnit(25f, TextUnitType.Sp))
             }
           }
         }
