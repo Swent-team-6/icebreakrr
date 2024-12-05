@@ -215,7 +215,7 @@ class MeetingRequestViewModel(
   }
 
   /** Send a meeting cancellation in the case of distance cancellation or time cancellation */
-  private fun sendMeetingCancellation() {
+  fun sendMeetingCancellation() {
     viewModelScope.launch {
       val data =
           hashMapOf(
