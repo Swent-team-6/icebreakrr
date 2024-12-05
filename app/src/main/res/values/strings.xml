@@ -49,4 +49,11 @@
     <string name="meeting_request_pending">Pending meeting requests</string>
     <string name="meeting_request_sent">Meeting request sent</string>
 
+    <string name="filter">Filter</string>
+    <string name="gender">Gender</string>
+    <string name="gender_men">Men</string>
+    <string name="gender_women">Women</string>
+    <string name="gender_other">Other</string>
+    <string name="age_range">Age Range</string>
+
 </resources>

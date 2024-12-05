@@ -58,9 +58,16 @@ private val PROFILE_IMAGE_ASPECT_RATIO = 1f
 private val PROFILE_IMAGE_PADDING = 16.dp
 private val USERNAME_TEXT_STYLE =
     TextStyle(fontSize = 24.sp, fontWeight = FontWeight.Bold, color = Color.White)
-private val ALPHA_DESCRIPTION = 0.9f
-private val DESCRIPTION_PADDING = 4.dp
+private val INFO_TEXT_STYLE = TextStyle(
+    fontSize = 14.sp,
+    lineHeight = 20.sp,
+    fontWeight = FontWeight.W500,
+    letterSpacing = 0.1.sp)
+private val CATCHPHRASE_TEXT_STYLE =
+    TextStyle(
+        fontSize = 22.sp, lineHeight = 28.sp, fontWeight = FontWeight.W400)
 
+private val DESCRIPTION_PADDING = 4.dp
 private val COLUMN_PADDING = 4.dp
 private val VERTICAL_ARRANGEMENT = 2.dp
 
@@ -117,13 +124,8 @@ fun InfoSection(profile: Profile, tagsViewModel: TagsViewModel) {
             verticalArrangement = Arrangement.spacedBy(VERTICAL_ARRANGEMENT)) {
               Text(
                   text = "Tags",
-                  style =
-                      TextStyle(
-                          fontSize = 14.sp,
-                          lineHeight = 20.sp,
-                          fontWeight = FontWeight.W500,
-                          color = MaterialTheme.colorScheme.secondary,
-                          letterSpacing = 0.1.sp))
+                  style = INFO_TEXT_STYLE,
+                  color = MaterialTheme.colorScheme.secondary)
               TagsSection(userTags)
             }
       }
@@ -402,7 +404,7 @@ fun ProfileHeader(
 fun ProfileCatchPhrase(catchPhrase: String) {
   Text(
       text = catchPhrase,
-      style = TextStyle(fontSize = 22.sp, lineHeight = 28.sp, fontWeight = FontWeight.W400),
+      style = CATCHPHRASE_TEXT_STYLE,
       color = MaterialTheme.colorScheme.onSecondary,
       textAlign = TextAlign.Left,
       maxLines = 2,
@@ -436,14 +438,8 @@ fun TagsSection(listOfTags: List<Pair<String, Color>>) {
 fun ProfileDescription(description: String) {
   Text(
       text = description,
-      style =
-          TextStyle(
-              fontSize = 16.sp,
-              lineHeight = 24.sp,
-              fontWeight = FontWeight.W500,
-              color = MaterialTheme.colorScheme.primary,
-              letterSpacing = 0.15.sp),
-      color = Color.Black.copy(alpha = ALPHA_DESCRIPTION),
+      style = INFO_TEXT_STYLE,
+      color = MaterialTheme.colorScheme.onSecondary,
       modifier = Modifier.padding(DESCRIPTION_PADDING).testTag("profileDescription"))
 }
 

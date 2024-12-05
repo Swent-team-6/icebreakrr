@@ -48,6 +48,7 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
@@ -71,6 +72,8 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.GeoPoint
 import com.google.firebase.firestore.firestore
+import androidx.compose.ui.res.stringResource
+import com.github.se.icebreakrr.R
 
 // This file was written with the help of Cursor, Claude, ChatGPT
 
@@ -275,7 +278,7 @@ fun FilterScreen(
         TopAppBar(
             title = {
               Text(
-                  "Filter",
+                  stringResource(R.string.filter),
                   color = MaterialTheme.colorScheme.onPrimary,
                   modifier = Modifier.testTag("FilterTopBarTitle"))
             },
@@ -316,7 +319,7 @@ fun FilterScreen(
                   modifier =
                       Modifier.fillMaxSize().padding(innerPadding).padding(DEFAULT_PADDING.dp)) {
                     Text(
-                        "Gender",
+                        stringResource(R.string.gender),
                         fontSize = (screenHeight.value * titleFontSizeFactor).sp,
                         modifier =
                             Modifier.padding(vertical = TEXTS_PADDING).testTag("GenderTitle"))
@@ -327,7 +330,7 @@ fun FilterScreen(
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                       GenderButton(
-                          label = "Men",
+                          label = stringResource(R.string.gender_men),
                           selected = manSelected,
                           onClick = {
                             manSelected = !manSelected
@@ -336,7 +339,7 @@ fun FilterScreen(
                           buttonWidth = buttonWidth,
                           buttonHeight = buttonHeight)
                       GenderButton(
-                          label = "Women",
+                          label = stringResource(R.string.gender_women),
                           selected = womanSelected,
                           onClick = {
                             womanSelected = !womanSelected
@@ -345,7 +348,7 @@ fun FilterScreen(
                           buttonWidth = buttonWidth,
                           buttonHeight = buttonHeight)
                       GenderButton(
-                          label = "Other",
+                          label = stringResource(R.string.gender_other),
                           selected = otherSelected,
                           onClick = {
                             otherSelected = !otherSelected
@@ -356,7 +359,7 @@ fun FilterScreen(
                     }
 
                     Text(
-                        "Age Range",
+                        stringResource(R.string.age_range),
                         fontSize = (screenHeight.value * titleFontSizeFactor).sp,
                         modifier =
                             Modifier.padding(vertical = TEXTS_PADDING).testTag("AgeRangeTitle"))

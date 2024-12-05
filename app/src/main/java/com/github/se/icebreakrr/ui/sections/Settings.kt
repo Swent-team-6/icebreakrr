@@ -19,6 +19,8 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchColors
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -224,6 +226,9 @@ fun ToggleOptionBox(
               Switch(
                   checked = isChecked,
                   modifier = Modifier.testTag("switch$label"),
+                  colors = SwitchDefaults.colors().copy(
+                      checkedThumbColor = MaterialTheme.colorScheme.primary,
+                      checkedTrackColor = MaterialTheme.colorScheme.onTertiary),
                   onCheckedChange = onCheckedChange)
             }
       }

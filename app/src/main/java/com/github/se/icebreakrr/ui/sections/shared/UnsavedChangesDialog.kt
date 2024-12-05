@@ -1,6 +1,7 @@
 package com.github.se.icebreakrr.ui.sections.shared
 
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -45,8 +46,8 @@ fun UnsavedChangesDialog(
         onDismissRequest = onDismiss,
         title = { Text("You are about to leave this page") },
         text = { Text("Your changes will not be saved.") },
-        confirmButton = { TextButton(onClick = onConfirm) { Text("Discard changes") } },
-        dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel") } },
+        confirmButton = { TextButton(onClick = onConfirm) { Text("Discard changes", color=MaterialTheme.colorScheme.error) } },
+        dismissButton = { TextButton(onClick = onDismiss) { Text("Cancel", color=MaterialTheme.colorScheme.onSecondary) } },
         modifier = modifier.testTag("alertDialog"))
   }
 }
