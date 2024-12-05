@@ -79,7 +79,7 @@ class EngagementNotificationManager(
    * and processes them if the user is discoverable.
    */
   private fun checkNearbyUsersForCommonTags() {
-    profilesViewModel.getSelfProfile()
+    profilesViewModel.getSelfProfile {}
     val selfProfile = profilesViewModel.selfProfile.value ?: return
     val selfLocation = selfProfile.location ?: return
 
