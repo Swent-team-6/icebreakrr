@@ -13,7 +13,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material.icons.outlined.Close
@@ -113,25 +115,39 @@ fun InboxProfileViewScreen(
             profilesViewModel = profilesViewModel,
             profileInNotification = true,
             onEditClick = null)
-        Spacer(modifier = Modifier.height(SPACER_HEIGHT.dp))
-        AcceptDeclineRequest(
-            message ?: "",
-            {
-              acceptDeclineCode(
-                  meetingRequestViewModel, navigationActions, profile.uid, true, profile.fcmToken)
-              Toast.makeText(
-                      context,
-                      "You've accepted the request, " +
-                          profile.name +
-                          " is choosing the location of your meeting!",
-                      Toast.LENGTH_SHORT)
-                  .show()
-            },
-            {
-              acceptDeclineCode(
-                  meetingRequestViewModel, navigationActions, profile.uid, false, profile.fcmToken)
-            })
-        InfoSection(profile = profile, tagsViewModel = tagsViewModel)
+
+        // Scrollable content with the accept/decline box and the information section
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
+              Spacer(modifier = Modifier.height(SPACER_HEIGHT.dp))
+              AcceptDeclineRequest(
+                  message ?: "",
+                  {
+                    acceptDeclineCode(
+                        meetingRequestViewModel,
+                        navigationActions,
+                        profile.uid,
+                        true,
+                        profile.fcmToken)
+                    Toast.makeText(
+                            context,
+                            "You've accepted the request, " +
+                                profile.name +
+                                " is choosing the location of your meeting!",
+                            Toast.LENGTH_SHORT)
+                        .show()
+                  },
+                  {
+                    acceptDeclineCode(
+                        meetingRequestViewModel,
+                        navigationActions,
+                        profile.uid,
+                        false,
+                        profile.fcmToken)
+                  })
+              InfoSection(profile = profile, tagsViewModel = tagsViewModel)
+            }
       }
     }
   }
