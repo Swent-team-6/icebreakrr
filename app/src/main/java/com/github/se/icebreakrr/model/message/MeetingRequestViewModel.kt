@@ -1,5 +1,6 @@
 package com.github.se.icebreakrr.model.message
 
+import android.annotation.SuppressLint
 import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -7,23 +8,28 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import androidx.work.Data
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
 import com.github.se.icebreakrr.model.profile.ProfilesViewModel
+import com.google.firebase.database.core.Context
 import com.google.firebase.firestore.GeoPoint
 import com.google.firebase.functions.FirebaseFunctions
+import kotlinx.coroutines.delay
 import kotlin.math.atan2
 import kotlin.math.cos
 import kotlin.math.sin
 import kotlin.math.sqrt
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
+import java.util.UUID
+import java.util.concurrent.TimeUnit
 
 private const val SEND_MEETING_REQUEST = "sendMeetingRequest"
 private const val SEND_MEETING_RESPONSE = "sendMeetingResponse"
 private const val SEND_MEETING_CONFIRMATION = "sendMeetingConfirmation"
 private const val SEND_MEETING_CANCELLATION = "sendMeetingCancellation"
 private const val SEND_ENGAGEMENT_NOTIFICATION = "sendEngagementNotification"
-private const val FIVE_HUNDRED_METERS_IN_KM = 0.5
-private const val EARTH_RADIUS_IN_KM = 6371.0
 /*
    Class that manages the interaction between messages, the Profile backend and the user of the app
 */
@@ -37,6 +43,7 @@ class MeetingRequestViewModel(
   var meetingResponseState by mutableStateOf(MeetingResponse())
   var meetingConfirmationState by mutableStateOf(MeetingConfirmation())
   var meetingCancellationState by mutableStateOf(MeetingCancellation())
+  val uidTimerMap : MutableMap<String, UUID> = mutableMapOf()
 
   var senderToken = ""
   var senderUID = ""
@@ -61,7 +68,6 @@ class MeetingRequestViewModel(
   enum class CancellationType(val reason: String) {
     DISTANCE("distance"),
     TIME("time"),
-    BLOCKED("blocked"),
     REPORTED("reported")
   }
   /**
@@ -118,25 +124,6 @@ class MeetingRequestViewModel(
     meetingResponseState =
         meetingResponseState.copy(
             targetToken = targetToken, message = newMessage, accepted = accepted)
-  }
-
-  /**
-   * Sets the message of the meeting cancellation
-   *
-   * @param targetToken: the FCM token of the target user
-   * @param cancellationReason: the reason for the cancellation of the meeting request
-   * @param otherUserName: the name of the other user
-   */
-  fun setMeetingCancellation(
-      targetToken: String,
-      cancellationReason: CancellationType,
-      otherUserName: String
-  ) {
-    meetingCancellationState =
-        meetingCancellationState.copy(
-            targetToken = targetToken,
-            message = cancellationReason.toString(),
-            nameTargetUser = otherUserName)
   }
 
   /**
@@ -215,14 +202,19 @@ class MeetingRequestViewModel(
   }
 
   /** Send a meeting cancellation in the case of distance cancellation or time cancellation */
-  fun sendMeetingCancellation() {
+  fun sendMeetingCancellation(
+      targetToken: String,
+      cancellationReason: String,
+      senderUID: String,
+      senderName: String
+  ) {
     viewModelScope.launch {
       val data =
           hashMapOf(
-              "targetToken" to meetingCancellationState.targetToken,
+              "targetToken" to targetToken,
               "senderUID" to senderUID,
-              "senderName" to meetingCancellationState.nameTargetUser,
-              "message" to meetingCancellationState.message,
+              "senderName" to senderName,
+              "message" to cancellationReason,
           )
       try {
         val result = functions.getHttpsCallable(SEND_MEETING_CANCELLATION).call(data).await()
@@ -399,54 +391,51 @@ class MeetingRequestViewModel(
    * the contact is too far away
    */
   fun meetingDistanceCancellation() {
-    val selfProfile = profilesViewModel.selfProfile.value
-    val originPoint = selfProfile?.location ?: GeoPoint(0.0, 0.0)
     updateInboxOfMessages {
       val contactUsers = profilesViewModel.getCancellationMessageProfile()
-      val distances =
-          contactUsers.map {
-            distanceBetweenGeoPoints(it.location ?: GeoPoint(0.0, 0.0), originPoint)
-          }
-      val mapUserDistance = contactUsers.zip(distances).toMap()
-      mapUserDistance.forEach {
-        if (it.value >= FIVE_HUNDRED_METERS_IN_KM) {
-          removeFromMeetingRequestInbox(it.key.uid)
-          removeFromMeetingRequestSent(it.key.uid) {}
-          val targetToken = it.key.fcmToken ?: "null"
-          val targetName = it.key.name
-          setMeetingCancellation(
-              targetToken, CancellationType.DISTANCE, targetName) // targeted to other user
-          sendMeetingCancellation()
-          setMeetingCancellation(senderToken, CancellationType.DISTANCE, it.key.name)
-          sendMeetingCancellation()
-        }
+      val usersInMessagingRange = profilesViewModel.messagingProfiles.value
+      val contactUsersUid = contactUsers.map { it.uid }
+      val usersInMessagingRangeUid = usersInMessagingRange.map { it.uid }
+      val contactUserNotInRangeUid = contactUsersUid.filter { !usersInMessagingRangeUid.contains(it) }
+      val contactUserNotInRange = contactUsers.filter { contactUserNotInRangeUid.contains(it.uid) }
+      Log.d("USERS NOT IN RANGE", contactUserNotInRange.toString())
+        contactUserNotInRange.forEach {
+          removeFromMeetingRequestInbox(it.uid)
+          removeFromMeetingRequestSent(it.uid) {}
+          sendCancellationToBothUsers(targetUID = it.uid, targetToken = it.fcmToken ?: "", targetName = it.name, reason = CancellationType.DISTANCE)
       }
     }
   }
 
-  /**
-   * Function computing the euclidean distance between two points
-   *
-   * @param point1: the first point
-   * @param point2: the second point
-   */
-  private fun distanceBetweenGeoPoints(point1: GeoPoint, point2: GeoPoint): Double {
-    val earthRadius = EARTH_RADIUS_IN_KM
+  fun startMeetingRequestTimer(uid: String, token: String, name: String, context: android.content.Context){
+      val workManager = WorkManager.getInstance(context)
+      val inputData = Data.Builder()
+          .putString("TARGET_UID", uid)
+          .putString("TARGET_TOKEN", token)
+          .putString("TARGET_NAME", name)
+          .build()
 
-    val lat1 = point1.latitude
-    val lon1 = point1.longitude
-    val lat2 = point2.latitude
-    val lon2 = point2.longitude
+      val workRequest = OneTimeWorkRequestBuilder<MessagingTimeoutWorker>()
+          .setInputData(inputData)
+          .setInitialDelay(30, TimeUnit.SECONDS)
+          .build()
 
-    val dLat = Math.toRadians(lat2 - lat1)
-    val dLon = Math.toRadians(lon2 - lon1)
+      Log.d("START TIMER", workRequest.id.toString())
+      uidTimerMap[uid] = workRequest.id
+      workManager.enqueue(workRequest)
+  }
 
-    val a =
-        sin(dLat / 2) * sin(dLat / 2) +
-            cos(Math.toRadians(lat1)) * cos(Math.toRadians(lat2)) * sin(dLon / 2) * sin(dLon / 2)
+  fun stopMeetingRequestTimer(uid: String, context: android.content.Context){
+      val workManager = WorkManager.getInstance(context)
+      val workId = uidTimerMap[uid]
+      if (workId != null) {
+          Log.d("STOP TIMER", workId.toString())
+          workManager.cancelWorkById(workId)
+      }
+  }
 
-    val c = 2 * atan2(sqrt(a), sqrt(1 - a))
-
-    return earthRadius * c
+  fun sendCancellationToBothUsers(targetUID : String, targetToken : String, targetName : String, reason: CancellationType){
+      sendMeetingCancellation(targetToken, reason.toString(), senderUID, senderName)
+      sendMeetingCancellation(senderToken, reason.toString(), targetUID , targetName)
   }
 }

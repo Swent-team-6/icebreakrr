@@ -23,6 +23,12 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 
+private val MEETING_REQUEST_MAX_RADIUS = 500
+private val MAX_RESOLUTION = 600
+private val DEFAULT_QUALITY = 100
+private val MAX_REPORTS_BEFORE_BAN = 2
+
+
 open class ProfilesViewModel(
     private val repository: ProfilesRepository,
     private val ppRepository: ProfilePicRepository,
@@ -31,6 +37,9 @@ open class ProfilesViewModel(
 
   private val _profiles = MutableStateFlow<List<Profile>>(emptyList())
   open val profiles: StateFlow<List<Profile>> = _profiles
+
+  private val _messagingProfiles = MutableStateFlow<List<Profile>>(emptyList())
+  open val messagingProfiles: StateFlow<List<Profile>> = _profiles
 
   private val _inboxProfiles = MutableStateFlow<List<Profile?>>(emptyList())
   private val _sentProfiles = MutableStateFlow<List<Profile?>>(emptyList())
@@ -88,11 +97,6 @@ open class ProfilesViewModel(
     repository.checkConnectionPeriodically({})
   }
 
-  private val MAX_RESOLUTION = 600
-  private val DEFAULT_QUALITY = 100
-
-  private val MAX_REPORTS_BEFORE_BAN = 2
-
   companion object {
     class Factory(private val auth: FirebaseAuth, private val firestore: FirebaseFirestore) :
         ViewModelProvider.Factory {
@@ -139,10 +143,10 @@ open class ProfilesViewModel(
   /** Initializes the repository and fetches profiles. */
   init {
     repository.init {
-      // Fetch profiles on initialization
+      val defaultPoint = GeoPoint(DEFAULT_USER_LATITUDE, DEFAULT_USER_LONGITUDE)
       getSelfProfile {
-        getFilteredProfilesInRadius(
-            GeoPoint(DEFAULT_USER_LATITUDE, DEFAULT_USER_LONGITUDE), DEFAULT_RADIUS)
+        getFilteredProfilesInRadius(defaultPoint, DEFAULT_RADIUS)
+        getMessagingRadiusProfile(defaultPoint)
       }
     }
   }
@@ -217,6 +221,33 @@ open class ProfilesViewModel(
             repository.checkConnectionPeriodically({})
           }
         })
+  }
+
+  fun getMessagingRadiusProfile(
+      center: GeoPoint
+  ){
+      _loading.value = true
+      repository.getProfilesInRadius(
+          center = center,
+          radiusInMeters = MEETING_REQUEST_MAX_RADIUS,
+          onSuccess = { profileList ->
+              val currentUserId = _selfProfile.value?.uid ?: ""
+              val filteredProfiles = profileList.filter { profile -> profile.uid != currentUserId}
+              _messagingProfiles.value = profileList
+              _loading.value = false
+              _isConnected.value = true
+          },
+          onFailure = { e ->
+              Log.e("ConnectionCheck", "Firebase Request FAILED")
+              Log.e(
+                  "ConnectionCheck",
+                  "Current state: waiting=${repository.isWaiting.value}, done=${repository.waitingDone.value}")
+              handleError(e)
+              if (_isConnected.value && repository.waitingDone.value) {
+                  _isConnected.value = false
+                  repository.checkConnectionPeriodically({})
+              }
+          })
   }
 
   /**

@@ -5,6 +5,7 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
 import android.util.Log
+import androidx.compose.ui.platform.LocalContext
 import androidx.core.app.NotificationCompat
 import com.github.se.icebreakrr.R
 import com.google.firebase.messaging.FirebaseMessagingService
@@ -21,7 +22,8 @@ class MeetingRequestService : FirebaseMessagingService() {
   private val MSG_RESPONSE_REJECTED = " rejected your meeting request :("
   private val MSG_CONFIRMATION = " has chosen the location for your meeting!"
   private val MSG_REQUEST = "Meeting request received!"
-  private val DISTANCE_REASON_CANCELLATION = "Reason : You went too far away"
+  private val DISTANCE_REASON_CANCELLATION = "Reason : You are too far away"
+  private val TIME_REASON_CANCELLATION = "Reason : Request reached timeout"
   private val DEFAULT_REASON_CANCELLATION = "Reason : Unknown"
   private val NOTIFICATION_ID = 0
   private val MSG_CONFIRMATION_INFO = "Go to your heatmap to see the pin!"
@@ -83,7 +85,7 @@ class MeetingRequestService : FirebaseMessagingService() {
         val accepted = remoteMessage.data["accepted"]?.toBoolean() ?: false
 
         MeetingRequestManager.meetingRequestViewModel?.removeFromMeetingRequestSent(senderUid) {
-          MeetingRequestManager.meetingRequestViewModel?.updateInboxOfMessages {}
+        MeetingRequestManager.meetingRequestViewModel?.updateInboxOfMessages {}
         }
         if (accepted) {
           showNotification(senderName + MSG_RESPONSE_ACCEPTED, "")
@@ -91,6 +93,7 @@ class MeetingRequestService : FirebaseMessagingService() {
         } else {
           showNotification(senderName + MSG_RESPONSE_REJECTED, "")
         }
+        MeetingRequestManager.meetingRequestViewModel?.stopMeetingRequestTimer(senderUid, this)
       }
       "MEETING CONFIRMATION" -> {
         val locationString = remoteMessage.data["location"] ?: "null"
@@ -101,16 +104,20 @@ class MeetingRequestService : FirebaseMessagingService() {
               Log.e("MeetingRequestService", "error when confirmMeetingLocation : ${it.message}")
             }
         showNotification(senderName + MSG_CONFIRMATION, MSG_CONFIRMATION_INFO)
+        MeetingRequestManager.meetingRequestViewModel?.stopMeetingRequestTimer(senderUid, this)
       }
       "MEETING CANCELLATION" -> {
+        Log.d("CANCELLATION REASON : ", message)
         val stringReason =
             when (message) {
-              "distance" -> DISTANCE_REASON_CANCELLATION
+              "DISTANCE" -> DISTANCE_REASON_CANCELLATION
+              "TIME" -> TIME_REASON_CANCELLATION
               else -> DEFAULT_REASON_CANCELLATION
             }
         showNotification("Cancelled meeting with $senderName", stringReason)
         MeetingRequestManager.meetingRequestViewModel?.removeFromMeetingRequestInbox(senderUid)
         MeetingRequestManager.meetingRequestViewModel?.removeFromMeetingRequestSent(senderUid) {}
+        MeetingRequestManager.meetingRequestViewModel?.stopMeetingRequestTimer(senderUid, this)
       }
       "ENGAGEMENT NOTIFICATION" -> {
         // Only show engagement notifications if app is in background

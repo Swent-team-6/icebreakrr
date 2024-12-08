@@ -216,6 +216,9 @@ dependencies {
     // Accompanist Flow Layout dependency
     implementation(libs.accompanist.flowlayout)
 
+    // WorkManager for timeouts of the messaging system
+    implementation(libs.androidx.work.runtime.ktx)
+
     // Add Firebase Cloud Messaging System
     implementation(libs.firebase.messaging.ktx)
 

@@ -107,7 +107,6 @@ fun OtherProfileView(
     if (isLoading) {
       MessageWhenLoadingProfile(paddingValues)
     } else if (profile != null) {
-
       Column(
           modifier = Modifier.fillMaxWidth().padding(paddingValues),
           horizontalAlignment = Alignment.CenterHorizontally) {
@@ -212,6 +211,7 @@ fun OtherProfileView(
                     meetingRequestViewModel.onLocalTokenChange(profile.fcmToken ?: "null")
                     meetingRequestViewModel.sendMeetingRequest()
                     meetingRequestViewModel.addToMeetingRequestSent(profile.uid)
+                    meetingRequestViewModel.startMeetingRequestTimer(profile.uid, profile.fcmToken ?: "null", profile.name, context)
                     writtenMessage = ""
                     navigationActions.goBack()
                   },

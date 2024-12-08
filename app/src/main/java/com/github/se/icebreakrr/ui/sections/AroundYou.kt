@@ -148,6 +148,8 @@ fun AroundYouScreen(
             filterViewModel.ageRange.value,
             tagsViewModel.filteredTags.value)
 
+        profilesViewModel.getMessagingRadiusProfile(userLocation.value ?: GeoPoint(DEFAULT_USER_LATITUDE, DEFAULT_USER_LONGITUDE))
+
         delay(REFRESH_DELAY) // Wait before the next update
       }
     }

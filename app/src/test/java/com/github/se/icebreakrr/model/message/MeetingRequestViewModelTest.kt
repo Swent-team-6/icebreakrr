@@ -165,21 +165,6 @@ class MeetingRequestViewModelTest {
   }
 
   @Test
-  fun onMeetingCancellationSetTest() = runBlocking {
-    val message = MeetingRequestViewModel.CancellationType.DISTANCE.toString()
-    println(message)
-    meetingRequestViewModel.setMeetingCancellation(
-        profile2.fcmToken ?: "null",
-        MeetingRequestViewModel.CancellationType.DISTANCE,
-        profile2.name)
-    assert(meetingRequestViewModel.meetingCancellationState.message == message)
-    assert(meetingRequestViewModel.meetingCancellationState.nameTargetUser == profile2.name)
-    assert(
-        (meetingRequestViewModel.meetingCancellationState.targetToken) ==
-            (profile2.fcmToken ?: "null"))
-  }
-
-  @Test
   fun onMeetingConfirmationSetTest() = runBlocking {
     val message = "New Message"
     val newLocation = "6.35838, 46.28495"
@@ -343,7 +328,7 @@ class MeetingRequestViewModelTest {
     meetingRequestViewModel.meetingCancellationState = meetingCancellationState
 
     // Act: Call the method under test
-    meetingRequestViewModel.sendMeetingCancellation()
+    meetingRequestViewModel.sendMeetingCancellation(meetingCancellationState.targetToken, MeetingRequestViewModel.CancellationType.TIME, meetingCancellationState.senderUID, meetingCancellationState.nameTargetUser)
     // Assert: Verify that the cloud function was called with the correct data
     verify(functions).getHttpsCallable("sendMeetingCancellation")
 
@@ -357,7 +342,7 @@ class MeetingRequestViewModelTest {
     assert(capturedData["targetToken"] == meetingCancellationState.targetToken)
     assert(capturedData["senderUID"] == profile1.uid)
     assert(capturedData["senderName"] == meetingCancellationState.nameTargetUser)
-    assert(capturedData["message"] == meetingCancellationState.message)
+    assert(capturedData["message"] == MeetingRequestViewModel.CancellationType.TIME)
   }
 
   @Test

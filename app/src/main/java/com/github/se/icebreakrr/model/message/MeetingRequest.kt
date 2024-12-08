@@ -31,6 +31,7 @@ The message sent to cancel a meeting request
 */
 data class MeetingCancellation(
     val targetToken: String = "",
+    val senderUID: String = "",
     val nameTargetUser: String = "",
     val message: String = "",
 )
