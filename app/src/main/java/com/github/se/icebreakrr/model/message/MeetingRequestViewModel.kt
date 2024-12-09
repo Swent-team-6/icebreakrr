@@ -148,6 +148,7 @@ class MeetingRequestViewModel(
               "senderUID" to senderUID,
               "senderName" to senderName,
               "message" to meetingRequestState.message,
+              "location" to "locationForTwoWayMeetingRequest"
           )
       try {
         val result = functions.getHttpsCallable(SEND_MEETING_REQUEST).call(data).await()
@@ -417,7 +418,7 @@ class MeetingRequestViewModel(
 
       val workRequest = OneTimeWorkRequestBuilder<MessagingTimeoutWorker>()
           .setInputData(inputData)
-          .setInitialDelay(30, TimeUnit.SECONDS)
+          .setInitialDelay(1, TimeUnit.MINUTES)
           .build()
 
       Log.d("START TIMER", workRequest.id.toString())
