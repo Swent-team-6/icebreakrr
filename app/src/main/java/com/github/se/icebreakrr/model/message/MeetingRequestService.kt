@@ -20,13 +20,11 @@ class MeetingRequestService : FirebaseMessagingService() {
   private val MSG_CHANNEL_NAME = "channel_message"
   private val MSG_RESPONSE_ACCEPTED = " accepted your meeting request!"
   private val MSG_RESPONSE_REJECTED = " rejected your meeting request :("
-  private val MSG_CONFIRMATION = " has chosen the location for your meeting!"
   private val MSG_REQUEST = "Meeting request received!"
   private val DISTANCE_REASON_CANCELLATION = "Reason : You are too far away"
   private val TIME_REASON_CANCELLATION = "Reason : Request reached timeout"
   private val DEFAULT_REASON_CANCELLATION = "Reason : Unknown"
   private val NOTIFICATION_ID = 0
-  private val MSG_CONFIRMATION_INFO = "Go to your heatmap to see the pin!"
 
   /**
    * Checks if the application is currently running in the foreground.
@@ -84,7 +82,9 @@ class MeetingRequestService : FirebaseMessagingService() {
             senderUid, message1, message2, location) {
               MeetingRequestManager.meetingRequestViewModel?.updateInboxOfMessages {}
             }
-        showNotification(MSG_REQUEST, "from : $senderName")
+        if(!isAppInForeground()) {
+          showNotification(MSG_REQUEST, "from : $senderName")
+        }
       }
       "MEETING RESPONSE" -> {
         val accepted = remoteMessage.data["accepted"]?.toBoolean() ?: false
@@ -92,37 +92,37 @@ class MeetingRequestService : FirebaseMessagingService() {
         val locationString = remoteMessage.data["location"]?.trim('(', ')') ?: "null"
         val latitudeString = locationString.split(", ")[0]
         val longitudeString = locationString.split(", ")[1]
-        Log.d("LOC", locationString)
-        Log.d("LAT", latitudeString)
-        Log.d("LONG", longitudeString)
         val location = Pair(latitudeString.toDouble(), longitudeString.toDouble())
         val locationAndMessage = Pair(message, location)
         MeetingRequestManager.meetingRequestViewModel?.removeFromMeetingRequestSent(senderUid) {
         MeetingRequestManager.meetingRequestViewModel?.updateInboxOfMessages {}
         }
         if (accepted) {
-          showNotification(senderName + MSG_RESPONSE_ACCEPTED, "")
           MeetingRequestManager.meetingRequestViewModel?.confirmMeetingLocation(senderUid, locationAndMessage){
             Log.e("LOCATION CONFIRMATION", "failed to confirm the meeting location")
           }
+          if (!isAppInForeground()) {
+            showNotification(senderName + MSG_RESPONSE_ACCEPTED, "")
+          }
         } else {
-          showNotification(senderName + MSG_RESPONSE_REJECTED, "")
+          if (!isAppInForeground()) {
+            showNotification(senderName + MSG_RESPONSE_REJECTED, "")
+          }
         }
         MeetingRequestManager.meetingRequestViewModel?.stopMeetingRequestTimer(senderUid, this)
       }
       "MEETING CANCELLATION" -> {
         val message = remoteMessage.data["message"] ?: "null"
-        Log.d("CANCELLATION REASON : ", message)
         val stringReason =
             when (message) {
               "DISTANCE" -> DISTANCE_REASON_CANCELLATION
               "TIME" -> TIME_REASON_CANCELLATION
               else -> DEFAULT_REASON_CANCELLATION
             }
-        showNotification("Cancelled meeting with $senderName", stringReason)
         MeetingRequestManager.meetingRequestViewModel?.removeFromMeetingRequestInbox(senderUid)
         MeetingRequestManager.meetingRequestViewModel?.removeFromMeetingRequestSent(senderUid) {}
         MeetingRequestManager.meetingRequestViewModel?.stopMeetingRequestTimer(senderUid, this)
+        showNotification("Cancelled meeting with $senderName", stringReason)
       }
       "ENGAGEMENT NOTIFICATION" -> {
         val message = remoteMessage.data["message"] ?: "null"

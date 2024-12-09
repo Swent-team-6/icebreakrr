@@ -233,7 +233,7 @@ open class ProfilesViewModel(
           onSuccess = { profileList ->
               val currentUserId = _selfProfile.value?.uid ?: ""
               val filteredProfiles = profileList.filter { profile -> profile.uid != currentUserId}
-              _messagingProfiles.value = profileList
+              _messagingProfiles.value = filteredProfiles
               _loading.value = false
               _isConnected.value = true
           },
@@ -672,6 +672,7 @@ open class ProfilesViewModel(
         _inboxItems.value = _inboxProfiles.value.filterNotNull().zip(messageList).toMap()
         getSentUsers(sentUidList) {
           _sentItems.value = _sentProfiles.value.filterNotNull()
+          onComplete()
         }
       }
     }

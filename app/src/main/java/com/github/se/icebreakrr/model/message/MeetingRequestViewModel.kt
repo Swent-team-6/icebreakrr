@@ -27,9 +27,10 @@ import java.util.concurrent.TimeUnit
 
 private const val SEND_MEETING_REQUEST = "sendMeetingRequest"
 private const val SEND_MEETING_RESPONSE = "sendMeetingResponse"
-private const val SEND_MEETING_CONFIRMATION = "sendMeetingConfirmation"
 private const val SEND_MEETING_CANCELLATION = "sendMeetingCancellation"
 private const val SEND_ENGAGEMENT_NOTIFICATION = "sendEngagementNotification"
+private const val TIMEOUT_DELAY = 20L
+
 /*
    Class that manages the interaction between messages, the Profile backend and the user of the app
 */
@@ -41,8 +42,6 @@ class MeetingRequestViewModel(
 
   var meetingRequestState by mutableStateOf(MeetingRequest())
   var meetingResponseState by mutableStateOf(MeetingResponse())
-  var meetingConfirmationState by mutableStateOf(MeetingConfirmation())
-  var meetingCancellationState by mutableStateOf(MeetingCancellation())
   val uidTimerMap : MutableMap<String, UUID> = mutableMapOf()
 
   var senderToken = ""
@@ -134,19 +133,6 @@ class MeetingRequestViewModel(
     meetingResponseState =
         meetingResponseState.copy(
             targetToken = targetToken, message = newMessage, accepted = accepted, location = location)
-  }
-
-  /**
-   * Sets the message of the meeting confirmation
-   *
-   * @param targetToken: the FCM token of the target user
-   * @param newLocation: the chosen location to send in the form "latitude, longitude"
-   * @param newMessage : message sent when choosing location
-   */
-  fun setMeetingConfirmation(targetToken: String, newLocation: String, newMessage: String) {
-    meetingConfirmationState =
-        meetingConfirmationState.copy(
-            targetToken = targetToken, message = newMessage, location = newLocation)
   }
 
   /** Send a meeting request to the target user, by calling a Firebase Cloud Function */
@@ -361,7 +347,9 @@ class MeetingRequestViewModel(
   fun updateInboxOfMessages(onComplete: () -> Unit) {
     profilesViewModel.getSelfProfile {
       profilesViewModel.getInboxOfSelfProfile {
-        profilesViewModel.getMessageCancellationUsers { onComplete() }
+        profilesViewModel.getMessageCancellationUsers {
+            onComplete()
+        }
       }
     }
   }
@@ -375,10 +363,12 @@ class MeetingRequestViewModel(
       val contactUsers = profilesViewModel.getCancellationMessageProfile()
       val usersInMessagingRange = profilesViewModel.messagingProfiles.value
       val contactUsersUid = contactUsers.map { it.uid }
+      Log.d("CONTACT USERS", contactUsersUid.toString())
       val usersInMessagingRangeUid = usersInMessagingRange.map { it.uid }
+      Log.d("RADIUS USERS", usersInMessagingRangeUid.toString())
       val contactUserNotInRangeUid = contactUsersUid.filter { !usersInMessagingRangeUid.contains(it) }
       val contactUserNotInRange = contactUsers.filter { contactUserNotInRangeUid.contains(it.uid) }
-      Log.d("USERS NOT IN RANGE", contactUserNotInRange.toString())
+      Log.d("CONTACT FAR", contactUserNotInRangeUid.toString())
         contactUserNotInRange.forEach {
           removeFromMeetingRequestInbox(it.uid)
           removeFromMeetingRequestSent(it.uid) {}
@@ -397,10 +387,9 @@ class MeetingRequestViewModel(
 
       val workRequest = OneTimeWorkRequestBuilder<MessagingTimeoutWorker>()
           .setInputData(inputData)
-          .setInitialDelay(1, TimeUnit.MINUTES)
+          .setInitialDelay(TIMEOUT_DELAY, TimeUnit.MINUTES)
           .build()
 
-      Log.d("START TIMER", workRequest.id.toString())
       uidTimerMap[uid] = workRequest.id
       workManager.enqueue(workRequest)
   }
@@ -409,7 +398,6 @@ class MeetingRequestViewModel(
       val workManager = WorkManager.getInstance(context)
       val workId = uidTimerMap[uid]
       if (workId != null) {
-          Log.d("STOP TIMER", workId.toString())
           workManager.cancelWorkById(workId)
       }
   }
