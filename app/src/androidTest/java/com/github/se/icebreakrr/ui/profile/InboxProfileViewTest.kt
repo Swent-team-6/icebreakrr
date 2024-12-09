@@ -66,7 +66,10 @@ class InboxProfileViewTest {
             geohash = "u0kbb57",
             hasBlocked = emptyList(),
             meetingRequestSent = emptyList(),
-            meetingRequestInbox = mapOf(Pair("12345", "Hey, do you want to meat?")))
+            meetingRequestInbox =
+                mapOf(
+                    Pair(
+                        "12345", Pair(Pair("wanna meat ?", "am under the rolex"), Pair(1.0, 2.0)))))
 
     profileViewModel =
         ProfilesViewModel(
