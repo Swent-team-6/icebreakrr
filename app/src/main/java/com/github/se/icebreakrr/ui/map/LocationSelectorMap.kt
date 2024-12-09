@@ -135,6 +135,7 @@ fun LocationSelectorMapScreen(
           IconButton(
               onClick = {
                 if (mapLoaded || isTesting) {
+                  val targetProfile = profile.value
                   meetingRequestViewModel.confirmMeetingLocation(
                       profileId!!,
                       Pair(
@@ -149,18 +150,24 @@ fun LocationSelectorMapScreen(
                                 context, "Could not confirm meeting location", Toast.LENGTH_SHORT)
                             .show()
                       }
-                  meetingRequestViewModel.setMeetingConfirmation(
-                      profile.value?.fcmToken!!,
-                      markerState?.position?.latitude!!.toString() +
-                          ", " +
-                          markerState?.position?.longitude!!.toString(),
-                      stringQuery)
-                  meetingRequestViewModel.sendMeetingConfirmation {
-                    Log.e("LocationSelectorMap", "Failed to sendMeetingLocation : ${it.message}")
-                    Toast.makeText(context, "Could not send meeting location", Toast.LENGTH_SHORT)
-                        .show()
-                  }
-                  navigationActions.navigateTo(Route.MAP)
+                    if (targetProfile != null) {
+                        meetingRequestViewModel.setMeetingRequestChangeSecondMessage(
+                            location = markerState?.position?.latitude!!.toString() +
+                                    ", " +
+                                    markerState?.position?.longitude!!.toString(),
+                            message2 = stringQuery
+                        )
+
+                        meetingRequestViewModel.sendMeetingRequest()
+                        meetingRequestViewModel.addToMeetingRequestSent(profile.value!!.uid)
+                        meetingRequestViewModel.startMeetingRequestTimer(
+                            targetProfile.uid,
+                            targetProfile.fcmToken!!,
+                            targetProfile.name,
+                            context
+                        )
+                        navigationActions.navigateTo(Route.MAP)
+                    }
                 }
               },
               modifier =

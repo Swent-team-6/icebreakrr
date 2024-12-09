@@ -102,7 +102,7 @@ class MeetingRequestViewModel(
    *
    * @param newToken the current token of the user to which we want to send the message
    */
-  fun onLocalTokenChange(newToken: String) {
+  fun setTargetToken(newToken: String) {
     meetingRequestState = meetingRequestState.copy(targetToken = newToken)
   }
   /**
@@ -110,9 +110,19 @@ class MeetingRequestViewModel(
    *
    * @param newMessage the message we want to send
    */
-  fun onMeetingRequestChange(newMessage: String) {
-    meetingRequestState = meetingRequestState.copy(message = newMessage)
+  fun setMeetingRequestChangeFirstMessage(message1: String) {
+    meetingRequestState = meetingRequestState.copy(message1 = message1)
   }
+
+    /**
+     * Sets the second message of the meeting request
+     *
+     * @param message2 the message we want to send
+     */
+    fun setMeetingRequestChangeSecondMessage(message2: String, location: String) {
+        meetingRequestState = meetingRequestState.copy(message2 = message2, location = location)
+    }
+
   /**
    * Sets the message of the meeting response
    *
@@ -147,12 +157,13 @@ class MeetingRequestViewModel(
               "targetToken" to meetingRequestState.targetToken,
               "senderUID" to senderUID,
               "senderName" to senderName,
-              "message" to meetingRequestState.message,
-              "location" to "locationForTwoWayMeetingRequest"
+              "message1" to meetingRequestState.message1,
+              "message2" to meetingRequestState.message2,
+              "location" to meetingRequestState.location
           )
       try {
         val result = functions.getHttpsCallable(SEND_MEETING_REQUEST).call(data).await()
-        meetingRequestState = meetingRequestState.copy(message = "")
+        meetingRequestState = meetingRequestState.copy(message1 = "", message2 = "", location = "")
       } catch (e: Exception) {
         Log.e("FIREBASE ERROR", "Error sending message", e)
       }
@@ -175,29 +186,6 @@ class MeetingRequestViewModel(
         meetingResponseState = meetingResponseState.copy(message = "")
       } catch (e: Exception) {
         Log.e("FIREBASE ERROR", "Error sending message", e)
-      }
-    }
-  }
-
-  /**
-   * Send a meeting confirmation to the target user, by calling a Firebase Cloud Function
-   *
-   * @param onFailure: callback to propagate errors
-   */
-  fun sendMeetingConfirmation(onFailure: (Exception) -> Unit) {
-    viewModelScope.launch {
-      val data =
-          hashMapOf(
-              "targetToken" to meetingConfirmationState.targetToken,
-              "senderUID" to senderUID,
-              "senderName" to senderName,
-              "message" to meetingConfirmationState.message,
-              "location" to meetingConfirmationState.location)
-      try {
-        val result = functions.getHttpsCallable(SEND_MEETING_CONFIRMATION).call(data).await()
-      } catch (e: Exception) {
-        Log.e("FIREBASE ERROR", "Error sending message", e)
-        onFailure(e)
       }
     }
   }
@@ -293,14 +281,14 @@ class MeetingRequestViewModel(
    * @param senderUID: the uid of the sender
    * @param message: the received message
    */
-  fun addToMeetingRequestInbox(senderUID: String, message: String, onComplete: () -> Unit) {
-    println("addToMeetingRequestInbox() called with senderUid: $senderUID and message: $message")
+  fun addToMeetingRequestInbox(senderUID: String, message1: String, message2: String, location: Pair<Double, Double>,onComplete: () -> Unit) {
+    println("addToMeetingRequestInbox() called with senderUid: $senderUID and message: $message1")
     val currentMeetingRequestInbox =
         profilesViewModel.selfProfile.value?.meetingRequestInbox ?: mapOf()
     if (!currentMeetingRequestInbox.keys.contains(senderUID)) {
       val updatedProfile =
           profilesViewModel.selfProfile.value?.copy(
-              meetingRequestInbox = currentMeetingRequestInbox + (senderUID to message))
+              meetingRequestInbox = currentMeetingRequestInbox + (senderUID to ((message1 to message2) to location)))
       if (updatedProfile != null) {
         profilesViewModel.updateProfile(updatedProfile, { onComplete() }, {})
       } else {
@@ -328,16 +316,6 @@ class MeetingRequestViewModel(
         Log.e("INBOX MEETING REQUEST", "Removing the meeting request in our inbox list failed")
       }
     }
-  }
-
-  /**
-   * function used to add a pending location. Called when someone accepts your meeting request
-   *
-   * @param newUid: uid of the user that accepted your request
-   * @param onComplete: callback function to avoid race conditions
-   */
-  fun addPendingLocation(newUid: String, onComplete: () -> Unit) {
-    profilesViewModel.addPendingLocation(newUid) { onComplete() }
   }
 
   /**

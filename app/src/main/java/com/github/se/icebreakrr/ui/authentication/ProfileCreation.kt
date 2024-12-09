@@ -313,7 +313,6 @@ fun ProfileCreationScreen(
                           fcmToken = fcmToken,
                           meetingRequestSent = listOf(),
                           meetingRequestInbox = mapOf(),
-                          meetingRequestPendingLocation = emptyList(),
                           meetingRequestChosenLocalisation = emptyMap())
                   // Creates profile in DB
                   profilesViewModel.addNewProfile(newProfile)

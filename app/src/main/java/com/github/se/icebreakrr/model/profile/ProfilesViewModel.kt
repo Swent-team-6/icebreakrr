@@ -44,8 +44,8 @@ open class ProfilesViewModel(
   private val _inboxProfiles = MutableStateFlow<List<Profile?>>(emptyList())
   private val _sentProfiles = MutableStateFlow<List<Profile?>>(emptyList())
 
-  private val _inboxItems = MutableStateFlow<Map<Profile, String>>(emptyMap())
-  open val inboxItems: StateFlow<Map<Profile, String>> = _inboxItems
+  private val _inboxItems = MutableStateFlow<Map<Profile, Pair<Pair<String, String>, Pair<Double, Double>>>>(emptyMap())
+  open val inboxItems: StateFlow<Map<Profile, Pair<Pair<String, String>, Pair<Double, Double>>>> = _inboxItems
 
   private val _sentItems = MutableStateFlow<List<Profile>>(emptyList())
   open val sentItems: StateFlow<List<Profile>> = _sentItems
@@ -664,8 +664,7 @@ open class ProfilesViewModel(
   fun getInboxOfSelfProfile(onComplete: () -> Unit) {
     val inboxUidList = selfProfile.value?.meetingRequestInbox
     val sentUidList = selfProfile.value?.meetingRequestSent
-    val pendingLocationUid = selfProfile.value?.meetingRequestPendingLocation
-    if (inboxUidList != null && sentUidList != null && pendingLocationUid != null) {
+    if (inboxUidList != null && sentUidList != null) {
       val uidsMessageList = inboxUidList.toList()
       val uidsList = uidsMessageList.map { it.first }
       val messageList = uidsMessageList.map { it.second }
@@ -673,7 +672,6 @@ open class ProfilesViewModel(
         _inboxItems.value = _inboxProfiles.value.filterNotNull().zip(messageList).toMap()
         getSentUsers(sentUidList) {
           _sentItems.value = _sentProfiles.value.filterNotNull()
-          getPendingLocationUsers(pendingLocationUid) { onComplete() }
         }
       }
     }
@@ -687,20 +685,6 @@ open class ProfilesViewModel(
     }
   }
 
-  /**
-   * adds a user uid in our pending location
-   *
-   * @param newUid : uid to add
-   * @param onComplete : callaback to avoid racing conditions
-   */
-  fun addPendingLocation(newUid: String, onComplete: () -> Unit) {
-    updateProfile(
-        _selfProfile.value?.copy(
-            meetingRequestPendingLocation =
-                _selfProfile.value?.meetingRequestPendingLocation?.plus(newUid) ?: emptyList())!!,
-        { onComplete() },
-        {})
-  }
 
   /**
    * remove a chosen locations (called when you already met a person after having decided of a
@@ -737,10 +721,8 @@ open class ProfilesViewModel(
         _selfProfile.value?.copy(
             meetingRequestChosenLocalisation =
                 _selfProfile.value?.meetingRequestChosenLocalisation?.plus(uid to loc)
-                    ?: emptyMap(),
-            meetingRequestPendingLocation =
-                _selfProfile.value?.meetingRequestPendingLocation?.filter { it != uid }
-                    ?: emptyList())!!,
+                    ?: emptyMap()
+           )!!,
         { onComplete() },
         { onFailure(it) })
   }

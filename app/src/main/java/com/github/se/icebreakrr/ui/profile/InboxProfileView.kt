@@ -1,5 +1,6 @@
 package com.github.se.icebreakrr.ui.profile
 
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -99,8 +100,10 @@ fun InboxProfileViewScreen(
   val profile = profilesViewModel.selectedProfile.collectAsState().value
   val inboxItems = profilesViewModel.inboxItems.collectAsState()
   val context = LocalContext.current
-
-  val message = inboxItems.value[profile]
+  Log.d("NOTIF INBOX", inboxItems.value[profile]?.first.toString())
+  val message = inboxItems.value[profile]?.first?.first
+  val locationMessage = inboxItems.value[profile]?.first?.second ?: "null"
+  val location = inboxItems.value[profile]?.second
 
   Scaffold(modifier = Modifier.fillMaxSize().testTag("NotificationProfileScreen")) { paddingValues
     ->
@@ -122,14 +125,19 @@ fun InboxProfileViewScreen(
             modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
               Spacer(modifier = Modifier.height(SPACER_HEIGHT.dp))
               AcceptDeclineRequest(
-                  message ?: "",
+                  message ?: "null",
                   {
-                    acceptDeclineCode(
-                        meetingRequestViewModel,
-                        navigationActions,
-                        profile.uid,
-                        true,
-                        profile.fcmToken)
+                    if (location != null) {
+                        acceptDeclineCode(
+                            meetingRequestViewModel,
+                            navigationActions,
+                            profile.uid,
+                            true,
+                            profile.fcmToken,
+                            location,
+                            locationMessage
+                        )
+                    }
                     Toast.makeText(
                             context,
                             "You've accepted the request, " +
@@ -139,12 +147,17 @@ fun InboxProfileViewScreen(
                         .show()
                   },
                   {
-                    acceptDeclineCode(
-                        meetingRequestViewModel,
-                        navigationActions,
-                        profile.uid,
-                        false,
-                        profile.fcmToken)
+                      if (location != null) {
+                          acceptDeclineCode(
+                              meetingRequestViewModel,
+                              navigationActions,
+                              profile.uid,
+                              false,
+                              profile.fcmToken,
+                              location,
+                              locationMessage
+                          )
+                      }
                   })
               InfoSection(profile = profile, tagsViewModel = tagsViewModel)
             }
@@ -169,10 +182,18 @@ fun acceptDeclineCode(
     navigationActions: NavigationActions,
     uid: String,
     accepted: Boolean,
-    fcm: String
+    fcm: String,
+    location: Pair<Double, Double>,
+    locationMessage: String
 ) {
   meetingRequestViewModel.setMeetingResponse(fcm, "accepting/decline request", accepted)
   meetingRequestViewModel.sendMeetingResponse()
+  if(accepted){
+      meetingRequestViewModel.confirmMeetingLocation(
+      uid, Pair(locationMessage, location)) {
+          Log.e("MeetingRequestService", "error when confirmMeetingLocation : ${it.message}")
+      }
+  }
   meetingRequestViewModel.removeFromMeetingRequestInbox(uid)
   meetingRequestViewModel.updateInboxOfMessages {}
   navigationActions.goBack()

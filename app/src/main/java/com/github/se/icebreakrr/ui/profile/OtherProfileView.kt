@@ -52,6 +52,7 @@ import com.github.se.icebreakrr.model.profile.ProfilesViewModel
 import com.github.se.icebreakrr.model.tags.TagsViewModel
 import com.github.se.icebreakrr.ui.message.SendRequestScreen
 import com.github.se.icebreakrr.ui.navigation.NavigationActions
+import com.github.se.icebreakrr.ui.navigation.Screen
 import com.github.se.icebreakrr.ui.sections.shared.InfoSection
 import com.github.se.icebreakrr.ui.sections.shared.MessageWhenLoadingProfile
 import com.github.se.icebreakrr.ui.sections.shared.ProfileHeader
@@ -207,13 +208,11 @@ fun OtherProfileView(
                   onValueChange = { writtenMessage = it },
                   value = writtenMessage,
                   onSendClick = {
-                    meetingRequestViewModel.onMeetingRequestChange(writtenMessage)
-                    meetingRequestViewModel.onLocalTokenChange(profile.fcmToken ?: "null")
-                    meetingRequestViewModel.sendMeetingRequest()
-                    meetingRequestViewModel.addToMeetingRequestSent(profile.uid)
-                    meetingRequestViewModel.startMeetingRequestTimer(profile.uid, profile.fcmToken ?: "null", profile.name, context)
+                    meetingRequestViewModel.setMeetingRequestChangeFirstMessage(writtenMessage)
+                    meetingRequestViewModel.setTargetToken(profile.fcmToken!!)
                     writtenMessage = ""
-                    navigationActions.goBack()
+                    navigationActions.navigateTo(Screen.MAP_MEETING_LOCATION_SCREEN +
+                            "?userId=${profile.uid}")
                   },
                   onCancelClick = { sendRequest = false })
             }
