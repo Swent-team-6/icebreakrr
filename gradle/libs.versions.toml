@@ -74,6 +74,7 @@ geohashJava = "1.4.0"
 playServicesMaps = "19.0.0"
 mapsCompose = "4.3.3"
 mapsComposeUtils = "4.3.0"
+workRuntimeKtx = "2.9.0"
 
 [libraries]
 #Google
@@ -82,6 +83,7 @@ androidx-core = { module = "androidx.test:core", version.ref = "core" }
 androidx-core-testing = { module = "androidx.arch.core:core-testing", version.ref = "coreTesting" }
 androidx-junit-v115 = { module = "androidx.test.ext:junit", version.ref = "androidxJunit" }
 androidx-lifecycle-viewmodel-ktx = { module = "androidx.lifecycle:lifecycle-viewmodel-ktx", version.ref = "lifecycleViewmodelKtx" }
+androidx-work-runtime-ktx = { module = "androidx.work:work-runtime-ktx", version.ref = "workRuntimeKtx" }
 compose-cropper = { module = "com.github.SmartToolFactory:Compose-Cropper", version.ref = "composeCropper" }
 firebase-messaging-ktx = { module = "com.google.firebase:firebase-messaging-ktx" }
 mockito-inline = { module = "org.mockito:mockito-inline", version.ref = "mockitoInline" }

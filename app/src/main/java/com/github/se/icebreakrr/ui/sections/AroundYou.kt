@@ -148,6 +148,9 @@ fun AroundYouScreen(
             filterViewModel.ageRange.value,
             tagsViewModel.filteredTags.value)
 
+        profilesViewModel.getMessagingRadiusProfile(
+            userLocation.value ?: GeoPoint(DEFAULT_USER_LATITUDE, DEFAULT_USER_LONGITUDE))
+
         delay(REFRESH_DELAY) // Wait before the next update
       }
     }
@@ -178,9 +181,7 @@ fun AroundYouScreen(
             },
             tabList = LIST_TOP_LEVEL_DESTINATIONS,
             selectedItem = Route.AROUND_YOU,
-            notificationCount =
-                (myProfile.value?.meetingRequestInbox?.size ?: 0) +
-                    (myProfile.value?.meetingRequestPendingLocation?.size ?: 0),
+            notificationCount = (myProfile.value?.meetingRequestInbox?.size ?: 0),
             heatMapCount = myProfile.value?.meetingRequestChosenLocalisation?.size ?: 0)
       },
       topBar = { TopBar("Around You") },

@@ -19,8 +19,6 @@ import com.github.se.icebreakrr.model.profile.ProfilesRepository
 import com.github.se.icebreakrr.model.profile.ProfilesViewModel
 import com.github.se.icebreakrr.ui.navigation.NavigationActions
 import com.github.se.icebreakrr.ui.navigation.Route
-import com.github.se.icebreakrr.ui.sections.DEFAULT_USER_LATITUDE
-import com.github.se.icebreakrr.ui.sections.DEFAULT_USER_LONGITUDE
 import com.github.se.icebreakrr.utils.IPermissionManager
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
@@ -61,7 +59,6 @@ class LocationMapSelectorTest {
           tags = listOf("friendly", "outgoing"),
           profilePictureUrl = "http://example.com/profile.jpg",
           meetingRequestInbox = mapOf(),
-          meetingRequestPendingLocation = listOf(),
           meetingRequestChosenLocalisation = mapOf(),
           meetingRequestSent = listOf(),
           fcmToken = "11")
@@ -89,7 +86,6 @@ class LocationMapSelectorTest {
           tags = listOf("friendly", "outgoing"),
           profilePictureUrl = "http://example.com/profile.jpg",
           meetingRequestInbox = mapOf(),
-          meetingRequestPendingLocation = listOf(),
           meetingRequestChosenLocalisation = mapOf(),
           meetingRequestSent = listOf(),
           fcmToken = "11")
@@ -167,13 +163,9 @@ class LocationMapSelectorTest {
         .performClick()
 
     assertEquals(
-        profilesViewModel.chosenLocalisations.value,
-        mapOf(
-            profile2 to
-                Pair(
-                    "Let's meet on the second floor",
-                    Pair(DEFAULT_USER_LATITUDE, DEFAULT_USER_LONGITUDE))))
-    verify(mockFunctions).getHttpsCallable("sendMeetingConfirmation")
+        mapOf<Profile, Pair<String, Pair<Double, Double>>>(),
+        profilesViewModel.chosenLocalisations.value)
+    verify(mockFunctions).getHttpsCallable("sendMeetingRequest")
     verify(mockNavigationActions).navigateTo(Route.MAP)
   }
 }

@@ -148,7 +148,6 @@ fun SignInScreen(
                   FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
                     if (task.isSuccessful) {
                       val fcmToken = task.result
-                      meetingRequestViewModel.onLocalTokenChange(token)
                       MeetingRequestManager.ourFcmToken = fcmToken
                       meetingRequestViewModel.setInitialValues(
                           MeetingRequestManager.ourFcmToken ?: "null",

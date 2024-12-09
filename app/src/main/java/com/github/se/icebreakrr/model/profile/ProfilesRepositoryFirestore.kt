@@ -368,13 +368,19 @@ class ProfilesRepositoryFirestore(
       val meetingRequestSent =
           (document.get("meetingRequestSent") as? List<*>)?.filterIsInstance<String>() ?: listOf()
       val meetingRequestInbox =
-          (document.get("meetingRequestInbox") as? Map<*, *>)
-              ?.filter { (key, value) -> key is String && value is String }
-              ?.map { (key, value) -> key as String to value as String }
+          (document.get("meetingRequestInbox") as? Map<String, Map<Any, Any>>)
+              ?.mapNotNull { (key, value) ->
+                val messagePair = (value["first"] as? Map<String, String>)
+                val message1 = messagePair?.get("first") ?: ""
+                val message2 = messagePair?.get("second") ?: ""
+                val loc = (value["second"] as? Map<String, Any>)
+                val latitude = (loc?.get("first") as? Double)
+                val longitude = (loc?.get("second") as? Double)
+                if (latitude == null || longitude == null)
+                    throw Exception("Could not retrieve location from chosen location")
+                key to Pair(Pair(message1, message2), Pair(latitude, longitude))
+              }
               ?.toMap() ?: mapOf()
-      val meetingRequestPendingLocation =
-          (document.get("meetingRequestPendingLocation") as? List<*>)?.filterIsInstance<String>()
-              ?: listOf()
       val meetingRequestChosenLocation =
           (document.get("meetingRequestChosenLocalisation") as? Map<String, Map<String, Any>>)
               ?.mapNotNull { (key, value) ->
@@ -404,7 +410,6 @@ class ProfilesRepositoryFirestore(
           reports = reports,
           meetingRequestSent = meetingRequestSent,
           meetingRequestInbox = meetingRequestInbox,
-          meetingRequestPendingLocation = meetingRequestPendingLocation,
           meetingRequestChosenLocalisation = meetingRequestChosenLocation)
     } catch (e: Exception) {
       Log.e("ProfileRepositoryFirestore", "Error converting document to Profile", e)
