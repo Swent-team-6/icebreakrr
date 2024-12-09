@@ -56,14 +56,18 @@ class MeetingRequestServiceTest {
           null
         }
         .`when`(mockMeetingRequestViewModel)
-        .addToMeetingRequestInbox(anyOrNull(), anyOrNull(), anyOrNull())
+        .addToMeetingRequestInbox(anyOrNull(), anyOrNull(), anyOrNull(), anyOrNull(), anyOrNull())
 
     // Simulate onMessageReceived
     meetingRequestService.onMessageReceived(mockRemoteMessage)
     // Verify that ViewModel methods were called
     verify(mockMeetingRequestViewModel)
         ?.addToMeetingRequestInbox(
-            senderUID = anyOrNull(), message = anyOrNull(), onComplete = anyOrNull())
+            senderUID = anyOrNull(),
+            message1 = anyOrNull(),
+            message2 = anyOrNull(),
+            location = anyOrNull(),
+            onComplete = anyOrNull())
     verify(mockMeetingRequestViewModel)?.updateInboxOfMessages(anyOrNull())
     verify(meetingRequestService).showNotification(anyOrNull(), anyOrNull())
   }

@@ -69,7 +69,6 @@ class ProfilesViewModelTest {
           tags = listOf("friendly", "outgoing"),
           profilePictureUrl = "http://example.com/profile.jpg",
           meetingRequestInbox = mapOf(),
-          meetingRequestPendingLocation = listOf(),
           meetingRequestChosenLocalisation = mapOf(),
           meetingRequestSent = listOf())
 
@@ -470,10 +469,9 @@ class ProfilesViewModelTest {
 
   @Test
   fun confirmMeetingLocationTest() {
-    val updatedProfile = profile1.copy(meetingRequestPendingLocation = listOf("2"))
+    val updatedProfile = profile1.copy()
     val finalProfile =
         profile1.copy(
-            meetingRequestPendingLocation = listOf(),
             meetingRequestChosenLocalisation =
                 mapOf("2" to Pair("we can meat here", Pair(5.0, 6.0))))
     profilesViewModel.updateProfile(updatedProfile, {}) {}
@@ -491,15 +489,6 @@ class ProfilesViewModelTest {
     profilesViewModel.updateProfile(updatedProfile, {}) {}
     profilesViewModel.removeChosenLocalisation("2")
     verify(profilesRepository).updateProfile(eq(finalProfile), any(), any())
-  }
-
-  @Test
-  fun addPendingLocationTest() {
-    val finalProfile = profile1.copy(meetingRequestPendingLocation = listOf("2"))
-    profilesViewModel.updateProfile(profile1, {}) {}
-    profilesViewModel.addPendingLocation("2") {
-      verify(profilesRepository).updateProfile(eq(finalProfile), any(), any())
-    }
   }
 
   @Test
