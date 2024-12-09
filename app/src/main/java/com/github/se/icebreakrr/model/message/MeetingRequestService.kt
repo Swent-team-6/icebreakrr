@@ -5,7 +5,6 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
 import android.util.Log
-import androidx.compose.ui.platform.LocalContext
 import androidx.core.app.NotificationCompat
 import com.github.se.icebreakrr.R
 import com.google.firebase.messaging.FirebaseMessagingService
@@ -82,7 +81,7 @@ class MeetingRequestService : FirebaseMessagingService() {
             senderUid, message1, message2, location) {
               MeetingRequestManager.meetingRequestViewModel?.updateInboxOfMessages {}
             }
-        if(!isAppInForeground()) {
+        if (!isAppInForeground()) {
           showNotification(MSG_REQUEST, "from : $senderName")
         }
       }
@@ -95,12 +94,13 @@ class MeetingRequestService : FirebaseMessagingService() {
         val location = Pair(latitudeString.toDouble(), longitudeString.toDouble())
         val locationAndMessage = Pair(message, location)
         MeetingRequestManager.meetingRequestViewModel?.removeFromMeetingRequestSent(senderUid) {
-        MeetingRequestManager.meetingRequestViewModel?.updateInboxOfMessages {}
+          MeetingRequestManager.meetingRequestViewModel?.updateInboxOfMessages {}
         }
         if (accepted) {
-          MeetingRequestManager.meetingRequestViewModel?.confirmMeetingLocation(senderUid, locationAndMessage){
-            Log.e("LOCATION CONFIRMATION", "failed to confirm the meeting location")
-          }
+          MeetingRequestManager.meetingRequestViewModel?.confirmMeetingLocation(
+              senderUid, locationAndMessage) {
+                Log.e("LOCATION CONFIRMATION", "failed to confirm the meeting location")
+              }
           if (!isAppInForeground()) {
             showNotification(senderName + MSG_RESPONSE_ACCEPTED, "")
           }

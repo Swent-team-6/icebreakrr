@@ -1,6 +1,5 @@
 package com.github.se.icebreakrr.ui.map
 
-import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -136,24 +135,20 @@ fun LocationSelectorMapScreen(
               onClick = {
                 if (mapLoaded || isTesting) {
                   val targetProfile = profile.value
-                    if (targetProfile != null) {
-                        meetingRequestViewModel.setMeetingRequestChangeSecondMessage(
-                            location = markerState?.position?.latitude!!.toString() +
-                                    ", " +
-                                    markerState?.position?.longitude!!.toString(),
-                            message2 = stringQuery
-                        )
+                  if (targetProfile != null) {
+                    meetingRequestViewModel.setMeetingRequestChangeSecondMessage(
+                        location =
+                            markerState?.position?.latitude!!.toString() +
+                                ", " +
+                                markerState?.position?.longitude!!.toString(),
+                        message2 = stringQuery)
 
-                        meetingRequestViewModel.sendMeetingRequest()
-                        meetingRequestViewModel.addToMeetingRequestSent(profile.value!!.uid)
-                        meetingRequestViewModel.startMeetingRequestTimer(
-                            targetProfile.uid,
-                            targetProfile.fcmToken!!,
-                            targetProfile.name,
-                            context
-                        )
-                        navigationActions.navigateTo(Route.MAP)
-                    }
+                    meetingRequestViewModel.sendMeetingRequest()
+                    meetingRequestViewModel.addToMeetingRequestSent(profile.value!!.uid)
+                    meetingRequestViewModel.startMeetingRequestTimer(
+                        targetProfile.uid, targetProfile.fcmToken!!, targetProfile.name, context)
+                    navigationActions.navigateTo(Route.MAP)
+                  }
                 }
               },
               modifier =

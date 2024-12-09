@@ -211,8 +211,8 @@ fun OtherProfileView(
                     meetingRequestViewModel.setMeetingRequestChangeFirstMessage(writtenMessage)
                     meetingRequestViewModel.setTargetToken(profile.fcmToken!!)
                     writtenMessage = ""
-                    navigationActions.navigateTo(Screen.MAP_MEETING_LOCATION_SCREEN +
-                            "?userId=${profile.uid}")
+                    navigationActions.navigateTo(
+                        Screen.MAP_MEETING_LOCATION_SCREEN + "?userId=${profile.uid}")
                   },
                   onCancelClick = { sendRequest = false })
             }

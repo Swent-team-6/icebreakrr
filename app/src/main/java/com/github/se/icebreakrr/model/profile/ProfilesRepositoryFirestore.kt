@@ -370,15 +370,15 @@ class ProfilesRepositoryFirestore(
       val meetingRequestInbox =
           (document.get("meetingRequestInbox") as? Map<String, Map<Any, Any>>)
               ?.mapNotNull { (key, value) ->
-                  val messagePair = (value["first"] as? Map<String, String>)
-                  val message1 = messagePair?.get("first") ?: ""
-                  val message2 = messagePair?.get("second") ?: ""
-                  val loc = (value["second"] as? Map<String, Any>)
-                  val latitude = (loc?.get("first") as? Double)
-                  val longitude = (loc?.get("second") as? Double)
-                  if (latitude == null || longitude == null)
-                      throw Exception("Could not retrieve location from chosen location")
-                  key to Pair(Pair(message1, message2), Pair(latitude, longitude))
+                val messagePair = (value["first"] as? Map<String, String>)
+                val message1 = messagePair?.get("first") ?: ""
+                val message2 = messagePair?.get("second") ?: ""
+                val loc = (value["second"] as? Map<String, Any>)
+                val latitude = (loc?.get("first") as? Double)
+                val longitude = (loc?.get("second") as? Double)
+                if (latitude == null || longitude == null)
+                    throw Exception("Could not retrieve location from chosen location")
+                key to Pair(Pair(message1, message2), Pair(latitude, longitude))
               }
               ?.toMap() ?: mapOf()
       val meetingRequestChosenLocation =

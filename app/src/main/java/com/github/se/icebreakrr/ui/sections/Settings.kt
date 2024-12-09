@@ -110,8 +110,7 @@ fun SettingsScreen(
             },
             tabList = LIST_TOP_LEVEL_DESTINATIONS,
             selectedItem = Route.SETTINGS,
-            notificationCount =
-                (myProfile.value?.meetingRequestInbox?.size ?: 0) ,
+            notificationCount = (myProfile.value?.meetingRequestInbox?.size ?: 0),
             heatMapCount = myProfile.value?.meetingRequestChosenLocalisation?.size ?: 0)
       },
   ) { innerPadding ->

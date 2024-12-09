@@ -28,7 +28,6 @@ private val MAX_RESOLUTION = 600
 private val DEFAULT_QUALITY = 100
 private val MAX_REPORTS_BEFORE_BAN = 2
 
-
 open class ProfilesViewModel(
     private val repository: ProfilesRepository,
     private val ppRepository: ProfilePicRepository,
@@ -44,8 +43,10 @@ open class ProfilesViewModel(
   private val _inboxProfiles = MutableStateFlow<List<Profile?>>(emptyList())
   private val _sentProfiles = MutableStateFlow<List<Profile?>>(emptyList())
 
-  private val _inboxItems = MutableStateFlow<Map<Profile, Pair<Pair<String, String>, Pair<Double, Double>>>>(emptyMap())
-  open val inboxItems: StateFlow<Map<Profile, Pair<Pair<String, String>, Pair<Double, Double>>>> = _inboxItems
+  private val _inboxItems =
+      MutableStateFlow<Map<Profile, Pair<Pair<String, String>, Pair<Double, Double>>>>(emptyMap())
+  open val inboxItems: StateFlow<Map<Profile, Pair<Pair<String, String>, Pair<Double, Double>>>> =
+      _inboxItems
 
   private val _sentItems = MutableStateFlow<List<Profile>>(emptyList())
   open val sentItems: StateFlow<List<Profile>> = _sentItems
@@ -223,31 +224,29 @@ open class ProfilesViewModel(
         })
   }
 
-  fun getMessagingRadiusProfile(
-      center: GeoPoint
-  ){
-      _loading.value = true
-      repository.getProfilesInRadius(
-          center = center,
-          radiusInMeters = MEETING_REQUEST_MAX_RADIUS,
-          onSuccess = { profileList ->
-              val currentUserId = _selfProfile.value?.uid ?: ""
-              val filteredProfiles = profileList.filter { profile -> profile.uid != currentUserId}
-              _messagingProfiles.value = filteredProfiles
-              _loading.value = false
-              _isConnected.value = true
-          },
-          onFailure = { e ->
-              Log.e("ConnectionCheck", "Firebase Request FAILED")
-              Log.e(
-                  "ConnectionCheck",
-                  "Current state: waiting=${repository.isWaiting.value}, done=${repository.waitingDone.value}")
-              handleError(e)
-              if (_isConnected.value && repository.waitingDone.value) {
-                  _isConnected.value = false
-                  repository.checkConnectionPeriodically({})
-              }
-          })
+  fun getMessagingRadiusProfile(center: GeoPoint) {
+    _loading.value = true
+    repository.getProfilesInRadius(
+        center = center,
+        radiusInMeters = MEETING_REQUEST_MAX_RADIUS,
+        onSuccess = { profileList ->
+          val currentUserId = _selfProfile.value?.uid ?: ""
+          val filteredProfiles = profileList.filter { profile -> profile.uid != currentUserId }
+          _messagingProfiles.value = filteredProfiles
+          _loading.value = false
+          _isConnected.value = true
+        },
+        onFailure = { e ->
+          Log.e("ConnectionCheck", "Firebase Request FAILED")
+          Log.e(
+              "ConnectionCheck",
+              "Current state: waiting=${repository.isWaiting.value}, done=${repository.waitingDone.value}")
+          handleError(e)
+          if (_isConnected.value && repository.waitingDone.value) {
+            _isConnected.value = false
+            repository.checkConnectionPeriodically({})
+          }
+        })
   }
 
   /**
@@ -686,7 +685,6 @@ open class ProfilesViewModel(
     }
   }
 
-
   /**
    * remove a chosen locations (called when you already met a person after having decided of a
    * meeting)
@@ -722,8 +720,7 @@ open class ProfilesViewModel(
         _selfProfile.value?.copy(
             meetingRequestChosenLocalisation =
                 _selfProfile.value?.meetingRequestChosenLocalisation?.plus(uid to loc)
-                    ?: emptyMap()
-           )!!,
+                    ?: emptyMap())!!,
         { onComplete() },
         { onFailure(it) })
   }

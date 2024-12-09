@@ -128,15 +128,14 @@ fun InboxProfileViewScreen(
                   message ?: "null",
                   {
                     if (location != null) {
-                        acceptDeclineCode(
-                            meetingRequestViewModel,
-                            navigationActions,
-                            profile.uid,
-                            true,
-                            profile.fcmToken,
-                            location,
-                            locationMessage
-                        )
+                      acceptDeclineCode(
+                          meetingRequestViewModel,
+                          navigationActions,
+                          profile.uid,
+                          true,
+                          profile.fcmToken,
+                          location,
+                          locationMessage)
                     }
                     Toast.makeText(
                             context,
@@ -147,17 +146,16 @@ fun InboxProfileViewScreen(
                         .show()
                   },
                   {
-                      if (location != null) {
-                          acceptDeclineCode(
-                              meetingRequestViewModel,
-                              navigationActions,
-                              profile.uid,
-                              false,
-                              profile.fcmToken,
-                              location,
-                              locationMessage
-                          )
-                      }
+                    if (location != null) {
+                      acceptDeclineCode(
+                          meetingRequestViewModel,
+                          navigationActions,
+                          profile.uid,
+                          false,
+                          profile.fcmToken,
+                          location,
+                          locationMessage)
+                    }
                   })
               InfoSection(profile = profile, tagsViewModel = tagsViewModel)
             }
@@ -186,13 +184,13 @@ fun acceptDeclineCode(
     location: Pair<Double, Double>,
     locationMessage: String
 ) {
-  meetingRequestViewModel.setMeetingResponse(fcm, "accepting/decline request", accepted, location.toString())
+  meetingRequestViewModel.setMeetingResponse(
+      fcm, "accepting/decline request", accepted, location.toString())
   meetingRequestViewModel.sendMeetingResponse()
-  if(accepted){
-      meetingRequestViewModel.confirmMeetingLocation(
-      uid, Pair(locationMessage, location)) {
-          Log.e("MeetingRequestService", "error when confirmMeetingLocation : ${it.message}")
-      }
+  if (accepted) {
+    meetingRequestViewModel.confirmMeetingLocation(uid, Pair(locationMessage, location)) {
+      Log.e("MeetingRequestService", "error when confirmMeetingLocation : ${it.message}")
+    }
   }
   meetingRequestViewModel.removeFromMeetingRequestInbox(uid)
   meetingRequestViewModel.updateInboxOfMessages {}
