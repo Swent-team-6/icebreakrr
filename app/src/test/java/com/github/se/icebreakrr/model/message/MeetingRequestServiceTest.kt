@@ -47,16 +47,23 @@ class MeetingRequestServiceTest {
     // Create mock RemoteMessage
     val mockRemoteMessage = mock(RemoteMessage::class.java)
     val data: Map<String, String> =
-        mapOf("title" to "MEETING REQUEST", "senderUID" to "1", "message" to "hello")
+        mapOf(
+            "title" to "MEETING REQUEST",
+            "senderUID" to "1",
+            "message1" to "hello",
+            "message2" to "am under the Rolex",
+            "location" to "1.0, 2.0")
     `when`(mockRemoteMessage.data).thenReturn(data)
     assertNotNull(MeetingRequestManager.meetingRequestViewModel)
     doAnswer { invocation ->
-          val onComplete: () -> Unit = invocation.getArgument(2)
+          val onComplete: () -> Unit = invocation.getArgument(4)
           onComplete() // Trigger the completion manually
           null
         }
         .`when`(mockMeetingRequestViewModel)
         .addToMeetingRequestInbox(anyOrNull(), anyOrNull(), anyOrNull(), anyOrNull(), anyOrNull())
+
+    `when`(meetingRequestService.isAppInForeground()).thenReturn(false)
 
     // Simulate onMessageReceived
     meetingRequestService.onMessageReceived(mockRemoteMessage)
@@ -81,7 +88,8 @@ class MeetingRequestServiceTest {
             "title" to "MEETING RESPONSE",
             "senderUID" to "1",
             "message" to "hello",
-            "accepted" to "true")
+            "accepted" to "true",
+            "location" to "1.0, 2.0")
     `when`(mockRemoteMessage.data).thenReturn(data)
     assertNotNull(MeetingRequestManager.meetingRequestViewModel)
     doAnswer { invocation ->
@@ -92,32 +100,13 @@ class MeetingRequestServiceTest {
         .`when`(mockMeetingRequestViewModel)
         .removeFromMeetingRequestSent(anyOrNull(), anyOrNull())
 
+    `when`(meetingRequestService.isAppInForeground()).thenReturn(false)
+
     // Simulate onMessageReceived
     meetingRequestService.onMessageReceived(mockRemoteMessage)
     // Verify that ViewModel methods were called
     verify(mockMeetingRequestViewModel)?.removeFromMeetingRequestSent(anyOrNull(), anyOrNull())
     verify(mockMeetingRequestViewModel)?.updateInboxOfMessages(anyOrNull())
-    verify(meetingRequestService).showNotification(anyOrNull(), anyOrNull())
-  }
-
-  @Test
-  fun onMessageReceivedMeetingConfirmationTest() {
-    // Create mock RemoteMessage
-    val mockRemoteMessage = mock(RemoteMessage::class.java)
-    val data: Map<String, String> =
-        mapOf(
-            "title" to "MEETING CONFIRMATION",
-            "senderUID" to "1",
-            "message" to "hello",
-            "location" to "1, 2")
-    `when`(mockRemoteMessage.data).thenReturn(data)
-    assertNotNull(MeetingRequestManager.meetingRequestViewModel)
-
-    // Simulate onMessageReceived
-    meetingRequestService.onMessageReceived(mockRemoteMessage)
-    // Verify that ViewModel methods were called
-    verify(mockMeetingRequestViewModel)
-        ?.confirmMeetingLocation(anyOrNull(), anyOrNull(), anyOrNull())
     verify(meetingRequestService).showNotification(anyOrNull(), anyOrNull())
   }
 

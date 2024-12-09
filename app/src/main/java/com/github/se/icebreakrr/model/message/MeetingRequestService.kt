@@ -44,8 +44,12 @@ class MeetingRequestService : FirebaseMessagingService() {
    * 5. Returning `true` if a match is found, indicating the app is in the foreground; otherwise, it
    *    returns `false`.
    */
-  private fun isAppInForeground(): Boolean {
-    val activityManager = getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+  fun isAppInForeground(): Boolean {
+    val activityManager = getSystemService(Context.ACTIVITY_SERVICE) as? ActivityManager
+    if (activityManager == null) {
+      Log.w("MeetingRequestService", "ActivityManager not available")
+      return false
+    }
     val appProcesses = activityManager.runningAppProcesses ?: return false
     val packageName = packageName
 
