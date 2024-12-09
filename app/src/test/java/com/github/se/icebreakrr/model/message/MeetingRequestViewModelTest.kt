@@ -157,7 +157,7 @@ class MeetingRequestViewModelTest {
   @Test
   fun onMeetingResponseSetTest() = runBlocking {
     val message = "New Message"
-    meetingRequestViewModel.setMeetingResponse(profile2.fcmToken ?: "null", message, true)
+    meetingRequestViewModel.setMeetingResponse(profile2.fcmToken ?: "null", message, true, "(2, 50)")
     assert(meetingRequestViewModel.meetingResponseState.message == message)
     assert(meetingRequestViewModel.meetingResponseState.accepted)
     assert(
@@ -353,7 +353,7 @@ class MeetingRequestViewModelTest {
     `when`(callableReference.call(any())).thenReturn(callableTask)
 
     // Act
-    meetingRequestViewModel.sendMeetingRequest({})
+    meetingRequestViewModel.sendMeetingRequest()
 
     // Verify: Ensure no unhandled exceptions and log output if needed
     verify(functions).getHttpsCallable("sendMeetingRequest")

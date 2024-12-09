@@ -186,7 +186,7 @@ fun acceptDeclineCode(
     location: Pair<Double, Double>,
     locationMessage: String
 ) {
-  meetingRequestViewModel.setMeetingResponse(fcm, "accepting/decline request", accepted)
+  meetingRequestViewModel.setMeetingResponse(fcm, "accepting/decline request", accepted, location.toString())
   meetingRequestViewModel.sendMeetingResponse()
   if(accepted){
       meetingRequestViewModel.confirmMeetingLocation(

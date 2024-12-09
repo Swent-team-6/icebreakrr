@@ -87,15 +87,24 @@ class MeetingRequestService : FirebaseMessagingService() {
         showNotification(MSG_REQUEST, "from : $senderName")
       }
       "MEETING RESPONSE" -> {
-        val message = remoteMessage.data["message"] ?: "null"
         val accepted = remoteMessage.data["accepted"]?.toBoolean() ?: false
-
+        val message = remoteMessage.data["message"] ?: "null"
+        val locationString = remoteMessage.data["location"]?.trim('(', ')') ?: "null"
+        val latitudeString = locationString.split(", ")[0]
+        val longitudeString = locationString.split(", ")[1]
+        Log.d("LOC", locationString)
+        Log.d("LAT", latitudeString)
+        Log.d("LONG", longitudeString)
+        val location = Pair(latitudeString.toDouble(), longitudeString.toDouble())
+        val locationAndMessage = Pair(message, location)
         MeetingRequestManager.meetingRequestViewModel?.removeFromMeetingRequestSent(senderUid) {
         MeetingRequestManager.meetingRequestViewModel?.updateInboxOfMessages {}
         }
         if (accepted) {
           showNotification(senderName + MSG_RESPONSE_ACCEPTED, "")
-          // TODO : ADD BADGE HERE
+          MeetingRequestManager.meetingRequestViewModel?.confirmMeetingLocation(senderUid, locationAndMessage){
+            Log.e("LOCATION CONFIRMATION", "failed to confirm the meeting location")
+          }
         } else {
           showNotification(senderName + MSG_RESPONSE_REJECTED, "")
         }

@@ -130,10 +130,10 @@ class MeetingRequestViewModel(
    * @param newMessage: the response message we want to send
    * @param accepted: the acceptation status of the meeting request
    */
-  fun setMeetingResponse(targetToken: String, newMessage: String, accepted: Boolean) {
+  fun setMeetingResponse(targetToken: String, newMessage: String, accepted: Boolean, location: String) {
     meetingResponseState =
         meetingResponseState.copy(
-            targetToken = targetToken, message = newMessage, accepted = accepted)
+            targetToken = targetToken, message = newMessage, accepted = accepted, location = location)
   }
 
   /**
@@ -180,6 +180,7 @@ class MeetingRequestViewModel(
               "senderUID" to senderUID,
               "senderName" to senderName,
               "message" to meetingResponseState.message,
+              "location" to meetingResponseState.location,
               "accepted" to meetingResponseState.accepted.toString())
       try {
         val result = functions.getHttpsCallable(SEND_MEETING_RESPONSE).call(data).await()
@@ -191,7 +192,7 @@ class MeetingRequestViewModel(
   }
 
   /** Send a meeting cancellation in the case of distance cancellation or time cancellation */
-  fun sendMeetingCancellation(
+  private fun sendMeetingCancellation(
       targetToken: String,
       cancellationReason: String,
       senderUID: String,

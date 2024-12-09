@@ -136,20 +136,6 @@ fun LocationSelectorMapScreen(
               onClick = {
                 if (mapLoaded || isTesting) {
                   val targetProfile = profile.value
-                  meetingRequestViewModel.confirmMeetingLocation(
-                      profileId!!,
-                      Pair(
-                          stringQuery,
-                          Pair(
-                              markerState?.position?.latitude!!,
-                              markerState?.position?.longitude!!))) {
-                        Log.e(
-                            "LocationSelectorMap",
-                            "Failed to confirmMeetingLocation : ${it.message}")
-                        Toast.makeText(
-                                context, "Could not confirm meeting location", Toast.LENGTH_SHORT)
-                            .show()
-                      }
                     if (targetProfile != null) {
                         meetingRequestViewModel.setMeetingRequestChangeSecondMessage(
                             location = markerState?.position?.latitude!!.toString() +

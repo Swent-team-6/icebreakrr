@@ -16,7 +16,8 @@ The message sent to respond to a user meeting request
 data class MeetingResponse(
     val targetToken: String = "",
     val message: String = "",
-    val accepted: Boolean = false
+    val accepted: Boolean = false,
+    val location: String = ""
 )
 
 /*
