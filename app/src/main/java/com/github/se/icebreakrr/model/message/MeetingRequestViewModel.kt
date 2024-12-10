@@ -408,7 +408,7 @@ class MeetingRequestViewModel(
     val workRequest =
         OneTimeWorkRequestBuilder<MessagingTimeoutWorker>()
             .setInputData(inputData)
-            .setInitialDelay(TIMEOUT_DELAY, TimeUnit.MINUTES)
+            .setInitialDelay(15, TimeUnit.SECONDS)
             .build()
 
     uidTimerMap[uid] = workRequest.id

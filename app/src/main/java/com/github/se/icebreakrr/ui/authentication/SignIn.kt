@@ -138,12 +138,10 @@ fun SignInScreen(
 
                 // Checking if user already exists
                 profilesViewModel.getProfileByUidAndThen(firebaseUser.uid) {
-                  MeetingRequestManager.ourName = firebaseUser.displayName
-                  MeetingRequestManager.ourUid = firebaseUser.uid
-
                   // Check selectedProfile after loading completes
                   val profile = profilesViewModel.selectedProfile.value
-
+                  MeetingRequestManager.ourName = profile?.name
+                  MeetingRequestManager.ourUid = firebaseUser.uid
                   // checking if profile already exists and add it its fcmToken
                   FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
                     if (task.isSuccessful) {
