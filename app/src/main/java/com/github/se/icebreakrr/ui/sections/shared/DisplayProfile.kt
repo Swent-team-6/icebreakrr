@@ -17,6 +17,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
@@ -55,7 +56,7 @@ private val BUTTON_ICON_SCALE = 0.7f
 private val PROFILE_IMAGE_ASPECT_RATIO = 1f
 private val PROFILE_IMAGE_PADDING = 16.dp
 private val USERNAME_TEXT_STYLE =
-    TextStyle(fontSize = 24.sp, fontWeight = FontWeight.Bold, color = Color.White)
+    TextStyle(fontSize = 26.sp, fontWeight = FontWeight.Bold, color = Color.White)
 private val INFO_TEXT_STYLE =
     TextStyle(
         fontSize = 14.sp, lineHeight = 20.sp, fontWeight = FontWeight.W500, letterSpacing = 0.1.sp)
@@ -70,9 +71,17 @@ private val PADDING_SMALL = 8.dp
 private val PADDING_STANDARD = 16.dp
 private val PADDING_LARGE = 24.dp
 private const val MAX_DIALOG_WIDTH_FACTOR = 0.95f
-val requestButtonSize = 55.dp
 private const val FLAG_BUTTON_WRAP = 0.7f
-private val modalTitleSize = 20.sp
+private val MODAL_TITLE_SIZE = 20.sp
+private val USERNAME_BOX_SIZE = 60.dp
+
+// a transparent vertical gradient to make the username more readable
+private val USERNAME_BG_GRADIENT =
+    Brush.verticalGradient(0f to Color.Transparent, 1f to Color.Black.copy(alpha = 0.4f))
+
+// a transparent radial gradiant to make buttons more readable
+private val BUTTON_BG_GRADIENT =
+    Brush.radialGradient(0f to Color.Black.copy(alpha = 0.15f), 1f to Color.Transparent)
 
 /**
  * Displays the information about a profile with the tags
@@ -154,18 +163,19 @@ fun ProfileHeader(
               .aspectRatio(PROFILE_IMAGE_ASPECT_RATIO)
               .background(Color.LightGray)
               .testTag("profileHeader")) {
+        val boxHeight =
 
-        // Profile image
-        AsyncImage(
-            model = profile.profilePictureUrl,
-            contentDescription = "Profile Image",
-            contentScale = ContentScale.Crop,
-            modifier =
-                Modifier.fillMaxSize()
-                    .background(MaterialTheme.colorScheme.surfaceVariant, CircleShape)
-                    .testTag("profilePicture"),
-            placeholder = painterResource(id = R.drawable.nopp),
-            error = painterResource(id = R.drawable.nopp))
+            // Profile image
+            AsyncImage(
+                model = profile.profilePictureUrl,
+                contentDescription = "Profile Image",
+                contentScale = ContentScale.Crop,
+                modifier =
+                    Modifier.fillMaxSize()
+                        .background(MaterialTheme.colorScheme.surfaceVariant, CircleShape)
+                        .testTag("profilePicture"),
+                placeholder = painterResource(id = R.drawable.nopp),
+                error = painterResource(id = R.drawable.nopp))
 
         // Back button
         IconButton(
@@ -173,6 +183,7 @@ fun ProfileHeader(
             modifier =
                 Modifier.align(Alignment.TopStart)
                     .padding(PROFILE_IMAGE_PADDING)
+                    .background(BUTTON_BG_GRADIENT, shape = CircleShape)
                     .testTag("goBackButton")) {
               Icon(
                   imageVector = Icons.AutoMirrored.Filled.ArrowBack,
@@ -186,11 +197,13 @@ fun ProfileHeader(
               modifier =
                   Modifier.align(Alignment.TopEnd)
                       .padding(PADDING_STANDARD)
-                      .size(requestButtonSize),
+                      .size(REQUEST_BUTTON_SIZE),
               contentAlignment = Alignment.Center) {
                 IconButton(
                     onClick = { blockReportModal = true },
-                    modifier = Modifier.testTag("flagButton")) {
+                    modifier =
+                        Modifier.background(BUTTON_BG_GRADIENT, shape = CircleShape)
+                            .testTag("flagButton")) {
                       Icon(
                           painter = painterResource(id = R.drawable.flag),
                           contentDescription = "report/block user",
@@ -200,49 +213,53 @@ fun ProfileHeader(
               }
         }
 
-        // Overlay with username and edit button
-        Row(
+        // Edit Button or message button
+        if (!profileInNotification) {
+          val buttonIcon = if (myProfile) Icons.Filled.Create else Icons.AutoMirrored.Filled.Send
+          val buttonDescription = if (myProfile) "Edit Profile" else "Send Request"
+          val buttonTag = if (myProfile) "editButton" else "requestButton"
+          Box(
+              modifier =
+                  Modifier.align(Alignment.BottomEnd)
+                      .padding(PADDING_STANDARD)
+                      .size(REQUEST_BUTTON_SIZE)
+                      .shadow(REQUEST_BUTTON_ELEVATION, shape = CircleShape)
+                      .background(MaterialTheme.colorScheme.primary, CircleShape),
+              contentAlignment = Alignment.Center) {
+                IconButton(
+                    onClick = {
+                      if (isNetworkAvailable()) {
+                        if (onEditClick != null) {
+                          onEditClick()
+                        }
+                      } else {
+                        showNoInternetToast(context = context)
+                      }
+                    },
+                    modifier = Modifier.testTag(buttonTag)) {
+                      Icon(
+                          imageVector = buttonIcon,
+                          contentDescription = buttonDescription,
+                          tint = Color.White,
+                          modifier = Modifier.fillMaxSize(BUTTON_ICON_SCALE))
+                    }
+              }
+        }
+
+        // Username
+        Box(
             modifier =
-                Modifier.align(Alignment.BottomStart).fillMaxWidth().padding(PROFILE_IMAGE_PADDING),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween) {
-              // Username
+                Modifier.fillMaxWidth()
+                    .align(Alignment.BottomEnd)
+                    .height(USERNAME_BOX_SIZE)
+                    .background(USERNAME_BG_GRADIENT)) {
               Text(
                   text = profile.name,
                   style = USERNAME_TEXT_STYLE,
-                  modifier = Modifier.testTag("username"))
-
-              // Edit Button or message button
-              if (!profileInNotification) {
-                val buttonIcon =
-                    if (myProfile) Icons.Filled.Create else Icons.AutoMirrored.Filled.Send
-                val buttonDescription = if (myProfile) "Edit Profile" else "Send Request"
-                val buttonTag = if (myProfile) "editButton" else "requestButton"
-                Box(
-                    modifier =
-                        Modifier.size(REQUEST_BUTTON_SIZE)
-                            .shadow(REQUEST_BUTTON_ELEVATION, shape = CircleShape)
-                            .background(MaterialTheme.colorScheme.primary, CircleShape),
-                    contentAlignment = Alignment.Center) {
-                      IconButton(
-                          onClick = {
-                            if (isNetworkAvailable()) {
-                              if (onEditClick != null) {
-                                onEditClick()
-                              }
-                            } else {
-                              showNoInternetToast(context = context)
-                            }
-                          },
-                          modifier = Modifier.testTag(buttonTag)) {
-                            Icon(
-                                imageVector = buttonIcon,
-                                contentDescription = buttonDescription,
-                                tint = Color.White,
-                                modifier = Modifier.fillMaxSize(BUTTON_ICON_SCALE))
-                          }
-                    }
-              }
+                  modifier =
+                      Modifier.align(Alignment.CenterStart)
+                          .padding(horizontal = PADDING_STANDARD)
+                          .testTag("username"))
             }
       }
 
@@ -268,7 +285,7 @@ fun ProfileHeader(
                       Text(
                           text = stringResource(R.string.block_report_modal_title),
                           style = MaterialTheme.typography.titleLarge,
-                          fontSize = modalTitleSize,
+                          fontSize = MODAL_TITLE_SIZE,
                           modifier = Modifier.padding(bottom = PADDING_SMALL))
                       // Content
                       if (showReportOptions) {
