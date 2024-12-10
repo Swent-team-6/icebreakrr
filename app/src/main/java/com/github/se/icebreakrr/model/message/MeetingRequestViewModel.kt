@@ -178,7 +178,7 @@ class MeetingRequestViewModel(
   }
 
   /** Send a meeting cancellation in the case of distance cancellation or time cancellation */
-  private fun sendMeetingCancellation(
+  fun sendMeetingCancellation(
       targetToken: String,
       cancellationReason: String,
       senderUID: String,
@@ -366,15 +366,12 @@ class MeetingRequestViewModel(
   fun meetingDistanceCancellation() {
     updateInboxOfMessages {
       val contactUsers = profilesViewModel.getCancellationMessageProfile()
-      val usersInMessagingRange = profilesViewModel.messagingProfiles.value
+      val usersInMessagingRange = profilesViewModel.getUsersInMessagingRange()
       val contactUsersUid = contactUsers.map { it.uid }
-      Log.d("CONTACT USERS", contactUsersUid.toString())
       val usersInMessagingRangeUid = usersInMessagingRange.map { it.uid }
-      Log.d("RADIUS USERS", usersInMessagingRangeUid.toString())
       val contactUserNotInRangeUid =
           contactUsersUid.filter { !usersInMessagingRangeUid.contains(it) }
       val contactUserNotInRange = contactUsers.filter { contactUserNotInRangeUid.contains(it.uid) }
-      Log.d("CONTACT FAR", contactUserNotInRangeUid.toString())
       contactUserNotInRange.forEach {
         removeFromMeetingRequestInbox(it.uid)
         removeFromMeetingRequestSent(it.uid) {}

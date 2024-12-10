@@ -752,6 +752,10 @@ open class ProfilesViewModel(
     return _cancellationMessageProfile.value
   }
 
+  fun getUsersInMessagingRange(): List<Profile> {
+    return messagingProfiles.value
+  }
+
   /**
    * Converts an image URI to a Bitmap.
    *

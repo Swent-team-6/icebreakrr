@@ -246,14 +246,6 @@ class NotificationTest {
         .assertIsDisplayed()
         .performClick()
     composeTestRule
-        .onNodeWithTag("MeetingRequestOptionsDropdown_Option_CHOOSE_LOCATION")
-        .assertIsDisplayed()
-        .performClick()
-    composeTestRule
-        .onNodeWithTag("MeetingRequestOptionsDropdown_Selected")
-        .assertIsDisplayed()
-        .performClick()
-    composeTestRule
         .onNodeWithTag("MeetingRequestOptionsDropdown_Option_SENT")
         .assertIsDisplayed()
         .performClick()
