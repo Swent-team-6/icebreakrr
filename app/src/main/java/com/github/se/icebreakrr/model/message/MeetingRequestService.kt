@@ -177,6 +177,7 @@ class MeetingRequestService : FirebaseMessagingService() {
 
   /**
    * Create a notification builder
+   *
    * @param title : the title of the notification
    * @param message : the message of the notification
    */

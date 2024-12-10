@@ -224,10 +224,11 @@ open class ProfilesViewModel(
         })
   }
 
-    /**
-     * Fetches profiles within the messaging max radius around a certain point
-     * @param center: The center location as a GeoPoint.
-     */
+  /**
+   * Fetches profiles within the messaging max radius around a certain point
+   *
+   * @param center: The center location as a GeoPoint.
+   */
   fun getMessagingRadiusProfile(center: GeoPoint) {
     _loading.value = true
     repository.getProfilesInRadius(
