@@ -136,12 +136,12 @@ fun LocationSelectorMapScreen(
                 if (mapLoaded || isTesting) {
                   val targetProfile = profile.value
                   if (targetProfile != null) {
-                    meetingRequestViewModel.setMeetingRequestChangeSecondMessage(
+                    meetingRequestViewModel.setMeetingRequestChangeLocation(
                         location =
                             markerState?.position?.latitude!!.toString() +
                                 ", " +
                                 markerState?.position?.longitude!!.toString(),
-                        message2 = stringQuery)
+                        locationMessage = stringQuery)
 
                     meetingRequestViewModel.sendMeetingRequest()
                     meetingRequestViewModel.addToMeetingRequestSent(profile.value!!.uid)

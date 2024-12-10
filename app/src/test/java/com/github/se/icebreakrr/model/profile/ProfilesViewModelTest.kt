@@ -473,9 +473,10 @@ class ProfilesViewModelTest {
     val finalProfile =
         profile1.copy(
             meetingRequestChosenLocalisation =
-                mapOf("2" to Pair("we can meat here", Pair(5.0, 6.0))))
+                mapOf(profile2.uid to Pair("we can meat here", Pair(5.0, 6.0))))
     profilesViewModel.updateProfile(updatedProfile, {}) {}
-    profilesViewModel.confirmMeetingLocation("2", Pair("we can meat here", Pair(5.0, 6.0)), {}) {}
+    profilesViewModel.confirmMeetingRequest(
+        profile2.uid, Pair("we can meat here", Pair(5.0, 6.0)), {}) {}
     verify(profilesRepository).updateProfile(eq(finalProfile), any(), any())
   }
 

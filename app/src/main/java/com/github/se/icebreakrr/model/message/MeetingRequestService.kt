@@ -72,17 +72,17 @@ class MeetingRequestService : FirebaseMessagingService() {
     val senderUid = remoteMessage.data["senderUID"] ?: "null"
     val title = remoteMessage.data["title"] ?: "null"
     val senderName = remoteMessage.data["senderName"] ?: "null"
+    val message = remoteMessage.data["message"] ?: "null"
 
     when (title) {
       "MEETING REQUEST" -> {
-        val message1 = remoteMessage.data["message1"] ?: "null"
-        val message2 = remoteMessage.data["message2"] ?: "null"
+        val locationMessage = remoteMessage.data["locationMessage"] ?: "null"
         val locationString = remoteMessage.data["location"] ?: "null"
         val latitudeString = locationString.split(", ")[0]
         val longitudeString = locationString.split(", ")[1]
         val location = (latitudeString.toDouble() to longitudeString.toDouble())
         MeetingRequestManager.meetingRequestViewModel?.addToMeetingRequestInbox(
-            senderUid, message1, message2, location) {
+            senderUid, message, locationMessage, location) {
               MeetingRequestManager.meetingRequestViewModel?.updateInboxOfMessages {}
             }
         if (!isAppInForeground()) {
@@ -91,7 +91,6 @@ class MeetingRequestService : FirebaseMessagingService() {
       }
       "MEETING RESPONSE" -> {
         val accepted = remoteMessage.data["accepted"]?.toBoolean() ?: false
-        val message = remoteMessage.data["message"] ?: "null"
         val locationString = remoteMessage.data["location"]?.trim('(', ')') ?: "null"
         val latitudeString = locationString.split(", ")[0]
         val longitudeString = locationString.split(", ")[1]
@@ -101,7 +100,7 @@ class MeetingRequestService : FirebaseMessagingService() {
           MeetingRequestManager.meetingRequestViewModel?.updateInboxOfMessages {}
         }
         if (accepted) {
-          MeetingRequestManager.meetingRequestViewModel?.confirmMeetingLocation(
+          MeetingRequestManager.meetingRequestViewModel?.confirmMeetingRequest(
               senderUid, locationAndMessage) {
                 Log.e("LOCATION CONFIRMATION", "failed to confirm the meeting location")
               }
@@ -116,20 +115,19 @@ class MeetingRequestService : FirebaseMessagingService() {
         MeetingRequestManager.meetingRequestViewModel?.stopMeetingRequestTimer(senderUid, this)
       }
       "MEETING CANCELLATION" -> {
-        val message = remoteMessage.data["message"] ?: "null"
         val stringReason =
             when (message) {
               "DISTANCE" -> DISTANCE_REASON_CANCELLATION
               "TIME" -> TIME_REASON_CANCELLATION
               else -> DEFAULT_REASON_CANCELLATION
             }
-        MeetingRequestManager.meetingRequestViewModel?.removeFromMeetingRequestInbox(senderUid)
-        MeetingRequestManager.meetingRequestViewModel?.removeFromMeetingRequestSent(senderUid) {}
-        MeetingRequestManager.meetingRequestViewModel?.stopMeetingRequestTimer(senderUid, this)
-        showNotification("Cancelled meeting with $senderName", stringReason)
+        MeetingRequestManager.meetingRequestViewModel?.removeFromMeetingRequestSent(senderUid) {
+          MeetingRequestManager.meetingRequestViewModel?.removeFromMeetingRequestInbox(senderUid) {}
+          MeetingRequestManager.meetingRequestViewModel?.stopMeetingRequestTimer(senderUid, this)
+          showNotification("Cancelled meeting with $senderName", stringReason)
+        }
       }
       "ENGAGEMENT NOTIFICATION" -> {
-        val message = remoteMessage.data["message"] ?: "null"
         // Only show engagement notifications if app is in background
         // Commented out for now as the locations don't update in the background so the feature
         // can't work until that is changed

@@ -87,8 +87,8 @@ class MeetingRequestViewModelTest {
   private val meetingRequestState =
       MeetingRequest(
           targetToken = profile2.fcmToken ?: "null",
-          message1 = "Hello!",
-          message2 = "I am in SAT",
+          message = "Hello!",
+          locationMessage = "I am in SAT",
           location = "100.0, 200.0")
 
   private val meetingResponseState =
@@ -143,10 +143,10 @@ class MeetingRequestViewModelTest {
   @Test
   fun onMeetingRequestChangeUpdatesMessageTest() = runBlocking {
     val message = "New Message"
-    meetingRequestViewModel.setMeetingRequestChangeFirstMessage(message)
+    meetingRequestViewModel.setMeetingRequestChangeMessage(message)
 
     // Assert that the message was updated in the ViewModel state
-    assert(meetingRequestViewModel.meetingRequestState.message1 == message)
+    assert(meetingRequestViewModel.meetingRequestState.message == message)
   }
 
   @Test
@@ -218,8 +218,8 @@ class MeetingRequestViewModelTest {
 
     assert(capturedData["targetToken"] == meetingRequestState.targetToken)
     assert(capturedData["senderUID"] == meetingRequestViewModel.senderUID)
-    assert(capturedData["message1"] == meetingRequestState.message1)
-    assert(capturedData["message2"] == meetingRequestState.message2)
+    assert(capturedData["message"] == meetingRequestState.message)
+    assert(capturedData["locationMessage"] == meetingRequestState.locationMessage)
     assert(capturedData["location"] == meetingRequestState.location)
   }
 
@@ -406,7 +406,7 @@ class MeetingRequestViewModelTest {
       onSuccess(updatedProfile1)
     }
     profilesViewModel.getSelfProfile {}
-    meetingRequestViewModel.removeFromMeetingRequestInbox(profile2.uid)
+    meetingRequestViewModel.removeFromMeetingRequestInbox(profile2.uid) {}
     verify(profilesRepository).getProfileByUid(eq(profile1.uid), any(), any())
     verify(profilesRepository).updateProfile(eq(profile1), any(), any())
   }
@@ -445,6 +445,6 @@ class MeetingRequestViewModelTest {
 
     meetingRequestViewModel.meetingDistanceCancellation()
 
-    verify(profilesRepository, times(2)).getProfileByUid(eq(profile1.uid), any(), any())
+    verify(profilesRepository).getProfileByUid(eq(profile1.uid), any(), any())
   }
 }

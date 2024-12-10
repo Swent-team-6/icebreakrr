@@ -715,7 +715,7 @@ open class ProfilesViewModel(
    * @param onComplete : callback to avoid racing conditions
    * @param onFailure : callback to propagate errors
    */
-  fun confirmMeetingLocation(
+  fun confirmMeetingRequest(
       uid: String,
       loc: Pair<String, Pair<Double, Double>>,
       onComplete: () -> Unit,

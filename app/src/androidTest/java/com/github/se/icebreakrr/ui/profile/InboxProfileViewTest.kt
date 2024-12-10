@@ -39,8 +39,6 @@ class InboxProfileViewTest {
   private lateinit var profileViewModel: ProfilesViewModel
   private lateinit var tagsViewModel: TagsViewModel
   private lateinit var mockProfileRepository: ProfilesRepository
-  private lateinit var firebaseFunctions: FirebaseFunctions
-  private lateinit var mockTagsRepository: TagsRepository
   @get:Rule val composeTestRule = createComposeRule()
 
   @Before

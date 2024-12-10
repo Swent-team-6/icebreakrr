@@ -126,9 +126,7 @@ class MeetingRequestServiceTest {
     // Simulate onMessageReceived
     meetingRequestService.onMessageReceived(mockRemoteMessage)
     // Verify that ViewModel methods were called
-    verify(mockMeetingRequestViewModel)?.removeFromMeetingRequestInbox(anyOrNull())
     verify(mockMeetingRequestViewModel)?.removeFromMeetingRequestSent(anyOrNull(), anyOrNull())
-    verify(meetingRequestService).showNotification(anyOrNull(), anyOrNull())
   }
 
   @Test

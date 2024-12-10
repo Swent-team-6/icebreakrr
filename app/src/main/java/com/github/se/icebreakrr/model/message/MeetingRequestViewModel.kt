@@ -22,7 +22,10 @@ private const val SEND_MEETING_REQUEST = "sendMeetingRequest"
 private const val SEND_MEETING_RESPONSE = "sendMeetingResponse"
 private const val SEND_MEETING_CANCELLATION = "sendMeetingCancellation"
 private const val SEND_ENGAGEMENT_NOTIFICATION = "sendEngagementNotification"
-private const val TIMEOUT_DELAY = 20
+private const val TIMER_TARGET_UID = "TARGET_UID"
+private const val TIMER_TARGET_TOKEN = "TARGET_TOKEN"
+private const val TIMER_TARGET_NAME = "TARGET_NAME"
+private const val TIMEOUT_DELAY = 20L
 
 /*
    Class that manages the interaction between messages, the Profile backend and the user of the app
@@ -102,8 +105,8 @@ class MeetingRequestViewModel(
    *
    * @param newMessage the message we want to send
    */
-  fun setMeetingRequestChangeFirstMessage(message1: String) {
-    meetingRequestState = meetingRequestState.copy(message1 = message1)
+  fun setMeetingRequestChangeMessage(message: String) {
+    meetingRequestState = meetingRequestState.copy(message = message)
   }
 
   /**
@@ -111,8 +114,9 @@ class MeetingRequestViewModel(
    *
    * @param message2 the message we want to send
    */
-  fun setMeetingRequestChangeSecondMessage(message2: String, location: String) {
-    meetingRequestState = meetingRequestState.copy(message2 = message2, location = location)
+  fun setMeetingRequestChangeLocation(locationMessage: String, location: String) {
+    meetingRequestState =
+        meetingRequestState.copy(locationMessage = locationMessage, location = location)
   }
 
   /**
@@ -121,6 +125,7 @@ class MeetingRequestViewModel(
    * @param targetToken: the FCM token of the target user
    * @param newMessage: the response message we want to send
    * @param accepted: the acceptation status of the meeting request
+   * @param location: the location of the meeting request
    */
   fun setMeetingResponse(
       targetToken: String,
@@ -144,12 +149,13 @@ class MeetingRequestViewModel(
               "targetToken" to meetingRequestState.targetToken,
               "senderUID" to senderUID,
               "senderName" to senderName,
-              "message1" to meetingRequestState.message1,
-              "message2" to meetingRequestState.message2,
+              "message" to meetingRequestState.message,
+              "locationMessage" to meetingRequestState.locationMessage,
               "location" to meetingRequestState.location)
       try {
         val result = functions.getHttpsCallable(SEND_MEETING_REQUEST).call(data).await()
-        meetingRequestState = meetingRequestState.copy(message1 = "", message2 = "", location = "")
+        meetingRequestState =
+            meetingRequestState.copy(message = "", locationMessage = "", location = "")
       } catch (e: Exception) {
         Log.e("FIREBASE ERROR", "Error sending message", e)
       }
@@ -177,7 +183,14 @@ class MeetingRequestViewModel(
     }
   }
 
-  /** Send a meeting cancellation in the case of distance cancellation or time cancellation */
+  /**
+   * Send a meeting cancellation in the case of distance cancellation or time cancellation
+   *
+   * @param targetToken: the fcm token of the target user
+   * @param cancellationReason: the reason for the cancellation of the meeting request
+   * @param senderUID: the uid of the sender
+   * @param senderName: the name of the sender
+   */
   fun sendMeetingCancellation(
       targetToken: String,
       cancellationReason: String,
@@ -260,6 +273,7 @@ class MeetingRequestViewModel(
         Log.e("SENT MEETING REQUEST", "Removing the meeting request of our sent list failed")
       }
     }
+    onComplete()
   }
 
   /**
@@ -278,7 +292,6 @@ class MeetingRequestViewModel(
       location: Pair<Double, Double>,
       onComplete: () -> Unit
   ) {
-    println("addToMeetingRequestInbox() called with senderUid: $senderUID and message: $message1")
     val currentMeetingRequestInbox =
         profilesViewModel.selfProfile.value?.meetingRequestInbox ?: mapOf()
     if (!currentMeetingRequestInbox.keys.contains(senderUID)) {
@@ -298,8 +311,9 @@ class MeetingRequestViewModel(
    * Remove the message from the Inbox
    *
    * @param senderUID: the uid of the sender
+   * @param onComplete: task called after completion of the server side task
    */
-  fun removeFromMeetingRequestInbox(senderUID: String) {
+  fun removeFromMeetingRequestInbox(senderUID: String, onComplete: () -> Unit) {
     val currentMeetingRequestInbox =
         profilesViewModel.selfProfile.value?.meetingRequestInbox ?: mapOf()
     if (currentMeetingRequestInbox.keys.contains(senderUID)) {
@@ -308,11 +322,12 @@ class MeetingRequestViewModel(
           profilesViewModel.selfProfile.value?.copy(
               meetingRequestInbox = updatedMeetingRequestInbox)
       if (updatedProfile != null) {
-        profilesViewModel.updateProfile(updatedProfile, {}, {})
+        profilesViewModel.updateProfile(updatedProfile, { onComplete() }, {})
       } else {
         Log.e("INBOX MEETING REQUEST", "Removing the meeting request in our inbox list failed")
       }
     }
+    onComplete()
   }
 
   /**
@@ -340,12 +355,12 @@ class MeetingRequestViewModel(
    *   you and the location he has chosen,
    * @param onFailure : callback to propagate errors
    */
-  fun confirmMeetingLocation(
+  fun confirmMeetingRequest(
       uid: String,
       locAndMessage: Pair<String, Pair<Double, Double>>,
       onFailure: (Exception) -> Unit
   ) {
-    profilesViewModel.confirmMeetingLocation(
+    profilesViewModel.confirmMeetingRequest(
         uid, locAndMessage, { getChosenLocalisations() }, { onFailure(it) })
   }
 
@@ -376,13 +391,15 @@ class MeetingRequestViewModel(
           contactUsersUid.filter { !usersInMessagingRangeUid.contains(it) }
       val contactUserNotInRange = contactUsers.filter { contactUserNotInRangeUid.contains(it.uid) }
       contactUserNotInRange.forEach {
-        removeFromMeetingRequestInbox(it.uid)
-        removeFromMeetingRequestSent(it.uid) {}
-        sendCancellationToBothUsers(
-            targetUID = it.uid,
-            targetToken = it.fcmToken ?: "",
-            targetName = it.name,
-            reason = CancellationType.DISTANCE)
+        removeFromMeetingRequestSent(it.uid) {
+          removeFromMeetingRequestInbox(it.uid) {
+            sendCancellationToBothUsers(
+                targetUID = it.uid,
+                targetToken = it.fcmToken ?: "",
+                targetName = it.name,
+                reason = CancellationType.DISTANCE)
+          }
+        }
       }
     }
   }
@@ -392,6 +409,7 @@ class MeetingRequestViewModel(
    *
    * @param uid: the uid of the user we are sending the meeting request
    * @param token: the fcm token of the target user
+   * @param name: the name of the target user
    * @param context: the current context
    */
   fun startMeetingRequestTimer(
@@ -403,15 +421,15 @@ class MeetingRequestViewModel(
     val workManager = WorkManager.getInstance(context)
     val inputData =
         Data.Builder()
-            .putString("TARGET_UID", uid)
-            .putString("TARGET_TOKEN", token)
-            .putString("TARGET_NAME", name)
+            .putString(TIMER_TARGET_UID, uid)
+            .putString(TIMER_TARGET_TOKEN, token)
+            .putString(TIMER_TARGET_NAME, name)
             .build()
 
     val workRequest =
         OneTimeWorkRequestBuilder<MessagingTimeoutWorker>()
             .setInputData(inputData)
-            .setInitialDelay(TIMEOUT_DELAY.toLong(), TimeUnit.MINUTES)
+            .setInitialDelay(TIMEOUT_DELAY, TimeUnit.MINUTES)
             .build()
 
     uidTimerMap[uid] = workRequest.id
@@ -445,6 +463,8 @@ class MeetingRequestViewModel(
       targetName: String,
       reason: CancellationType
   ) {
+    Log.d("SENT MSG", "$targetName $targetUID $targetToken")
+    Log.d("OUR MSG", "$senderName $senderUID $senderToken")
     sendMeetingCancellation(targetToken, reason.toString(), senderUID, senderName)
     sendMeetingCancellation(senderToken, reason.toString(), targetUID, targetName)
   }

@@ -100,7 +100,6 @@ fun InboxProfileViewScreen(
   val profile = profilesViewModel.selectedProfile.collectAsState().value
   val inboxItems = profilesViewModel.inboxItems.collectAsState()
   val context = LocalContext.current
-  Log.d("NOTIF INBOX", inboxItems.value[profile]?.first.toString())
   val message = inboxItems.value[profile]?.first?.first
   val locationMessage = inboxItems.value[profile]?.first?.second ?: "null"
   val location = inboxItems.value[profile]?.second
@@ -188,12 +187,13 @@ fun acceptDeclineCode(
       fcm, "accepting/decline request", accepted, location.toString())
   meetingRequestViewModel.sendMeetingResponse()
   if (accepted) {
-    meetingRequestViewModel.confirmMeetingLocation(uid, Pair(locationMessage, location)) {
+    meetingRequestViewModel.confirmMeetingRequest(uid, Pair(locationMessage, location)) {
       Log.e("MeetingRequestService", "error when confirmMeetingLocation : ${it.message}")
     }
   }
-  meetingRequestViewModel.removeFromMeetingRequestInbox(uid)
-  meetingRequestViewModel.updateInboxOfMessages {}
+  meetingRequestViewModel.removeFromMeetingRequestInbox(uid) {
+    meetingRequestViewModel.updateInboxOfMessages {}
+  }
   navigationActions.goBack()
 }
 

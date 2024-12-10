@@ -5,8 +5,8 @@ The message sent by the user when he does a meeting request
 */
 data class MeetingRequest(
     val targetToken: String = "",
-    val message1: String = "",
-    val message2: String = "",
+    val message: String = "",
+    val locationMessage: String = "",
     val location: String = ""
 )
 
