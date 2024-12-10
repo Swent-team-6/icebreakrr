@@ -22,7 +22,7 @@ private const val SEND_MEETING_REQUEST = "sendMeetingRequest"
 private const val SEND_MEETING_RESPONSE = "sendMeetingResponse"
 private const val SEND_MEETING_CANCELLATION = "sendMeetingCancellation"
 private const val SEND_ENGAGEMENT_NOTIFICATION = "sendEngagementNotification"
-private const val TIMEOUT_DELAY = 20L
+private const val TIMEOUT_DELAY = 20
 
 /*
    Class that manages the interaction between messages, the Profile backend and the user of the app
@@ -266,7 +266,10 @@ class MeetingRequestViewModel(
    * Adds to our inbox the sender uid and the message the sender sent to us
    *
    * @param senderUID: the uid of the sender
-   * @param message: the received message
+   * @param message1: the meeting request message
+   * @param message2: the location message
+   * @param location: the location of the meeting request
+   * @param onComplete: the function called when the task has been completed
    */
   fun addToMeetingRequestInbox(
       senderUID: String,
@@ -408,7 +411,7 @@ class MeetingRequestViewModel(
     val workRequest =
         OneTimeWorkRequestBuilder<MessagingTimeoutWorker>()
             .setInputData(inputData)
-            .setInitialDelay(15, TimeUnit.SECONDS)
+            .setInitialDelay(TIMEOUT_DELAY.toLong(), TimeUnit.MINUTES)
             .build()
 
     uidTimerMap[uid] = workRequest.id

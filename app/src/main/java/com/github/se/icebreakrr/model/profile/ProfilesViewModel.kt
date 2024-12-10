@@ -224,6 +224,10 @@ open class ProfilesViewModel(
         })
   }
 
+    /**
+     * Fetches profiles within the messaging max radius around a certain point
+     * @param center: The center location as a GeoPoint.
+     */
   fun getMessagingRadiusProfile(center: GeoPoint) {
     _loading.value = true
     repository.getProfilesInRadius(
@@ -752,6 +756,7 @@ open class ProfilesViewModel(
     return _cancellationMessageProfile.value
   }
 
+  /** Get the profiles in messaging range */
   fun getUsersInMessagingRange(): List<Profile> {
     return messagingProfiles.value
   }

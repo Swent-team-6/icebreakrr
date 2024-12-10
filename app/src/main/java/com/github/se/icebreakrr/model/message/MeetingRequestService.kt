@@ -175,6 +175,11 @@ class MeetingRequestService : FirebaseMessagingService() {
     notificationManager.notify(NOTIFICATION_ID, notificationBuilder.build())
   }
 
+  /**
+   * Create a notification builder
+   * @param title : the title of the notification
+   * @param message : the message of the notification
+   */
   fun createNotificationBuilder(title: String, message: String): NotificationCompat.Builder {
     return NotificationCompat.Builder(this, MSG_CHANNEL_ID)
         .setSmallIcon(R.drawable.ic_launcher_foreground) // Replace with app icon
