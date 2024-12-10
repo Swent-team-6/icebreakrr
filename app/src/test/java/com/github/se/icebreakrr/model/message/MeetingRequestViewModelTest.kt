@@ -445,6 +445,6 @@ class MeetingRequestViewModelTest {
 
     meetingRequestViewModel.meetingDistanceCancellation()
 
-    verify(profilesRepository).getProfileByUid(eq(profile1.uid), any(), any())
+    verify(profilesRepository, times(2)).getProfileByUid(eq(profile1.uid), any(), any())
   }
 }
