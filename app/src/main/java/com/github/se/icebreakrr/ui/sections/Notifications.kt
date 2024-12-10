@@ -60,7 +60,6 @@ private val DROPDOWN_HORIZONTAL_PADDING = 16.dp
 private val DROPDOWN_VERTICAL_PADDING = 8.dp
 private const val UNDERSCORE = "_"
 private const val SPACE = " "
-private const val MEETING_REQUEST_LOCATION_PENDING = "Choose location"
 
 /**
  * Composable function for displaying the notification screen.
@@ -128,14 +127,6 @@ fun NotificationScreen(
                   context,
                   navigationActions)
             }
-            MeetingRequestOption.CHOOSE_LOCATION -> {
-              DisplayTextAndCard(
-                  MEETING_REQUEST_LOCATION_PENDING,
-                  pendingLocation.value,
-                  Screen.MAP_MEETING_LOCATION_SCREEN,
-                  context,
-                  navigationActions)
-            }
           }
         }
       })
@@ -200,11 +191,6 @@ fun MeetingRequestOptionDropdown(
                   Badge(pendingLocationsSize, "badgeInbox")
                 }
               }
-              MeetingRequestOption.CHOOSE_LOCATION -> {
-                if (inboxSize > 0) {
-                  Badge(inboxSize, "badgePendingAndInbox")
-                }
-              }
             }
           }
         }
@@ -235,11 +221,6 @@ fun MeetingRequestOptionDropdown(
               fontSize = TEXT_SMALL_SIZE,
               color = MaterialTheme.colorScheme.secondaryContainer)
           when (meetingRequestOption) {
-            MeetingRequestOption.CHOOSE_LOCATION -> {
-              if (pendingLocationsSize > 0) {
-                Badge(pendingLocationsSize, "badgeChooseLocation")
-              }
-            }
             MeetingRequestOption.INBOX -> {
               if (inboxSize > 0) {
                 Badge(inboxSize, "badgeInbox")
@@ -257,7 +238,6 @@ fun MeetingRequestOptionDropdown(
 enum class MeetingRequestOption {
   INBOX,
   SENT,
-  CHOOSE_LOCATION
 }
 
 /**

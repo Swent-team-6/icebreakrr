@@ -44,10 +44,11 @@ data class Profile(
     var hasBlocked: List<String> = listOf(),
     var hasAlreadyMet: List<String> = listOf(),
     var reports: Map<String, reportType> = mapOf(),
-    val meetingRequestSent: List<String> = listOf(),
-    val meetingRequestInbox: Map<String, String> = mapOf(),
-    val meetingRequestPendingLocation: List<String> = listOf(),
-    val meetingRequestChosenLocalisation: Map<String, Pair<String, Pair<Double, Double>>> = mapOf()
+    val meetingRequestSent: List<String> = listOf(), // uid
+    val meetingRequestInbox: Map<String, Pair<Pair<String, String>, Pair<Double, Double>>> =
+        mapOf(), // uid -> (m1, m2, loc)
+    val meetingRequestChosenLocalisation: Map<String, Pair<String, Pair<Double, Double>>> =
+        mapOf() // uid -> (m2, loc)
 ) {
   /**
    * Calculates the user's age based on their birth date.

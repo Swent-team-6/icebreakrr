@@ -23,6 +23,11 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 
+private val MEETING_REQUEST_MAX_RADIUS = 500
+private val MAX_RESOLUTION = 600
+private val DEFAULT_QUALITY = 100
+private val MAX_REPORTS_BEFORE_BAN = 2
+
 open class ProfilesViewModel(
     private val repository: ProfilesRepository,
     private val ppRepository: ProfilePicRepository,
@@ -32,11 +37,16 @@ open class ProfilesViewModel(
   private val _profiles = MutableStateFlow<List<Profile>>(emptyList())
   open val profiles: StateFlow<List<Profile>> = _profiles
 
+  private val _messagingProfiles = MutableStateFlow<List<Profile>>(emptyList())
+  open val messagingProfiles: StateFlow<List<Profile>> = _profiles
+
   private val _inboxProfiles = MutableStateFlow<List<Profile?>>(emptyList())
   private val _sentProfiles = MutableStateFlow<List<Profile?>>(emptyList())
 
-  private val _inboxItems = MutableStateFlow<Map<Profile, String>>(emptyMap())
-  open val inboxItems: StateFlow<Map<Profile, String>> = _inboxItems
+  private val _inboxItems =
+      MutableStateFlow<Map<Profile, Pair<Pair<String, String>, Pair<Double, Double>>>>(emptyMap())
+  open val inboxItems: StateFlow<Map<Profile, Pair<Pair<String, String>, Pair<Double, Double>>>> =
+      _inboxItems
 
   private val _sentItems = MutableStateFlow<List<Profile>>(emptyList())
   open val sentItems: StateFlow<List<Profile>> = _sentItems
@@ -88,11 +98,6 @@ open class ProfilesViewModel(
     repository.checkConnectionPeriodically({})
   }
 
-  private val MAX_RESOLUTION = 600
-  private val DEFAULT_QUALITY = 100
-
-  private val MAX_REPORTS_BEFORE_BAN = 2
-
   companion object {
     class Factory(private val auth: FirebaseAuth, private val firestore: FirebaseFirestore) :
         ViewModelProvider.Factory {
@@ -139,10 +144,10 @@ open class ProfilesViewModel(
   /** Initializes the repository and fetches profiles. */
   init {
     repository.init {
-      // Fetch profiles on initialization
+      val defaultPoint = GeoPoint(DEFAULT_USER_LATITUDE, DEFAULT_USER_LONGITUDE)
       getSelfProfile {
-        getFilteredProfilesInRadius(
-            GeoPoint(DEFAULT_USER_LATITUDE, DEFAULT_USER_LONGITUDE), DEFAULT_RADIUS)
+        getFilteredProfilesInRadius(defaultPoint, DEFAULT_RADIUS)
+        getMessagingRadiusProfile(defaultPoint)
       }
     }
   }
@@ -203,6 +208,36 @@ open class ProfilesViewModel(
               }
           _profiles.value = profileList
           _filteredProfiles.value = filteredProfiles
+          _loading.value = false
+          _isConnected.value = true
+        },
+        onFailure = { e ->
+          Log.e("ConnectionCheck", "Firebase Request FAILED")
+          Log.e(
+              "ConnectionCheck",
+              "Current state: waiting=${repository.isWaiting.value}, done=${repository.waitingDone.value}")
+          handleError(e)
+          if (_isConnected.value && repository.waitingDone.value) {
+            _isConnected.value = false
+            repository.checkConnectionPeriodically({})
+          }
+        })
+  }
+
+  /**
+   * Fetches profiles within the messaging max radius around a certain point
+   *
+   * @param center: The center location as a GeoPoint.
+   */
+  fun getMessagingRadiusProfile(center: GeoPoint) {
+    _loading.value = true
+    repository.getProfilesInRadius(
+        center = center,
+        radiusInMeters = MEETING_REQUEST_MAX_RADIUS,
+        onSuccess = { profileList ->
+          val currentUserId = _selfProfile.value?.uid ?: ""
+          val filteredProfiles = profileList.filter { profile -> profile.uid != currentUserId }
+          _messagingProfiles.value = filteredProfiles
           _loading.value = false
           _isConnected.value = true
         },
@@ -633,8 +668,7 @@ open class ProfilesViewModel(
   fun getInboxOfSelfProfile(onComplete: () -> Unit) {
     val inboxUidList = selfProfile.value?.meetingRequestInbox
     val sentUidList = selfProfile.value?.meetingRequestSent
-    val pendingLocationUid = selfProfile.value?.meetingRequestPendingLocation
-    if (inboxUidList != null && sentUidList != null && pendingLocationUid != null) {
+    if (inboxUidList != null && sentUidList != null) {
       val uidsMessageList = inboxUidList.toList()
       val uidsList = uidsMessageList.map { it.first }
       val messageList = uidsMessageList.map { it.second }
@@ -642,7 +676,7 @@ open class ProfilesViewModel(
         _inboxItems.value = _inboxProfiles.value.filterNotNull().zip(messageList).toMap()
         getSentUsers(sentUidList) {
           _sentItems.value = _sentProfiles.value.filterNotNull()
-          getPendingLocationUsers(pendingLocationUid) { onComplete() }
+          onComplete()
         }
       }
     }
@@ -654,21 +688,6 @@ open class ProfilesViewModel(
     if (chosenLocationsUid != null) {
       getChosenLocationsUsers(chosenLocationsUid)
     }
-  }
-
-  /**
-   * adds a user uid in our pending location
-   *
-   * @param newUid : uid to add
-   * @param onComplete : callaback to avoid racing conditions
-   */
-  fun addPendingLocation(newUid: String, onComplete: () -> Unit) {
-    updateProfile(
-        _selfProfile.value?.copy(
-            meetingRequestPendingLocation =
-                _selfProfile.value?.meetingRequestPendingLocation?.plus(newUid) ?: emptyList())!!,
-        { onComplete() },
-        {})
   }
 
   /**
@@ -696,7 +715,7 @@ open class ProfilesViewModel(
    * @param onComplete : callback to avoid racing conditions
    * @param onFailure : callback to propagate errors
    */
-  fun confirmMeetingLocation(
+  fun confirmMeetingRequest(
       uid: String,
       loc: Pair<String, Pair<Double, Double>>,
       onComplete: () -> Unit,
@@ -706,10 +725,7 @@ open class ProfilesViewModel(
         _selfProfile.value?.copy(
             meetingRequestChosenLocalisation =
                 _selfProfile.value?.meetingRequestChosenLocalisation?.plus(uid to loc)
-                    ?: emptyMap(),
-            meetingRequestPendingLocation =
-                _selfProfile.value?.meetingRequestPendingLocation?.filter { it != uid }
-                    ?: emptyList())!!,
+                    ?: emptyMap())!!,
         { onComplete() },
         { onFailure(it) })
   }
@@ -739,6 +755,11 @@ open class ProfilesViewModel(
   /** Get the cancellation messages of the different profiles */
   fun getCancellationMessageProfile(): List<Profile> {
     return _cancellationMessageProfile.value
+  }
+
+  /** Get the profiles in messaging range */
+  fun getUsersInMessagingRange(): List<Profile> {
+    return messagingProfiles.value
   }
 
   /**
