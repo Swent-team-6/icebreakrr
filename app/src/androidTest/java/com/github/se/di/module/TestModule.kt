@@ -33,6 +33,7 @@ import org.mockito.Mockito.mock
 import org.mockito.Mockito.`when`
 import org.mockito.invocation.InvocationOnMock
 import org.mockito.kotlin.any
+import org.mockito.kotlin.anyOrNull
 
 /** FirebaseAuth object that Hilt will inject into the MainActivity when testing */
 @Module
@@ -213,6 +214,10 @@ object MockFirebaseFirestoreModule {
               .thenReturn(myProfile.profilePictureUrl)
           `when`(mockMyDocumentSnapshot.getString("fcmToken")).thenReturn(myProfile.fcmToken)
           `when`(mockMyDocumentSnapshot.getGeoPoint("location")).thenReturn(globalMockGeopoint)
+          `when`(mockMyDocumentSnapshot.get("meetingRequestSent"))
+              .thenReturn(myProfile.meetingRequestSent)
+          `when`(mockMyDocumentSnapshot.get("hasBlocked")).thenReturn(myProfile.hasBlocked)
+          `when`(mockMyDocumentSnapshot.get("hasAlreadyMet")).thenReturn(myProfile.hasAlreadyMet)
           mockMyTask
         }
         .`when`(mockMyDocumentReference)
@@ -234,6 +239,50 @@ object MockFirebaseFirestoreModule {
       `when`(profilesTaskDocumentSnapshot[i].isSuccessful).thenReturn(true)
       `when`(profilesTaskDocumentSnapshot[i].result).thenReturn(profilesDocumentSnapshots[i])
     }
+
+    // get sent users :
+    val mockUser2Query = mock(Query::class.java)
+    val mockUser2TaskQuerySnapshot = mock(Task::class.java) as Task<QuerySnapshot>
+    val mockUser2QuerySnapshot = mock(QuerySnapshot::class.java)
+    `when`(mockProfilesCollectionReference.whereIn("uid", listOf("2"))).thenReturn(mockUser2Query)
+    `when`(mockUser2Query.get()).thenReturn(mockUser2TaskQuerySnapshot)
+    `when`(mockUser2TaskQuerySnapshot.isSuccessful).thenReturn(true)
+    doAnswer { invocation ->
+          val listener = invocation.arguments[0] as OnSuccessListener<QuerySnapshot>
+          listener.onSuccess(mockUser2QuerySnapshot)
+          mockUser2TaskQuerySnapshot
+        }
+        .`when`(mockUser2TaskQuerySnapshot)
+        .addOnSuccessListener(anyOrNull())
+    `when`(mockUser2QuerySnapshot.documents).thenReturn(mutableListOf(profilesDocumentSnapshots[0]))
+
+    // get blocked users :
+    val mockAliceQuery = mock(Query::class.java)
+    val mockAliceTaskQuerySnapshot = mock(Task::class.java) as Task<QuerySnapshot>
+    val mockAliceQuerySnapshot = mock(QuerySnapshot::class.java)
+    `when`(mockProfilesCollectionReference.whereIn("uid", listOf("0"))).thenReturn(mockAliceQuery)
+    `when`(mockAliceQuery.get()).thenReturn(mockAliceTaskQuerySnapshot)
+    `when`(mockAliceTaskQuerySnapshot.isSuccessful).thenReturn(true)
+    doAnswer { invocation ->
+          val listener = invocation.arguments[0] as OnSuccessListener<QuerySnapshot>
+          listener.onSuccess(mockAliceQuerySnapshot)
+          mockAliceTaskQuerySnapshot
+        }
+        .`when`(mockAliceTaskQuerySnapshot)
+        .addOnSuccessListener(anyOrNull())
+    `when`(mockAliceQuerySnapshot.documents).thenReturn(mutableListOf(profilesDocumentSnapshots[0]))
+
+    // actions for setUserPosition :
+    val myMockLocationTask = mock(Task::class.java) as Task<Void>
+    `when`(mockMyDocumentReference.update(anyOrNull())).thenReturn(myMockLocationTask)
+    `when`(myMockLocationTask.isSuccessful).thenReturn(true)
+    doAnswer { invocation ->
+          val listener = invocation.arguments[0] as OnSuccessListener<Void>
+          listener.onSuccess(null)
+          myMockLocationTask
+        }
+        .`when`(myMockLocationTask)
+        .addOnSuccessListener(any())
 
     // mock firebasefirestore for TagsRepository :
     val mockCollectionReferenceTags = mock(CollectionReference::class.java)

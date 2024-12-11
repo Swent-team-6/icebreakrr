@@ -155,6 +155,14 @@ fun AroundYouScreen(
       }
     }
   }
+  LaunchedEffect(Unit) {
+    profilesViewModel.getFilteredProfilesInRadius(
+        userLocation.value ?: GeoPoint(DEFAULT_USER_LATITUDE, DEFAULT_USER_LONGITUDE),
+        filterViewModel.selectedRadius.value,
+        filterViewModel.selectedGenders.value,
+        filterViewModel.ageRange.value,
+        tagsViewModel.filteredTags.value)
+  }
 
   // Stop monitoring when the screen is disposed
   DisposableEffect(Unit) { onDispose { engagementManager?.stopMonitoring() } }

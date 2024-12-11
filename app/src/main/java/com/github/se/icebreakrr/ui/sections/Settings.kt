@@ -90,6 +90,7 @@ fun SettingsScreen(
 
   // Collect the discoverability state from DataStore
   val isDiscoverable by appDataStore.isDiscoverable.collectAsState(initial = true)
+  // Log.d("TESTEST", "[settings] is discoverable : ${isDiscoverable}")
 
   LaunchedEffect(Unit) { auth.currentUser?.let { profilesViewModel.getProfileByUid(it.uid) } }
 

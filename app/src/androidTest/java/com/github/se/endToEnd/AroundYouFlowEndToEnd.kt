@@ -33,7 +33,7 @@ import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
 @HiltAndroidTest
-class M2Test {
+class AroundYouFlowEndToEnd {
   val intent =
       Intent(InstrumentationRegistry.getInstrumentation().targetContext, MainActivity::class.java)
   @Inject lateinit var authInjected: FirebaseAuth
@@ -52,7 +52,7 @@ class M2Test {
   }
 
   @Test
-  fun endToEnd2() {
+  fun AroundYouFlowEndToEndTest() {
     ActivityScenario.launch<MainActivity>(intent).use { scenario ->
       // check if everything is displayed in the around you
       composeTestRule.onNodeWithTag("aroundYouScreen").assertIsDisplayed()
@@ -81,20 +81,38 @@ class M2Test {
       composeTestRule.onNodeWithText("#Travel").assertIsDisplayed()
       composeTestRule.onNodeWithText("#Software").assertIsDisplayed()
       composeTestRule.onNodeWithText("#Music").assertIsDisplayed()
-      //      // click on send request :
-      //      composeTestRule.onNodeWithTag("requestButton").assertIsDisplayed().performClick()
-      //      // check if everything is displayed :
-      //      composeTestRule.onNodeWithTag("messageTextField").assertIsDisplayed()
-      //      composeTestRule.onNodeWithTag("bluredBackground").assertIsDisplayed()
-      //      composeTestRule.onNodeWithTag("sendButton").assertIsDisplayed().assertHasClickAction()
-      //
-      // composeTestRule.onNodeWithTag("cancelButton").assertIsDisplayed().assertHasClickAction()
-      //      // try to send a message :
-      //      composeTestRule
-      //          .onNodeWithTag("messageTextField")
-      //          .performTextInput("Hey, do you want to meet?")
-      //      composeTestRule.onNodeWithText("Hey, do you want to meet?").assertIsDisplayed()
-      //      composeTestRule.onNodeWithTag("sendButton").performClick()
+      // click on send request :
+      composeTestRule.onNodeWithTag("requestButton").assertIsDisplayed().performClick()
+      // check if everything is displayed :
+      composeTestRule.onNodeWithTag("messageTextField").assertIsDisplayed()
+      composeTestRule.onNodeWithTag("bluredBackground").assertIsDisplayed()
+      composeTestRule.onNodeWithTag("sendButton").assertIsDisplayed().assertHasClickAction()
+
+      composeTestRule.onNodeWithTag("cancelButton").assertIsDisplayed().assertHasClickAction()
+      // try to send a message :
+      composeTestRule
+          .onNodeWithTag("messageTextField")
+          .performTextInput("Hey, do you want to meet?")
+      composeTestRule.onNodeWithText("Hey, do you want to meet?").assertIsDisplayed()
+      composeTestRule.onNodeWithTag("sendButton").performClick()
+      // choose location screen :
+      composeTestRule.waitForIdle()
+      composeTestRule.onNodeWithTag("LocationSelectorMapScreen").assertIsDisplayed()
+      composeTestRule.onNodeWithTag("addTextAndSendLocationBox").assertIsDisplayed()
+      composeTestRule.onNodeWithTag("addDetailsTextField").assertIsDisplayed()
+      composeTestRule
+          .onNodeWithTag("buttonSendMessageLocation")
+          .assertIsDisplayed()
+          .assertHasClickAction()
+      // put a message :
+      composeTestRule
+          .onNodeWithTag("addDetailsTextField")
+          .performTextInput("Lets meet in the building, 3rd floor!")
+      composeTestRule.onNodeWithText("Lets meet in the building, 3rd floor!").assertIsDisplayed()
+      // send the request :
+      composeTestRule.onNodeWithTag("buttonSendMessageLocation").performClick()
+      // go in around you :
+      composeTestRule.onNodeWithText("Around You").assertIsDisplayed().performClick()
       // reclick on alice profile :
       composeTestRule.onNodeWithText("Alice Inwonderland").assertIsDisplayed().performClick()
       // click on send button :
@@ -152,86 +170,22 @@ class M2Test {
       // check if filter worked :
       composeTestRule.onNodeWithText("Bob Marley").assertIsDisplayed()
       composeTestRule.onNodeWithText("Indiana Jones").assertIsDisplayed()
-      // go to settings :
-      composeTestRule.onNodeWithText("Settings").performClick()
-      // check if everything is displayed :
-      composeTestRule.onNodeWithTag("profileCard").assertIsDisplayed()
-      composeTestRule.onNodeWithTag("settingsScreen").assertIsDisplayed()
-      composeTestRule.onNodeWithTag("logOutButton").assertIsDisplayed().assertHasClickAction()
-      composeTestRule.onNodeWithTag("Toggle Discoverability").assertIsDisplayed()
-      // click on your profile :
-      composeTestRule.onNodeWithTag("profileCard").performClick()
-      // test if everything is displayed
-      composeTestRule.onNodeWithTag("profileScreen").assertIsDisplayed()
-      composeTestRule.onNodeWithTag("infoSection").assertIsDisplayed()
-      composeTestRule.onNodeWithTag("profileHeader").assertIsDisplayed()
-      composeTestRule.onNodeWithTag("profilePicture").assertIsDisplayed()
-      composeTestRule.onNodeWithTag("goBackButton").assertIsDisplayed().assertHasClickAction()
-      composeTestRule.onNodeWithTag("username").assertIsDisplayed()
-      composeTestRule.onNodeWithTag("editButton").assertIsDisplayed().assertHasClickAction()
-      // click on edit profile :
-      composeTestRule.onNodeWithTag("editButton").performClick()
-      // check if edit profile is displayed :
-      composeTestRule.onNodeWithTag("profileEditScreen").assertIsDisplayed()
-      composeTestRule.onNodeWithTag("topAppBar").assertIsDisplayed()
-      composeTestRule.onNodeWithTag("goBackButton").assertIsDisplayed().assertHasClickAction()
-      composeTestRule.onNodeWithTag("checkButton").assertIsDisplayed().assertHasClickAction()
-      composeTestRule.onNodeWithTag("profileEditScreenContent").assertIsDisplayed()
-      composeTestRule.onNodeWithTag("profilePicture").assertIsDisplayed()
-      composeTestRule.onNodeWithTag("nameAndAge").assertIsDisplayed()
-      composeTestRule.onNodeWithTag("catchphrase").assertIsDisplayed()
-      composeTestRule.onNodeWithTag("description").assertIsDisplayed()
-      // populate profile :
-      composeTestRule.onNodeWithTag("catchphrase").performTextInput("This is my new catchphrase!")
-      composeTestRule.onNodeWithText("This is my new catchphrase!").assertIsDisplayed()
-      composeTestRule.onNodeWithTag("description").performTextInput("This is my new description!")
-      composeTestRule.onNodeWithText("This is my new description!").assertHasClickAction()
-      // test tag selector :
-      composeTestRule.onNodeWithTag("inputTagSelector").performTextInput("Travel")
-      composeTestRule.onNodeWithText("#Travel").assertIsDisplayed().performClick()
+      // go to notification to check if you have sended a message
+      composeTestRule.onNodeWithText("Notifications").assertIsDisplayed().performClick()
       composeTestRule
-          .onNodeWithTag("clickTestTag")
+          .onNodeWithTag("MeetingRequestOptionsDropdown_Selected")
           .assertIsDisplayed()
           .performClick()
-          .assertIsNotDisplayed()
-      composeTestRule.onNodeWithTag("inputTagSelector").performTextClearance()
-      composeTestRule.onNodeWithTag("inputTagSelector").performTextInput("Travel")
-      composeTestRule.onNodeWithText("#Travel").assertIsDisplayed().performClick()
-      // click on go back :
-      composeTestRule.onNodeWithTag("goBackButton").performClick()
-      // click on cancel :
-      composeTestRule.onNodeWithText("Cancel").performClick()
-      // click on go back :
-      composeTestRule.onNodeWithTag("goBackButton").performClick()
-      // click on discard changes :
-      composeTestRule.onNodeWithText("Discard changes").performClick()
-      // test that profile hasent changed :
-      composeTestRule.onNodeWithText("This is my new catchphrase!").assertIsNotDisplayed()
-      composeTestRule.onNodeWithText("This is my new description!").assertIsNotDisplayed()
-      composeTestRule.onNodeWithText("#Travel").assertIsNotDisplayed()
-      // click on edit profile :
-      composeTestRule.onNodeWithTag("editButton").performClick()
-      // repopulate profile :
-      composeTestRule.onNodeWithTag("catchphrase").performTextInput("This is my new catchphrase!")
-      composeTestRule.onNodeWithText("This is my new catchphrase!").assertIsDisplayed()
-      composeTestRule.onNodeWithTag("description").performTextInput("This is my new description!")
-      composeTestRule.onNodeWithText("This is my new description!").assertHasClickAction()
-      composeTestRule.onNodeWithTag("inputTagSelector").performTextInput("Travel")
-      composeTestRule.onNodeWithText("#Travel").assertIsDisplayed().performClick()
-      // save changes :
-      composeTestRule.onNodeWithTag("checkButton").performClick()
-      // check if profile has been updated :
-      composeTestRule.onNodeWithText("This is my new catchphrase!").assertIsDisplayed()
-      composeTestRule.onNodeWithText("This is my new description!").assertIsDisplayed()
-      composeTestRule.onNodeWithText("#Travel").assertIsDisplayed()
-      // click on go back :
-      composeTestRule.onNodeWithTag("goBackButton").performClick()
-      // click on notification :
-      composeTestRule.onNodeWithText("Notifications").performClick()
-      // check if everything exists on notifications :
-      composeTestRule.onNodeWithTag("notificationScreen").assertIsDisplayed()
-      composeTestRule.onNodeWithTag("notificationScroll").assertIsDisplayed()
-      composeTestRule.onNodeWithTag("notificationFirstText").assertIsDisplayed()
+      composeTestRule
+          .onNodeWithTag("MeetingRequestOptionsDropdown_Option_SENT")
+          .assertIsDisplayed()
+          .performClick()
+      composeTestRule.waitForIdle()
+      composeTestRule.onNodeWithText("Alice Inwonderland").assertIsDisplayed().performClick()
+      // click on alice to cancel the meeting request
+      composeTestRule.waitForIdle()
+      composeTestRule.onNodeWithTag("Alice Inwonderland").assertIsNotDisplayed()
+
       scenario.close()
     }
   }
