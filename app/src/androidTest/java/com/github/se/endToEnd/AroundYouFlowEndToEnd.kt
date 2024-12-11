@@ -181,8 +181,17 @@ class AroundYouFlowEndToEnd {
           .assertIsDisplayed()
           .performClick()
       composeTestRule.waitForIdle()
-      composeTestRule.onNodeWithText("Alice Inwonderland").assertIsDisplayed().performClick()
       // click on alice to cancel the meeting request
+      composeTestRule.onNodeWithText("Alice Inwonderland").assertIsDisplayed().performClick()
+      composeTestRule.onNodeWithTag("confirmDialog").assertIsDisplayed()
+      composeTestRule.onNodeWithText("No").assertIsDisplayed().assertHasClickAction().performClick()
+      composeTestRule.onNodeWithText("Alice Inwonderland").assertIsDisplayed().performClick()
+      composeTestRule.onNodeWithTag("confirmDialog").assertIsDisplayed()
+      composeTestRule
+          .onNodeWithText("Yes")
+          .assertIsDisplayed()
+          .assertHasClickAction()
+          .performClick()
       composeTestRule.waitForIdle()
       composeTestRule.onNodeWithTag("Alice Inwonderland").assertIsNotDisplayed()
 

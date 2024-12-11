@@ -218,6 +218,7 @@ object MockFirebaseFirestoreModule {
               .thenReturn(myProfile.meetingRequestSent)
           `when`(mockMyDocumentSnapshot.get("hasBlocked")).thenReturn(myProfile.hasBlocked)
           `when`(mockMyDocumentSnapshot.get("hasAlreadyMet")).thenReturn(myProfile.hasAlreadyMet)
+          `when`(mockMyDocumentSnapshot.get("reports")).thenReturn(myProfile.reports)
           mockMyTask
         }
         .`when`(mockMyDocumentReference)
@@ -238,6 +239,34 @@ object MockFirebaseFirestoreModule {
           .addOnCompleteListener(any())
       `when`(profilesTaskDocumentSnapshot[i].isSuccessful).thenReturn(true)
       `when`(profilesTaskDocumentSnapshot[i].result).thenReturn(profilesDocumentSnapshots[i])
+
+      // when we update one of these profiles :
+      val profileTask = mock(Task::class.java) as Task<Void>
+      doAnswer { invocation ->
+            val newProfile = invocation.arguments[0] as Profile
+            `when`(profilesDocumentSnapshots[i].id).thenReturn(newProfile.uid)
+            `when`(profilesDocumentSnapshots[i].getString("name")).thenReturn(newProfile.name)
+            `when`(profilesDocumentSnapshots[i].getString("gender"))
+                .thenReturn(newProfile.gender.toString())
+            `when`(profilesDocumentSnapshots[i].getTimestamp("birthDate"))
+                .thenReturn(newProfile.birthDate)
+            `when`(profilesDocumentSnapshots[i].getString("catchPhrase"))
+                .thenReturn(newProfile.catchPhrase)
+            `when`(profilesDocumentSnapshots[i].getString("description"))
+                .thenReturn(newProfile.description)
+            `when`(profilesDocumentSnapshots[i].get("tags")).thenReturn(newProfile.tags)
+            `when`(profilesDocumentSnapshots[i].getString("profilePictureUrl"))
+                .thenReturn(newProfile.profilePictureUrl)
+            `when`(profilesDocumentSnapshots[i].getString("fcmToken"))
+                .thenReturn(newProfile.fcmToken)
+            `when`(profilesDocumentSnapshots[i].getGeoPoint("location"))
+                .thenReturn(globalMockGeopoint)
+            `when`(profilesDocumentSnapshots[i].get("reports")).thenReturn(newProfile.reports)
+            profileTask
+          }
+          .`when`(profilesDocumentReference[i])
+          .set(any())
+      `when`(profileTask.isSuccessful).thenReturn(true)
     }
 
     // get sent users :

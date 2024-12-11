@@ -259,6 +259,22 @@ class SettingsFlowEndToEnd {
       composeTestRule.onNodeWithText("Around You").assertIsDisplayed().performClick()
       composeTestRule.onNodeWithText("Alice Inwonderland").assertIsDisplayed()
 
+      // report alice
+      composeTestRule.onNodeWithText("Alice Inwonderland").assertIsDisplayed().performClick()
+      composeTestRule.onNodeWithTag("flagButton").assertIsDisplayed().performClick()
+      composeTestRule
+          .onNodeWithText("Report")
+          .assertIsDisplayed()
+          .assertHasClickAction()
+          .performClick()
+      composeTestRule
+          .onNodeWithText("Spam")
+          .assertIsDisplayed()
+          .assertHasClickAction()
+          .performClick()
+      composeTestRule.onNodeWithText("Report").assertExists().assertHasClickAction().performClick()
+      composeTestRule.onNodeWithText("Alice Inwonderland").assertIsNotDisplayed()
+
       // log out :
       composeTestRule.onNodeWithText("Settings").assertIsDisplayed().performClick()
       composeTestRule
