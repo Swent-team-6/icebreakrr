@@ -14,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.github.se.icebreakrr.model.profile.ProfilesViewModel
@@ -46,6 +47,7 @@ fun ImageCropperScreen(
   val cropProperties = remember {
     CropDefaults.properties(
         cropType = CropType.Static,
+        contentScale = ContentScale.Inside,
         handleSize = 100F,
         cropOutlineProperty = CropOutlineProperty(OutlineType.Oval, RectCropShape(0, "rect")),
         aspectRatio = AspectRatio(1f), // 1:1 aspect ratio
