@@ -3,7 +3,6 @@ package com.github.se.icebreakrr.ui.profile
 import android.location.Location
 import android.util.Log
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,6 +13,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
@@ -41,9 +43,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.LocationOn
-import androidx.compose.material.icons.filled.Clear
 import coil.compose.AsyncImage
 import com.github.se.icebreakrr.R
 import com.github.se.icebreakrr.model.location.LocationViewModel
@@ -134,10 +133,11 @@ fun MapScreen(
 
   // Create a mutable list to hold the fetched profiles
   val profilesMeeting = remember { mutableStateListOf<Profile>() }
-    var selectedProfile by remember { mutableStateOf<Profile?>(null) } // State to hold the selected profile
+  var selectedProfile by remember {
+    mutableStateOf<Profile?>(null)
+  } // State to hold the selected profile
 
-
-    // Fetch profiles for the UIDs
+  // Fetch profiles for the UIDs
   LaunchedEffect(uidsToFetch) {
     if (uidsToFetch.isNotEmpty()) {
       profilesMeeting.clear()
@@ -288,28 +288,31 @@ fun MapScreen(
             }
           }
 
-            // Show the profile modal if a profile is selected
-            ProfileModal(
-                profile = selectedProfile,
-                locationDescription = selectedProfile?.let { userMarkers.find { marker -> marker.uid == it.uid }?.locationDescription },
-                onDismiss = { selectedProfile = null },
-                onNavigate = { uid ->
-                    navigationActions.navigateTo(Screen.OTHER_PROFILE_VIEW + "?userId=${selectedProfile?.uid}")
-                }
-            )
+          // Show the profile modal if a profile is selected
+          ProfileModal(
+              profile = selectedProfile,
+              locationDescription =
+                  selectedProfile?.let {
+                    userMarkers.find { marker -> marker.uid == it.uid }?.locationDescription
+                  },
+              onDismiss = { selectedProfile = null },
+              onNavigate = { uid ->
+                navigationActions.navigateTo(
+                    Screen.OTHER_PROFILE_VIEW + "?userId=${selectedProfile?.uid}")
+              })
 
           // Toggle button for map visibility with an icon and increased spacing
           Box(modifier = Modifier.padding(BUTTON_PADDING)) {
             Button(onClick = { isHeatmapVisible = !isHeatmapVisible }) {
               Icon(
-                  imageVector = if (isHeatmapVisible) Icons.Filled.Clear else Icons.Filled.LocationOn,
+                  imageVector =
+                      if (isHeatmapVisible) Icons.Filled.Clear else Icons.Filled.LocationOn,
                   contentDescription = if (isHeatmapVisible) "Hide Heatmap" else "Show Heatmap",
                   modifier = Modifier.padding(end = 8.dp) // Add padding to the right of the icon
-              )
+                  )
               Text(if (isHeatmapVisible) "Hide Heatmap" else "Show Heatmap")
             }
           }
-
 
           // Fetch profiles when the camera position changes
           LaunchedEffect(cameraPositionState.position) {
@@ -387,62 +390,64 @@ fun MarkerOverlay(position: Offset, text: String) {
 }
 
 @Composable
-fun ProfileModal(profile: Profile?, locationDescription: String?, onDismiss: () -> Unit, onNavigate: (String) -> Unit) {
-    if (profile != null) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Color.Black.copy(alpha = 0.5f)) // Blurred background
+fun ProfileModal(
+    profile: Profile?,
+    locationDescription: String?,
+    onDismiss: () -> Unit,
+    onNavigate: (String) -> Unit
+) {
+  if (profile != null) {
+    Box(
+        modifier =
+            Modifier.fillMaxSize().background(Color.Black.copy(alpha = 0.5f)) // Blurred background
         ) {
-            Card(
-                modifier = Modifier
-                    .align(Alignment.Center)
-                    .padding(16.dp)
-                    .testTag("profileModal"),
-                shape = RoundedCornerShape(16.dp),
-                onClick={
-                    onNavigate(Screen.OTHER_PROFILE_VIEW +
-                            "?userId=${profile.uid}")
-                }
-            ) {
+          Card(
+              modifier = Modifier.align(Alignment.Center).padding(16.dp).testTag("profileModal"),
+              shape = RoundedCornerShape(16.dp),
+              onClick = { onNavigate(Screen.OTHER_PROFILE_VIEW + "?userId=${profile.uid}") }) {
                 Column(
                     modifier = Modifier.padding(16.dp),
                     horizontalAlignment = Alignment.CenterHorizontally, // Center horizontally
                     verticalArrangement = Arrangement.spacedBy(16.dp) // Add spacing between items
-                ) {
-                    AsyncImage(
-                        model = profile.profilePictureUrl,
-                        contentDescription = "profile picture",
-                        modifier = Modifier
-                            .size(IMAGE_SIZE)
-                            .clip(CircleShape)
-                            .align(Alignment.CenterHorizontally), // Center the image
-                        placeholder = painterResource(id = R.drawable.nopp), // Default image during loading
-                        error = painterResource(id = R.drawable.nopp) // Fallback image if URL fails
-                    )
-                    Text(
-                        text = profile.name,
-                        fontSize = 24.sp,
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier.align(Alignment.CenterHorizontally) // Center the text
-                    )
-                    // Display the location description
-                    locationDescription?.let {
+                    ) {
+                      AsyncImage(
+                          model = profile.profilePictureUrl,
+                          contentDescription = "profile picture",
+                          modifier =
+                              Modifier.size(IMAGE_SIZE)
+                                  .clip(CircleShape)
+                                  .align(Alignment.CenterHorizontally), // Center the image
+                          placeholder =
+                              painterResource(id = R.drawable.nopp), // Default image during loading
+                          error =
+                              painterResource(id = R.drawable.nopp) // Fallback image if URL fails
+                          )
+                      Text(
+                          text = profile.name,
+                          fontSize = 24.sp,
+                          fontWeight = FontWeight.Bold,
+                          modifier = Modifier.align(Alignment.CenterHorizontally) // Center the text
+                          )
+                      // Display the location description
+                      locationDescription?.let {
                         Text(
                             text = it,
                             fontSize = 14.sp,
                             fontWeight = FontWeight.Normal,
-                            modifier = Modifier.align(Alignment.CenterHorizontally) // Center the location description
-                        )
+                            modifier =
+                                Modifier.align(
+                                    Alignment.CenterHorizontally) // Center the location description
+                            )
+                      }
+                      Button(
+                          onClick = onDismiss,
+                          modifier =
+                              Modifier.align(Alignment.CenterHorizontally) // Center the button
+                          ) {
+                            Text("Close")
+                          }
                     }
-                    Button(
-                        onClick = onDismiss,
-                        modifier = Modifier.align(Alignment.CenterHorizontally) // Center the button
-                    ) {
-                        Text("Close")
-                    }
-                }
-            }
+              }
         }
-    }
+  }
 }
