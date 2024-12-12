@@ -11,6 +11,7 @@ import android.os.Binder
 import android.os.IBinder
 import android.os.Looper
 import android.util.Log
+import com.github.se.icebreakrr.R
 import com.github.se.icebreakrr.model.message.MeetingRequestManager
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationAvailability
@@ -156,8 +157,8 @@ class LocationService(
    */
   private fun createNotification(): Notification {
     return Notification.Builder(this, NOTIFICATION_CHANNEL_ID)
-        .setContentTitle("Icebreakrr")
-        .setContentText("Tracking location in the background")
+        .setContentTitle(R.string.app_name.toString())
+        .setContentText(R.string.background_notification.toString())
         .setSmallIcon(android.R.drawable.ic_menu_mylocation)
         .setOngoing(true)
         .build()
