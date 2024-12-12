@@ -10,6 +10,7 @@ import com.github.se.icebreakrr.model.profile.Profile
 import com.github.se.icebreakrr.model.profile.ProfilePicRepository
 import com.github.se.icebreakrr.model.profile.ProfilesRepository
 import com.github.se.icebreakrr.model.profile.ProfilesViewModel
+import com.github.se.icebreakrr.model.tags.TagsViewModel
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.Dispatchers
@@ -35,6 +36,7 @@ class EngagementNotificationManagerTest {
   private lateinit var appDataStore: AppDataStore
   private lateinit var context: Context
   private lateinit var filterViewModel: FilterViewModel
+  private lateinit var tagsViewModel: TagsViewModel
   private val testDispatcher = UnconfinedTestDispatcher()
 
   private val selfProfile =
@@ -69,6 +71,7 @@ class EngagementNotificationManagerTest {
     appDataStore = mock()
     context = mock()
     filterViewModel = mock()
+    tagsViewModel = mock()
 
     // Setup profilesViewModel with proper mocking
     val mockProfilesRepo = mock(ProfilesRepository::class.java)
@@ -81,7 +84,11 @@ class EngagementNotificationManagerTest {
     // Create the manager with mocked dependencies
     engagementManager =
         EngagementNotificationManager(
-            profilesViewModel, meetingRequestViewModel, appDataStore, context, filterViewModel)
+            profilesViewModel,
+            meetingRequestViewModel,
+            appDataStore,
+            filterViewModel,
+            tagsViewModel = tagsViewModel)
   }
 
   @Test
