@@ -21,6 +21,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
@@ -119,6 +121,7 @@ fun AroundYouScreen(
 ) {
   val filteredProfiles = profilesViewModel.filteredProfiles.collectAsState()
   val isLoading = profilesViewModel.loading.collectAsState()
+  val isManualRefresh = remember { mutableStateOf(false) }
   val context = LocalContext.current
   val isConnected = profilesViewModel.isConnected.collectAsState()
   val userLocation = locationViewModel.lastKnownLocation.collectAsState()
@@ -145,6 +148,12 @@ fun AroundYouScreen(
           context = context,
           filterViewModel = filterViewModel,
           permissionManager = permissionManager)
+    }
+  }
+  // this makes sure that the manual refresh is stopped when profiles are loaded
+  LaunchedEffect(isLoading.value) {
+    if (!isLoading.value) {
+      isManualRefresh.value = false
     }
   }
 
@@ -263,8 +272,9 @@ fun AroundYouScreen(
                 locationViewModel = locationViewModel,
                 filterViewModel = filterViewModel,
                 tagsViewModel = tagsViewModel,
-                isRefreshing = isLoading.value,
+                isRefreshing = isManualRefresh.value,
                 onRefresh = { center, radiusInMeters, genders, ageRange, tags ->
+                  isManualRefresh.value = true
                   profilesViewModel.getFilteredProfilesInRadius(
                       center, radiusInMeters, genders, ageRange, tags)
                 },
@@ -480,32 +490,34 @@ fun EmptyProfilePrompt(
     context: Context,
     redirectToSettings: Boolean = false
 ) {
-  Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize().testTag(testTag)) {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(COLUMN_VERTICAL_PADDING),
-        modifier = Modifier.padding(COLUMN_VERTICAL_PADDING)) {
-          Text(
-              text = label,
-              fontSize = TEXT_SIZE_LARGE,
-              fontWeight = FontWeight.Bold,
-              color = MaterialTheme.colorScheme.onSurface,
-              textAlign = TextAlign.Center)
-          if (redirectToSettings) {
-            Button(
-                onClick = {
-                  // Redirect to app settings
-                  val intent =
-                      Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
-                        data = android.net.Uri.fromParts("package", context.packageName, null)
-                      }
-                  context.startActivity(intent)
-                }) {
-                  Text(text = GOTO_SETTINGS_BUTTON_TEXT)
-                }
-          }
-        }
-  }
+  Box(
+      contentAlignment = Alignment.Center,
+      modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).testTag(testTag)) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(COLUMN_VERTICAL_PADDING),
+            modifier = Modifier.padding(COLUMN_VERTICAL_PADDING)) {
+              Text(
+                  text = label,
+                  fontSize = TEXT_SIZE_LARGE,
+                  fontWeight = FontWeight.Bold,
+                  color = MaterialTheme.colorScheme.onSurface,
+                  textAlign = TextAlign.Center)
+              if (redirectToSettings) {
+                Button(
+                    onClick = {
+                      // Redirect to app settings
+                      val intent =
+                          Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                            data = android.net.Uri.fromParts("package", context.packageName, null)
+                          }
+                      context.startActivity(intent)
+                    }) {
+                      Text(text = GOTO_SETTINGS_BUTTON_TEXT)
+                    }
+              }
+            }
+      }
 }
 
 /**

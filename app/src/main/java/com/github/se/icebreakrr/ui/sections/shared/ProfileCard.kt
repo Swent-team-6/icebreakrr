@@ -103,13 +103,11 @@ fun ProfileCard(
                           )
 
                       // Distance text
-                      profile.distanceToSelfProfile?.let { distance ->
-                        Text(
-                            text = "$distance m",
-                            color = MaterialTheme.colorScheme.onSecondary,
-                            fontSize = CATCHPHRASE_FONT_SIZE, // Smaller font size
-                            fontWeight = FontWeight.Normal)
-                      }
+                      Text(
+                          text = profile.approxDistanceToSelfProfile(),
+                          color = MaterialTheme.colorScheme.onSecondary,
+                          fontSize = CATCHPHRASE_FONT_SIZE, // Smaller font size
+                          fontWeight = FontWeight.Normal)
                     }
 
                 Text(text = "\"${profile.catchPhrase}\"", fontSize = CATCHPHRASE_FONT_SIZE)
