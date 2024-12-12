@@ -10,6 +10,7 @@ import com.github.se.icebreakrr.model.profile.Profile
 import com.github.se.icebreakrr.model.profile.ProfilePicRepository
 import com.github.se.icebreakrr.model.profile.ProfilesRepository
 import com.github.se.icebreakrr.model.profile.ProfilesViewModel
+import com.github.se.icebreakrr.utils.IPermissionManager
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.Dispatchers
@@ -35,6 +36,7 @@ class EngagementNotificationManagerTest {
   private lateinit var appDataStore: AppDataStore
   private lateinit var context: Context
   private lateinit var filterViewModel: FilterViewModel
+  private lateinit var permissionManager: IPermissionManager
   private val testDispatcher = UnconfinedTestDispatcher()
 
   private val selfProfile =
@@ -75,13 +77,19 @@ class EngagementNotificationManagerTest {
     val mockProfilePicRepo = mock(ProfilePicRepository::class.java)
     val mockAuth = mock(FirebaseAuth::class.java)
 
+    permissionManager = mock(IPermissionManager::class.java)
     profilesViewModel = ProfilesViewModel(mockProfilesRepo, mockProfilePicRepo, mockAuth)
     profilesViewModel.selfProfile = MutableStateFlow(selfProfile)
 
     // Create the manager with mocked dependencies
     engagementManager =
         EngagementNotificationManager(
-            profilesViewModel, meetingRequestViewModel, appDataStore, context, filterViewModel)
+            profilesViewModel,
+            meetingRequestViewModel,
+            appDataStore,
+            context,
+            filterViewModel,
+            permissionManager)
   }
 
   @Test
