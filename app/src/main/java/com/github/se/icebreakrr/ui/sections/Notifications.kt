@@ -113,6 +113,7 @@ fun NotificationScreen(
                   context,
                   navigationActions)
             }
+            MeetingRequestOption.CHOOSE_LOCATION -> {}
           }
         }
       })
