@@ -178,16 +178,6 @@ class MainActivity : ComponentActivity() {
             tagsViewModel,
             permissionManager)
 
-    // Monitor login/logout events
-    authStateListener =
-        FirebaseAuth.AuthStateListener { firebaseAuth ->
-          if (auth.currentUser != null) {
-            locationViewModel.tryToStartLocationUpdates()
-          } else {
-            locationViewModel.stopLocationUpdates()
-          }
-        }
-
     // Retrieve the API key from AndroidManifest.xml
     val chatGptApiKey = getChatGptApiKey()
 
@@ -238,7 +228,11 @@ class MainActivity : ComponentActivity() {
 
     // Remove the AuthStateListener when the activity stops
     auth.removeAuthStateListener(authStateListener)
-    // Stop monitoring when app goes to background
+  }
+
+  override fun onDestroy() {
+    super.onDestroy()
+    // Stop monitoring when app closed
     engagementNotificationManager.stopMonitoring()
   }
 
