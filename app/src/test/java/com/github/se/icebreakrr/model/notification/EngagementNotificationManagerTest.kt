@@ -121,7 +121,7 @@ class EngagementNotificationManagerTest {
     doAnswer { invocation ->
           val callback = invocation.getArgument<() -> Unit>(0)
           callback.invoke()
-    }
+        }
         .whenever(profilesViewModel)
         .getSelfProfile(any())
 
