@@ -1,6 +1,7 @@
 package com.github.se.icebreakrr.model.location
 
 import android.Manifest
+import android.content.Context
 import android.content.pm.PackageManager
 import android.location.Location
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
@@ -25,6 +26,7 @@ import org.junit.rules.TestRule
 import org.junit.runner.RunWith
 import org.mockito.Mock
 import org.mockito.Mockito.mock
+import org.mockito.Mockito.never
 import org.mockito.Mockito.reset
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
@@ -43,6 +45,8 @@ class LocationViewModelTest {
 
   @Mock private lateinit var locationRepositoryFirestore: LocationRepositoryFirestore
 
+  @Mock private lateinit var mockContext: Context
+
   @Mock private lateinit var permissionManager: PermissionManager
 
   private lateinit var locationViewModel: LocationViewModel
@@ -55,7 +59,8 @@ class LocationViewModelTest {
     Dispatchers.setMain(testDispatcher) // Configure Dispatchers.Main to use the testDispatcher
 
     locationViewModel =
-        LocationViewModel(locationService, locationRepositoryFirestore, permissionManager)
+        LocationViewModel(
+            locationService, locationRepositoryFirestore, permissionManager, mockContext)
   }
 
   @After
@@ -74,6 +79,23 @@ class LocationViewModelTest {
         verify(permissionManager)
             .requestPermissions(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION))
         assertFalse(locationViewModel.isUpdatingLocation.value)
+      }
+
+  @Test
+  fun `tryToStartLocationUpdates should not start foreground service if permission is denied`() =
+      runTest(testDispatcher) {
+        val permissionFlow =
+            MutableStateFlow(
+                mapOf(Manifest.permission.ACCESS_FINE_LOCATION to PackageManager.PERMISSION_DENIED))
+        whenever(permissionManager.permissionStatuses).thenReturn(permissionFlow)
+
+        locationViewModel.tryToStartLocationUpdates()
+
+        // Verify foreground service is not started
+        verify(mockContext, never()).startForegroundService(anyOrNull())
+
+        // Verify location updates are not started
+        verify(locationService, never()).startLocationUpdates(anyOrNull(), anyOrNull())
       }
 
   @Test
@@ -185,4 +207,28 @@ class LocationViewModelTest {
     assertEquals(40.7128, geoPointCaptor.firstValue.latitude)
     assertEquals(-74.0060, geoPointCaptor.firstValue.longitude)
   }
+
+  @Test
+  fun `stopLocationUpdates should stop updates but not stop service`() =
+      runTest(testDispatcher) {
+        val permissionFlow =
+            MutableStateFlow(
+                mapOf(
+                    Manifest.permission.ACCESS_FINE_LOCATION to PackageManager.PERMISSION_GRANTED))
+        whenever(permissionManager.permissionStatuses).thenReturn(permissionFlow)
+        whenever(locationService.startLocationUpdates(anyOrNull(), anyOrNull())).thenReturn(true)
+
+        locationViewModel.tryToStartLocationUpdates()
+        advanceUntilIdle()
+        assertTrue(locationViewModel.isUpdatingLocation.value)
+
+        // Stop updates
+        locationViewModel.stopLocationUpdates()
+
+        verify(locationService).stopLocationUpdates()
+        assertFalse(locationViewModel.isUpdatingLocation.value)
+
+        // Ensure the service remains running
+        verify(mockContext, never()).stopService(anyOrNull())
+      }
 }
