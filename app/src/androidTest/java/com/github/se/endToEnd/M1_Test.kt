@@ -1,12 +1,15 @@
 package com.github.se.endToEnd
 
 import android.content.Intent
+import androidx.compose.ui.test.assertAll
+import androidx.compose.ui.test.assertAny
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotSelected
 import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onChildAt
 import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithTag
@@ -84,7 +87,7 @@ class M1_Test {
       // Screen 4 : Notification Screen
       composeTestRule.onNodeWithTag("notificationScreen").assertIsDisplayed()
       composeTestRule.onNodeWithTag("topBar").assertIsDisplayed()
-      composeTestRule.onNodeWithText("Inbox").assertIsDisplayed()
+      composeTestRule.onAllNodesWithText("Inbox").onFirst().assertIsDisplayed()
       composeTestRule.onNodeWithTag("bottomNavigationMenu").assertIsDisplayed()
       composeTestRule.onNodeWithTag("notificationScroll").assertIsDisplayed()
       composeTestRule.onNodeWithTag("notificationFirstText").assertIsDisplayed()
