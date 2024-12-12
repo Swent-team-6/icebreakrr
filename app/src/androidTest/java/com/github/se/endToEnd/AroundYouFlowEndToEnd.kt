@@ -31,6 +31,8 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
+private const val ALICE = "Alice Inwonderland"
+
 @RunWith(AndroidJUnit4::class)
 @HiltAndroidTest
 class AroundYouFlowEndToEnd {
@@ -60,7 +62,7 @@ class AroundYouFlowEndToEnd {
       composeTestRule.onNodeWithTag("filterButton").assertIsDisplayed().assertHasClickAction()
       composeTestRule.onNodeWithTag("bottomNavigationMenu").assertIsDisplayed()
       // click on a profile
-      composeTestRule.onNodeWithText("Alice Inwonderland").assertIsDisplayed().performClick()
+      composeTestRule.onNodeWithText(ALICE).assertIsDisplayed().performClick()
       // check if everything is displayed in alice's profile
       composeTestRule.onNodeWithTag("goBackButton").assertIsDisplayed().assertHasClickAction()
       composeTestRule.onNodeWithTag("profileHeader").assertIsDisplayed()
@@ -73,7 +75,7 @@ class AroundYouFlowEndToEnd {
       composeTestRule.onNodeWithTag("aroundYouProfileScreen").assertIsDisplayed()
       composeTestRule.onNodeWithTag("requestButton").assertIsDisplayed().assertHasClickAction()
       // check if alice has the good profile :
-      composeTestRule.onNodeWithText("Alice Inwonderland").assertIsDisplayed()
+      composeTestRule.onNodeWithText(ALICE).assertIsDisplayed()
       composeTestRule.onNodeWithText("So much to see, so little time").assertIsDisplayed()
       composeTestRule
           .onNodeWithText("I am a software engineer who loves to travel and meet new people.")
@@ -114,7 +116,7 @@ class AroundYouFlowEndToEnd {
       // go in around you :
       composeTestRule.onNodeWithText("Around You").assertIsDisplayed().performClick()
       // reclick on alice profile :
-      composeTestRule.onNodeWithText("Alice Inwonderland").assertIsDisplayed().performClick()
+      composeTestRule.onNodeWithText(ALICE).assertIsDisplayed().performClick()
       // click on send button :
       composeTestRule.onNodeWithTag("requestButton").performClick()
       // click on cancel button :
@@ -182,10 +184,10 @@ class AroundYouFlowEndToEnd {
           .performClick()
       composeTestRule.waitForIdle()
       // click on alice to cancel the meeting request
-      composeTestRule.onNodeWithText("Alice Inwonderland").assertIsDisplayed().performClick()
+      composeTestRule.onNodeWithText(ALICE).assertIsDisplayed().performClick()
       composeTestRule.onNodeWithTag("confirmDialog").assertIsDisplayed()
       composeTestRule.onNodeWithText("No").assertIsDisplayed().assertHasClickAction().performClick()
-      composeTestRule.onNodeWithText("Alice Inwonderland").assertIsDisplayed().performClick()
+      composeTestRule.onNodeWithText(ALICE).assertIsDisplayed().performClick()
       composeTestRule.onNodeWithTag("confirmDialog").assertIsDisplayed()
       composeTestRule
           .onNodeWithText("Yes")
@@ -193,7 +195,7 @@ class AroundYouFlowEndToEnd {
           .assertHasClickAction()
           .performClick()
       composeTestRule.waitForIdle()
-      composeTestRule.onNodeWithTag("Alice Inwonderland").assertIsNotDisplayed()
+      composeTestRule.onNodeWithTag(ALICE).assertIsNotDisplayed()
 
       scenario.close()
     }

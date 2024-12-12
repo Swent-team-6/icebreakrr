@@ -33,6 +33,12 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
+private const val MAX_TIME_IDLE: Long = 5000
+private const val NEW_CATCHPHRASE = "This is my new catchphrase!"
+private const val NEW_DESCRIPTION = "This is my new description!"
+private const val TRAVEL_TAG = "Travel"
+private const val ALICE = "Alice Inwonderland"
+
 @RunWith(AndroidJUnit4::class)
 @HiltAndroidTest
 class SettingsFlowEndToEnd {
@@ -61,7 +67,11 @@ class SettingsFlowEndToEnd {
       composeTestRule.onNodeWithTag("aroundYouScreen").assertIsDisplayed()
       composeTestRule.onNodeWithTag("bottomNavigationMenu").assertIsDisplayed()
       composeTestRule.waitForIdle()
-      composeTestRule.onAllNodesWithTag("profileCard").onFirst().assertIsDisplayed()
+      val profileCard = composeTestRule.onAllNodesWithTag("profileCard")
+      assert(profileCard.fetchSemanticsNodes().isNotEmpty()) {
+        "Expected at least one profile card"
+      }
+      profileCard.onFirst().assertIsDisplayed()
       composeTestRule.onNodeWithTag("topBar").assertIsDisplayed()
       composeTestRule.onNodeWithTag("filterButton").assertIsDisplayed()
 
@@ -99,20 +109,20 @@ class SettingsFlowEndToEnd {
       composeTestRule.onNodeWithTag("catchphrase").assertIsDisplayed()
       composeTestRule.onNodeWithTag("description").assertIsDisplayed()
       // populate profile :
-      composeTestRule.onNodeWithTag("catchphrase").performTextInput("This is my new catchphrase!")
-      composeTestRule.onNodeWithText("This is my new catchphrase!").assertIsDisplayed()
-      composeTestRule.onNodeWithTag("description").performTextInput("This is my new description!")
-      composeTestRule.onNodeWithText("This is my new description!").assertHasClickAction()
+      composeTestRule.onNodeWithTag("catchphrase").performTextInput(NEW_CATCHPHRASE)
+      composeTestRule.onNodeWithText(NEW_CATCHPHRASE).assertIsDisplayed()
+      composeTestRule.onNodeWithTag("description").performTextInput(NEW_DESCRIPTION)
+      composeTestRule.onNodeWithText(NEW_DESCRIPTION).assertHasClickAction()
       // test tag selector :
-      composeTestRule.onNodeWithTag("inputTagSelector").performTextInput("Travel")
-      composeTestRule.onNodeWithText("#Travel").assertIsDisplayed().performClick()
+      composeTestRule.onNodeWithTag("inputTagSelector").performTextInput(TRAVEL_TAG)
+      composeTestRule.onNodeWithText("#${TRAVEL_TAG}").assertIsDisplayed().performClick()
       composeTestRule
           .onNodeWithTag("clickTestTag")
           .assertIsDisplayed()
           .performClick()
           .assertIsNotDisplayed()
       composeTestRule.onNodeWithTag("inputTagSelector").performTextClearance()
-      composeTestRule.onNodeWithTag("inputTagSelector").performTextInput("Travel")
+      composeTestRule.onNodeWithTag("inputTagSelector").performTextInput(TRAVEL_TAG)
       composeTestRule.onNodeWithText("#Travel").assertIsDisplayed().performClick()
       // click on go back :
       composeTestRule.onNodeWithTag("goBackButton").performClick()
@@ -123,24 +133,24 @@ class SettingsFlowEndToEnd {
       // click on discard changes :
       composeTestRule.onNodeWithText("Discard changes").performClick()
       // test that profile hasent changed :
-      composeTestRule.onNodeWithText("This is my new catchphrase!").assertIsNotDisplayed()
-      composeTestRule.onNodeWithText("This is my new description!").assertIsNotDisplayed()
-      composeTestRule.onNodeWithText("#Travel").assertIsNotDisplayed()
+      composeTestRule.onNodeWithText(NEW_CATCHPHRASE).assertIsNotDisplayed()
+      composeTestRule.onNodeWithText(NEW_DESCRIPTION).assertIsNotDisplayed()
+      composeTestRule.onNodeWithText("#${TRAVEL_TAG}").assertIsNotDisplayed()
       // click on edit profile :
       composeTestRule.onNodeWithTag("editButton").performClick()
       // repopulate profile :
-      composeTestRule.onNodeWithTag("catchphrase").performTextInput("This is my new catchphrase!")
-      composeTestRule.onNodeWithText("This is my new catchphrase!").assertIsDisplayed()
-      composeTestRule.onNodeWithTag("description").performTextInput("This is my new description!")
-      composeTestRule.onNodeWithText("This is my new description!").assertHasClickAction()
-      composeTestRule.onNodeWithTag("inputTagSelector").performTextInput("Travel")
-      composeTestRule.onNodeWithText("#Travel").assertIsDisplayed().performClick()
+      composeTestRule.onNodeWithTag("catchphrase").performTextInput(NEW_CATCHPHRASE)
+      composeTestRule.onNodeWithText(NEW_CATCHPHRASE).assertIsDisplayed()
+      composeTestRule.onNodeWithTag("description").performTextInput(NEW_DESCRIPTION)
+      composeTestRule.onNodeWithText(NEW_DESCRIPTION).assertIsDisplayed()
+      composeTestRule.onNodeWithTag("inputTagSelector").performTextInput(TRAVEL_TAG)
+      composeTestRule.onNodeWithText("#${TRAVEL_TAG}").assertIsDisplayed().performClick()
       // save changes :
       composeTestRule.onNodeWithTag("checkButton").performClick()
       // check if profile has been updated :
-      composeTestRule.onNodeWithText("This is my new catchphrase!").assertIsDisplayed()
-      composeTestRule.onNodeWithText("This is my new description!").assertIsDisplayed()
-      composeTestRule.onNodeWithText("#Travel").assertIsDisplayed()
+      composeTestRule.onNodeWithText(NEW_CATCHPHRASE).assertIsDisplayed()
+      composeTestRule.onNodeWithText(NEW_DESCRIPTION).assertIsDisplayed()
+      composeTestRule.onNodeWithText("#${TRAVEL_TAG}").assertIsDisplayed()
       // click on go back :
       composeTestRule.onNodeWithTag("goBackButton").performClick()
 
@@ -150,7 +160,7 @@ class SettingsFlowEndToEnd {
           .assertIsDisplayed()
           .assertIsOn()
           .performClick()
-      composeTestRule.waitUntil(timeoutMillis = 5_000) {
+      composeTestRule.waitUntil(timeoutMillis = MAX_TIME_IDLE) {
         val node =
             composeTestRule.onNodeWithTag("switchToggle Discoverability").fetchSemanticsNode()
         node.config.getOrNull(SemanticsProperties.ToggleableState) ==
@@ -172,7 +182,7 @@ class SettingsFlowEndToEnd {
           .assertIsDisplayed()
           .assertIsOff()
           .performClick()
-      composeTestRule.waitUntil(timeoutMillis = 5_000) {
+      composeTestRule.waitUntil(timeoutMillis = MAX_TIME_IDLE) {
         val node =
             composeTestRule.onNodeWithTag("switchToggle Discoverability").fetchSemanticsNode()
         node.config.getOrNull(SemanticsProperties.ToggleableState) ==
@@ -186,7 +196,7 @@ class SettingsFlowEndToEnd {
       composeTestRule.onNodeWithTag("goBackButton").assertIsDisplayed().performClick()
       // go in around you to block alice :
       composeTestRule.onNodeWithText("Around You").assertIsDisplayed().performClick()
-      composeTestRule.onNodeWithText("Alice Inwonderland").assertIsDisplayed().performClick()
+      composeTestRule.onNodeWithText(ALICE).assertIsDisplayed().performClick()
       composeTestRule.onNodeWithTag("flagButton").assertIsDisplayed().performClick()
       composeTestRule.onNodeWithTag("alertDialogReportBlock").assertIsDisplayed()
       // cancel and then block :
@@ -198,15 +208,15 @@ class SettingsFlowEndToEnd {
       composeTestRule.onNodeWithText("Block").assertIsDisplayed().performClick()
       composeTestRule.onNodeWithText("Block").assertIsDisplayed().performClick()
       composeTestRule.waitForIdle()
-      composeTestRule.onNodeWithText("Alice Inwonderland").assertIsNotDisplayed()
+      composeTestRule.onNodeWithText(ALICE).assertIsNotDisplayed()
       // go back in blocked users to see if it has been updated :
       composeTestRule.onNodeWithText("Settings").assertIsDisplayed().performClick()
       composeTestRule.onNodeWithTag("blockedUsersButton").assertIsDisplayed().performClick()
-      composeTestRule.onNodeWithText("Alice Inwonderland").assertIsDisplayed()
+      composeTestRule.onNodeWithText(ALICE).assertIsDisplayed()
       // unblock and check it is updated :
-      composeTestRule.onNodeWithText("Alice Inwonderland").performClick()
+      composeTestRule.onNodeWithText(ALICE).performClick()
       composeTestRule.onNodeWithText("No").assertIsDisplayed().assertHasClickAction().performClick()
-      composeTestRule.onNodeWithText("Alice Inwonderland").performClick()
+      composeTestRule.onNodeWithText(ALICE).performClick()
       composeTestRule
           .onNodeWithText("Yes")
           .assertIsDisplayed()
@@ -219,7 +229,7 @@ class SettingsFlowEndToEnd {
           .assertHasClickAction()
           .performClick()
       composeTestRule.onNodeWithText("Around You").assertIsDisplayed().performClick()
-      composeTestRule.onNodeWithText("Alice Inwonderland").assertIsDisplayed()
+      composeTestRule.onNodeWithText(ALICE).assertIsDisplayed()
       composeTestRule.onNodeWithText("Settings").assertIsDisplayed().performClick()
 
       // already met alice and check everything updated :
@@ -233,20 +243,20 @@ class SettingsFlowEndToEnd {
           .assertHasClickAction()
           .performClick()
       composeTestRule.onNodeWithText("Around You").assertIsDisplayed().performClick()
-      composeTestRule.onNodeWithText("Alice Inwonderland").assertIsDisplayed().performClick()
+      composeTestRule.onNodeWithText(ALICE).assertIsDisplayed().performClick()
       composeTestRule
           .onNodeWithTag("alreadyMetButton")
           .performScrollTo()
           .assertIsDisplayed()
           .assertHasClickAction()
           .performClick()
-      composeTestRule.onNodeWithText("Alice Inwonderland").assertIsNotDisplayed()
+      composeTestRule.onNodeWithText(ALICE).assertIsNotDisplayed()
       composeTestRule.onNodeWithText("Settings").assertIsDisplayed().performClick()
       // remove alice from already met to see if updated :
       composeTestRule.onNodeWithTag("alreadyMetButton").assertIsDisplayed().performClick()
-      composeTestRule.onNodeWithText("Alice Inwonderland").assertIsDisplayed().performClick()
+      composeTestRule.onNodeWithText(ALICE).assertIsDisplayed().performClick()
       composeTestRule.onNodeWithText("No").assertIsDisplayed().assertHasClickAction().performClick()
-      composeTestRule.onNodeWithText("Alice Inwonderland").assertIsDisplayed().performClick()
+      composeTestRule.onNodeWithText(ALICE).assertIsDisplayed().performClick()
       composeTestRule
           .onNodeWithText("Yes")
           .assertIsDisplayed()
@@ -257,10 +267,10 @@ class SettingsFlowEndToEnd {
           .assertIsDisplayed()
       composeTestRule.onNodeWithTag("goBackButton").assertIsDisplayed().performClick()
       composeTestRule.onNodeWithText("Around You").assertIsDisplayed().performClick()
-      composeTestRule.onNodeWithText("Alice Inwonderland").assertIsDisplayed()
+      composeTestRule.onNodeWithText(ALICE).assertIsDisplayed()
 
       // report alice
-      composeTestRule.onNodeWithText("Alice Inwonderland").assertIsDisplayed().performClick()
+      composeTestRule.onNodeWithText(ALICE).assertIsDisplayed().performClick()
       composeTestRule.onNodeWithTag("flagButton").assertIsDisplayed().performClick()
       composeTestRule
           .onNodeWithText("Report")
@@ -273,7 +283,7 @@ class SettingsFlowEndToEnd {
           .assertHasClickAction()
           .performClick()
       composeTestRule.onNodeWithText("Report").assertExists().assertHasClickAction().performClick()
-      composeTestRule.onNodeWithText("Alice Inwonderland").assertIsNotDisplayed()
+      composeTestRule.onNodeWithText(ALICE).assertIsNotDisplayed()
 
       // log out :
       composeTestRule.onNodeWithText("Settings").assertIsDisplayed().performClick()

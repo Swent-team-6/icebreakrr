@@ -252,7 +252,6 @@ class ProfilesRepositoryFirestore(
       onSuccess: () -> Unit,
       onFailure: (Exception) -> Unit
   ) {
-    Log.d("TESTEST", "[repo update] ${profile}")
     performFirestoreOperation(
         db.collection(collectionPath).document(profile.uid).set(profile), onSuccess, onFailure)
   }

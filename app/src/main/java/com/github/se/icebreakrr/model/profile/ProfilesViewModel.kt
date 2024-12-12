@@ -173,9 +173,6 @@ open class ProfilesViewModel(
         center = center,
         radiusInMeters = radiusInMeters,
         onSuccess = { profileList ->
-          Log.d(
-              "TESTEST",
-              "[getFilteredProfilesInRadius] has blocked : ${_selfProfile.value?.hasBlocked}")
           val currentUserId = _selfProfile.value?.uid ?: ""
           val filteredProfiles =
               profileList.filter { profile ->
