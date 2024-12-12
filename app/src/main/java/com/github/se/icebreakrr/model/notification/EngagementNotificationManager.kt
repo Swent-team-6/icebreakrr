@@ -17,9 +17,9 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 private const val TAG = "EngagementManager"
-private const val CHECK_INTERVAL = 1 * 60 * 1000L // 1 minutes in milliseconds
+const val CHECK_INTERVAL = 1 * 60 * 1000L // 1 minutes in milliseconds
 private const val NOTIFICATION_COOLDOWN = 4 * 60 * 60 * 1000L // 4 hours in milliseconds
-private const val GET_FILTERED_WAIT_DELAY = 200L
+const val GET_FILTERED_WAIT_DELAY = 200L
 
 /**
  * Manages engagement notifications between users based on proximity and shared interests.
@@ -37,7 +37,7 @@ private const val GET_FILTERED_WAIT_DELAY = 200L
  * @property profilesViewModel Handles profile data and filtering
  * @property meetingRequestViewModel Manages sending notifications
  * @property appDataStore Manages user preferences and settings
- * @property context Android context for system services
+ * @property tagsViewModel to get the filters
  * @property filterViewModel Manages user's filter settings (radius, age, gender)
  */
 class EngagementNotificationManager(
@@ -90,7 +90,7 @@ class EngagementNotificationManager(
    * nearby profiles within the specified radius. It launches a coroutine to collect these profiles
    * and processes them if the user is discoverable.
    */
-  private fun checkNearbyUsersForCommonTags() {
+  fun checkNearbyUsersForCommonTags() {
     Log.i(TAG, "Checking for nearby users")
     scope.launch {
       try {
@@ -148,7 +148,7 @@ class EngagementNotificationManager(
    * remaining profiles to find common tags. If common tags are found, it sends a notification to
    * the nearby user using the first common tag.
    */
-  private fun processNearbyProfiles(selfProfile: Profile, nearbyProfiles: List<Profile>) {
+  fun processNearbyProfiles(selfProfile: Profile, nearbyProfiles: List<Profile>) {
     val selfTags = selfProfile.tags
     val newListMinusSelf = nearbyProfiles.filter { it != selfProfile }
     Log.i(TAG, "Found ${newListMinusSelf.size} profiles (excluding self)")
