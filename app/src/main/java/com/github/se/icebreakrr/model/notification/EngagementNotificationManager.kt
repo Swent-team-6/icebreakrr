@@ -19,6 +19,7 @@ import kotlinx.coroutines.launch
 private const val TAG = "EngagementManager"
 private const val CHECK_INTERVAL = 1 * 60 * 1000L // 1 minutes in milliseconds
 private const val NOTIFICATION_COOLDOWN = 4 * 60 * 60 * 1000L // 4 hours in milliseconds
+private const val GET_FILTERED_WAIT_DELAY = 200L
 
 /**
  * Manages engagement notifications between users based on proximity and shared interests.
@@ -57,12 +58,12 @@ class EngagementNotificationManager(
 
     notificationJob =
         scope.launch {
-          Log.e(TAG, "Starting periodic checks")
+          Log.i(TAG, "Starting periodic checks")
           try {
             while (true) {
-              Log.e(TAG, "Running periodic check")
+              Log.i(TAG, "Running periodic check")
               checkNearbyUsersForCommonTags()
-              Log.e(TAG, "Waiting for next check interval (${CHECK_INTERVAL}ms)")
+              Log.i(TAG, "Waiting for next check interval (${CHECK_INTERVAL}ms)")
               delay(CHECK_INTERVAL)
             }
           } catch (e: Exception) {
@@ -73,10 +74,10 @@ class EngagementNotificationManager(
 
   /** Stop monitoring for nearby users */
   fun stopMonitoring() {
-    Log.e(TAG, "Stopping engagement monitoring")
+    Log.i(TAG, "Stopping engagement monitoring")
     notificationJob?.let {
       it.cancel()
-      Log.e(TAG, "Notification job cancelled")
+      Log.i(TAG, "Notification job cancelled")
     }
     notificationJob = null
   }
@@ -90,14 +91,14 @@ class EngagementNotificationManager(
    * and processes them if the user is discoverable.
    */
   private fun checkNearbyUsersForCommonTags() {
-    Log.e(TAG, "Checking for nearby users")
+    Log.i(TAG, "Checking for nearby users")
     scope.launch {
       try {
         // Check if discoverable
         val isDiscoverable = appDataStore.isDiscoverable.first()
-        Log.e(TAG, "User discoverable status: $isDiscoverable")
+        Log.i(TAG, "User discoverable status: $isDiscoverable")
         if (!isDiscoverable) {
-          Log.e(TAG, "User is not discoverable, skipping check")
+          Log.i(TAG, "User is not discoverable, skipping check")
           return@launch
         }
 
@@ -105,19 +106,17 @@ class EngagementNotificationManager(
         profilesViewModel.getSelfProfile {
           val selfProfile = profilesViewModel.selfProfile.value
           if (selfProfile == null) {
-            Log.e(TAG, "Self profile is null")
+            Log.i(TAG, "Self profile is null")
             return@getSelfProfile
           }
           val selfLocation = selfProfile.location
           if (selfLocation == null) {
-            Log.e(TAG, "Self location is null")
+            Log.i(TAG, "Self location is null")
             return@getSelfProfile
           }
-          Log.e(
-              TAG, "Got self profile with ${selfProfile.tags.size} tags at location $selfLocation")
 
           // Update filtered profiles
-          Log.e(TAG, "Updating filtered profiles")
+          Log.i(TAG, "Updating filtered profiles")
           profilesViewModel.getFilteredProfilesInRadius(
               center = selfLocation,
               radiusInMeters = filterViewModel.selectedRadius.value,
@@ -127,9 +126,9 @@ class EngagementNotificationManager(
 
           // Wait a bit for profiles to be fully loaded, then process them once
           scope.launch {
-            delay(200) // Wait for profiles to stabilize
+            delay(GET_FILTERED_WAIT_DELAY) // Wait for profiles to stabilize
             val nearbyProfiles = profilesViewModel.filteredProfiles.value
-            Log.e(TAG, "Found ${nearbyProfiles.size} nearby profiles")
+            Log.i(TAG, "Found ${nearbyProfiles.size} nearby profiles")
             processNearbyProfiles(selfProfile, nearbyProfiles)
           }
         }
@@ -150,10 +149,9 @@ class EngagementNotificationManager(
    * the nearby user using the first common tag.
    */
   private fun processNearbyProfiles(selfProfile: Profile, nearbyProfiles: List<Profile>) {
-    Log.e(TAG, "Processing ${nearbyProfiles.size} nearby profiles")
     val selfTags = selfProfile.tags
     val newListMinusSelf = nearbyProfiles.filter { it != selfProfile }
-    Log.e(TAG, "Found ${newListMinusSelf.size} profiles (excluding self)")
+    Log.i(TAG, "Found ${newListMinusSelf.size} profiles (excluding self)")
 
     for (nearbyProfile in newListMinusSelf) {
       try {
@@ -161,7 +159,7 @@ class EngagementNotificationManager(
         val lastTime = lastNotificationTimes[nearbyProfile.uid] ?: 0L
         val timeSinceLastNotification = System.currentTimeMillis() - lastTime
         if (timeSinceLastNotification < NOTIFICATION_COOLDOWN) {
-          Log.e(
+          Log.v(
               TAG,
               "Skipping profile ${nearbyProfile.uid} - cooldown active (${timeSinceLastNotification}ms < ${NOTIFICATION_COOLDOWN}ms)")
           continue
@@ -169,16 +167,16 @@ class EngagementNotificationManager(
 
         // Find common tags
         val commonTags = selfTags.intersect(nearbyProfile.tags.toSet())
-        Log.e(TAG, "Found ${commonTags.size} common tags with profile ${nearbyProfile.uid}")
+        Log.v(TAG, "Found ${commonTags.size} common tags with profile ${nearbyProfile.uid}")
 
         if (commonTags.isNotEmpty()) {
           val commonTag = commonTags.first()
-          Log.e(TAG, "Sending notification for common tag: $commonTag")
+          Log.v(TAG, "Sending notification for common tag: $commonTag")
           try {
             meetingRequestViewModel.engagementNotification(
                 targetToken = nearbyProfile.fcmToken ?: "null", tag = commonTag)
             lastNotificationTimes[nearbyProfile.uid] = System.currentTimeMillis()
-            Log.e(TAG, "Successfully sent notification to ${nearbyProfile.uid}")
+            Log.i(TAG, "Successfully sent notification to ${nearbyProfile.uid}")
           } catch (e: Exception) {
             Log.e(TAG, "Failed to send notification to ${nearbyProfile.uid}: ${e.message}", e)
           }
