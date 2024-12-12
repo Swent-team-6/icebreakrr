@@ -1,5 +1,8 @@
 package com.github.se.icebreakrr.ui.profile
 
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.Paint
 import android.location.Location
 import android.util.Log
 import androidx.compose.foundation.background
@@ -56,6 +59,8 @@ import com.github.se.icebreakrr.ui.navigation.NavigationActions
 import com.github.se.icebreakrr.ui.navigation.Route
 import com.github.se.icebreakrr.ui.navigation.Screen
 import com.github.se.icebreakrr.utils.cropUsername
+import com.google.android.gms.maps.model.BitmapDescriptor
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.firebase.firestore.GeoPoint
@@ -113,7 +118,6 @@ fun MapScreen(
     navigationActions: NavigationActions,
     profilesViewModel: ProfilesViewModel,
     locationViewModel: LocationViewModel,
-    meetingRequestViewModel: MeetingRequestViewModel
 ) {
   val userLocation = locationViewModel.lastKnownLocation.collectAsState()
   val profiles = profilesViewModel.filteredProfiles.collectAsState()
@@ -145,8 +149,6 @@ fun MapScreen(
         profilesViewModel.getProfileByUidAndThen(uid) {
           profilesViewModel.selectedProfile.value?.let { profile ->
             profilesMeeting.add(profile)
-            // Schedule removal of the meeting request after 2 minutes
-            meetingRequestViewModel.scheduleMeetingRequestRemoval(uid)
           }
         }
       }
@@ -279,6 +281,25 @@ fun MapScreen(
                         Offset(markerScreenPosition.x.toFloat(), markerScreenPosition.y.toFloat())
                   }
                 }
+
+                // Add user's location marker with custom blue circle
+                userLocation.value?.let { location ->
+                  val userLatLng = LatLng(location.latitude, location.longitude)
+
+                  // Create the user marker bitmap
+                  val bitmapDescriptor = createUserMarkerBitmap()
+
+                  Marker(
+                      state = rememberMarkerState(position = userLatLng),
+                      icon = bitmapDescriptor, // Use the custom bitmap as the marker icon
+                      title = "Your Location",
+                      snippet = "This is where you are",
+                      onClick = {
+                        // Handle marker click if needed
+                        true // Return true to indicate the event was handled
+                      }
+                  )
+                }
               }
 
           userMarkers.forEach { userMarker ->
@@ -359,6 +380,34 @@ fun MapScreen(
           }
         }
       }
+}
+
+/**
+ * Creates a bitmap for the user marker with a blue circle and a white border.
+ *
+ * @return BitmapDescriptor for the user marker.
+ */
+private fun createUserMarkerBitmap(): BitmapDescriptor {
+    // Create a bitmap for the blue circle with a white border programmatically
+    val circleBitmap = Bitmap.createBitmap(60, 60, Bitmap.Config.ARGB_8888) // Increased size for border
+    val canvas = Canvas(circleBitmap)
+
+    // Draw the white border
+    val borderPaint = Paint().apply {
+        color = android.graphics.Color.BLACK // White color for the border
+        isAntiAlias = true
+        style = Paint.Style.FILL // Fill the circle
+    }
+    canvas.drawCircle(30f, 30f, 30f, borderPaint) // Draw the border circle
+
+    // Draw the blue circle
+    val bluePaint = Paint().apply {
+        color = android.graphics.Color.parseColor("#1FAEF0") // IceBreakrr Blue
+        isAntiAlias = true
+    }
+    canvas.drawCircle(30f, 30f, 25f, bluePaint) // Draw the inner blue circle
+
+    return BitmapDescriptorFactory.fromBitmap(circleBitmap)
 }
 
 @Composable
