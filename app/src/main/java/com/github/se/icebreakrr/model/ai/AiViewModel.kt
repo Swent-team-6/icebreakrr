@@ -59,7 +59,7 @@ class AiViewModel(
         val prompt = userPrompt.value
         val request = AiRequest(systemPrompt = systemPrompt, userPrompt = prompt)
         // Call the repository and update state with the result
-        val response = aiRepository.generateResponse(request)
+        val response = aiRepository.generateResponse(request).removePrefix("\"").removeSuffix("\"")
         _uiState.value = UiState.Success(response)
       } catch (e: Exception) {
         _uiState.value = UiState.Error(e.message ?: "Sorry, an error occurred") // Handle errors

@@ -138,23 +138,21 @@ fun ExtendTag(tagStyle: TagStyle, onClick: () -> Unit) {
  */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun RowOfTags(tags: List<Pair<String, Color>>, tagStyle: TagStyle) {
+fun RowOfTags(tags: List<Pair<String, Color>>, tagStyle: TagStyle = TagStyle()) {
   val isExtended = remember { mutableStateOf(false) }
-  LazyColumn(modifier = Modifier.fillMaxSize()) {
-    item {
-      FlowRow(
-          modifier = Modifier.padding(TAG_PADDING),
-          horizontalArrangement = Arrangement.Start,
-          verticalArrangement = Arrangement.Top) {
-            val tagsToShow = if (isExtended.value) tags else tags.take(TAGS_SHOWN_DEFAULT)
-            tagsToShow.forEach { (text, color) ->
-              Tag(text, TagStyle(tagStyle.textColor, color, tagStyle.fontSize))
-            }
-            if (!isExtended.value && tags.size > TAGS_SHOWN_DEFAULT) {
-              ExtendTag(tagStyle) { isExtended.value = true }
-            }
+  Column(modifier = Modifier.fillMaxWidth().wrapContentHeight()) {
+    FlowRow(
+        modifier = Modifier.wrapContentHeight(),
+        horizontalArrangement = Arrangement.Start,
+        verticalArrangement = Arrangement.Top) {
+          val tagsToShow = if (isExtended.value) tags else tags.take(TAGS_SHOWN_DEFAULT)
+          tagsToShow.forEach { (text, color) ->
+            Tag(text, TagStyle(tagStyle.textColor, color, tagStyle.fontSize))
           }
-    }
+          if (!isExtended.value && tags.size > TAGS_SHOWN_DEFAULT) {
+            ExtendTag(tagStyle) { isExtended.value = true }
+          }
+        }
   }
 }
 

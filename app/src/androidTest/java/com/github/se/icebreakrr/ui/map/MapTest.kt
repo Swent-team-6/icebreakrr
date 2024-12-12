@@ -1,5 +1,6 @@
 package com.github.se.icebreakrr.ui.map
 
+import android.content.Context
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -50,7 +51,11 @@ class MapTest {
             mock(FirebaseAuth::class.java))
 
     locationViewModel =
-        LocationViewModel(mockLocationService, mockLocationRepository, mockPermissionManager)
+        LocationViewModel(
+            mockLocationService,
+            mockLocationRepository,
+            mockPermissionManager,
+            mock(Context::class.java))
   }
 
   @Test

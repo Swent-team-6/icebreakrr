@@ -9,6 +9,9 @@
     <!-- Permission for background location (API 29 and above) -->
     <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" /> <!-- Sensitive -->
 
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
+
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
@@ -50,6 +53,10 @@
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
         </service>
+        <service
+            android:name=".model.location.LocationService"
+            android:foregroundServiceType="location"
+            android:exported="false" />
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="${MAPS_API_KEY}" />

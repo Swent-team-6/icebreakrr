@@ -1,5 +1,6 @@
 package com.github.se.icebreakrr.ui.sections
 
+import android.content.Context
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsOff
 import androidx.compose.ui.test.assertIsOn
@@ -10,17 +11,24 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.datastore.preferences.core.Preferences
 import com.github.se.icebreakrr.data.AppDataStore
+import com.github.se.icebreakrr.model.filter.FilterViewModel
 import com.github.se.icebreakrr.model.location.ILocationService
 import com.github.se.icebreakrr.model.location.LocationRepository
 import com.github.se.icebreakrr.model.location.LocationViewModel
+import com.github.se.icebreakrr.model.message.MeetingRequestViewModel
+import com.github.se.icebreakrr.model.notification.EngagementNotificationManager
 import com.github.se.icebreakrr.model.profile.ProfilePicRepositoryStorage
 import com.github.se.icebreakrr.model.profile.ProfilesRepository
 import com.github.se.icebreakrr.model.profile.ProfilesViewModel
+import com.github.se.icebreakrr.model.tags.TagsRepository
+import com.github.se.icebreakrr.model.tags.TagsViewModel
 import com.github.se.icebreakrr.ui.navigation.NavigationActions
 import com.github.se.icebreakrr.ui.navigation.Route
 import com.github.se.icebreakrr.ui.navigation.Screen
 import com.github.se.icebreakrr.utils.IPermissionManager
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.functions.FirebaseFunctions
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
 import java.io.File
@@ -37,8 +45,8 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
 import org.mockito.Mockito
+import org.mockito.Mockito.mock
 import org.mockito.Mockito.`when`
-import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 
 // This File was written with the help of Cursor
@@ -58,6 +66,11 @@ class SettingsTest {
   private lateinit var testDataStore: DataStore<Preferences>
   private lateinit var appDataStore: AppDataStore
   private lateinit var locationViewModel: LocationViewModel
+  private lateinit var engagementNotificationManager: EngagementNotificationManager
+  private lateinit var meetingRequestViewModel: MeetingRequestViewModel
+  private lateinit var filterViewModel: FilterViewModel
+  private lateinit var tagsViewModel: TagsViewModel
+  private lateinit var functions: FirebaseFunctions
 
   @Before
   fun setUp() {
@@ -74,18 +87,40 @@ class SettingsTest {
     mockLocationService = Mockito.mock(ILocationService::class.java)
     mockLocationRepository = Mockito.mock(LocationRepository::class.java)
     mockPermissionManager = Mockito.mock(IPermissionManager::class.java)
+    functions = mock(FirebaseFunctions::class.java)
 
     // Create a mock storage reference
     val mockStorage = mock<FirebaseStorage>()
     val mockStorageRef = mock<StorageReference>()
     `when`(mockStorage.reference).thenReturn(mockStorageRef)
 
-    // Initialize profilesViewModel and locationViewmodel with proper mocks
+    // Initialize ViewModels
     profilesViewModel =
         ProfilesViewModel(
             mockProfilesRepository, ProfilePicRepositoryStorage(mockStorage), mock<FirebaseAuth>())
+
+    meetingRequestViewModel = MeetingRequestViewModel(profilesViewModel, functions)
+    filterViewModel = FilterViewModel()
+    tagsViewModel =
+        TagsViewModel(
+            TagsRepository(mock(FirebaseFirestore::class.java), mock(FirebaseAuth::class.java)))
+
+    // Initialize EngagementNotificationManager with all required dependencies
+    engagementNotificationManager =
+        EngagementNotificationManager(
+            profilesViewModel,
+            meetingRequestViewModel,
+            appDataStore,
+            filterViewModel,
+            tagsViewModel,
+            mockPermissionManager)
+
     locationViewModel =
-        LocationViewModel(mockLocationService, mockLocationRepository, mockPermissionManager)
+        LocationViewModel(
+            mockLocationService,
+            mockLocationRepository,
+            mockPermissionManager,
+            Mockito.mock(Context::class.java))
 
     // Mock necessary Flow returns
     `when`(mockProfilesRepository.isWaiting).thenReturn(MutableStateFlow(false))
@@ -109,6 +144,7 @@ class SettingsTest {
           navigationActionsMock,
           appDataStore,
           locationViewModel,
+          engagementNotificationManager = engagementNotificationManager,
           mock<FirebaseAuth>())
     }
 
@@ -140,6 +176,7 @@ class SettingsTest {
           navigationActionsMock,
           appDataStore,
           locationViewModel,
+          engagementNotificationManager = engagementNotificationManager,
           mock<FirebaseAuth>())
     }
 
@@ -158,6 +195,7 @@ class SettingsTest {
           navigationActionsMock,
           appDataStore,
           locationViewModel,
+          engagementNotificationManager = engagementNotificationManager,
           mock<FirebaseAuth>())
     }
 

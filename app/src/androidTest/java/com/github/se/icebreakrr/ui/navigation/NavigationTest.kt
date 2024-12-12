@@ -1,5 +1,6 @@
 package com.github.se.icebreakrr.ui.navigation
 
+import android.content.Context
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.datastore.core.DataStore
@@ -16,6 +17,7 @@ import com.github.se.icebreakrr.model.location.ILocationService
 import com.github.se.icebreakrr.model.location.LocationRepository
 import com.github.se.icebreakrr.model.location.LocationViewModel
 import com.github.se.icebreakrr.model.message.MeetingRequestViewModel
+import com.github.se.icebreakrr.model.notification.EngagementNotificationManager
 import com.github.se.icebreakrr.model.profile.ProfilePicRepositoryStorage
 import com.github.se.icebreakrr.model.profile.ProfilesRepository
 import com.github.se.icebreakrr.model.profile.ProfilesViewModel
@@ -68,6 +70,7 @@ class NavigationTest {
   private lateinit var mockAiRepository: AiRepository
   private lateinit var aiViewModel: AiViewModel
   private lateinit var locationViewModel: LocationViewModel
+  private lateinit var engagementNotificationManager: EngagementNotificationManager
 
   @Before
   fun setup() {
@@ -101,8 +104,21 @@ class NavigationTest {
     mockAiRepository = mock(AiRepository::class.java)
     aiViewModel = AiViewModel(mockAiRepository, mockProfileViewModel)
 
+    engagementNotificationManager =
+        EngagementNotificationManager(
+            mockProfileViewModel,
+            mockMeetingRequestViewModel,
+            appDataStore,
+            mockFilterViewModel,
+            tagsViewModel,
+            mockPermissionManager)
+
     locationViewModel =
-        LocationViewModel(mockLocationService, mockLocationRepository, mockPermissionManager)
+        LocationViewModel(
+            mockLocationService,
+            mockLocationRepository,
+            mockPermissionManager,
+            mock(Context::class.java))
 
     // mock state flow
     `when`(mockPermissionManager.permissionStatuses)
@@ -128,7 +144,8 @@ class NavigationTest {
           mock(FirebaseAuth::class.java),
           mock(IPermissionManager::class.java),
           aiViewModel,
-          true)
+          engagementNotificationManager = engagementNotificationManager,
+          isTesting = true)
     }
 
     // Assert that the login screen is shown on launch

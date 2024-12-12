@@ -14,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.github.se.icebreakrr.model.profile.ProfilesViewModel
@@ -28,6 +29,7 @@ import com.smarttoolfactory.cropper.settings.CropProperties
 import com.smarttoolfactory.cropper.settings.CropStyle
 import com.smarttoolfactory.cropper.settings.CropType
 
+private const val HANDLE_SIZE = 100F
 /**
  * Composable function for the Image Cropper Screen.
  *
@@ -46,7 +48,8 @@ fun ImageCropperScreen(
   val cropProperties = remember {
     CropDefaults.properties(
         cropType = CropType.Static,
-        handleSize = 100F,
+        contentScale = ContentScale.Inside,
+        handleSize = HANDLE_SIZE,
         cropOutlineProperty = CropOutlineProperty(OutlineType.Oval, RectCropShape(0, "rect")),
         aspectRatio = AspectRatio(1f), // 1:1 aspect ratio
         fixedAspectRatio = true,
