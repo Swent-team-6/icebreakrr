@@ -86,7 +86,7 @@ class EngagementNotificationManagerTest {
     val mockProfilePicRepo = mock(ProfilePicRepository::class.java)
     val mockAuth = mock(FirebaseAuth::class.java)
     permissionManager = mock(IPermissionManager::class.java)
-    profilesViewModel = ProfilesViewModel(mockProfilesRepo, mockProfilePicRepo, mockAuth)
+    profilesViewModel = spy(ProfilesViewModel(mockProfilesRepo, mockProfilePicRepo, mockAuth))
     profilesViewModel.selfProfile = MutableStateFlow(selfProfile)
 
     // Setup filter values

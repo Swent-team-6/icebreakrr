@@ -65,8 +65,6 @@ import com.github.se.icebreakrr.ui.theme.IceBreakrrTheme
 import com.github.se.icebreakrr.utils.IPermissionManager
 import com.github.se.icebreakrr.utils.NetworkUtils
 import com.github.se.icebreakrr.utils.PermissionManager
-import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.location.LocationServices
 import com.google.firebase.Firebase
 import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.FirebaseAuth
@@ -155,19 +153,8 @@ class MainActivity : ComponentActivity() {
     permissionManager = PermissionManager(this)
     permissionManager.initializeLauncher(this, requiredPermissions)
 
-
     // Initialize location services
-    fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
-    locationService = LocationService(fusedLocationClient)
     locationRepositoryFirestore = LocationRepositoryFirestore(firestore, auth)
-
-    // Initialize ViewModels
-    locationViewModel =
-        ViewModelProvider(
-            this,
-            LocationViewModel.provideFactory(
-                locationService, locationRepositoryFirestore, permissionManager))[
-            LocationViewModel::class.java]
 
     val profilesViewModel =
         ProfilesViewModel(
@@ -188,7 +175,8 @@ class MainActivity : ComponentActivity() {
             meetingRequestViewModel,
             appDataStore,
             filterViewModel,
-            tagsViewModel)
+            tagsViewModel,
+            permissionManager)
 
     // Monitor login/logout events
     authStateListener =
@@ -264,18 +252,6 @@ class MainActivity : ComponentActivity() {
       ""
     }
   }
-
-  private fun requestNotificationPermission() {
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-      val hasPermission =
-          ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) ==
-              PackageManager.PERMISSION_GRANTED
-
-      if (!hasPermission) {
-        ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.POST_NOTIFICATIONS), 0)
-      }
-    }
-  }
 }
 
 /**
@@ -321,7 +297,8 @@ fun IcebreakrrApp(
             meetingRequestViewModel = it,
             appDataStore = appDataStore,
             filterViewModel = filterViewModel,
-            tagsViewModel = tagsViewModel)
+            tagsViewModel = tagsViewModel,
+            permissionManager = permissionManager)
       }
 
   val startDestination =
