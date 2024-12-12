@@ -174,14 +174,8 @@ class AroundYouFlowEndToEnd {
       composeTestRule.onNodeWithText("Indiana Jones").assertIsDisplayed()
       // go to notification to check if you have sended a message
       composeTestRule.onNodeWithText("Notifications").assertIsDisplayed().performClick()
-      composeTestRule
-          .onNodeWithTag("MeetingRequestOptionsDropdown_Selected")
-          .assertIsDisplayed()
-          .performClick()
-      composeTestRule
-          .onNodeWithTag("MeetingRequestOptionsDropdown_Option_SENT")
-          .assertIsDisplayed()
-          .performClick()
+      composeTestRule.onNodeWithTag("inboxButton").assertIsDisplayed().performClick()
+      composeTestRule.onNodeWithTag("sentButton").assertIsDisplayed().performClick()
       composeTestRule.waitForIdle()
       // click on alice to cancel the meeting request
       composeTestRule.onNodeWithText(ALICE).assertIsDisplayed().performClick()
