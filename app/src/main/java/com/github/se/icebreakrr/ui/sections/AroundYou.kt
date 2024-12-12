@@ -274,7 +274,7 @@ fun AroundYouScreen(
                 tagsViewModel = tagsViewModel,
                 isRefreshing = isManualRefresh.value,
                 onRefresh = { center, radiusInMeters, genders, ageRange, tags ->
-                isManualRefresh.value = true
+                  isManualRefresh.value = true
                   profilesViewModel.getFilteredProfilesInRadius(
                       center, radiusInMeters, genders, ageRange, tags)
                 },
@@ -489,33 +489,35 @@ fun EmptyProfilePrompt(
     testTag: String,
     context: Context,
     redirectToSettings: Boolean = false
-) {Box(
+) {
+  Box(
       contentAlignment = Alignment.Center,
       modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).testTag(testTag)) {
         Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(COLUMN_VERTICAL_PADDING),
-        modifier = Modifier.padding(COLUMN_VERTICAL_PADDING)) {Text(
-            text = label,
-            fontSize = TEXT_SIZE_LARGE,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onSurface,
-            textAlign = TextAlign.Center)
-      if (redirectToSettings) {
-            Button(
-                onClick = {
-                  // Redirect to app settings
-                  val intent =
-                      Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
-                        data = android.net.Uri.fromParts("package", context.packageName, null)
-                      }
-                  context.startActivity(intent)
-                }) {
-                  Text(text = GOTO_SETTINGS_BUTTON_TEXT)
-                }
-          }
-        }
-  }
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(COLUMN_VERTICAL_PADDING),
+            modifier = Modifier.padding(COLUMN_VERTICAL_PADDING)) {
+              Text(
+                  text = label,
+                  fontSize = TEXT_SIZE_LARGE,
+                  fontWeight = FontWeight.Bold,
+                  color = MaterialTheme.colorScheme.onSurface,
+                  textAlign = TextAlign.Center)
+              if (redirectToSettings) {
+                Button(
+                    onClick = {
+                      // Redirect to app settings
+                      val intent =
+                          Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                            data = android.net.Uri.fromParts("package", context.packageName, null)
+                          }
+                      context.startActivity(intent)
+                    }) {
+                      Text(text = GOTO_SETTINGS_BUTTON_TEXT)
+                    }
+              }
+            }
+      }
 }
 
 /**
