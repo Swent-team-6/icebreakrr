@@ -110,7 +110,8 @@ class NavigationTest {
             mockMeetingRequestViewModel,
             appDataStore,
             mockFilterViewModel,
-            tagsViewModel)
+            tagsViewModel,
+            mockPermissionManager)
 
     locationViewModel =
         LocationViewModel(

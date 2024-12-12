@@ -96,7 +96,12 @@ class SignInScreenTest {
     meetingRequestViewModel = MeetingRequestViewModel(profileViewModel, functions)
     engagementNotificationManager =
         EngagementNotificationManager(
-            profileViewModel, meetingRequestViewModel, appDataStore, filterViewModel, tagsViewModel)
+            profileViewModel,
+            meetingRequestViewModel,
+            appDataStore,
+            filterViewModel,
+            tagsViewModel,
+            permissionManager = mockPermissionManager)
   }
 
   @Test

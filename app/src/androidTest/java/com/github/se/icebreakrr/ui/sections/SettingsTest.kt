@@ -112,7 +112,8 @@ class SettingsTest {
             meetingRequestViewModel,
             appDataStore,
             filterViewModel,
-            tagsViewModel)
+            tagsViewModel,
+            mockPermissionManager)
 
     locationViewModel =
         LocationViewModel(
