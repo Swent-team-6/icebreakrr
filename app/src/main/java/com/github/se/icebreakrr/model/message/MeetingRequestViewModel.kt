@@ -63,7 +63,8 @@ class MeetingRequestViewModel(
   enum class CancellationType(val reason: String) {
     DISTANCE("distance"),
     TIME("time"),
-    REPORTED("reported")
+    REPORTED("reported"),
+    CANCELLED("cancel")
   }
   /**
    * Set the initial values of the meeting VM that are needed to send messages

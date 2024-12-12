@@ -276,7 +276,8 @@ fun Profile.Companion.getMockedProfiles(): List<Profile> {
             profilePictureUrl = null,
             hasBlocked = hasBlockedList[i],
             hasAlreadyMet = hasAlreadyMetList[i],
-            meetingRequestChosenLocalisation = emptyMap()))
+            meetingRequestChosenLocalisation = emptyMap(),
+            fcmToken = "123"))
   }
   return profiles
 }

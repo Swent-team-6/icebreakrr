@@ -138,6 +138,14 @@ fun AroundYouScreen(
       }
     }
   }
+  LaunchedEffect(Unit) {
+    profilesViewModel.getFilteredProfilesInRadius(
+        userLocation.value ?: GeoPoint(DEFAULT_USER_LATITUDE, DEFAULT_USER_LONGITUDE),
+        filterViewModel.selectedRadius.value,
+        filterViewModel.selectedGenders.value,
+        filterViewModel.ageRange.value,
+        tagsViewModel.filteredTags.value)
+  }
 
   // Generate the sorted profile list based on the selected sortOption
   val sortOption = sortViewModel.selectedSortOption.collectAsState()
