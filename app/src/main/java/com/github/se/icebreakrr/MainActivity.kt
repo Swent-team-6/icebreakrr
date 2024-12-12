@@ -18,6 +18,7 @@ import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -28,6 +29,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
+import com.github.se.icebreakrr.config.LocalIsTesting
 import com.github.se.icebreakrr.data.AppDataStore
 import com.github.se.icebreakrr.model.ai.AiViewModel
 import com.github.se.icebreakrr.model.filter.FilterViewModel
@@ -149,18 +151,21 @@ class MainActivity : ComponentActivity() {
     val chatGptApiKey = getChatGptApiKey()
 
     setContent {
-      IceBreakrrTheme {
-        Surface(modifier = Modifier.fillMaxSize()) {
-          if (isLocationViewModelInitialized) {
-            IcebreakrrApp(
-                auth,
-                functions,
-                appDataStore,
-                locationViewModel,
-                firestore,
-                chatGptApiKey,
-                intent?.getBooleanExtra("IS_TESTING", false) == true,
-                permissionManager)
+      // Provide the `isTesting` flag to the entire composable tree
+      CompositionLocalProvider(LocalIsTesting provides isTesting) {
+        IceBreakrrTheme {
+          Surface(modifier = Modifier.fillMaxSize()) {
+            if (isLocationViewModelInitialized) {
+              IcebreakrrApp(
+                  auth,
+                  functions,
+                  appDataStore,
+                  locationViewModel,
+                  firestore,
+                  chatGptApiKey,
+                  isTesting,
+                  permissionManager)
+            }
           }
         }
       }
