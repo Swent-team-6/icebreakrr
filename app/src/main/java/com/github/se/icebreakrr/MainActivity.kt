@@ -61,131 +61,156 @@ import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.functions.FirebaseFunctions
-import dagger.hilt.android.AndroidEntryPoint
-import javax.inject.Inject
+import com.github.se.icebreakrr.model.notification.EngagementNotificationManager
+import com.github.se.icebreakrr.model.profile.ProfilePicRepositoryStorage
+import com.github.se.icebreakrr.model.profile.ProfilesRepositoryFirestore
+import com.github.se.icebreakrr.model.tags.TagsRepository
+import com.google.firebase.Firebase
+import com.google.firebase.storage.storage
 
-@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
-  @Inject lateinit var auth: FirebaseAuth
-  @Inject lateinit var firestore: FirebaseFirestore
-  @Inject lateinit var authStateListener: FirebaseAuth.AuthStateListener
-  private lateinit var locationViewModel: LocationViewModel
-  private lateinit var locationService: LocationService
-  private lateinit var locationRepositoryFirestore: LocationRepositoryFirestore
-  private lateinit var permissionManager: PermissionManager
-  private lateinit var fusedLocationClient: FusedLocationProviderClient
-  private lateinit var appDataStore: AppDataStore
-  private lateinit var functions: FirebaseFunctions
+    private lateinit var auth: FirebaseAuth
+    private lateinit var firestore: FirebaseFirestore
+    private lateinit var authStateListener: FirebaseAuth.AuthStateListener
+    private lateinit var engagementNotificationManager: EngagementNotificationManager
+    private lateinit var locationViewModel: LocationViewModel
+    private lateinit var locationService: LocationService
+    private lateinit var locationRepositoryFirestore: LocationRepositoryFirestore
+    private lateinit var permissionManager: PermissionManager
+    private lateinit var fusedLocationClient: FusedLocationProviderClient
+    private lateinit var appDataStore: AppDataStore
+    private lateinit var functions: FirebaseFunctions
 
-  override fun onCreate(savedInstanceState: Bundle?) {
-    super.onCreate(savedInstanceState)
-    AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
 
-    // Retrieve the testing flag from the Intent
-    val isTesting = intent?.getBooleanExtra("IS_TESTING", false) ?: false
+        // Retrieve the testing flag from the Intent
+        val isTesting = intent?.getBooleanExtra("IS_TESTING", false) ?: false
 
-    // Initialize Firebase Auth
-    FirebaseApp.initializeApp(this)
-    functions = FirebaseFunctions.getInstance()
+        // Initialize Firebase
+        FirebaseApp.initializeApp(this)
+        auth = FirebaseAuth.getInstance()
+        firestore = FirebaseFirestore.getInstance()
+        functions = FirebaseFunctions.getInstance()
 
-    // Initialize Utils
-    NetworkUtils.init(this)
+        // Initialize Utils
+        NetworkUtils.init(this)
 
-    // Create and initialize the PermissionManager with the list of permissions required
-    requestNotificationPermission() // TODO remove this and use the PermissionManager instead
-    permissionManager = PermissionManager(this)
-    permissionManager.initializeLauncher(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION))
+        // Initialize DataStore
+        appDataStore = AppDataStore(context = this)
 
-    // Create required dependencies for the LocationViewModel
-    fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
-    locationService = LocationService(fusedLocationClient)
-    locationRepositoryFirestore = LocationRepositoryFirestore(firestore, auth)
+        // Create and initialize the PermissionManager
+        requestNotificationPermission()
+        permissionManager = PermissionManager(this)
+        permissionManager.initializeLauncher(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION))
 
-    // Initialize the LocationViewModel with dependencies
-    locationViewModel =
-        ViewModelProvider(
+        // Initialize location services
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+        locationService = LocationService(fusedLocationClient)
+        locationRepositoryFirestore = LocationRepositoryFirestore(firestore, auth)
+
+        // Initialize ViewModels
+        locationViewModel = ViewModelProvider(
             this,
             LocationViewModel.provideFactory(
-                locationService, locationRepositoryFirestore, permissionManager))[
-            LocationViewModel::class.java]
+                locationService, locationRepositoryFirestore, permissionManager
+            )
+        )[LocationViewModel::class.java]
 
-    // Monitor login/logout events and perform the necessary actions.
-    authStateListener =
-        FirebaseAuth.AuthStateListener { firebaseAuth ->
-          if (auth.currentUser != null) {
-            locationViewModel.tryToStartLocationUpdates()
-          } else {
-            locationViewModel.stopLocationUpdates()
-          }
+        val profilesViewModel = ProfilesViewModel(
+            repository = ProfilesRepositoryFirestore(firestore, auth),
+            ppRepository = ProfilePicRepositoryStorage(Firebase.storage),
+            auth = auth
+        )
+
+        val filterViewModel = FilterViewModel()
+
+        val meetingRequestViewModel = MeetingRequestViewModel(
+            profilesViewModel = profilesViewModel,
+            functions = functions
+        )
+
+        val tagsViewModel = TagsViewModel(TagsRepository(firestore, auth))
+
+        engagementNotificationManager = EngagementNotificationManager(
+                    profilesViewModel,
+                    meetingRequestViewModel,
+                    appDataStore,
+                    filterViewModel,
+                    tagsViewModel
+                )
+
+        // Monitor login/logout events
+        authStateListener = FirebaseAuth.AuthStateListener { firebaseAuth ->
+            if (auth.currentUser != null) {
+                locationViewModel.tryToStartLocationUpdates()
+            } else {
+                locationViewModel.stopLocationUpdates()
+            }
         }
 
-    // Initialize DataStore
-    appDataStore = AppDataStore(context = this)
+        val chatGptApiKey = getChatGptApiKey()
 
-    val chatGptApiKey = getChatGptApiKey()
-
-    setContent {
-      // Provide the `isTesting` flag to the entire composable tree
-      CompositionLocalProvider(LocalIsTesting provides isTesting) {
-        IceBreakrrTheme {
-          Surface(modifier = Modifier.fillMaxSize()) {
-            IcebreakrrApp(
-                auth,
-                functions,
-                appDataStore,
-                locationViewModel,
-                firestore,
-                chatGptApiKey,
-                isTesting,
-                permissionManager)
-          }
+        setContent {
+            CompositionLocalProvider(LocalIsTesting provides isTesting) {
+                IceBreakrrTheme {
+                    Surface(modifier = Modifier.fillMaxSize()) {
+                        IcebreakrrApp(
+                            auth = auth,
+                            functions = functions,
+                            appDataStore = appDataStore,
+                            locationViewModel = locationViewModel,
+                            firestore = firestore,
+                            chatGptApiKey = chatGptApiKey,
+                            isTesting = isTesting,
+                            permissionManager = permissionManager,
+                        )
+                    }
+                }
+            }
         }
-      }
     }
-  }
 
-  override fun onStart() {
-    super.onStart()
-    // Add the AuthStateListener when the activity starts
-    auth.addAuthStateListener(authStateListener)
-  }
-
-  override fun onResume() {
-    super.onResume()
-    // Update permissions when the activity resumes to ensure they are up-to-date
-    permissionManager.updateAllPermissions()
-  }
-
-  override fun onStop() {
-    super.onStop()
-    // Remove the AuthStateListener when the activity stops
-    auth.removeAuthStateListener(authStateListener)
-  }
-
-  private fun getChatGptApiKey(): String {
-    return try {
-      val appInfo = packageManager.getApplicationInfo(packageName, PackageManager.GET_META_DATA)
-      appInfo.metaData?.getString("com.openai.chatgpt.API_KEY")
-          ?: throw Exception("API Key not found in AndroidManifest.xml")
-    } catch (e: Exception) {
-      Log.e("MainActivity", "Error retrieving API Key: ${e.message}")
-      ""
+    override fun onStart() {
+        super.onStart()
+        auth.addAuthStateListener(authStateListener)
     }
-  }
 
-  // TODO remove this and use the PermissionManager instead
-  // TODO the permissions must be asked by the class requiring it
-  private fun requestNotificationPermission() {
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-      val hasPermission =
-          ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) ==
-              PackageManager.PERMISSION_GRANTED
-
-      if (!hasPermission) {
-        ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.POST_NOTIFICATIONS), 0)
-      }
+    override fun onResume() {
+        super.onResume()
+        permissionManager.updateAllPermissions()
     }
-  }
+
+    override fun onStop() {
+        super.onStop()
+        auth.removeAuthStateListener(authStateListener)
+        // Stop monitoring when app goes to background
+        engagementNotificationManager.stopMonitoring()
+    }
+
+    private fun getChatGptApiKey(): String {
+        return try {
+            val appInfo = packageManager.getApplicationInfo(packageName, PackageManager.GET_META_DATA)
+            appInfo.metaData?.getString("com.openai.chatgpt.API_KEY")
+                ?: throw Exception("API Key not found in AndroidManifest.xml")
+        } catch (e: Exception) {
+            Log.e("MainActivity", "Error retrieving API Key: ${e.message}")
+            ""
+        }
+    }
+
+    private fun requestNotificationPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            val hasPermission =
+                ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) ==
+                    PackageManager.PERMISSION_GRANTED
+
+            if (!hasPermission) {
+                ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.POST_NOTIFICATIONS), 0)
+            }
+        }
+    }
 }
 
 /**
@@ -207,35 +232,49 @@ fun IcebreakrrApp(
     firestore: FirebaseFirestore,
     chatGptApiKey: String,
     isTesting: Boolean,
-    permissionManager: IPermissionManager
+    permissionManager: IPermissionManager,
 ) {
-  val profileViewModel: ProfilesViewModel =
-      viewModel(factory = ProfilesViewModel.Companion.Factory(auth, firestore))
-  val tagsViewModel: TagsViewModel =
-      viewModel(factory = TagsViewModel.Companion.Factory(auth, firestore))
-  val filterViewModel: FilterViewModel = viewModel(factory = FilterViewModel.Factory)
-  MeetingRequestManager.meetingRequestViewModel =
-      viewModel(factory = MeetingRequestViewModel.Companion.Factory(profileViewModel, functions))
-  val sortViewModel: SortViewModel =
-      viewModel(factory = SortViewModel.createFactory(profileViewModel))
-  val aiViewModel: AiViewModel =
-      viewModel(factory = AiViewModel.provideFactory(chatGptApiKey, profileViewModel))
-  val meetingRequestViewModel = MeetingRequestManager.meetingRequestViewModel
-  val startDestination = if (isTesting) Route.AROUND_YOU else Route.AUTH
+    val profileViewModel: ProfilesViewModel =
+        viewModel(factory = ProfilesViewModel.Companion.Factory(auth, firestore))
+    val tagsViewModel: TagsViewModel =
+        viewModel(factory = TagsViewModel.Companion.Factory(auth, firestore))
+    val filterViewModel: FilterViewModel = viewModel(factory = FilterViewModel.Factory)
+    MeetingRequestManager.meetingRequestViewModel =
+        viewModel(factory = MeetingRequestViewModel.Companion.Factory(profileViewModel, functions))
+    val sortViewModel: SortViewModel =
+        viewModel(factory = SortViewModel.createFactory(profileViewModel))
+    val aiViewModel: AiViewModel =
+        viewModel(factory = AiViewModel.provideFactory(chatGptApiKey, profileViewModel))
+    val meetingRequestViewModel = MeetingRequestManager.meetingRequestViewModel
+    // Initialize EngagementManager
+    val engagementManager =
+        meetingRequestViewModel?.let {
+            EngagementNotificationManager(
+            profilesViewModel = profileViewModel,
+            meetingRequestViewModel = it,
+            appDataStore = appDataStore,
+            filterViewModel = filterViewModel,
+                tagsViewModel = tagsViewModel
+        )
+        }
 
-  IcebreakrrNavHost(
-      profileViewModel,
-      tagsViewModel,
-      filterViewModel,
-      sortViewModel,
-      meetingRequestViewModel,
-      appDataStore,
-      locationViewModel,
-      startDestination,
-      auth,
-      permissionManager,
-      aiViewModel,
-      isTesting)
+    val startDestination = if (isTesting) Route.AROUND_YOU else Route.AUTH
+
+    IcebreakrrNavHost(
+        profileViewModel,
+        tagsViewModel,
+        filterViewModel,
+        sortViewModel,
+        meetingRequestViewModel,
+        appDataStore,
+        locationViewModel,
+        startDestination,
+        auth,
+        permissionManager,
+        aiViewModel,
+        isTesting,
+        engagementManager
+    )
 }
 
 @Composable
@@ -251,166 +290,184 @@ fun IcebreakrrNavHost(
     auth: FirebaseAuth,
     permissionManager: IPermissionManager,
     aiViewModel: AiViewModel,
-    isTesting: Boolean
+    isTesting: Boolean,
+    engagementNotificationManager: EngagementNotificationManager?
 ) {
-  val navController = rememberNavController()
-  val navigationActions = NavigationActions(navController)
-  NavHost(navController = navController, startDestination = startDestination) {
-    navigation(
-        startDestination = Screen.AUTH,
-        route = Route.AUTH,
-    ) {
-      composable(Screen.AUTH) {
-        if (meetingRequestViewModel != null) {
-          SignInScreen(
-              profileViewModel,
-              meetingRequestViewModel,
-              navigationActions,
-              filterViewModel = filterViewModel,
-              tagsViewModel = tagsViewModel,
-              appDataStore = appDataStore,
-              locationViewModel = locationViewModel)
-        } else {
-          throw IllegalStateException(
-              "The Meeting Request View Model shouldn't be null : Bad initialization")
+    val navController = rememberNavController()
+    val navigationActions = NavigationActions(navController)
+    NavHost(navController = navController, startDestination = startDestination) {
+        navigation(
+            startDestination = Screen.AUTH,
+            route = Route.AUTH,
+        ) {
+            composable(Screen.AUTH) {
+                if (meetingRequestViewModel != null) {
+                    if (engagementNotificationManager != null) {
+                        SignInScreen(
+                            profileViewModel,
+                            meetingRequestViewModel,
+                            engagementNotificationManager = engagementNotificationManager,
+                            navigationActions,
+                            filterViewModel = filterViewModel,
+                            tagsViewModel = tagsViewModel,
+                            appDataStore = appDataStore,
+                            locationViewModel = locationViewModel
+                        )
+                    }
+                } else {
+                    throw IllegalStateException(
+                        "The Meeting Request View Model shouldn't be null : Bad initialization"
+                    )
+                }
+            }
+            composable(Screen.PROFILE_CREATION) {
+                ProfileCreationScreen(tagsViewModel, profileViewModel, navigationActions)
+            }
         }
-      }
-      composable(Screen.PROFILE_CREATION) {
-        ProfileCreationScreen(tagsViewModel, profileViewModel, navigationActions)
-      }
+
+        navigation(
+            startDestination = Screen.AROUND_YOU,
+            route = Route.AROUND_YOU,
+        ) {
+            composable(Screen.AROUND_YOU) {
+                AroundYouScreen(
+                    navigationActions,
+                    profileViewModel,
+                    tagsViewModel,
+                    filterViewModel,
+                    locationViewModel,
+                    sortViewModel,
+                    permissionManager,
+                    appDataStore,
+                    isTesting
+                )
+            }
+            composable(Screen.OTHER_PROFILE_VIEW + "?userId={userId}") { navBackStackEntry ->
+                if (meetingRequestViewModel != null) {
+                    OtherProfileView(
+                        profileViewModel,
+                        tagsViewModel,
+                        aiViewModel,
+                        meetingRequestViewModel,
+                        navigationActions,
+                        navBackStackEntry
+                    )
+                } else {
+                    throw IllegalStateException(
+                        "The Meeting Request View Model shouldn't be null : Bad initialization"
+                    )
+                }
+            }
+        }
+
+        navigation(
+            startDestination = Screen.SETTINGS,
+            route = Route.SETTINGS,
+        ) {
+            composable(Screen.SETTINGS) {
+                if (engagementNotificationManager != null) {
+                    SettingsScreen(
+                        profilesViewModel = profileViewModel,
+                        navigationActions = navigationActions,
+                        appDataStore = appDataStore,
+                        locationViewModel = locationViewModel,
+                        engagementNotificationManager = engagementNotificationManager,
+                        auth = auth
+                    )
+                }
+            }
+            composable(Screen.PROFILE) {
+                ProfileView(profileViewModel, tagsViewModel, navigationActions, auth)
+            }
+            composable(Screen.ALREADY_MET) { AlreadyMetScreen(navigationActions, profileViewModel) }
+        }
+
+        navigation(
+            startDestination = Screen.NOTIFICATIONS,
+            route = Route.NOTIFICATIONS,
+        ) {
+            composable(Screen.NOTIFICATIONS) {
+                if (meetingRequestViewModel != null) {
+                    NotificationScreen(navigationActions, profileViewModel, meetingRequestViewModel)
+                } else {
+                    throw IllegalStateException(
+                        "The Meeting Request View Model shouldn't be null : Bad initialization"
+                    )
+                }
+            }
+            composable(Screen.INBOX_PROFILE_VIEW + "?userId={userId}") { navBackStackEntry ->
+                if (meetingRequestViewModel != null) {
+                    InboxProfileViewScreen(
+                        profileViewModel,
+                        navBackStackEntry,
+                        navigationActions,
+                        tagsViewModel,
+                        meetingRequestViewModel,
+                        isTesting
+                    )
+                } else {
+                    throw IllegalStateException(
+                        "The Meeting Request View Model shouldn't be null : Bad initialization"
+                    )
+                }
+            }
+            composable(Screen.MAP_MEETING_LOCATION_SCREEN + "?userId={userId}") { navBackStackEntry ->
+                if (meetingRequestViewModel != null) {
+                    LocationSelectorMapScreen(
+                        profileViewModel,
+                        navigationActions,
+                        meetingRequestViewModel,
+                        navBackStackEntry,
+                        locationViewModel,
+                        isTesting
+                    )
+                } else {
+                    throw IllegalStateException(
+                        "The Meeting Request View Model shouldn't be null : Bad initialization"
+                    )
+                }
+            }
+
+            navigation(
+                startDestination = Screen.PROFILE_EDIT,
+                route = Route.PROFILE_EDIT,
+            ) {
+                composable(Screen.PROFILE_EDIT) {
+                    ProfileEditingScreen(navigationActions, tagsViewModel, profileViewModel, auth)
+                }
+            }
+
+            navigation(
+                startDestination = Screen.FILTER,
+                route = Route.FILTER,
+            ) {
+                composable(Screen.FILTER) {
+                    FilterScreen(navigationActions, tagsViewModel, filterViewModel, profileViewModel)
+                }
+            }
+
+            navigation(
+                startDestination = Screen.CROP,
+                route = Route.CROP,
+            ) {
+                composable(Screen.CROP) { ImageCropperScreen(profileViewModel, navigationActions) }
+            }
+
+            navigation(
+                startDestination = Screen.UNBLOCK_PROFILE,
+                route = Route.UNBLOCK_PROFILE,
+            ) {
+                composable(Screen.UNBLOCK_PROFILE) {
+                    UnblockProfileScreen(navigationActions, profileViewModel)
+                }
+            }
+
+            navigation(
+                startDestination = Screen.MAP,
+                route = Route.MAP,
+            ) {
+                composable(Screen.MAP) { MapScreen(navigationActions, profileViewModel, locationViewModel) }
+            }
+        }
     }
-
-    navigation(
-        startDestination = Screen.AROUND_YOU,
-        route = Route.AROUND_YOU,
-    ) {
-      composable(Screen.AROUND_YOU) {
-        AroundYouScreen(
-            navigationActions,
-            profileViewModel,
-            tagsViewModel,
-            filterViewModel,
-            locationViewModel,
-            sortViewModel,
-            permissionManager,
-            appDataStore,
-            isTesting)
-      }
-      composable(Screen.OTHER_PROFILE_VIEW + "?userId={userId}") { navBackStackEntry ->
-        if (meetingRequestViewModel != null) {
-          OtherProfileView(
-              profileViewModel,
-              tagsViewModel,
-              aiViewModel,
-              meetingRequestViewModel,
-              navigationActions,
-              navBackStackEntry)
-        } else {
-          throw IllegalStateException(
-              "The Meeting Request View Model shouldn't be null : Bad initialization")
-        }
-      }
-    }
-
-    navigation(
-        startDestination = Screen.SETTINGS,
-        route = Route.SETTINGS,
-    ) {
-      composable(Screen.SETTINGS) {
-        SettingsScreen(
-            profilesViewModel = profileViewModel,
-            navigationActions = navigationActions,
-            appDataStore = appDataStore,
-            locationViewModel = locationViewModel,
-            auth = auth)
-      }
-      composable(Screen.PROFILE) {
-        ProfileView(profileViewModel, tagsViewModel, navigationActions, auth)
-      }
-      composable(Screen.ALREADY_MET) { AlreadyMetScreen(navigationActions, profileViewModel) }
-    }
-
-    navigation(
-        startDestination = Screen.NOTIFICATIONS,
-        route = Route.NOTIFICATIONS,
-    ) {
-      composable(Screen.NOTIFICATIONS) {
-        if (meetingRequestViewModel != null) {
-          NotificationScreen(navigationActions, profileViewModel, meetingRequestViewModel)
-        } else {
-          throw IllegalStateException(
-              "The Meeting Request View Model shouldn't be null : Bad initialization")
-        }
-      }
-      composable(Screen.INBOX_PROFILE_VIEW + "?userId={userId}") { navBackStackEntry ->
-        if (meetingRequestViewModel != null) {
-          InboxProfileViewScreen(
-              profileViewModel,
-              navBackStackEntry,
-              navigationActions,
-              tagsViewModel,
-              meetingRequestViewModel,
-              isTesting)
-        } else {
-          throw IllegalStateException(
-              "The Meeting Request View Model shouldn't be null : Bad initialization")
-        }
-      }
-      composable(Screen.MAP_MEETING_LOCATION_SCREEN + "?userId={userId}") { navBackStackEntry ->
-        if (meetingRequestViewModel != null) {
-          LocationSelectorMapScreen(
-              profileViewModel,
-              navigationActions,
-              meetingRequestViewModel,
-              navBackStackEntry,
-              locationViewModel,
-              isTesting)
-        } else {
-          throw IllegalStateException(
-              "The Meeting Request View Model shouldn't be null : Bad initialization")
-        }
-      }
-
-      navigation(
-          startDestination = Screen.PROFILE_EDIT,
-          route = Route.PROFILE_EDIT,
-      ) {
-        composable(Screen.PROFILE_EDIT) {
-          ProfileEditingScreen(navigationActions, tagsViewModel, profileViewModel, auth)
-        }
-      }
-
-      navigation(
-          startDestination = Screen.FILTER,
-          route = Route.FILTER,
-      ) {
-        composable(Screen.FILTER) {
-          FilterScreen(navigationActions, tagsViewModel, filterViewModel, profileViewModel)
-        }
-      }
-
-      navigation(
-          startDestination = Screen.CROP,
-          route = Route.CROP,
-      ) {
-        composable(Screen.CROP) { ImageCropperScreen(profileViewModel, navigationActions) }
-      }
-
-      navigation(
-          startDestination = Screen.UNBLOCK_PROFILE,
-          route = Route.UNBLOCK_PROFILE,
-      ) {
-        composable(Screen.UNBLOCK_PROFILE) {
-          UnblockProfileScreen(navigationActions, profileViewModel)
-        }
-      }
-
-      navigation(
-          startDestination = Screen.MAP,
-          route = Route.MAP,
-      ) {
-        composable(Screen.MAP) { MapScreen(navigationActions, profileViewModel, locationViewModel) }
-      }
-    }
-  }
 }
