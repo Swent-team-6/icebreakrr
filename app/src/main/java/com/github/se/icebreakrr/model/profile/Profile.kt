@@ -65,6 +65,11 @@ data class Profile(
     return age
   }
 
+  fun approxDistanceToSelfProfile(): String {
+    val distance = distanceToSelfProfile ?: return ""
+    return if (distance <= 50) "Nearby" else "${((distance + 50) / 100) * 100}m"
+  }
+
   companion object
 }
 
