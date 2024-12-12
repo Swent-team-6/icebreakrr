@@ -3,17 +3,15 @@ package com.github.se.icebreakrr.ui.sections
 import android.annotation.SuppressLint
 import android.content.Context
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.KeyboardArrowUp
-import androidx.compose.material3.Icon
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -25,6 +23,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
@@ -45,21 +44,12 @@ import com.github.se.icebreakrr.ui.sections.shared.ProfileCard
 import com.github.se.icebreakrr.ui.sections.shared.TopBar
 import com.github.se.icebreakrr.utils.NetworkUtils.isNetworkAvailableWithContext
 import com.github.se.icebreakrr.utils.NetworkUtils.showNoInternetToast
-import java.util.Locale
 
 // Constants for padding and list management
 private val HORIZONTAL_PADDING = 7.dp
 private val TEXT_VERTICAL_PADDING = 16.dp
 private val CARD_SPACING = 16.dp
-private val COLUMN_VERTICAL_PADDING = 16.dp
-private val COLUMN_HORIZONTAL_PADDING = 8.dp
-private val SORT_TOP_PADDING = 4.dp
-private val TEXT_SMALL_SIZE = 16.sp
-private val TEXT_WEIGHT = 1f
-private val DROPDOWN_HORIZONTAL_PADDING = 16.dp
 private val DROPDOWN_VERTICAL_PADDING = 8.dp
-private const val UNDERSCORE = "_"
-private const val SPACE = " "
 private const val MEETING_REQUEST_LOCATION_PENDING = "Choose location"
 
 /**
@@ -104,11 +94,10 @@ fun NotificationScreen(
               selectedOption = meetingRequestOption,
               onOptionSelected = { meetingRequestOption = it },
               modifier =
-                  Modifier.fillMaxWidth()
-                      .background(MaterialTheme.colorScheme.primaryContainer)
-                      .padding(
-                          horizontal = DROPDOWN_HORIZONTAL_PADDING,
-                          vertical = DROPDOWN_VERTICAL_PADDING),
+              Modifier
+                  .fillMaxWidth()
+                  .background(MaterialTheme.colorScheme.primaryContainer)
+                      ,
               pendingLocationsSize = pendingLocation.value.size,
               inboxSize = inboxCardList.value.size)
           when (meetingRequestOption) {
@@ -163,101 +152,82 @@ fun MeetingRequestOptionDropdown(
     pendingLocationsSize: Int,
     inboxSize: Int
 ) {
-  var expanded by remember { mutableStateOf(false) }
-
-  val otherOptions = MeetingRequestOption.values().filter { it != selectedOption }
-
-  Column(modifier = modifier) {
     Row(
-        modifier =
-            Modifier.fillMaxWidth()
-                .clickable { expanded = !expanded }
-                .padding(COLUMN_HORIZONTAL_PADDING)
-                .testTag("MeetingRequestOptionsDropdown_Selected"),
-        verticalAlignment = Alignment.CenterVertically) {
-          Text(
-              text =
-                  "Meeting Request: ${
-                    selectedOption.name.replace(UNDERSCORE, SPACE).lowercase()
-                        .replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.ROOT) else it.toString() }
-                }",
-              fontSize = TEXT_SMALL_SIZE,
-              modifier = Modifier.weight(TEXT_WEIGHT).testTag("MeetingRequestOptionsDropdown_Text"))
-          Icon(
-              imageVector =
-                  if (expanded) Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown,
-              contentDescription = "Icon of the MeetingRequest option dropdown menu",
-              modifier = Modifier.testTag("MeetingRequestOptionsDropdown_Arrow"))
-          if (!expanded) {
-            when (selectedOption) {
-              MeetingRequestOption.SENT -> {
-                if (pendingLocationsSize + inboxSize > 0) {
-                  Badge(pendingLocationsSize + inboxSize, "badgeSent")
-                }
-              }
-              MeetingRequestOption.INBOX -> {
-                if (pendingLocationsSize > 0) {
-                  Badge(pendingLocationsSize, "badgeInbox")
-                }
-              }
-              MeetingRequestOption.CHOOSE_LOCATION -> {
-                if (inboxSize > 0) {
-                  Badge(inboxSize, "badgePendingAndInbox")
-                }
-              }
-            }
-          }
-        }
-
-    if (expanded) {
-      otherOptions.forEach { meetingRequestOption ->
-        Row(
-            modifier =
-                Modifier.fillMaxWidth()
-                    .clickable {
-                      expanded = false
-                      onOptionSelected(meetingRequestOption)
-                    }
-                    .padding(
-                        start = COLUMN_VERTICAL_PADDING,
-                        top = SORT_TOP_PADDING,
-                        bottom = COLUMN_HORIZONTAL_PADDING)
-                    .testTag("MeetingRequestOptionsDropdown_Option_${meetingRequestOption.name}"),
-        ) {
-          Text(
-              text =
-                  meetingRequestOption.name
-                      .replace(UNDERSCORE, SPACE)
-                      .lowercase()
-                      .replaceFirstChar {
-                        if (it.isLowerCase()) it.titlecase(Locale.ROOT) else it.toString()
-                      },
-              fontSize = TEXT_SMALL_SIZE,
-              color = MaterialTheme.colorScheme.secondaryContainer)
-          when (meetingRequestOption) {
-            MeetingRequestOption.CHOOSE_LOCATION -> {
-              if (pendingLocationsSize > 0) {
-                Badge(pendingLocationsSize, "badgeChooseLocation")
-              }
-            }
-            MeetingRequestOption.INBOX -> {
-              if (inboxSize > 0) {
-                Badge(inboxSize, "badgeInbox")
-              }
-            }
-            MeetingRequestOption.SENT -> {}
-          }
-        }
-      }
+        modifier = modifier,
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        MeetingRequestButton(
+            option = MeetingRequestOption.INBOX,
+            isSelected = selectedOption == MeetingRequestOption.INBOX,
+            onClick = { onOptionSelected(MeetingRequestOption.INBOX) },
+            badgeCount = inboxSize,
+            modifier = Modifier.weight(1f).testTag("inboxButton")
+        )
+        
+        MeetingRequestButton(
+            option = MeetingRequestOption.SENT,
+            isSelected = selectedOption == MeetingRequestOption.SENT,
+            onClick = { onOptionSelected(MeetingRequestOption.SENT) },
+            badgeCount = pendingLocationsSize + inboxSize,
+            modifier = Modifier.weight(1f).testTag("sentButton")
+        )
+        
+        MeetingRequestButton(
+            option = MeetingRequestOption.CHOOSE_LOCATION,
+            isSelected = selectedOption == MeetingRequestOption.CHOOSE_LOCATION,
+            onClick = { onOptionSelected(MeetingRequestOption.CHOOSE_LOCATION) },
+            badgeCount = pendingLocationsSize,
+            modifier = Modifier.weight(1f).testTag("locationButton")
+        )
     }
-  }
+}
+
+@Composable
+private fun MeetingRequestButton(
+    option: MeetingRequestOption,
+    isSelected: Boolean,
+    onClick: () -> Unit,
+    badgeCount: Int,
+    modifier: Modifier = Modifier
+) {
+    Button(
+        onClick = onClick,
+        modifier = modifier,
+        shape = RectangleShape,
+        colors = ButtonDefaults.buttonColors(
+            containerColor = if (isSelected) 
+                MaterialTheme.colorScheme.secondaryContainer
+            else 
+                MaterialTheme.colorScheme.primaryContainer,
+            contentColor = MaterialTheme.colorScheme.onSecondary
+        )
+    ) {
+        Box(
+            modifier = Modifier.padding(
+                vertical = DROPDOWN_VERTICAL_PADDING),
+            contentAlignment = Alignment.Center,
+        ) {
+            Text(
+                text = option.displayName,
+                fontSize = 15.sp,
+                maxLines = 1
+            )
+            if (badgeCount > 0) {
+                Badge(
+                    count = badgeCount,
+                    tag = "badge${option.name}"
+                )
+            }
+        }
+    }
 }
 
 /** The enumeration of all the options available for meeting request displays */
-enum class MeetingRequestOption {
-  INBOX,
-  SENT,
-  CHOOSE_LOCATION
+enum class MeetingRequestOption(val displayName: String) {
+  INBOX("Inbox"),
+  SENT("Sent"),
+  CHOOSE_LOCATION("Location")
 }
 
 /**
@@ -277,16 +247,18 @@ private fun DisplayTextAndCard(
 ) {
   LazyColumn(
       modifier =
-          Modifier.padding()
-              .padding(horizontal = HORIZONTAL_PADDING)
-              .testTag("notificationScroll")) {
+      Modifier
+          .padding()
+          .padding(horizontal = HORIZONTAL_PADDING)
+          .testTag("notificationScroll")) {
         item {
           Text(
               text = text,
               fontWeight = FontWeight.Bold,
               modifier =
-                  Modifier.padding(vertical = TEXT_VERTICAL_PADDING)
-                      .testTag("notificationFirstText"))
+              Modifier
+                  .padding(vertical = TEXT_VERTICAL_PADDING)
+                  .testTag("notificationFirstText"))
           Column(verticalArrangement = Arrangement.spacedBy(CARD_SPACING)) {
             profiles.forEach { p ->
               ProfileCard(
