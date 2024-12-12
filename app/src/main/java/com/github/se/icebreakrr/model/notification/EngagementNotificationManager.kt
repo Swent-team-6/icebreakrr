@@ -63,7 +63,7 @@ class EngagementNotificationManager(
    * Android TIRAMISU+ and launches monitoring in a coroutine.
    */
   fun startMonitoring() {
-    Log.e(TAG, "Starting engagement monitoring")
+    Log.i(TAG, "Starting engagement monitoring")
     stopMonitoring() // Stop any existing monitoring
 
     // Handle permission request
