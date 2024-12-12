@@ -67,11 +67,14 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.functions.FirebaseFunctions
 import com.google.firebase.storage.storage
+import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
-  private lateinit var auth: FirebaseAuth
-  private lateinit var firestore: FirebaseFirestore
-  private lateinit var authStateListener: FirebaseAuth.AuthStateListener
+  @Inject lateinit var auth: FirebaseAuth
+  @Inject lateinit var firestore: FirebaseFirestore
+  @Inject lateinit var authStateListener: FirebaseAuth.AuthStateListener
   private lateinit var engagementNotificationManager: EngagementNotificationManager
   private lateinit var locationViewModel: LocationViewModel
   private lateinit var locationService: LocationService
@@ -90,8 +93,8 @@ class MainActivity : ComponentActivity() {
 
     // Initialize Firebase
     FirebaseApp.initializeApp(this)
-    auth = FirebaseAuth.getInstance()
-    firestore = FirebaseFirestore.getInstance()
+    // auth = FirebaseAuth.getInstance()
+    // firestore = FirebaseFirestore.getInstance()
     functions = FirebaseFunctions.getInstance()
 
     // Initialize Utils
