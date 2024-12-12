@@ -8,7 +8,6 @@ import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithTag
-import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import com.github.se.icebreakrr.R
 import com.github.se.icebreakrr.model.message.MeetingRequestViewModel
@@ -132,7 +131,7 @@ class NotificationTest {
       NotificationScreen(navigationActions, profilesViewModel, meetingRequestViewModel)
     }
     composeTestRule.onNodeWithTag("topBar").assertIsDisplayed()
-      composeTestRule.onAllNodesWithText("Inbox").onFirst().assertIsDisplayed()
+    composeTestRule.onAllNodesWithText("Inbox").onFirst().assertIsDisplayed()
     composeTestRule.onNodeWithTag("bottomNavigationMenu").assertIsDisplayed()
     composeTestRule.onNodeWithTag("notificationScroll").assertIsDisplayed()
     composeTestRule.onNodeWithTag("notificationFirstText").assertIsDisplayed()
@@ -236,23 +235,11 @@ class NotificationTest {
     }
     composeTestRule.waitForIdle()
     composeTestRule.onNodeWithTag("profileCard").assertIsDisplayed()
-    composeTestRule
-        .onNodeWithTag("locationButton")
-        .assertIsDisplayed()
-        .performClick()
+    composeTestRule.onNodeWithTag("locationButton").assertIsDisplayed().performClick()
     composeTestRule.onNodeWithTag("profileCard").assertIsDisplayed()
-    composeTestRule
-        .onNodeWithTag("inboxButton")
-        .assertIsDisplayed()
-        .performClick()
-    composeTestRule
-        .onNodeWithTag("sentButton")
-        .assertIsDisplayed()
-        .performClick()
-    composeTestRule
-        .onNodeWithTag("inboxButton")
-        .assertIsDisplayed()
-        .performClick()
+    composeTestRule.onNodeWithTag("inboxButton").assertIsDisplayed().performClick()
+    composeTestRule.onNodeWithTag("sentButton").assertIsDisplayed().performClick()
+    composeTestRule.onNodeWithTag("inboxButton").assertIsDisplayed().performClick()
   }
 
   // Helper function to create a mock profile

@@ -94,10 +94,7 @@ fun NotificationScreen(
               selectedOption = meetingRequestOption,
               onOptionSelected = { meetingRequestOption = it },
               modifier =
-              Modifier
-                  .fillMaxWidth()
-                  .background(MaterialTheme.colorScheme.primaryContainer)
-                      ,
+                  Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.primaryContainer),
               pendingLocationsSize = pendingLocation.value.size,
               inboxSize = inboxCardList.value.size)
           when (meetingRequestOption) {
@@ -152,35 +149,31 @@ fun MeetingRequestOptionDropdown(
     pendingLocationsSize: Int,
     inboxSize: Int
 ) {
-    Row(
-        modifier = modifier,
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
+  Row(
+      modifier = modifier,
+      horizontalArrangement = Arrangement.SpaceBetween,
+      verticalAlignment = Alignment.CenterVertically) {
         MeetingRequestButton(
             option = MeetingRequestOption.INBOX,
             isSelected = selectedOption == MeetingRequestOption.INBOX,
             onClick = { onOptionSelected(MeetingRequestOption.INBOX) },
             badgeCount = inboxSize,
-            modifier = Modifier.weight(1f).testTag("inboxButton")
-        )
-        
+            modifier = Modifier.weight(1f).testTag("inboxButton"))
+
         MeetingRequestButton(
             option = MeetingRequestOption.SENT,
             isSelected = selectedOption == MeetingRequestOption.SENT,
             onClick = { onOptionSelected(MeetingRequestOption.SENT) },
             badgeCount = pendingLocationsSize + inboxSize,
-            modifier = Modifier.weight(1f).testTag("sentButton")
-        )
-        
+            modifier = Modifier.weight(1f).testTag("sentButton"))
+
         MeetingRequestButton(
             option = MeetingRequestOption.CHOOSE_LOCATION,
             isSelected = selectedOption == MeetingRequestOption.CHOOSE_LOCATION,
             onClick = { onOptionSelected(MeetingRequestOption.CHOOSE_LOCATION) },
             badgeCount = pendingLocationsSize,
-            modifier = Modifier.weight(1f).testTag("locationButton")
-        )
-    }
+            modifier = Modifier.weight(1f).testTag("locationButton"))
+      }
 }
 
 @Composable
@@ -191,36 +184,26 @@ private fun MeetingRequestButton(
     badgeCount: Int,
     modifier: Modifier = Modifier
 ) {
-    Button(
-        onClick = onClick,
-        modifier = modifier,
-        shape = RectangleShape,
-        colors = ButtonDefaults.buttonColors(
-            containerColor = if (isSelected) 
-                MaterialTheme.colorScheme.secondaryContainer
-            else 
-                MaterialTheme.colorScheme.primaryContainer,
-            contentColor = MaterialTheme.colorScheme.onSecondary
-        )
-    ) {
+  Button(
+      onClick = onClick,
+      modifier = modifier,
+      shape = RectangleShape,
+      colors =
+          ButtonDefaults.buttonColors(
+              containerColor =
+                  if (isSelected) MaterialTheme.colorScheme.secondaryContainer
+                  else MaterialTheme.colorScheme.primaryContainer,
+              contentColor = MaterialTheme.colorScheme.onSecondary)) {
         Box(
-            modifier = Modifier.padding(
-                vertical = DROPDOWN_VERTICAL_PADDING),
+            modifier = Modifier.padding(vertical = DROPDOWN_VERTICAL_PADDING),
             contentAlignment = Alignment.Center,
         ) {
-            Text(
-                text = option.displayName,
-                fontSize = 15.sp,
-                maxLines = 1
-            )
-            if (badgeCount > 0) {
-                Badge(
-                    count = badgeCount,
-                    tag = "badge${option.name}"
-                )
-            }
+          Text(text = option.displayName, fontSize = 15.sp, maxLines = 1)
+          if (badgeCount > 0) {
+            Badge(count = badgeCount, tag = "badge${option.name}")
+          }
         }
-    }
+      }
 }
 
 /** The enumeration of all the options available for meeting request displays */
@@ -247,18 +230,16 @@ private fun DisplayTextAndCard(
 ) {
   LazyColumn(
       modifier =
-      Modifier
-          .padding()
-          .padding(horizontal = HORIZONTAL_PADDING)
-          .testTag("notificationScroll")) {
+          Modifier.padding()
+              .padding(horizontal = HORIZONTAL_PADDING)
+              .testTag("notificationScroll")) {
         item {
           Text(
               text = text,
               fontWeight = FontWeight.Bold,
               modifier =
-              Modifier
-                  .padding(vertical = TEXT_VERTICAL_PADDING)
-                  .testTag("notificationFirstText"))
+                  Modifier.padding(vertical = TEXT_VERTICAL_PADDING)
+                      .testTag("notificationFirstText"))
           Column(verticalArrangement = Arrangement.spacedBy(CARD_SPACING)) {
             profiles.forEach { p ->
               ProfileCard(

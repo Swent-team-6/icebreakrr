@@ -1,8 +1,6 @@
 package com.github.se.endToEnd
 
 import android.content.Intent
-import androidx.compose.ui.test.assertAll
-import androidx.compose.ui.test.assertAny
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotSelected
 import androidx.compose.ui.test.assertIsSelected

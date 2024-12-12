@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -27,7 +26,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
@@ -142,27 +140,21 @@ fun ExtendTag(tagStyle: TagStyle, onClick: () -> Unit) {
 @Composable
 fun RowOfTags(tags: List<Pair<String, Color>>, tagStyle: TagStyle = TagStyle()) {
   val isExtended = remember { mutableStateOf(false) }
-  Column(
-      modifier = Modifier
-          .fillMaxWidth()
-          .wrapContentHeight()
-  ) {
-      FlowRow(
-          modifier = Modifier
-              .wrapContentHeight(),
-          horizontalArrangement = Arrangement.Start,
-          verticalArrangement = Arrangement.Top
-      ) {
-        val tagsToShow = if (isExtended.value) tags else tags.take(TAGS_SHOWN_DEFAULT)
-        tagsToShow.forEach { (text, color) ->
-          Tag(text, TagStyle(tagStyle.textColor, color, tagStyle.fontSize))
+  Column(modifier = Modifier.fillMaxWidth().wrapContentHeight()) {
+    FlowRow(
+        modifier = Modifier.wrapContentHeight(),
+        horizontalArrangement = Arrangement.Start,
+        verticalArrangement = Arrangement.Top) {
+          val tagsToShow = if (isExtended.value) tags else tags.take(TAGS_SHOWN_DEFAULT)
+          tagsToShow.forEach { (text, color) ->
+            Tag(text, TagStyle(tagStyle.textColor, color, tagStyle.fontSize))
+          }
+          if (!isExtended.value && tags.size > TAGS_SHOWN_DEFAULT) {
+            ExtendTag(tagStyle) { isExtended.value = true }
+          }
         }
-        if (!isExtended.value && tags.size > TAGS_SHOWN_DEFAULT) {
-          ExtendTag(tagStyle) { isExtended.value = true }
-        }
-      }
-    }
   }
+}
 
 /**
  * This Composable is a row of tags that are clickable and that adapts dynamically to the space it

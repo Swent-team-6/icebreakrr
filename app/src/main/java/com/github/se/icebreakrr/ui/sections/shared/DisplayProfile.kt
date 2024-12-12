@@ -3,7 +3,6 @@ package com.github.se.icebreakrr.ui.sections.shared
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
@@ -42,7 +41,6 @@ import com.github.se.icebreakrr.model.profile.reportType
 import com.github.se.icebreakrr.model.tags.TagsViewModel
 import com.github.se.icebreakrr.ui.navigation.NavigationActions
 import com.github.se.icebreakrr.ui.tags.RowOfTags
-import com.github.se.icebreakrr.ui.tags.Tag
 import com.github.se.icebreakrr.ui.tags.TagStyle
 import com.github.se.icebreakrr.ui.theme.IceBreakrrBlue
 import com.github.se.icebreakrr.utils.NetworkUtils.isNetworkAvailable
@@ -418,12 +416,9 @@ fun ProfileCatchPhrase(catchPhrase: String) {
  */
 @Composable
 fun TagsSection(listOfTags: List<Pair<String, Color>>) {
-  Box(
-      modifier =
-          Modifier.fillMaxWidth()
-              .testTag("tagSection")) {
-      RowOfTags(listOfTags, TagStyle())
-      }
+  Box(modifier = Modifier.fillMaxWidth().testTag("tagSection")) {
+    RowOfTags(listOfTags, TagStyle())
+  }
 }
 
 /**

@@ -109,10 +109,10 @@ fun SendRequestScreen(
                       contentDescription = "send button")
                 }
               },
-              modifier = Modifier
-                  .width(TEXT_FIELD_WIDTH)
-                  .height(TEXT_FIELD_HEIGHT * 2)
-                  .testTag("messageTextField"),
+              modifier =
+                  Modifier.width(TEXT_FIELD_WIDTH)
+                      .height(TEXT_FIELD_HEIGHT * 2)
+                      .testTag("messageTextField"),
           )
           Row(
               verticalAlignment = Alignment.CenterVertically,
@@ -120,13 +120,11 @@ fun SendRequestScreen(
                 TextButton(
                     onClick = { onCancelClick() },
                     enabled = true,
-                    modifier =
-                        Modifier.padding(start = BOTTOM_PADDING)
-                            .testTag("cancelButton")) {
+                    modifier = Modifier.padding(start = BOTTOM_PADDING).testTag("cancelButton")) {
                       Text("Cancel")
                     }
               }
-        Spacer(Modifier)
+          Spacer(Modifier)
         }
       }
 }
