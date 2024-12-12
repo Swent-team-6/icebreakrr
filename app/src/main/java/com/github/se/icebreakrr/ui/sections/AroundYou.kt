@@ -218,7 +218,7 @@ fun AroundYouScreen(
       }
 
   Box(modifier = Modifier.fillMaxSize()) {
-    if (showPopup) {
+    if (showPopup && !isTestMode) {
       LocationPermissionPopup(
           onDismiss = {
             showPopup = false
