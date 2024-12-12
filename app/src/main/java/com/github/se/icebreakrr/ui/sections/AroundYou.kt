@@ -1,7 +1,13 @@
 package com.github.se.icebreakrr.ui.sections
 
+import android.Manifest
 import android.annotation.SuppressLint
+import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.os.Build
+import android.provider.Settings
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -13,10 +19,12 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -39,10 +47,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import com.github.se.icebreakrr.R
 import com.github.se.icebreakrr.data.AppDataStore
 import com.github.se.icebreakrr.model.filter.FilterViewModel
@@ -78,7 +88,10 @@ private val TEXT_SMALL_SIZE = 16.sp
 private const val REFRESH_DELAY = 10_000L
 private val DROPDOWN_HORIZONTAL_PADDING = 16.dp
 private val DROPDOWN_VERTICAL_PADDING = 8.dp
+private const val LOCATION_POPUP_BUTTON_TEXT = "OK"
+private const val GOTO_SETTINGS_BUTTON_TEXT = "Go to Settings"
 
+@RequiresApi(Build.VERSION_CODES.Q)
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
@@ -104,19 +117,23 @@ fun AroundYouScreen(
     appDataStore: AppDataStore,
     isTestMode: Boolean = false,
 ) {
-
-  val permissionStatuses = permissionManager.permissionStatuses.collectAsState()
-  val hasLocationPermission =
-      permissionStatuses.value[android.Manifest.permission.ACCESS_FINE_LOCATION] ==
-          PackageManager.PERMISSION_GRANTED
   val filteredProfiles = profilesViewModel.filteredProfiles.collectAsState()
   val isLoading = profilesViewModel.loading.collectAsState()
   val context = LocalContext.current
   val isConnected = profilesViewModel.isConnected.collectAsState()
   val userLocation = locationViewModel.lastKnownLocation.collectAsState()
-  // Collect the discoverability state from DataStore
   val isDiscoverable by appDataStore.isDiscoverable.collectAsState(initial = false)
   val myProfile = profilesViewModel.selfProfile.collectAsState()
+
+  val permissionStatuses = permissionManager.permissionStatuses.collectAsState()
+  val hasLocationPermission =
+      permissionStatuses.value[Manifest.permission.ACCESS_FINE_LOCATION] ==
+          PackageManager.PERMISSION_GRANTED
+  val hasBackgroundLocationPermission =
+      permissionStatuses.value[Manifest.permission.ACCESS_BACKGROUND_LOCATION] ==
+          PackageManager.PERMISSION_GRANTED
+  var showBackgroundPermissionPopup by remember { mutableStateOf(false) }
+  var showPopup by remember { mutableStateOf(false) }
 
   // Create the engagement notification manager
   val engagementManager = remember {
@@ -126,31 +143,56 @@ fun AroundYouScreen(
           meetingRequestViewModel = it,
           appDataStore = appDataStore,
           context = context,
-          filterViewModel = filterViewModel)
+          filterViewModel = filterViewModel,
+          permissionManager = permissionManager)
     }
   }
 
-  // Start monitoring when the screen is active and we have location permission
+  // Start monitoring when the screen is active
   LaunchedEffect(isConnected.value, userLocation.value) {
+    // Show a popup to explain why the app need the location permission
+    if (!hasLocationPermission) {
+      showPopup = true
+    } else {
+      locationViewModel.tryToStartLocationUpdates()
+    }
+
+    // Show message to request background location permission
+    if (hasLocationPermission && !hasBackgroundLocationPermission) {
+      showBackgroundPermissionPopup = true
+    }
+
+    // Check network availability in non-test mode
     if (!isTestMode && !isNetworkAvailable()) {
       profilesViewModel.updateIsConnected(false)
-    } else if (hasLocationPermission) {
-      // Start engagement notifications
+      return@LaunchedEffect // Stop execution if no network is available
+    }
+
+    // Proceed only if location permission is granted
+    if (hasLocationPermission) {
+      // Start location updates
+      locationViewModel.tryToStartLocationUpdates()
+
+      // Start engagement notifications if applicable
       engagementManager?.startMonitoring()
 
+      // Loop to periodically refresh data
       while (true) {
-        // Call the profile fetch function
+        val location = userLocation.value ?: GeoPoint(DEFAULT_USER_LATITUDE, DEFAULT_USER_LONGITUDE)
+
+        // Fetch filtered profiles within a radius
         profilesViewModel.getFilteredProfilesInRadius(
-            userLocation.value ?: GeoPoint(DEFAULT_USER_LATITUDE, DEFAULT_USER_LONGITUDE),
-            filterViewModel.selectedRadius.value,
-            filterViewModel.selectedGenders.value,
-            filterViewModel.ageRange.value,
-            tagsViewModel.filteredTags.value)
+            center = location,
+            radiusInMeters = filterViewModel.selectedRadius.value,
+            genders = filterViewModel.selectedGenders.value,
+            ageRange = filterViewModel.ageRange.value,
+            tags = tagsViewModel.filteredTags.value)
 
-        profilesViewModel.getMessagingRadiusProfile(
-            userLocation.value ?: GeoPoint(DEFAULT_USER_LATITUDE, DEFAULT_USER_LONGITUDE))
+        // Fetch profiles within the messaging radius
+        profilesViewModel.getMessagingRadiusProfile(location)
 
-        delay(REFRESH_DELAY) // Wait before the next update
+        // Pause before the next update
+        delay(REFRESH_DELAY)
       }
     }
   }
@@ -177,89 +219,112 @@ fun AroundYouScreen(
         }
       }
 
-  Scaffold(
-      modifier = Modifier.testTag("aroundYouScreen"),
-      bottomBar = {
-        BottomNavigationMenu(
-            onTabSelect = { route ->
-              if (route.route != Route.AROUND_YOU) {
-                navigationActions.navigateTo(route)
-              }
-            },
-            tabList = LIST_TOP_LEVEL_DESTINATIONS,
-            selectedItem = Route.AROUND_YOU,
-            notificationCount = (myProfile.value?.meetingRequestInbox?.size ?: 0),
-            heatMapCount = myProfile.value?.meetingRequestChosenLocalisation?.size ?: 0)
-      },
-      topBar = { TopBar("Around You") },
-      content = { innerPadding ->
+  Box(modifier = Modifier.fillMaxSize()) {
+    if (showPopup && !isTestMode) {
+      LocationPermissionPopup(
+          onDismiss = {
+            showPopup = false
+            locationViewModel.tryToStartLocationUpdates()
+          })
+    }
 
-        // Wrapping dropdown and profile list in a Column
-        Column(modifier = Modifier.padding(innerPadding)) {
-          // Sort Options Dropdown
-          SortOptionsDropdown(
-              selectedOption = sortOption.value,
-              onOptionSelected = { sortViewModel.updateSortOption(it) },
-              modifier =
-                  Modifier.fillMaxWidth()
-                      .background(MaterialTheme.colorScheme.primaryContainer)
-                      .padding(
-                          horizontal = DROPDOWN_HORIZONTAL_PADDING,
-                          vertical = DROPDOWN_VERTICAL_PADDING))
-
-          // Profile List
-          PullToRefreshBox(
-              locationViewModel = locationViewModel,
-              filterViewModel = filterViewModel,
-              tagsViewModel = tagsViewModel,
-              isRefreshing = isLoading.value,
-              onRefresh = { center, radiusInMeters, genders, ageRange, tags ->
-                profilesViewModel.getFilteredProfilesInRadius(
-                    center, radiusInMeters, genders, ageRange, tags)
-              },
-              modifier = Modifier.fillMaxSize(),
-              content = {
-                if (!isConnected.value) {
-                  EmptyProfilePrompt(
-                      label = stringResource(id = R.string.no_internet),
-                      testTag = "noConnectionPrompt")
-                } else if (!isDiscoverable) {
-                  EmptyProfilePrompt(
-                      label = stringResource(R.string.ask_to_toggle_location),
-                      testTag = "activateLocationPrompt")
-                } else if (!isTestMode && !hasLocationPermission) {
-                  EmptyProfilePrompt(
-                      label = stringResource(R.string.ask_to_give_location_permission),
-                      testTag = "noLocationPermissionPrompt")
-                } else if (sortedProfiles.isEmpty()) {
-                  EmptyProfilePrompt(
-                      label = stringResource(R.string.no_one_around),
-                      testTag = "emptyProfilePrompt")
-                } else {
-                  LazyColumn(
-                      contentPadding = PaddingValues(vertical = COLUMN_VERTICAL_PADDING),
-                      verticalArrangement = Arrangement.spacedBy(COLUMN_VERTICAL_PADDING),
-                      modifier =
-                          Modifier.fillMaxSize().padding(horizontal = COLUMN_HORIZONTAL_PADDING)) {
-                        items(sortedProfiles.size) { index ->
-                          ProfileCard(
-                              profile = sortedProfiles[index],
-                              onclick = {
-                                if (isNetworkAvailableWithContext(context)) {
-                                  navigationActions.navigateTo(
-                                      Screen.OTHER_PROFILE_VIEW +
-                                          "?userId=${sortedProfiles[index].uid}")
-                                } else {
-                                  showNoInternetToast(context)
-                                }
-                              })
-                        }
-                      }
+    Scaffold(
+        modifier = Modifier.testTag("aroundYouScreen"),
+        bottomBar = {
+          BottomNavigationMenu(
+              onTabSelect = { route ->
+                if (route.route != Route.AROUND_YOU) {
+                  navigationActions.navigateTo(route)
                 }
-              })
-        }
-      },
-      floatingActionButton = { FilterFloatingActionButton(navigationActions) })
+              },
+              tabList = LIST_TOP_LEVEL_DESTINATIONS,
+              selectedItem = Route.AROUND_YOU,
+              notificationCount = (myProfile.value?.meetingRequestInbox?.size ?: 0),
+              heatMapCount = myProfile.value?.meetingRequestChosenLocalisation?.size ?: 0)
+        },
+        topBar = { TopBar("Around You") },
+        content = { innerPadding ->
+
+          // Wrapping dropdown and profile list in a Column
+          Column(modifier = Modifier.padding(innerPadding)) {
+            // Sort Options Dropdown
+            SortOptionsDropdown(
+                selectedOption = sortOption.value,
+                onOptionSelected = { sortViewModel.updateSortOption(it) },
+                modifier =
+                    Modifier.fillMaxWidth()
+                        .background(MaterialTheme.colorScheme.primaryContainer)
+                        .padding(
+                            horizontal = DROPDOWN_HORIZONTAL_PADDING,
+                            vertical = DROPDOWN_VERTICAL_PADDING))
+
+            // Profile List
+            PullToRefreshBox(
+                locationViewModel = locationViewModel,
+                filterViewModel = filterViewModel,
+                tagsViewModel = tagsViewModel,
+                isRefreshing = isLoading.value,
+                onRefresh = { center, radiusInMeters, genders, ageRange, tags ->
+                  profilesViewModel.getFilteredProfilesInRadius(
+                      center, radiusInMeters, genders, ageRange, tags)
+                },
+                modifier = Modifier.fillMaxSize(),
+                content = {
+                  if (!isConnected.value) {
+                    EmptyProfilePrompt(
+                        label = stringResource(id = R.string.no_internet),
+                        testTag = "noConnectionPrompt",
+                        context)
+                  } else if (!isDiscoverable) {
+                    EmptyProfilePrompt(
+                        label = stringResource(R.string.ask_to_toggle_location),
+                        testTag = "activateLocationPrompt",
+                        context)
+                  } else if (!isTestMode && !hasLocationPermission) {
+                    EmptyProfilePrompt(
+                        label = stringResource(R.string.ask_to_give_location_permission),
+                        testTag = "noLocationPermissionPrompt",
+                        context,
+                        true)
+                  } else if (!isTestMode && !hasBackgroundLocationPermission) {
+                    EmptyProfilePrompt(
+                        label =
+                            "You must select the option \"Allow all the time\" in the location permission settings",
+                        testTag = "noBackgroundLocationPermissionPrompt",
+                        context,
+                        true)
+                  } else if (sortedProfiles.isEmpty()) {
+                    EmptyProfilePrompt(
+                        label = stringResource(R.string.no_one_around),
+                        testTag = "emptyProfilePrompt",
+                        context)
+                  } else {
+                    LazyColumn(
+                        contentPadding = PaddingValues(vertical = COLUMN_VERTICAL_PADDING),
+                        verticalArrangement = Arrangement.spacedBy(COLUMN_VERTICAL_PADDING),
+                        modifier =
+                            Modifier.fillMaxSize()
+                                .padding(horizontal = COLUMN_HORIZONTAL_PADDING)) {
+                          items(sortedProfiles.size) { index ->
+                            ProfileCard(
+                                profile = sortedProfiles[index],
+                                onclick = {
+                                  if (isNetworkAvailableWithContext(context)) {
+                                    navigationActions.navigateTo(
+                                        Screen.OTHER_PROFILE_VIEW +
+                                            "?userId=${sortedProfiles[index].uid}")
+                                  } else {
+                                    showNoInternetToast(context)
+                                  }
+                                })
+                          }
+                        }
+                  }
+                })
+          }
+        },
+        floatingActionButton = { FilterFloatingActionButton(navigationActions) })
+  }
 }
 
 /**
@@ -398,14 +463,92 @@ fun PullToRefreshBox(
       }
 }
 
+/**
+ * Displays a prompt to inform the user when no profiles are available, with an optional redirection
+ * to the app's settings.
+ *
+ * @param label The text message to display as the prompt.
+ * @param testTag A tag used for testing this composable.
+ * @param context The context used to create an intent for redirecting to the app's settings.
+ * @param redirectToSettings If true, a button is displayed that redirects the user to the app's
+ *   settings.
+ */
 @Composable
-fun EmptyProfilePrompt(label: String, testTag: String) {
+fun EmptyProfilePrompt(
+    label: String,
+    testTag: String,
+    context: Context,
+    redirectToSettings: Boolean = false
+) {
   Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize().testTag(testTag)) {
-    Text(
-        text = label,
-        fontSize = TEXT_SIZE_LARGE,
-        fontWeight = FontWeight.Bold,
-        color = MaterialTheme.colorScheme.onSurface,
-        textAlign = TextAlign.Center)
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(COLUMN_VERTICAL_PADDING),
+        modifier = Modifier.padding(COLUMN_VERTICAL_PADDING)) {
+          Text(
+              text = label,
+              fontSize = TEXT_SIZE_LARGE,
+              fontWeight = FontWeight.Bold,
+              color = MaterialTheme.colorScheme.onSurface,
+              textAlign = TextAlign.Center)
+          if (redirectToSettings) {
+            Button(
+                onClick = {
+                  // Redirect to app settings
+                  val intent =
+                      Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+                        data = android.net.Uri.fromParts("package", context.packageName, null)
+                      }
+                  context.startActivity(intent)
+                }) {
+                  Text(text = GOTO_SETTINGS_BUTTON_TEXT)
+                }
+          }
+        }
+  }
+}
+
+/**
+ * Displays a popup dialog to inform the user about location permission requirements.
+ *
+ * @param onDismiss A callback invoked when the dialog is dismissed.
+ */
+@Composable
+fun LocationPermissionPopup(onDismiss: () -> Unit) {
+  Dialog(onDismissRequest = onDismiss) {
+    Box(
+        modifier =
+            Modifier.fillMaxWidth()
+                .wrapContentHeight()
+                .background(MaterialTheme.colorScheme.surface, MaterialTheme.shapes.medium)
+                .padding(COLUMN_VERTICAL_PADDING)
+                .testTag("locationPermissionPopup")) {
+          Column(
+              horizontalAlignment = Alignment.CenterHorizontally,
+              verticalArrangement = Arrangement.spacedBy(COLUMN_VERTICAL_PADDING),
+              modifier = Modifier.fillMaxWidth()) {
+                Text(
+                    text = stringResource(R.string.permission_popup_title),
+                    style =
+                        TextStyle(
+                            fontSize = TEXT_SIZE_LARGE,
+                            fontWeight = FontWeight.Bold,
+                            textAlign = TextAlign.Center),
+                    modifier = Modifier.fillMaxWidth())
+                Text(
+                    text = stringResource(R.string.permission_popup_content),
+                    style =
+                        TextStyle(
+                            fontSize = TEXT_SMALL_SIZE,
+                            textAlign = TextAlign.Center,
+                            color = MaterialTheme.colorScheme.onSurface),
+                    modifier = Modifier.fillMaxWidth())
+                Button(onClick = onDismiss, modifier = Modifier.fillMaxWidth()) {
+                  Text(
+                      text = LOCATION_POPUP_BUTTON_TEXT,
+                      style = TextStyle(fontSize = TEXT_SMALL_SIZE))
+                }
+              }
+        }
   }
 }
