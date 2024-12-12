@@ -38,8 +38,12 @@ import com.github.se.icebreakrr.model.location.LocationService
 import com.github.se.icebreakrr.model.location.LocationViewModel
 import com.github.se.icebreakrr.model.message.MeetingRequestManager
 import com.github.se.icebreakrr.model.message.MeetingRequestViewModel
+import com.github.se.icebreakrr.model.notification.EngagementNotificationManager
+import com.github.se.icebreakrr.model.profile.ProfilePicRepositoryStorage
+import com.github.se.icebreakrr.model.profile.ProfilesRepositoryFirestore
 import com.github.se.icebreakrr.model.profile.ProfilesViewModel
 import com.github.se.icebreakrr.model.sort.SortViewModel
+import com.github.se.icebreakrr.model.tags.TagsRepository
 import com.github.se.icebreakrr.model.tags.TagsViewModel
 import com.github.se.icebreakrr.ui.authentication.SignInScreen
 import com.github.se.icebreakrr.ui.map.LocationSelectorMapScreen
@@ -61,10 +65,12 @@ import com.github.se.icebreakrr.ui.theme.IceBreakrrTheme
 import com.github.se.icebreakrr.utils.IPermissionManager
 import com.github.se.icebreakrr.utils.NetworkUtils
 import com.github.se.icebreakrr.utils.PermissionManager
+import com.google.firebase.Firebase
 import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.functions.FirebaseFunctions
+import com.google.firebase.storage.storage
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -73,6 +79,7 @@ class MainActivity : ComponentActivity() {
   @Inject lateinit var auth: FirebaseAuth
   @Inject lateinit var firestore: FirebaseFirestore
   @Inject lateinit var authStateListener: FirebaseAuth.AuthStateListener
+  private lateinit var engagementNotificationManager: EngagementNotificationManager
   private lateinit var locationViewModel: LocationViewModel
   private lateinit var locationRepositoryFirestore: LocationRepositoryFirestore
   private lateinit var permissionManager: PermissionManager
@@ -125,12 +132,17 @@ class MainActivity : ComponentActivity() {
     // Retrieve the testing flag from the Intent
     val isTesting = intent?.getBooleanExtra("IS_TESTING", false) ?: false
 
-    // Initialize Firebase Auth
+    // Initialize Firebase
     FirebaseApp.initializeApp(this)
+    // auth = FirebaseAuth.getInstance()
+    // firestore = FirebaseFirestore.getInstance()
     functions = FirebaseFunctions.getInstance()
 
     // Initialize Utils
     NetworkUtils.init(this)
+
+    // Initialize DataStore
+    appDataStore = AppDataStore(context = this)
 
     // Create and initialize the PermissionManager with the list of permissions required
     val requiredPermissions =
@@ -141,17 +153,35 @@ class MainActivity : ComponentActivity() {
     permissionManager = PermissionManager(this)
     permissionManager.initializeLauncher(this, requiredPermissions)
 
-    // Start the LocationService
+    // Initialize location services
     locationRepositoryFirestore = LocationRepositoryFirestore(firestore, auth)
 
-    // Initialize DataStore
-    appDataStore = AppDataStore(context = this)
+    val profilesViewModel =
+        ProfilesViewModel(
+            repository = ProfilesRepositoryFirestore(firestore, auth),
+            ppRepository = ProfilePicRepositoryStorage(Firebase.storage),
+            auth = auth)
+
+    val filterViewModel = FilterViewModel()
+
+    val meetingRequestViewModel =
+        MeetingRequestViewModel(profilesViewModel = profilesViewModel, functions = functions)
+
+    val tagsViewModel = TagsViewModel(TagsRepository(firestore, auth))
+
+    engagementNotificationManager =
+        EngagementNotificationManager(
+            profilesViewModel,
+            meetingRequestViewModel,
+            appDataStore,
+            filterViewModel,
+            tagsViewModel,
+            permissionManager)
 
     // Retrieve the API key from AndroidManifest.xml
     val chatGptApiKey = getChatGptApiKey()
 
     setContent {
-      // Provide the `isTesting` flag to the entire composable tree
       CompositionLocalProvider(LocalIsTesting provides isTesting) {
         IceBreakrrTheme {
           Surface(modifier = Modifier.fillMaxSize()) {
@@ -184,7 +214,6 @@ class MainActivity : ComponentActivity() {
 
   override fun onResume() {
     super.onResume()
-    // Update permissions when the activity resumes to ensure they are up-to-date
     permissionManager.updateAllPermissions()
   }
 
@@ -199,6 +228,12 @@ class MainActivity : ComponentActivity() {
 
     // Remove the AuthStateListener when the activity stops
     auth.removeAuthStateListener(authStateListener)
+  }
+
+  override fun onDestroy() {
+    super.onDestroy()
+    // Stop monitoring when app closed
+    engagementNotificationManager.stopMonitoring()
   }
 
   private fun getChatGptApiKey(): String {
@@ -233,7 +268,7 @@ fun IcebreakrrApp(
     firestore: FirebaseFirestore,
     chatGptApiKey: String,
     isTesting: Boolean,
-    permissionManager: IPermissionManager
+    permissionManager: IPermissionManager,
 ) {
   val profileViewModel: ProfilesViewModel =
       viewModel(factory = ProfilesViewModel.Companion.Factory(auth, firestore))
@@ -247,6 +282,19 @@ fun IcebreakrrApp(
   val aiViewModel: AiViewModel =
       viewModel(factory = AiViewModel.provideFactory(chatGptApiKey, profileViewModel))
   val meetingRequestViewModel = MeetingRequestManager.meetingRequestViewModel
+
+  // Initialize EngagementManager
+  val engagementManager =
+      meetingRequestViewModel?.let {
+        EngagementNotificationManager(
+            profilesViewModel = profileViewModel,
+            meetingRequestViewModel = it,
+            appDataStore = appDataStore,
+            filterViewModel = filterViewModel,
+            tagsViewModel = tagsViewModel,
+            permissionManager = permissionManager)
+      }
+
   val startDestination =
       if (isTesting) Route.AROUND_YOU
       else (if (auth.currentUser != null) Route.AROUND_YOU else Route.AUTH)
@@ -263,7 +311,8 @@ fun IcebreakrrApp(
       auth,
       permissionManager,
       aiViewModel,
-      isTesting)
+      isTesting,
+      engagementManager)
 }
 
 @RequiresApi(Build.VERSION_CODES.Q)
@@ -280,7 +329,8 @@ fun IcebreakrrNavHost(
     auth: FirebaseAuth,
     permissionManager: IPermissionManager,
     aiViewModel: AiViewModel,
-    isTesting: Boolean
+    isTesting: Boolean,
+    engagementNotificationManager: EngagementNotificationManager?
 ) {
   val navController = rememberNavController()
   val navigationActions = NavigationActions(navController)
@@ -291,14 +341,17 @@ fun IcebreakrrNavHost(
     ) {
       composable(Screen.AUTH) {
         if (meetingRequestViewModel != null) {
-          SignInScreen(
-              profileViewModel,
-              meetingRequestViewModel,
-              navigationActions,
-              filterViewModel = filterViewModel,
-              tagsViewModel = tagsViewModel,
-              appDataStore = appDataStore,
-              locationViewModel = locationViewModel)
+          if (engagementNotificationManager != null) {
+            SignInScreen(
+                profileViewModel,
+                meetingRequestViewModel,
+                engagementNotificationManager = engagementNotificationManager,
+                navigationActions,
+                filterViewModel = filterViewModel,
+                tagsViewModel = tagsViewModel,
+                appDataStore = appDataStore,
+                locationViewModel = locationViewModel)
+          }
         } else {
           throw IllegalStateException(
               "The Meeting Request View Model shouldn't be null : Bad initialization")
@@ -346,12 +399,15 @@ fun IcebreakrrNavHost(
         route = Route.SETTINGS,
     ) {
       composable(Screen.SETTINGS) {
-        SettingsScreen(
-            profilesViewModel = profileViewModel,
-            navigationActions = navigationActions,
-            appDataStore = appDataStore,
-            locationViewModel = locationViewModel,
-            auth = auth)
+        if (engagementNotificationManager != null) {
+          SettingsScreen(
+              profilesViewModel = profileViewModel,
+              navigationActions = navigationActions,
+              appDataStore = appDataStore,
+              locationViewModel = locationViewModel,
+              engagementNotificationManager = engagementNotificationManager,
+              auth = auth)
+        }
       }
       composable(Screen.PROFILE) {
         ProfileView(profileViewModel, tagsViewModel, navigationActions, auth)

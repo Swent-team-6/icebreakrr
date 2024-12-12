@@ -37,7 +37,6 @@ import androidx.compose.material3.pulltorefresh.PullToRefreshState
 import androidx.compose.material3.pulltorefresh.pullToRefresh
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -59,8 +58,6 @@ import com.github.se.icebreakrr.R
 import com.github.se.icebreakrr.data.AppDataStore
 import com.github.se.icebreakrr.model.filter.FilterViewModel
 import com.github.se.icebreakrr.model.location.LocationViewModel
-import com.github.se.icebreakrr.model.message.MeetingRequestManager.meetingRequestViewModel
-import com.github.se.icebreakrr.model.notification.EngagementNotificationManager
 import com.github.se.icebreakrr.model.profile.Gender
 import com.github.se.icebreakrr.model.profile.ProfilesViewModel
 import com.github.se.icebreakrr.model.sort.SortOption
@@ -138,18 +135,6 @@ fun AroundYouScreen(
   var showBackgroundPermissionPopup by remember { mutableStateOf(false) }
   var showPopup by remember { mutableStateOf(false) }
 
-  // Create the engagement notification manager
-  val engagementManager = remember {
-    meetingRequestViewModel?.let {
-      EngagementNotificationManager(
-          profilesViewModel = profilesViewModel,
-          meetingRequestViewModel = it,
-          appDataStore = appDataStore,
-          context = context,
-          filterViewModel = filterViewModel,
-          permissionManager = permissionManager)
-    }
-  }
   // this makes sure that the manual refresh is stopped when profiles are loaded
   LaunchedEffect(isLoading.value) {
     if (!isLoading.value) {
@@ -182,9 +167,6 @@ fun AroundYouScreen(
       // Start location updates
       locationViewModel.tryToStartLocationUpdates()
 
-      // Start engagement notifications if applicable
-      engagementManager?.startMonitoring()
-
       // Loop to periodically refresh data
       while (true) {
         val location = userLocation.value ?: GeoPoint(DEFAULT_USER_LATITUDE, DEFAULT_USER_LONGITUDE)
@@ -213,9 +195,6 @@ fun AroundYouScreen(
         filterViewModel.ageRange.value,
         tagsViewModel.filteredTags.value)
   }
-
-  // Stop monitoring when the screen is disposed
-  DisposableEffect(Unit) { onDispose { engagementManager?.stopMonitoring() } }
 
   // Generate the sorted profile list based on the selected sortOption
   val sortOption = sortViewModel.selectedSortOption.collectAsState()

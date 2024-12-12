@@ -133,17 +133,15 @@ class MeetingRequestService : FirebaseMessagingService() {
       }
       "ENGAGEMENT NOTIFICATION" -> {
         // Only show engagement notifications if app is in background
-        // Commented out for now as the locations don't update in the background so the feature
-        // can't work until that is changed
-        // if (!isAppInForeground()) {
-        val name = remoteMessage.data["senderName"] ?: "null"
-        showNotification(
-            "A person with similar interests is close by !",
-            "The user $name has the common tag : $message")
-        // } else {
-        //  Log.d("NotificationDebug", "Skipping engagement notification because app is in
-        // foreground")
-        // }
+        if (!isAppInForeground()) {
+          val name = remoteMessage.data["senderName"] ?: "null"
+          showNotification(
+              "A person with similar interests is close by !",
+              "The user $name has the common tag : $message")
+        } else {
+          Log.d(
+              "NotificationDebug", "Skipping engagement notification because app is in foreground")
+        }
       }
     }
   }
