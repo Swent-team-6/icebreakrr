@@ -14,6 +14,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
@@ -401,12 +403,14 @@ fun PullToRefreshBox(
 
 @Composable
 fun EmptyProfilePrompt(label: String, testTag: String) {
-  Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize().testTag(testTag)) {
-    Text(
-        text = label,
-        fontSize = TEXT_SIZE_LARGE,
-        fontWeight = FontWeight.Bold,
-        color = MaterialTheme.colorScheme.onSurface,
-        textAlign = TextAlign.Center)
-  }
+  Box(
+      contentAlignment = Alignment.Center,
+      modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).testTag(testTag)) {
+        Text(
+            text = label,
+            fontSize = TEXT_SIZE_LARGE,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onSurface,
+            textAlign = TextAlign.Center)
+      }
 }
