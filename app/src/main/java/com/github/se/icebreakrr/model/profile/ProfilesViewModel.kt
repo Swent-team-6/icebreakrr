@@ -468,10 +468,17 @@ open class ProfilesViewModel(
    * @param uid The unique ID of the user being blocked.
    */
   fun blockUser(uid: String) {
-    _selfProfile.update { currentProfile ->
-      currentProfile?.copy(hasBlocked = currentProfile.hasBlocked + uid)
-    }
-    updateProfile(selfProfile.value!!, {}, {})
+    val updatedProfile =
+        selfProfile.value?.copy(
+            hasBlocked = selfProfile.value?.hasBlocked?.plus(uid)?.toSet()?.toList() ?: emptyList())
+    updateProfile(
+        updatedProfile!!,
+        {
+          _selfProfile.update { currentProfile ->
+            currentProfile?.copy(hasBlocked = currentProfile.hasBlocked.plus(uid))
+          }
+        },
+        {})
   }
 
   /**
