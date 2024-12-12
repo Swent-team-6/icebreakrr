@@ -3,6 +3,7 @@ package com.github.se.icebreakrr.ui.sections.shared
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
@@ -41,6 +42,7 @@ import com.github.se.icebreakrr.model.profile.reportType
 import com.github.se.icebreakrr.model.tags.TagsViewModel
 import com.github.se.icebreakrr.ui.navigation.NavigationActions
 import com.github.se.icebreakrr.ui.tags.RowOfTags
+import com.github.se.icebreakrr.ui.tags.Tag
 import com.github.se.icebreakrr.ui.tags.TagStyle
 import com.github.se.icebreakrr.ui.theme.IceBreakrrBlue
 import com.github.se.icebreakrr.utils.NetworkUtils.isNetworkAvailable
@@ -50,7 +52,7 @@ import com.github.se.icebreakrr.utils.NetworkUtils.showNoInternetToast
 // Constants
 private val INFO_SECTION_PADDING = 16.dp
 private val INFO_SECTION_SPACING = 11.dp
-private val TAG_HEIGHT_DP = 50.dp
+private val TAG_HEIGHT_DP = 54.dp
 private val REQUEST_BUTTON_SIZE = 55.dp
 private val REQUEST_BUTTON_ELEVATION = 8.dp
 private val BUTTON_ICON_SCALE = 0.7f
@@ -416,13 +418,11 @@ fun ProfileCatchPhrase(catchPhrase: String) {
  */
 @Composable
 fun TagsSection(listOfTags: List<Pair<String, Color>>) {
-  val listHeight = (listOfTags.size + 1) / 2
   Box(
       modifier =
           Modifier.fillMaxWidth()
-              .height((listHeight * TAG_HEIGHT_DP.value).dp)
               .testTag("tagSection")) {
-        RowOfTags(listOfTags, TagStyle())
+      RowOfTags(listOfTags, TagStyle())
       }
 }
 
