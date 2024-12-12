@@ -39,6 +39,7 @@ import com.github.se.icebreakrr.config.LocalIsTesting
 import com.github.se.icebreakrr.data.AppDataStore
 import com.github.se.icebreakrr.mock.getMockedProfiles
 import com.github.se.icebreakrr.model.location.LocationViewModel
+import com.github.se.icebreakrr.model.notification.EngagementNotificationManager
 import com.github.se.icebreakrr.model.profile.Profile
 import com.github.se.icebreakrr.model.profile.ProfilesViewModel
 import com.github.se.icebreakrr.ui.navigation.BottomNavigationMenu
@@ -81,6 +82,7 @@ fun SettingsScreen(
     navigationActions: NavigationActions,
     appDataStore: AppDataStore,
     locationViewModel: LocationViewModel,
+    engagementNotificationManager: EngagementNotificationManager,
     auth: FirebaseAuth
 ) {
 
@@ -181,9 +183,17 @@ fun SettingsScreen(
                   navigationActions.navigateTo(Screen.AUTH)
                 } else {
                   auth.currentUser?.let {
-                    logout(context, navigationActions, appDataStore = appDataStore)
+                    logout(
+                        context,
+                        navigationActions,
+                        appDataStore = appDataStore,
+                        engagementManager = engagementNotificationManager)
                   }
-                  logout(context, navigationActions, appDataStore)
+                  logout(
+                      context,
+                      navigationActions,
+                      appDataStore,
+                      engagementManager = engagementNotificationManager)
                 }
               },
               colors = ButtonDefaults.buttonColors(containerColor = BUTTON_COLOR),
