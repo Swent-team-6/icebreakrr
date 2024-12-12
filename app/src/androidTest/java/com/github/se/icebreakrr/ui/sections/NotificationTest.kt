@@ -242,10 +242,10 @@ class NotificationTest {
     composeTestRule.waitForIdle()
     composeTestRule.onNodeWithTag("profileCard").assertIsDisplayed()
     composeTestRule.onNodeWithTag("locationButton").assertIsDisplayed().performClick()
-    composeTestRule.onNodeWithTag("profileCard").assertIsDisplayed()
+      composeTestRule.onNodeWithTag("profileCard").assertIsNotDisplayed()
     composeTestRule.onNodeWithTag("inboxButton").assertIsDisplayed().performClick()
+      composeTestRule.onNodeWithTag("profileCard").assertIsDisplayed()
     composeTestRule.onNodeWithTag("sentButton").assertIsDisplayed().performClick()
-    composeTestRule.onNodeWithTag("inboxButton").assertIsDisplayed().performClick()
   }
 
   // Helper function to create a mock profile
