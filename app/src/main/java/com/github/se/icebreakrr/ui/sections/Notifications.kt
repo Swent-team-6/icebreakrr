@@ -122,11 +122,11 @@ fun NotificationScreen(
 /**
  * A composable dropdown menu that allows the user to select the display about the meeting requests
  *
- * This row displays three options. The user can select a new meeting request display
- * option from the list, which triggers the provided callback to handle the selection.
+ * This row displays three options. The user can select a new meeting request display option from
+ * the list, which triggers the provided callback to handle the selection.
  *
  * @param selectedOption The currently selected meeting request display option, displayed in a
- * darker color.
+ *   darker color.
  * @param onOptionSelected A callback function that is triggered when the user selects a new meeting
  *   request display option.
  * @param modifier A [Modifier] applied to the container of the dropdown for customization.
