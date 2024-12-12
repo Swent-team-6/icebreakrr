@@ -4,6 +4,8 @@ import com.google.firebase.Timestamp
 import com.google.firebase.firestore.GeoPoint
 import java.util.Calendar
 
+private const val NEARBY_DISTANCE_THRESHOLD = 50
+
 /**
  * Data class representing a user's profile.
  *
@@ -67,7 +69,8 @@ data class Profile(
 
   fun approxDistanceToSelfProfile(): String {
     val distance = distanceToSelfProfile ?: return ""
-    return if (distance <= 50) "Nearby" else "${((distance + 50) / 100) * 100}m"
+    return if (distance <= NEARBY_DISTANCE_THRESHOLD) "Nearby"
+    else "${((distance + 50) / 100) * 100}m"
   }
 
   companion object
