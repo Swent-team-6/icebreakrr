@@ -47,6 +47,8 @@
     <string name="ask_to_toggle_location">Activate location sharing in the app settings!</string>
     <string name="ask_to_give_location_permission">Precise location permission is required to show profiles. Activate it in your phone settings</string>
     <string name="no_one_around">There is no one around. Try moving!</string>
+    <string name="permission_popup_title">Location Permissions Required</string>
+    <string name="permission_popup_content">This app requires precise location permission to work properly. Please grant it.</string>
 
     <string name="meeting_request_pending">Pending meeting requests</string>
     <string name="meeting_request_sent">Meeting request sent</string>
