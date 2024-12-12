@@ -88,6 +88,8 @@ private val TEXT_SMALL_SIZE = 16.sp
 private const val REFRESH_DELAY = 10_000L
 private val DROPDOWN_HORIZONTAL_PADDING = 16.dp
 private val DROPDOWN_VERTICAL_PADDING = 8.dp
+private const val LOCATION_POPUP_BUTTON_TEXT = "OK"
+private const val GOTO_SETTINGS_BUTTON_TEXT = "Go to Settings"
 
 @RequiresApi(Build.VERSION_CODES.Q)
 @OptIn(ExperimentalMaterial3Api::class)
@@ -499,7 +501,7 @@ fun EmptyProfilePrompt(
                       }
                   context.startActivity(intent)
                 }) {
-                  Text(text = "Go to Settings")
+                  Text(text = GOTO_SETTINGS_BUTTON_TEXT)
                 }
           }
         }
@@ -519,7 +521,8 @@ fun LocationPermissionPopup(onDismiss: () -> Unit) {
             Modifier.fillMaxWidth()
                 .wrapContentHeight()
                 .background(MaterialTheme.colorScheme.surface, MaterialTheme.shapes.medium)
-                .padding(COLUMN_VERTICAL_PADDING)) {
+                .padding(COLUMN_VERTICAL_PADDING)
+                .testTag("locationPermissionPopup")) {
           Column(
               horizontalAlignment = Alignment.CenterHorizontally,
               verticalArrangement = Arrangement.spacedBy(COLUMN_VERTICAL_PADDING),
@@ -541,7 +544,9 @@ fun LocationPermissionPopup(onDismiss: () -> Unit) {
                             color = MaterialTheme.colorScheme.onSurface),
                     modifier = Modifier.fillMaxWidth())
                 Button(onClick = onDismiss, modifier = Modifier.fillMaxWidth()) {
-                  Text(text = "OK", style = TextStyle(fontSize = 16.sp))
+                  Text(
+                      text = LOCATION_POPUP_BUTTON_TEXT,
+                      style = TextStyle(fontSize = TEXT_SMALL_SIZE))
                 }
               }
         }
