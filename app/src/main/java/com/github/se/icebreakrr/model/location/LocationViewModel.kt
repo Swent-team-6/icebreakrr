@@ -38,6 +38,16 @@ class LocationViewModel(
 
   private var permissionObserverJob: Job? = null
 
+  /**
+   * Companion object to provide a factory for creating instances of LocationViewModel.
+   *
+   * This factory simplifies the creation of LocationViewModel by injecting the required
+   * dependencies:
+   * - LocationService
+   * - LocationRepositoryFirestore
+   * - PermissionManager
+   * - Context
+   */
   companion object {
     fun provideFactory(
         locationService: LocationService,
