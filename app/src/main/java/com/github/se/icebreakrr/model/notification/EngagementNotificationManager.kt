@@ -16,6 +16,8 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
+// This File was written with the help of CursorAI
+
 private const val TAG = "EngagementManager"
 const val CHECK_INTERVAL = 1 * 60 * 1000L // 1 minutes in milliseconds
 private const val NOTIFICATION_COOLDOWN = 4 * 60 * 60 * 1000L // 4 hours in milliseconds
