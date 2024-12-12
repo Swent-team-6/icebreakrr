@@ -50,7 +50,6 @@ import coil.compose.AsyncImage
 import com.github.se.icebreakrr.R
 import com.github.se.icebreakrr.model.location.LocationViewModel
 import com.github.se.icebreakrr.model.map.UserMarker
-import com.github.se.icebreakrr.model.message.MeetingRequestViewModel
 import com.github.se.icebreakrr.model.profile.Profile
 import com.github.se.icebreakrr.model.profile.ProfilesViewModel
 import com.github.se.icebreakrr.ui.navigation.BottomNavigationMenu
@@ -147,9 +146,7 @@ fun MapScreen(
       profilesMeeting.clear()
       uidsToFetch.forEach { uid ->
         profilesViewModel.getProfileByUidAndThen(uid) {
-          profilesViewModel.selectedProfile.value?.let { profile ->
-            profilesMeeting.add(profile)
-          }
+          profilesViewModel.selectedProfile.value?.let { profile -> profilesMeeting.add(profile) }
         }
       }
     }
@@ -297,8 +294,7 @@ fun MapScreen(
                       onClick = {
                         // Handle marker click if needed
                         true // Return true to indicate the event was handled
-                      }
-                  )
+                      })
                 }
               }
 
@@ -388,26 +384,29 @@ fun MapScreen(
  * @return BitmapDescriptor for the user marker.
  */
 private fun createUserMarkerBitmap(): BitmapDescriptor {
-    // Create a bitmap for the blue circle with a white border programmatically
-    val circleBitmap = Bitmap.createBitmap(60, 60, Bitmap.Config.ARGB_8888) // Increased size for border
-    val canvas = Canvas(circleBitmap)
+  // Create a bitmap for the blue circle with a white border programmatically
+  val circleBitmap =
+      Bitmap.createBitmap(60, 60, Bitmap.Config.ARGB_8888) // Increased size for border
+  val canvas = Canvas(circleBitmap)
 
-    // Draw the white border
-    val borderPaint = Paint().apply {
+  // Draw the white border
+  val borderPaint =
+      Paint().apply {
         color = android.graphics.Color.BLACK // White color for the border
         isAntiAlias = true
         style = Paint.Style.FILL // Fill the circle
-    }
-    canvas.drawCircle(30f, 30f, 30f, borderPaint) // Draw the border circle
+      }
+  canvas.drawCircle(30f, 30f, 30f, borderPaint) // Draw the border circle
 
-    // Draw the blue circle
-    val bluePaint = Paint().apply {
+  // Draw the blue circle
+  val bluePaint =
+      Paint().apply {
         color = android.graphics.Color.parseColor("#1FAEF0") // IceBreakrr Blue
         isAntiAlias = true
-    }
-    canvas.drawCircle(30f, 30f, 25f, bluePaint) // Draw the inner blue circle
+      }
+  canvas.drawCircle(30f, 30f, 25f, bluePaint) // Draw the inner blue circle
 
-    return BitmapDescriptorFactory.fromBitmap(circleBitmap)
+  return BitmapDescriptorFactory.fromBitmap(circleBitmap)
 }
 
 @Composable
