@@ -50,7 +50,6 @@ private val HORIZONTAL_PADDING = 7.dp
 private val TEXT_VERTICAL_PADDING = 16.dp
 private val CARD_SPACING = 16.dp
 private val DROPDOWN_VERTICAL_PADDING = 8.dp
-private const val MEETING_REQUEST_LOCATION_PENDING = "Choose location"
 
 /**
  * Composable function for displaying the notification screen.
@@ -111,14 +110,6 @@ fun NotificationScreen(
                   stringResource(R.string.meeting_request_sent),
                   sentCardList.value,
                   "",
-                  context,
-                  navigationActions)
-            }
-            MeetingRequestOption.CHOOSE_LOCATION -> {
-              DisplayTextAndCard(
-                  MEETING_REQUEST_LOCATION_PENDING,
-                  pendingLocation.value,
-                  Screen.MAP_MEETING_LOCATION_SCREEN,
                   context,
                   navigationActions)
             }

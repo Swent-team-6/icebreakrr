@@ -59,6 +59,7 @@ junitVersion = "1.2.1"
 espressoCore = "3.6.1"
 retrofit = "2.9.0"
 robolectric = "4.11.1"
+mockwebserver = "4.10.0"
 
 #CI
 sonar = "4.4.1.3373"
@@ -73,6 +74,7 @@ geohashJava = "1.4.0"
 playServicesMaps = "19.0.0"
 mapsCompose = "4.3.3"
 mapsComposeUtils = "4.3.0"
+workRuntimeKtx = "2.9.0"
 
 [libraries]
 #Google
@@ -81,6 +83,7 @@ androidx-core = { module = "androidx.test:core", version.ref = "core" }
 androidx-core-testing = { module = "androidx.arch.core:core-testing", version.ref = "coreTesting" }
 androidx-junit-v115 = { module = "androidx.test.ext:junit", version.ref = "androidxJunit" }
 androidx-lifecycle-viewmodel-ktx = { module = "androidx.lifecycle:lifecycle-viewmodel-ktx", version.ref = "lifecycleViewmodelKtx" }
+androidx-work-runtime-ktx = { module = "androidx.work:work-runtime-ktx", version.ref = "workRuntimeKtx" }
 compose-cropper = { module = "com.github.SmartToolFactory:Compose-Cropper", version.ref = "composeCropper" }
 firebase-messaging-ktx = { module = "com.google.firebase:firebase-messaging-ktx" }
 mockito-inline = { module = "org.mockito:mockito-inline", version.ref = "mockitoInline" }
@@ -96,6 +99,7 @@ androidx-datastore-preferences = { module = "androidx.datastore:datastore-prefer
 androidx-datastore-preferences-core = { module = "androidx.datastore:datastore-preferences-core", version.ref = "datastorePreferences" }
 converter-moshi = { module = "com.squareup.retrofit2:converter-moshi", version.ref = "converterMoshi" }
 gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
+json = { module = "org.json:json", version = "20210307" }
 
 #Android
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -148,6 +152,7 @@ hilt-android-compiler = { module = "com.google.dagger:hilt-android-compiler", ve
 hilt-android-testing = { module = "com.google.dagger:hilt-android-testing", version.ref = "hiltAndroidTesting" }
 androidx-datastore-preferences-core-jvm = { group = "androidx.datastore", name = "datastore-preferences-core-jvm", version.ref = "datastorePreferencesCoreJvm" }
 androidx-datastore-core-android = { group = "androidx.datastore", name = "datastore-core-android", version.ref = "datastoreCoreAndroid" }
+mockwebserver = { module = "com.squareup.okhttp3:mockwebserver", version.ref = "mockwebserver" }
 
 #Utils
 geohashJava = { module = "ch.hsr:geohash", version.ref = "geohashJava" }

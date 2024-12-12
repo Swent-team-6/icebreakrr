@@ -6,6 +6,8 @@ The message sent by the user when he does a meeting request
 data class MeetingRequest(
     val targetToken: String = "",
     val message: String = "",
+    val locationMessage: String = "",
+    val location: String = ""
 )
 
 /*
@@ -14,7 +16,8 @@ The message sent to respond to a user meeting request
 data class MeetingResponse(
     val targetToken: String = "",
     val message: String = "",
-    val accepted: Boolean = false
+    val accepted: Boolean = false,
+    val location: String = ""
 )
 
 /*
@@ -31,6 +34,7 @@ The message sent to cancel a meeting request
 */
 data class MeetingCancellation(
     val targetToken: String = "",
+    val senderUID: String = "",
     val nameTargetUser: String = "",
     val message: String = "",
 )

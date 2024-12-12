@@ -1,6 +1,5 @@
 package com.github.se.icebreakrr.ui.map
 
-import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -135,32 +134,21 @@ fun LocationSelectorMapScreen(
           IconButton(
               onClick = {
                 if (mapLoaded || isTesting) {
-                  meetingRequestViewModel.confirmMeetingLocation(
-                      profileId!!,
-                      Pair(
-                          stringQuery,
-                          Pair(
-                              markerState?.position?.latitude!!,
-                              markerState?.position?.longitude!!))) {
-                        Log.e(
-                            "LocationSelectorMap",
-                            "Failed to confirmMeetingLocation : ${it.message}")
-                        Toast.makeText(
-                                context, "Could not confirm meeting location", Toast.LENGTH_SHORT)
-                            .show()
-                      }
-                  meetingRequestViewModel.setMeetingConfirmation(
-                      profile.value?.fcmToken!!,
-                      markerState?.position?.latitude!!.toString() +
-                          ", " +
-                          markerState?.position?.longitude!!.toString(),
-                      stringQuery)
-                  meetingRequestViewModel.sendMeetingConfirmation {
-                    Log.e("LocationSelectorMap", "Failed to sendMeetingLocation : ${it.message}")
-                    Toast.makeText(context, "Could not send meeting location", Toast.LENGTH_SHORT)
-                        .show()
+                  val targetProfile = profile.value
+                  if (targetProfile != null) {
+                    meetingRequestViewModel.setMeetingRequestChangeLocation(
+                        location =
+                            markerState?.position?.latitude!!.toString() +
+                                ", " +
+                                markerState?.position?.longitude!!.toString(),
+                        locationMessage = stringQuery)
+
+                    meetingRequestViewModel.sendMeetingRequest()
+                    meetingRequestViewModel.addToMeetingRequestSent(profile.value!!.uid)
+                    meetingRequestViewModel.startMeetingRequestTimer(
+                        targetProfile.uid, targetProfile.fcmToken!!, targetProfile.name, context)
+                    navigationActions.navigateTo(Route.MAP)
                   }
-                  navigationActions.navigateTo(Route.HEAT_MAP)
                 }
               },
               modifier =

@@ -68,7 +68,6 @@ class NotificationTest {
           geohash = "LocationProfile1",
           meetingRequestSent = listOf(),
           meetingRequestInbox = mapOf(),
-          meetingRequestPendingLocation = listOf(),
           meetingRequestChosenLocalisation = mapOf())
 
   private val profile2 =
@@ -159,7 +158,11 @@ class NotificationTest {
 
   @Test
   fun InboxListOneElement() {
-    val updatedProfile = profile1.copy(meetingRequestInbox = mapOf((profile2.name to "hello !")))
+    val updatedProfile =
+        profile1.copy(
+            meetingRequestInbox =
+                mapOf(
+                    Pair(profile2.uid, Pair(Pair("hello", "am under the bridge"), Pair(1.0, 2.0)))))
     `when`(mockProfilesRepository.getProfileByUid(eq("1"), any(), any())).thenAnswer {
       val onSuccess = it.getArgument<(Profile) -> Unit>(1)
       onSuccess(updatedProfile)
@@ -184,7 +187,10 @@ class NotificationTest {
     val updatedProfile =
         profile1.copy(
             meetingRequestInbox =
-                mapOf((profile2.name to "hello !"), (profile3.name to "Hey dude !")))
+                mapOf(
+                    (profile2.uid to Pair(Pair("hello", "am under the bridge"), Pair(1.0, 2.0))),
+                    (profile3.uid to
+                        Pair(Pair("hey there !", "am under the Eiffel tower"), Pair(50.0, 65.0)))))
     `when`(mockProfilesRepository.getProfileByUid(eq("1"), any(), any())).thenAnswer {
       val onSuccess = it.getArgument<(Profile) -> Unit>(1)
       onSuccess(updatedProfile)
@@ -220,8 +226,8 @@ class NotificationTest {
   fun badgeDisplayWhen1PendingAnd1Inbox() {
     val updatedProfile =
         profile1.copy(
-            meetingRequestPendingLocation = listOf("2"),
-            meetingRequestInbox = mapOf("2" to "Hey, wanna meat?"))
+            meetingRequestInbox =
+                mapOf(profile2.uid to Pair(Pair("hello", "am under the bridge"), Pair(1.0, 2.0))))
     `when`(mockProfilesRepository.getProfileByUid(eq("1"), any(), any())).thenAnswer {
       val onSuccess = it.getArgument<(Profile) -> Unit>(1)
       onSuccess(updatedProfile)

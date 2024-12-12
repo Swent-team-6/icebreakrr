@@ -1,5 +1,6 @@
 package com.github.se.icebreakrr.ui.profile
 
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -13,7 +14,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material.icons.outlined.Close
@@ -97,8 +100,9 @@ fun InboxProfileViewScreen(
   val profile = profilesViewModel.selectedProfile.collectAsState().value
   val inboxItems = profilesViewModel.inboxItems.collectAsState()
   val context = LocalContext.current
-
-  val message = inboxItems.value[profile]
+  val message = inboxItems.value[profile]?.first?.first
+  val locationMessage = inboxItems.value[profile]?.first?.second ?: "null"
+  val location = inboxItems.value[profile]?.second
 
   Scaffold(modifier = Modifier.fillMaxSize().testTag("NotificationProfileScreen")) { paddingValues
     ->
@@ -113,25 +117,47 @@ fun InboxProfileViewScreen(
             profilesViewModel = profilesViewModel,
             profileInNotification = true,
             onEditClick = null)
-        Spacer(modifier = Modifier.height(SPACER_HEIGHT.dp))
-        AcceptDeclineRequest(
-            message ?: "",
-            {
-              acceptDeclineCode(
-                  meetingRequestViewModel, navigationActions, profile.uid, true, profile.fcmToken)
-              Toast.makeText(
-                      context,
-                      "You've accepted the request, " +
-                          profile.name +
-                          " is choosing the location of your meeting!",
-                      Toast.LENGTH_SHORT)
-                  .show()
-            },
-            {
-              acceptDeclineCode(
-                  meetingRequestViewModel, navigationActions, profile.uid, false, profile.fcmToken)
-            })
-        InfoSection(profile = profile, tagsViewModel = tagsViewModel)
+
+        // Scrollable content with the accept/decline box and the information section
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
+              Spacer(modifier = Modifier.height(SPACER_HEIGHT.dp))
+              AcceptDeclineRequest(
+                  message ?: "null",
+                  {
+                    if (location != null) {
+                      acceptDeclineCode(
+                          meetingRequestViewModel,
+                          navigationActions,
+                          profile.uid,
+                          true,
+                          profile.fcmToken,
+                          location,
+                          locationMessage)
+                    }
+                    Toast.makeText(
+                            context,
+                            "You've accepted the request, " +
+                                profile.name +
+                                " is choosing the location of your meeting!",
+                            Toast.LENGTH_SHORT)
+                        .show()
+                  },
+                  {
+                    if (location != null) {
+                      acceptDeclineCode(
+                          meetingRequestViewModel,
+                          navigationActions,
+                          profile.uid,
+                          false,
+                          profile.fcmToken,
+                          location,
+                          locationMessage)
+                    }
+                  })
+              InfoSection(profile = profile, tagsViewModel = tagsViewModel)
+            }
       }
     }
   }
@@ -153,12 +179,21 @@ fun acceptDeclineCode(
     navigationActions: NavigationActions,
     uid: String,
     accepted: Boolean,
-    fcm: String
+    fcm: String,
+    location: Pair<Double, Double>,
+    locationMessage: String
 ) {
-  meetingRequestViewModel.setMeetingResponse(fcm, "accepting/decline request", accepted)
+  meetingRequestViewModel.setMeetingResponse(
+      fcm, "accepting/decline request", accepted, location.toString())
   meetingRequestViewModel.sendMeetingResponse()
-  meetingRequestViewModel.removeFromMeetingRequestInbox(uid)
-  meetingRequestViewModel.updateInboxOfMessages {}
+  if (accepted) {
+    meetingRequestViewModel.confirmMeetingRequest(uid, Pair(locationMessage, location)) {
+      Log.e("MeetingRequestService", "error when confirmMeetingLocation : ${it.message}")
+    }
+  }
+  meetingRequestViewModel.removeFromMeetingRequestInbox(uid) {
+    meetingRequestViewModel.updateInboxOfMessages {}
+  }
   navigationActions.goBack()
 }
 

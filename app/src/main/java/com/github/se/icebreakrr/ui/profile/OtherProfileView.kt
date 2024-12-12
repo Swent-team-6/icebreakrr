@@ -3,18 +3,29 @@ package com.github.se.icebreakrr.ui.profile
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -27,15 +38,21 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.TextUnit
+import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavBackStackEntry
 import com.github.se.icebreakrr.R
+import com.github.se.icebreakrr.model.ai.AiViewModel
 import com.github.se.icebreakrr.model.message.MeetingRequestViewModel
 import com.github.se.icebreakrr.model.profile.ProfilesViewModel
 import com.github.se.icebreakrr.model.tags.TagsViewModel
 import com.github.se.icebreakrr.ui.message.SendRequestScreen
 import com.github.se.icebreakrr.ui.navigation.NavigationActions
+import com.github.se.icebreakrr.ui.navigation.Screen
 import com.github.se.icebreakrr.ui.sections.shared.InfoSection
 import com.github.se.icebreakrr.ui.sections.shared.MessageWhenLoadingProfile
 import com.github.se.icebreakrr.ui.sections.shared.ProfileHeader
@@ -48,8 +65,15 @@ import com.github.se.icebreakrr.utils.NetworkUtils.showNoInternetToast
  * @param navigationActions Actions to navigate between screens.
  */
 private val ALPHA = 0.5f
-private val MET_BUTTON_HORIZTONAL_PADDING = 16.dp
+private val BUTTONS_HORIZONTAL_PADDING = 16.dp
 private val BUTTON_VERTICAL_PADDING = 16.dp
+private val SHEET_INNER_PADDING = 16.dp
+private val MIN_SHEET_HEIGHT = 400.dp
+private val HEADER_FONT_SIZE = 25f
+private val HEADER_LINE_HEIGHT = 30f
+private val CONTENT_FONT_SIZE = 20f
+private val CONTENT_LINE_HEIGHT = 25f
+private val ICON_SPACING = 8.dp
 private const val USER_ALREADY_SEND_REQUEST_TOAST_MESSAGE =
     "this user has already send you a meeting request!"
 
@@ -57,12 +81,14 @@ private const val USER_ALREADY_SEND_REQUEST_TOAST_MESSAGE =
 fun OtherProfileView(
     profilesViewModel: ProfilesViewModel,
     tagsViewModel: TagsViewModel,
+    aiViewModel: AiViewModel,
     meetingRequestViewModel: MeetingRequestViewModel,
     navigationActions: NavigationActions,
     navBackStackEntry: NavBackStackEntry?
 ) {
   var sendRequest by remember { mutableStateOf(false) }
   var writtenMessage by remember { mutableStateOf("") }
+  var bottomSheetVisible by remember { mutableStateOf(false) }
   // retrieving user id from navigation params
   val profileId = navBackStackEntry?.arguments?.getString("userId")
   val context = LocalContext.current
@@ -76,12 +102,12 @@ fun OtherProfileView(
 
   val isLoading = profilesViewModel.loading.collectAsState(initial = true).value
   val profile = profilesViewModel.selectedProfile.collectAsState().value
+  val aiState = aiViewModel.uiState.collectAsState().value
 
   Scaffold(modifier = Modifier.fillMaxSize().testTag("aroundYouProfileScreen")) { paddingValues ->
     if (isLoading) {
       MessageWhenLoadingProfile(paddingValues)
     } else if (profile != null) {
-
       Column(
           modifier = Modifier.fillMaxWidth().padding(paddingValues),
           horizontalAlignment = Alignment.CenterHorizontally) {
@@ -98,39 +124,75 @@ fun OtherProfileView(
                 sendRequest = false
               }
             }
-            InfoSection(profile, tagsViewModel)
 
-            // Add spacer for some padding
-            Spacer(modifier = Modifier.height(BUTTON_VERTICAL_PADDING))
+            // Scrollable content
+            Column(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
+              InfoSection(profile, tagsViewModel)
 
-            // Already met button
-            Button(
-                onClick = {
-                  if (isNetworkAvailableWithContext(context)) {
-                    profilesViewModel.addAlreadyMet(profile.uid)
-                    meetingRequestViewModel.removeChosenLocalisation(profile.uid)
-                    Toast.makeText(context, R.string.Already_Met_Button_Success, Toast.LENGTH_SHORT)
-                        .show()
-                    profilesViewModel.getSelfProfile {}
-                    navigationActions.goBack()
-                  } else {
-                    showNoInternetToast(context = context)
+              // Add spacer for some padding
+              Spacer(modifier = Modifier.height(BUTTON_VERTICAL_PADDING))
+
+              // Ai button
+              Button(
+                  onClick = {
+                    bottomSheetVisible = true
+                    aiViewModel.findDiscussionStarter()
+                  },
+                  colors =
+                      ButtonDefaults.buttonColors(
+                          containerColor = MaterialTheme.colorScheme.primary),
+                  modifier =
+                      Modifier.fillMaxWidth()
+                          .padding(horizontal = BUTTONS_HORIZONTAL_PADDING)
+                          .align(Alignment.CenterHorizontally)
+                          .testTag("aiButton")) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically) {
+                          Text(
+                              text = stringResource(R.string.AI_button),
+                              color = MaterialTheme.colorScheme.onPrimary)
+                          Spacer(modifier = Modifier.width(ICON_SPACING))
+
+                          Icon(
+                              painter = painterResource(id = R.drawable.sparkles),
+                              contentDescription = "AI icon",
+                              tint = MaterialTheme.colorScheme.onPrimary)
+                        }
                   }
-                },
-                colors =
-                    ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
-                modifier =
-                    Modifier.fillMaxWidth()
-                        .padding(MET_BUTTON_HORIZTONAL_PADDING)
-                        .align(Alignment.CenterHorizontally)
-                        .testTag("alreadyMetButton")) {
-                  Text(
-                      text = stringResource(R.string.Already_Met_Button_Text),
-                      color = MaterialTheme.colorScheme.onPrimary)
-                }
 
-            // Add bottom padding
-            Spacer(modifier = Modifier.height(BUTTON_VERTICAL_PADDING))
+              // Already met button
+              Button(
+                  onClick = {
+                    if (isNetworkAvailableWithContext(context)) {
+                      profilesViewModel.addAlreadyMet(profile.uid)
+                      meetingRequestViewModel.removeChosenLocalisation(profile.uid)
+                      Toast.makeText(
+                              context, R.string.Already_Met_Button_Success, Toast.LENGTH_SHORT)
+                          .show()
+                      profilesViewModel.getSelfProfile {}
+                      navigationActions.goBack()
+                    } else {
+                      showNoInternetToast(context = context)
+                    }
+                  },
+                  colors =
+                      ButtonDefaults.buttonColors(
+                          containerColor = MaterialTheme.colorScheme.primary),
+                  modifier =
+                      Modifier.fillMaxWidth()
+                          .padding(BUTTONS_HORIZONTAL_PADDING)
+                          .align(Alignment.CenterHorizontally)
+                          .testTag("alreadyMetButton")) {
+                    Text(
+                        text = stringResource(R.string.Already_Met_Button_Text),
+                        color = MaterialTheme.colorScheme.onPrimary)
+                  }
+
+              // Add bottom padding
+              Spacer(modifier = Modifier.height(BUTTON_VERTICAL_PADDING))
+            }
           }
 
       // this displays the request messaging system
@@ -146,16 +208,81 @@ fun OtherProfileView(
                   onValueChange = { writtenMessage = it },
                   value = writtenMessage,
                   onSendClick = {
-                    meetingRequestViewModel.onMeetingRequestChange(writtenMessage)
-                    meetingRequestViewModel.onLocalTokenChange(profile.fcmToken ?: "null")
-                    meetingRequestViewModel.sendMeetingRequest()
-                    meetingRequestViewModel.addToMeetingRequestSent(profile.uid)
+                    navigationActions.navigateTo(
+                        Screen.MAP_MEETING_LOCATION_SCREEN + "?userId=${profile.uid}")
+                    meetingRequestViewModel.setMeetingRequestChangeMessage(writtenMessage)
+                    meetingRequestViewModel.setTargetToken(profile.fcmToken!!)
                     writtenMessage = ""
-                    navigationActions.goBack()
                   },
                   onCancelClick = { sendRequest = false })
             }
       }
+
+      // this displays the bottom sheet
+      if (bottomSheetVisible) {
+        BottomSheet(aiState) { bottomSheetVisible = false }
+      }
     }
   }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun BottomSheet(aiState: AiViewModel.UiState, onDismissRequest: () -> Unit) {
+  val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+
+  ModalBottomSheet(
+      sheetState = sheetState,
+      onDismissRequest = onDismissRequest,
+      modifier = Modifier.testTag("aiBottomSheet")) {
+        Column(
+            modifier =
+                Modifier.fillMaxWidth()
+                    .heightIn(min = MIN_SHEET_HEIGHT)
+                    .padding(SHEET_INNER_PADDING),
+            verticalArrangement = Arrangement.Top,
+            horizontalAlignment = Alignment.Start) {
+              // Header
+              Text(
+                  text = stringResource(R.string.here_is_a_possible_starter),
+                  fontWeight = FontWeight.Bold,
+                  fontSize = TextUnit(HEADER_FONT_SIZE, TextUnitType.Sp),
+                  lineHeight = TextUnit(HEADER_LINE_HEIGHT, TextUnitType.Sp))
+
+              Spacer(modifier = Modifier.height(16.dp))
+
+              // Content
+              when (aiState) {
+                is AiViewModel.UiState.Success -> {
+                  Text(
+                      text = "\"${aiState.data}\"",
+                      fontWeight = FontWeight.Normal,
+                      fontSize = TextUnit(CONTENT_FONT_SIZE, TextUnitType.Sp),
+                      lineHeight = TextUnit(CONTENT_LINE_HEIGHT, TextUnitType.Sp),
+                      modifier = Modifier.testTag("aiResponse"))
+                }
+                is AiViewModel.UiState.Loading -> {
+                  Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator(modifier = Modifier.testTag("aiLoading"))
+                  }
+                }
+                is AiViewModel.UiState.Error -> {
+                  Text(
+                      text = "\"${aiState.message}\"",
+                      fontWeight = FontWeight.Normal,
+                      fontSize = TextUnit(CONTENT_FONT_SIZE, TextUnitType.Sp),
+                      lineHeight = TextUnit(CONTENT_LINE_HEIGHT, TextUnitType.Sp),
+                      modifier = Modifier.testTag("aiError"))
+                }
+                else -> {
+                  Text(
+                      text = "An unknown error occurred",
+                      fontWeight = FontWeight.Normal,
+                      fontSize = TextUnit(CONTENT_FONT_SIZE, TextUnitType.Sp),
+                      lineHeight = TextUnit(CONTENT_LINE_HEIGHT, TextUnitType.Sp),
+                      modifier = Modifier.testTag("aiUnknownError"))
+                }
+              }
+            }
+      }
 }

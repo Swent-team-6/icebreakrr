@@ -39,8 +39,6 @@ class InboxProfileViewTest {
   private lateinit var profileViewModel: ProfilesViewModel
   private lateinit var tagsViewModel: TagsViewModel
   private lateinit var mockProfileRepository: ProfilesRepository
-  private lateinit var firebaseFunctions: FirebaseFunctions
-  private lateinit var mockTagsRepository: TagsRepository
   @get:Rule val composeTestRule = createComposeRule()
 
   @Before
@@ -66,7 +64,10 @@ class InboxProfileViewTest {
             geohash = "u0kbb57",
             hasBlocked = emptyList(),
             meetingRequestSent = emptyList(),
-            meetingRequestInbox = mapOf(Pair("12345", "Hey, do you want to meat?")))
+            meetingRequestInbox =
+                mapOf(
+                    Pair(
+                        "12345", Pair(Pair("wanna meat ?", "am under the rolex"), Pair(1.0, 2.0)))))
 
     profileViewModel =
         ProfilesViewModel(

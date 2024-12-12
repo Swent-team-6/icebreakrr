@@ -3,9 +3,7 @@ package com.github.se.icebreakrr.ui.sections.shared
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Send
@@ -84,16 +82,11 @@ private val modalTitleSize = 20.sp
  */
 @Composable
 fun InfoSection(profile: Profile, tagsViewModel: TagsViewModel) {
-  val scrollState = rememberScrollState()
   val userTags =
       profile.tags.map { tagString -> Pair(tagString, tagsViewModel.tagToColor(tagString)) }
 
   Column(
-      modifier =
-          Modifier.fillMaxWidth()
-              .padding(INFO_SECTION_PADDING)
-              .verticalScroll(scrollState)
-              .testTag("infoSection"),
+      modifier = Modifier.fillMaxWidth().padding(INFO_SECTION_PADDING).testTag("infoSection"),
       verticalArrangement = Arrangement.spacedBy(INFO_SECTION_SPACING, Alignment.Top),
       horizontalAlignment = Alignment.Start) {
         // Catchphrase Section

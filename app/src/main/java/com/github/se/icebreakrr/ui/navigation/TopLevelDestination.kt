@@ -26,8 +26,8 @@ object Route {
   const val PROFILE_CREATION = "ProfileCreation"
   const val CROP = "Crop"
   const val UNBLOCK_PROFILE = "UnblockProfile"
-  const val HEAT_MAP = "Heatmap"
   const val MAP_MEETING_LOCATION = "Map Meeting Location"
+  const val MAP = "MAP"
 }
 
 object Screen {
@@ -42,7 +42,7 @@ object Screen {
   const val PROFILE_CREATION = "Profile Creation Screen"
   const val CROP = "Crop Screen"
   const val UNBLOCK_PROFILE = "Unblock Profile Screen"
-  const val HEAT_MAP = "Heatmap Screen"
+  const val MAP = "Map Screen"
   const val ALREADY_MET = "Already Met Screen"
   const val INBOX_PROFILE_VIEW = "Inbox Profile View Screen"
   const val MAP_MEETING_LOCATION_SCREEN = "Map Meeting Location Screen"
@@ -57,14 +57,13 @@ object TopLevelDestinations {
   val NOTIFICATIONS =
       TopLevelDestination(
           route = Route.NOTIFICATIONS, icon = NotificationsIcon, textId = R.string.notifications)
-  val HEATMAP =
-      TopLevelDestination(
-          route = Route.HEAT_MAP, icon = Icons.TwoTone.LocationOn, textId = R.string.heatmap)
+  val MAP =
+      TopLevelDestination(route = Route.MAP, icon = Icons.TwoTone.LocationOn, textId = R.string.map)
 }
 
 val LIST_TOP_LEVEL_DESTINATIONS =
     listOf(
         TopLevelDestinations.SETTINGS,
         TopLevelDestinations.AROUND_YOU,
-        TopLevelDestinations.HEATMAP,
+        TopLevelDestinations.MAP,
         TopLevelDestinations.NOTIFICATIONS)
