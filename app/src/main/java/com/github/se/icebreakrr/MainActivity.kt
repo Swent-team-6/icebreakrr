@@ -3,20 +3,26 @@ package com.github.se.icebreakrr
 import ImageCropperScreen
 import ProfileCreationScreen
 import android.Manifest
+import android.content.ComponentName
+import android.content.Intent
+import android.content.ServiceConnection
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
+import android.os.IBinder
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
@@ -77,13 +83,50 @@ class MainActivity : ComponentActivity() {
   @Inject lateinit var authStateListener: FirebaseAuth.AuthStateListener
   private lateinit var engagementNotificationManager: EngagementNotificationManager
   private lateinit var locationViewModel: LocationViewModel
-  private lateinit var locationService: LocationService
   private lateinit var locationRepositoryFirestore: LocationRepositoryFirestore
   private lateinit var permissionManager: PermissionManager
-  private lateinit var fusedLocationClient: FusedLocationProviderClient
   private lateinit var appDataStore: AppDataStore
   private lateinit var functions: FirebaseFunctions
 
+  private var locationService: LocationService? = null
+  private var isBound = false
+  private var isLocationViewModelInitialized by mutableStateOf(false)
+
+  /**
+   * Manages the binding and unbinding of the `LocationService`.
+   * - `onServiceConnected`: Initializes `LocationService` and `LocationViewModel` when the service
+   *   is connected.
+   * - `onServiceDisconnected`: Cleans up references when the service is disconnected.
+   */
+  private val connection =
+      object : ServiceConnection {
+        override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
+          val binder = service as LocationService.LocalBinder
+          locationService = binder.getService()
+          isBound = true
+
+          // Initialize ViewModel after the service is connected
+          locationViewModel =
+              ViewModelProvider(
+                  this@MainActivity,
+                  LocationViewModel.provideFactory(
+                      locationService!!,
+                      locationRepositoryFirestore,
+                      permissionManager,
+                      this@MainActivity))[LocationViewModel::class.java]
+
+          // Mark ViewModel as initialized
+          isLocationViewModelInitialized = true
+        }
+
+        override fun onServiceDisconnected(name: ComponentName?) {
+          locationService = null
+          isBound = false
+          isLocationViewModelInitialized = false
+        }
+      }
+
+  @RequiresApi(Build.VERSION_CODES.TIRAMISU)
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
@@ -103,10 +146,15 @@ class MainActivity : ComponentActivity() {
     // Initialize DataStore
     appDataStore = AppDataStore(context = this)
 
-    // Create and initialize the PermissionManager
-    requestNotificationPermission()
+    // Create and initialize the PermissionManager with the list of permissions required
+    val requiredPermissions =
+        arrayOf(
+            Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.ACCESS_BACKGROUND_LOCATION,
+            Manifest.permission.POST_NOTIFICATIONS)
     permissionManager = PermissionManager(this)
-    permissionManager.initializeLauncher(this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION))
+    permissionManager.initializeLauncher(this, requiredPermissions)
+
 
     // Initialize location services
     fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
@@ -152,22 +200,24 @@ class MainActivity : ComponentActivity() {
           }
         }
 
+    // Retrieve the API key from AndroidManifest.xml
     val chatGptApiKey = getChatGptApiKey()
 
     setContent {
       CompositionLocalProvider(LocalIsTesting provides isTesting) {
         IceBreakrrTheme {
           Surface(modifier = Modifier.fillMaxSize()) {
-            IcebreakrrApp(
-                auth = auth,
-                functions = functions,
-                appDataStore = appDataStore,
-                locationViewModel = locationViewModel,
-                firestore = firestore,
-                chatGptApiKey = chatGptApiKey,
-                isTesting = isTesting,
-                permissionManager = permissionManager,
-            )
+            if (isLocationViewModelInitialized) {
+              IcebreakrrApp(
+                  auth,
+                  functions,
+                  appDataStore,
+                  locationViewModel,
+                  firestore,
+                  chatGptApiKey,
+                  isTesting,
+                  permissionManager)
+            }
           }
         }
       }
@@ -176,6 +226,11 @@ class MainActivity : ComponentActivity() {
 
   override fun onStart() {
     super.onStart()
+    // Bind to LocationService
+    val serviceIntent = Intent(this, LocationService::class.java)
+    bindService(serviceIntent, connection, BIND_AUTO_CREATE)
+
+    // Add the AuthStateListener when the activity starts
     auth.addAuthStateListener(authStateListener)
   }
 
@@ -186,6 +241,14 @@ class MainActivity : ComponentActivity() {
 
   override fun onStop() {
     super.onStop()
+
+    // Unbind from LocationService
+    if (isBound) {
+      unbindService(connection)
+      isBound = false
+    }
+
+    // Remove the AuthStateListener when the activity stops
     auth.removeAuthStateListener(authStateListener)
     // Stop monitoring when app goes to background
     engagementNotificationManager.stopMonitoring()
@@ -225,6 +288,7 @@ class MainActivity : ComponentActivity() {
  * @see SettingsScreen
  * @see NotificationScreen
  */
+@RequiresApi(Build.VERSION_CODES.Q)
 @Composable
 fun IcebreakrrApp(
     auth: FirebaseAuth,
@@ -248,6 +312,7 @@ fun IcebreakrrApp(
   val aiViewModel: AiViewModel =
       viewModel(factory = AiViewModel.provideFactory(chatGptApiKey, profileViewModel))
   val meetingRequestViewModel = MeetingRequestManager.meetingRequestViewModel
+
   // Initialize EngagementManager
   val engagementManager =
       meetingRequestViewModel?.let {
@@ -259,7 +324,9 @@ fun IcebreakrrApp(
             tagsViewModel = tagsViewModel)
       }
 
-  val startDestination = if (isTesting) Route.AROUND_YOU else Route.AUTH
+  val startDestination =
+      if (isTesting) Route.AROUND_YOU
+      else (if (auth.currentUser != null) Route.AROUND_YOU else Route.AUTH)
 
   IcebreakrrNavHost(
       profileViewModel,
@@ -277,6 +344,7 @@ fun IcebreakrrApp(
       engagementManager)
 }
 
+@RequiresApi(Build.VERSION_CODES.Q)
 @Composable
 fun IcebreakrrNavHost(
     profileViewModel: ProfilesViewModel,

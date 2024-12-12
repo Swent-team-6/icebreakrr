@@ -1,5 +1,6 @@
 package com.github.se.icebreakrr.ui.authentication
 
+import android.content.Context
 import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertTextEquals
@@ -63,6 +64,7 @@ class SignInScreenTest {
   private lateinit var functions: FirebaseFunctions
   private lateinit var ourUid: String
   private lateinit var engagementNotificationManager: EngagementNotificationManager
+  private lateinit var mockContext: Context
 
   @Before
   fun setUp() {
@@ -77,9 +79,11 @@ class SignInScreenTest {
     mockLocationService = mock(ILocationService::class.java)
     mockLocationRepository = mock(LocationRepository::class.java)
     mockPermissionManager = mock(IPermissionManager::class.java)
+    mockContext = mock(Context::class.java)
 
     locationViewModel =
-        LocationViewModel(mockLocationService, mockLocationRepository, mockPermissionManager)
+        LocationViewModel(
+            mockLocationService, mockLocationRepository, mockPermissionManager, mockContext)
     navHostController = mock(NavHostController::class.java)
     navigationActions = NavigationActions(navHostController)
     profileViewModel = mock(ProfilesViewModel::class.java)

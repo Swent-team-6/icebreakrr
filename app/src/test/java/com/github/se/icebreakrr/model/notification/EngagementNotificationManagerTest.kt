@@ -10,6 +10,7 @@ import com.github.se.icebreakrr.model.profile.ProfilePicRepository
 import com.github.se.icebreakrr.model.profile.ProfilesRepository
 import com.github.se.icebreakrr.model.profile.ProfilesViewModel
 import com.github.se.icebreakrr.model.tags.TagsViewModel
+import com.github.se.icebreakrr.utils.IPermissionManager
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.GeoPoint
@@ -42,6 +43,7 @@ class EngagementNotificationManagerTest {
   private lateinit var filterViewModel: FilterViewModel
   private lateinit var tagsViewModel: TagsViewModel
   private lateinit var mockProfilesRepo: ProfilesRepository
+  private lateinit var permissionManager: IPermissionManager
   private val testDispatcher = UnconfinedTestDispatcher()
 
   private val selfProfile =
@@ -83,7 +85,8 @@ class EngagementNotificationManagerTest {
     // Setup profilesViewModel
     val mockProfilePicRepo = mock(ProfilePicRepository::class.java)
     val mockAuth = mock(FirebaseAuth::class.java)
-    profilesViewModel = spy(ProfilesViewModel(mockProfilesRepo, mockProfilePicRepo, mockAuth))
+    permissionManager = mock(IPermissionManager::class.java)
+    profilesViewModel = ProfilesViewModel(mockProfilesRepo, mockProfilePicRepo, mockAuth)
     profilesViewModel.selfProfile = MutableStateFlow(selfProfile)
 
     // Setup filter values
@@ -100,7 +103,8 @@ class EngagementNotificationManagerTest {
             meetingRequestViewModel,
             appDataStore,
             filterViewModel,
-            tagsViewModel)
+            tagsViewModel,
+            permissionManager)
   }
 
   @Test

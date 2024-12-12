@@ -1,5 +1,6 @@
 package com.github.se.icebreakrr.ui.sections
 
+import android.content.Context
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsOff
 import androidx.compose.ui.test.assertIsOn
@@ -114,7 +115,11 @@ class SettingsTest {
             tagsViewModel)
 
     locationViewModel =
-        LocationViewModel(mockLocationService, mockLocationRepository, mockPermissionManager)
+        LocationViewModel(
+            mockLocationService,
+            mockLocationRepository,
+            mockPermissionManager,
+            Mockito.mock(Context::class.java))
 
     // Mock necessary Flow returns
     `when`(mockProfilesRepository.isWaiting).thenReturn(MutableStateFlow(false))

@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -26,8 +27,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
-private val WIDTH = 312.dp
-private val HEIGHT_MAJOR = 254.dp
+private val WIDTH = 324.dp
 private val HEIGHT_MINOR = 125.dp
 private val PADDING_MAJOR = 0.dp
 private val PADDING_MINOR = 24.dp
@@ -40,7 +40,7 @@ private val FONTSIZE_2 = 14.sp
 private val LINE_HEIGHT_1 = 32.sp
 private val LINE_HEIGHT_2 = 20.sp
 private val LETTER_SPACING = 0.25.sp
-private val TEXT_FIELD_HEIGHT = 56.dp
+private val TEXT_FIELD_HEIGHT = 58.dp
 private val TEXT_FIELD_WIDTH = 292.dp
 private val ROW_HEIGHT = 49.dp
 private val ROW_WIDTH = 312.dp
@@ -56,7 +56,6 @@ fun SendRequestScreen(
       modifier =
           Modifier.padding(PADDING_MAJOR)
               .width(WIDTH)
-              .height(HEIGHT_MAJOR)
               .background(color = MaterialTheme.colorScheme.surface, shape = BOX_SHAPE)) {
         Column(
             verticalArrangement = Arrangement.spacedBy(SPACING, Alignment.CenterVertically),
@@ -111,23 +110,21 @@ fun SendRequestScreen(
                 }
               },
               modifier =
-                  Modifier.padding(PADDING_MAJOR)
-                      .width(TEXT_FIELD_WIDTH)
-                      .height(TEXT_FIELD_HEIGHT)
-                      .testTag("messageTextField"))
+                  Modifier.width(TEXT_FIELD_WIDTH)
+                      .height(TEXT_FIELD_HEIGHT * 2)
+                      .testTag("messageTextField"),
+          )
           Row(
-              horizontalArrangement = Arrangement.spacedBy(BOTTOM_PADDING, Alignment.End),
               verticalAlignment = Alignment.CenterVertically,
               modifier = Modifier.width(ROW_WIDTH).height(ROW_HEIGHT)) {
                 TextButton(
                     onClick = { onCancelClick() },
                     enabled = true,
-                    modifier =
-                        Modifier.padding(start = BOTTOM_PADDING, end = PADDING_MINOR)
-                            .testTag("cancelButton")) {
+                    modifier = Modifier.padding(start = BOTTOM_PADDING).testTag("cancelButton")) {
                       Text("Cancel")
                     }
               }
+          Spacer(Modifier)
         }
       }
 }
