@@ -3,15 +3,21 @@ package com.github.se.icebreakrr.ui.profile
 import android.location.Location
 import android.util.Log
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -26,15 +32,23 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.Clear
+import coil.compose.AsyncImage
+import com.github.se.icebreakrr.R
 import com.github.se.icebreakrr.model.location.LocationViewModel
 import com.github.se.icebreakrr.model.map.UserMarker
+import com.github.se.icebreakrr.model.message.MeetingRequestViewModel
 import com.github.se.icebreakrr.model.profile.Profile
 import com.github.se.icebreakrr.model.profile.ProfilesViewModel
 import com.github.se.icebreakrr.ui.navigation.BottomNavigationMenu
@@ -67,7 +81,7 @@ private const val HEATMAP_MAX_INTENSITY = 15.0 // Maximum intensity for heatmap
 
 // Padding constants
 private val BUTTON_PADDING = 16.dp
-private val LOADING_BOX_PADDING = 16.dp
+private val IMAGE_SIZE = 80.dp
 private val OVERLAY_WIDTH = 90.dp // Width of the overlay
 private val OVERLAY_HEIGHT = 25.dp // Height of the overlay
 private val OVERLAY_OFFSET_Y = 10 // Offset for overlay position
@@ -100,6 +114,7 @@ fun MapScreen(
     navigationActions: NavigationActions,
     profilesViewModel: ProfilesViewModel,
     locationViewModel: LocationViewModel,
+    meetingRequestViewModel: MeetingRequestViewModel
 ) {
   val userLocation = locationViewModel.lastKnownLocation.collectAsState()
   val profiles = profilesViewModel.filteredProfiles.collectAsState()
@@ -119,15 +134,20 @@ fun MapScreen(
 
   // Create a mutable list to hold the fetched profiles
   val profilesMeeting = remember { mutableStateListOf<Profile>() }
+    var selectedProfile by remember { mutableStateOf<Profile?>(null) } // State to hold the selected profile
 
-  // Fetch profiles for the UIDs
+
+    // Fetch profiles for the UIDs
   LaunchedEffect(uidsToFetch) {
     if (uidsToFetch.isNotEmpty()) {
       profilesMeeting.clear()
       uidsToFetch.forEach { uid ->
         profilesViewModel.getProfileByUidAndThen(uid) {
-          // Add the profile to the list after fetching
-          profilesViewModel.selectedProfile.value?.let { profile -> profilesMeeting.add(profile) }
+          profilesViewModel.selectedProfile.value?.let { profile ->
+            profilesMeeting.add(profile)
+            // Schedule removal of the meeting request after 2 minutes
+            meetingRequestViewModel.scheduleMeetingRequestRemoval(uid)
+          }
         }
       }
     }
@@ -142,6 +162,7 @@ fun MapScreen(
           UserMarker(
               uid = uid,
               username = cropUsername(it.name, 10), // Crop username to 10 characters
+              locationDescription = message,
               location = LatLng(coordinates.first, coordinates.second),
               overlayPosition = null // Initially set to null
               )
@@ -246,8 +267,7 @@ fun MapScreen(
                       snippet = "This is ${userMarker.username}'s location",
                       onClick = {
                         // Handle marker click, e.g., navigate to user profile
-                        navigationActions.navigateTo(
-                            Screen.OTHER_PROFILE_VIEW + "?userId=${userMarker.uid}")
+                        selectedProfile = profilesMeeting.find { it.uid == userMarker.uid }
                         true // Return true to indicate the event was handled
                       })
 
@@ -268,12 +288,28 @@ fun MapScreen(
             }
           }
 
-          // Toggle button for heatmap visibility
+            // Show the profile modal if a profile is selected
+            ProfileModal(
+                profile = selectedProfile,
+                locationDescription = selectedProfile?.let { userMarkers.find { marker -> marker.uid == it.uid }?.locationDescription },
+                onDismiss = { selectedProfile = null },
+                onNavigate = { uid ->
+                    navigationActions.navigateTo(Screen.OTHER_PROFILE_VIEW + "?userId=${selectedProfile?.uid}")
+                }
+            )
+
+          // Toggle button for map visibility with an icon and increased spacing
           Box(modifier = Modifier.padding(BUTTON_PADDING)) {
             Button(onClick = { isHeatmapVisible = !isHeatmapVisible }) {
+              Icon(
+                  imageVector = if (isHeatmapVisible) Icons.Filled.Clear else Icons.Filled.LocationOn,
+                  contentDescription = if (isHeatmapVisible) "Hide Heatmap" else "Show Heatmap",
+                  modifier = Modifier.padding(end = 8.dp) // Add padding to the right of the icon
+              )
               Text(if (isHeatmapVisible) "Hide Heatmap" else "Show Heatmap")
             }
           }
+
 
           // Fetch profiles when the camera position changes
           LaunchedEffect(cameraPositionState.position) {
@@ -348,4 +384,65 @@ fun MarkerOverlay(position: Offset, text: String) {
                     .padding(2.dp) // Optional: Add padding to the text for better spacing
             )
       }
+}
+
+@Composable
+fun ProfileModal(profile: Profile?, locationDescription: String?, onDismiss: () -> Unit, onNavigate: (String) -> Unit) {
+    if (profile != null) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.Black.copy(alpha = 0.5f)) // Blurred background
+        ) {
+            Card(
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    .padding(16.dp)
+                    .testTag("profileModal"),
+                shape = RoundedCornerShape(16.dp),
+                onClick={
+                    onNavigate(Screen.OTHER_PROFILE_VIEW +
+                            "?userId=${profile.uid}")
+                }
+            ) {
+                Column(
+                    modifier = Modifier.padding(16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally, // Center horizontally
+                    verticalArrangement = Arrangement.spacedBy(16.dp) // Add spacing between items
+                ) {
+                    AsyncImage(
+                        model = profile.profilePictureUrl,
+                        contentDescription = "profile picture",
+                        modifier = Modifier
+                            .size(IMAGE_SIZE)
+                            .clip(CircleShape)
+                            .align(Alignment.CenterHorizontally), // Center the image
+                        placeholder = painterResource(id = R.drawable.nopp), // Default image during loading
+                        error = painterResource(id = R.drawable.nopp) // Fallback image if URL fails
+                    )
+                    Text(
+                        text = profile.name,
+                        fontSize = 24.sp,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.align(Alignment.CenterHorizontally) // Center the text
+                    )
+                    // Display the location description
+                    locationDescription?.let {
+                        Text(
+                            text = it,
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Normal,
+                            modifier = Modifier.align(Alignment.CenterHorizontally) // Center the location description
+                        )
+                    }
+                    Button(
+                        onClick = onDismiss,
+                        modifier = Modifier.align(Alignment.CenterHorizontally) // Center the button
+                    ) {
+                        Text("Close")
+                    }
+                }
+            }
+        }
+    }
 }
