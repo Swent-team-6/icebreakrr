@@ -9,7 +9,7 @@ val IceBreakrrBlue = Color(0xFF1C9EDA)
 val md_theme_light_primary = Color(0xFF2557fa)
 val md_theme_light_onPrimary = Color(0xFFFFFFFF)
 val md_theme_light_primaryContainer = Color(0xFFD2E4F1)
-val md_theme_light_onPrimaryContainer = Color(0xFF91999e)
+val md_theme_light_onPrimaryContainer = Color(0xFFa5acb0)
 
 val md_theme_light_secondary = Color(0xFF71787D)
 val md_theme_light_onSecondary = Color(0xFF000000)
@@ -41,12 +41,12 @@ val md_theme_light_surfaceTint = Color(0xFF1C9EDA)
 // Dark Theme
 val md_theme_dark_primary = Color(0xFF1a3aa3)
 val md_theme_dark_onPrimary = Color(0xFFFAFCFF)
-val md_theme_dark_primaryContainer = Color(0xFF41484D)
+val md_theme_dark_primaryContainer = Color(0xFF004A78)
 val md_theme_dark_onPrimaryContainer = Color(0xFFCDE5FF)
 
 val md_theme_dark_secondary = Color(0xFF94CCFF)
 val md_theme_dark_onSecondary = Color(0xFFFAFCFF)
-val md_theme_dark_secondaryContainer = Color(0xFF004A78)
+val md_theme_dark_secondaryContainer = Color(0xFF41484D)
 val md_theme_dark_onSecondaryContainer = Color(0xFFCCE5FF)
 
 val md_theme_dark_tertiary = Color(0xFF1C9EDA)

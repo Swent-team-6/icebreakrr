@@ -1,8 +1,11 @@
 package com.github.se.icebreakrr.model.location
 
 import android.Manifest
+import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.util.Log
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -10,6 +13,7 @@ import com.github.se.icebreakrr.data.AppDataStore
 import com.github.se.icebreakrr.utils.IPermissionManager
 import com.github.se.icebreakrr.utils.PermissionManager
 import com.google.firebase.firestore.GeoPoint
+import java.lang.ref.WeakReference
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -18,8 +22,11 @@ import kotlinx.coroutines.launch
 class LocationViewModel(
     private val locationService: ILocationService,
     private val locationRepositoryFirestore: LocationRepository,
-    private val permissionManager: IPermissionManager
+    private val permissionManager: IPermissionManager,
+    context: Context
 ) : ViewModel() {
+
+  private val contextRef = WeakReference(context)
 
   private val _isUpdatingLocation = MutableStateFlow(false)
   val isUpdatingLocation: StateFlow<Boolean>
@@ -31,18 +38,29 @@ class LocationViewModel(
 
   private var permissionObserverJob: Job? = null
 
+  /**
+   * Companion object to provide a factory for creating instances of LocationViewModel.
+   *
+   * This factory simplifies the creation of LocationViewModel by injecting the required
+   * dependencies:
+   * - LocationService
+   * - LocationRepositoryFirestore
+   * - PermissionManager
+   * - Context
+   */
   companion object {
     fun provideFactory(
         locationService: LocationService,
         locationRepositoryFirestore: LocationRepositoryFirestore,
-        permissionManager: PermissionManager
+        permissionManager: PermissionManager,
+        context: Context
     ): ViewModelProvider.Factory =
         object : ViewModelProvider.Factory {
           @Suppress("UNCHECKED_CAST")
           override fun <T : ViewModel> create(modelClass: Class<T>): T {
             if (modelClass.isAssignableFrom(LocationViewModel::class.java)) {
               return LocationViewModel(
-                  locationService, locationRepositoryFirestore, permissionManager)
+                  locationService, locationRepositoryFirestore, permissionManager, context)
                   as T
             }
             throw IllegalArgumentException("Unknown ViewModel class")
@@ -89,14 +107,27 @@ class LocationViewModel(
   }
 
   /**
-   * Initiates location updates from `LocationService` and updates Firestore with the user's
-   * position.
+   * Starts the location updates service to track the user's location in the background.
    *
-   * Converts each new location into a `GeoPoint` and saves it in Firestore through
-   * `geoFirestoreRepository`. Sets `_isUpdatingLocation` to `true` if updates start successfully,
-   * or `false` if an error occurs.
+   * This function ensures that the `Context` is available before starting the service. It
+   * initializes the location updates by starting the `LocationService` in the foreground. On
+   * receiving location updates, the user's position is updated in Firestore and stored as the last
+   * known location.
+   *
+   * If the service fails to start, it stops any ongoing location updates and sets the internal
+   * state accordingly.
+   *
+   * @throws IllegalStateException If the `Context` is no longer available.
    */
   private fun startServiceLocationUpdates() {
+    val context = contextRef.get()
+    if (context == null) {
+      Log.e("LocationViewModel", "Context is no longer available, unable to start service.")
+      return
+    }
+    val serviceIntent = Intent(context, LocationService::class.java)
+    ContextCompat.startForegroundService(context, serviceIntent)
+
     val locationUpdatesStarted =
         locationService.startLocationUpdates(
             onLocationUpdate = { location ->

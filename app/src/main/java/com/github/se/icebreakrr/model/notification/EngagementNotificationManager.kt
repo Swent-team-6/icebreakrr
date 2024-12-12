@@ -1,6 +1,9 @@
 package com.github.se.icebreakrr.model.notification
 
+import android.Manifest
 import android.content.Context
+import android.content.pm.PackageManager
+import android.os.Build
 import android.util.Log
 import androidx.annotation.VisibleForTesting
 import com.github.se.icebreakrr.data.AppDataStore
@@ -8,6 +11,7 @@ import com.github.se.icebreakrr.model.filter.FilterViewModel
 import com.github.se.icebreakrr.model.message.MeetingRequestViewModel
 import com.github.se.icebreakrr.model.profile.Profile
 import com.github.se.icebreakrr.model.profile.ProfilesViewModel
+import com.github.se.icebreakrr.utils.IPermissionManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -44,15 +48,28 @@ class EngagementNotificationManager(
     private val meetingRequestViewModel: MeetingRequestViewModel,
     private val appDataStore: AppDataStore,
     private val context: Context,
-    private val filterViewModel: FilterViewModel
+    private val filterViewModel: FilterViewModel,
+    private val permissionManager: IPermissionManager
 ) {
   private var notificationJob: Job? = null
   private val scope = CoroutineScope(Dispatchers.Main)
   private val lastNotificationTimes = mutableMapOf<String, Long>()
 
-  /** Start monitoring for nearby users with common tags */
+  /**
+   * Starts monitoring nearby users with common tags. Ensures POST_NOTIFICATIONS permission on
+   * Android TIRAMISU+ and launches monitoring in a coroutine.
+   */
   fun startMonitoring() {
     stopMonitoring() // Stop any existing monitoring
+
+    // Handle permission request
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+      val permission = Manifest.permission.POST_NOTIFICATIONS
+      val permissionStatus = permissionManager.permissionStatuses.value[permission]
+      if (permissionStatus != PackageManager.PERMISSION_GRANTED) {
+        permissionManager.requestPermissions(arrayOf(permission))
+      }
+    }
 
     notificationJob =
         scope.launch {

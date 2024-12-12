@@ -1,5 +1,6 @@
 package com.github.se.icebreakrr.ui.navigation
 
+import android.content.Context
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.datastore.core.DataStore
@@ -102,7 +103,11 @@ class NavigationTest {
     aiViewModel = AiViewModel(mockAiRepository, mockProfileViewModel)
 
     locationViewModel =
-        LocationViewModel(mockLocationService, mockLocationRepository, mockPermissionManager)
+        LocationViewModel(
+            mockLocationService,
+            mockLocationRepository,
+            mockPermissionManager,
+            mock(Context::class.java))
 
     // mock state flow
     `when`(mockPermissionManager.permissionStatuses)

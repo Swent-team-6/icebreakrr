@@ -1,5 +1,6 @@
 package com.github.se.icebreakrr.ui.sections
 
+import android.content.Context
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -66,6 +67,7 @@ class AroundYouScreenTest {
   private lateinit var mockPermissionManager: IPermissionManager
   private lateinit var testDataStore: DataStore<Preferences>
   private lateinit var appDataStore: AppDataStore
+  private lateinit var mockContext: Context
 
   private lateinit var locationViewModel: LocationViewModel
 
@@ -93,9 +95,10 @@ class AroundYouScreenTest {
     mockLocationService = mock(ILocationService::class.java)
     mockLocationRepository = mock(LocationRepository::class.java)
     mockPermissionManager = mock(IPermissionManager::class.java)
-
+    mockContext = mock(Context::class.java)
     locationViewModel =
-        LocationViewModel(mockLocationService, mockLocationRepository, mockPermissionManager)
+        LocationViewModel(
+            mockLocationService, mockLocationRepository, mockPermissionManager, mockContext)
 
     // Mock state flows
     `when`(mockProfilesRepository.isWaiting).thenReturn(MutableStateFlow(false))

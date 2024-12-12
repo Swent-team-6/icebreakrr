@@ -49,7 +49,7 @@ import com.github.se.icebreakrr.utils.NetworkUtils.showNoInternetToast
 // Constants
 private val INFO_SECTION_PADDING = 16.dp
 private val INFO_SECTION_SPACING = 11.dp
-private val TAG_HEIGHT_DP = 50.dp
+private val TAG_HEIGHT_DP = 54.dp
 private val REQUEST_BUTTON_SIZE = 55.dp
 private val REQUEST_BUTTON_ELEVATION = 8.dp
 private val BUTTON_ICON_SCALE = 0.7f
@@ -426,14 +426,9 @@ fun ProfileCatchPhrase(catchPhrase: String) {
  */
 @Composable
 fun TagsSection(listOfTags: List<Pair<String, Color>>) {
-  val listHeight = (listOfTags.size + 1) / 2
-  Box(
-      modifier =
-          Modifier.fillMaxWidth()
-              .height((listHeight * TAG_HEIGHT_DP.value).dp)
-              .testTag("tagSection")) {
-        RowOfTags(listOfTags, TagStyle())
-      }
+  Box(modifier = Modifier.fillMaxWidth().testTag("tagSection")) {
+    RowOfTags(listOfTags, TagStyle())
+  }
 }
 
 /**

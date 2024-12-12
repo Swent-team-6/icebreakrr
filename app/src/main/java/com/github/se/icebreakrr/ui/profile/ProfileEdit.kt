@@ -74,7 +74,7 @@ fun ProfileEditingScreen(
   val descriptionHeight = screenHeight * 0.16f
 
   val CATCHPHRASE_MAX = 200
-  val DESSCRIPTION_MAX = 400
+  val DESCRIPTION_MAX = 400
 
   LaunchedEffect(Unit) {
     auth.currentUser?.let { profilesViewModel.getProfileByUid(it.uid) }
@@ -219,7 +219,7 @@ fun ProfileEditingScreen(
                 OutlinedTextField(
                     value = description,
                     onValueChange = {
-                      if (it.text.length <= DESSCRIPTION_MAX) {
+                      if (it.text.length <= DESCRIPTION_MAX) {
                         description = it
                         isModified = true
                       }
