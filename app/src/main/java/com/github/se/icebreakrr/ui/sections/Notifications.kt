@@ -13,11 +13,14 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -81,7 +84,29 @@ fun NotificationScreen(
   val pendingLocation = profileViewModel.pendingLocalisations.collectAsState()
   val context = LocalContext.current
   var meetingRequestOption by remember { mutableStateOf(MeetingRequestOption.INBOX) }
+  var alertDialogSent by remember { mutableStateOf(false) }
+  var sentSelectedProfile = remember { mutableStateOf<Profile?>(null) }
   val myProfile = profileViewModel.selfProfile.collectAsState()
+  if (alertDialogSent) {
+    AlertDialog(
+        modifier = Modifier.testTag("confirmDialog"),
+        onDismissRequest = { alertDialogSent = false },
+        title = { Text("Do you want to cancel this meeting request?") },
+        confirmButton = {
+          TextButton(
+              onClick = {
+                meetingRequestViewModel.sendCancellationToBothUsers(
+                    sentSelectedProfile.value?.uid ?: "null",
+                    sentSelectedProfile.value?.fcmToken ?: "",
+                    sentSelectedProfile.value?.name ?: "",
+                    MeetingRequestViewModel.CancellationType.CANCELLED)
+                alertDialogSent = false
+              }) {
+                Text("Yes")
+              }
+        },
+        dismissButton = { TextButton(onClick = { alertDialogSent = false }) { Text("No") } })
+  }
   Scaffold(
       modifier = Modifier.testTag("notificationScreen"),
       topBar = { TopBar("Inbox") },
@@ -117,7 +142,9 @@ fun NotificationScreen(
                   inboxCardList.value.map { it.key },
                   Screen.INBOX_PROFILE_VIEW,
                   context,
-                  navigationActions)
+                  navigationActions,
+                  {},
+                  sentSelectedProfile)
             }
             MeetingRequestOption.SENT -> {
               DisplayTextAndCard(
@@ -125,7 +152,9 @@ fun NotificationScreen(
                   sentCardList.value,
                   "",
                   context,
-                  navigationActions)
+                  navigationActions,
+                  { alertDialogSent = true },
+                  sentSelectedProfile)
             }
           }
         }
@@ -253,7 +282,9 @@ private fun DisplayTextAndCard(
     profiles: List<Profile>,
     screenToNavigate: String,
     context: Context,
-    navigationActions: NavigationActions
+    navigationActions: NavigationActions,
+    onClick: (Profile) -> Unit,
+    selectedProfile: MutableState<Profile?>
 ) {
   LazyColumn(
       modifier =
@@ -279,6 +310,8 @@ private fun DisplayTextAndCard(
                         showNoInternetToast(context)
                       }
                     }
+                    selectedProfile.value = p
+                    onClick(p)
                   },
                   greyedOut = false)
             }
