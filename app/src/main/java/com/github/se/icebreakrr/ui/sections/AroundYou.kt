@@ -112,6 +112,7 @@ fun AroundYouScreen(
           PackageManager.PERMISSION_GRANTED
   val filteredProfiles = profilesViewModel.filteredProfiles.collectAsState()
   val isLoading = profilesViewModel.loading.collectAsState()
+  val isManualRefresh = remember { mutableStateOf(false) }
   val context = LocalContext.current
   val isConnected = profilesViewModel.isConnected.collectAsState()
   val userLocation = locationViewModel.lastKnownLocation.collectAsState()
@@ -128,6 +129,12 @@ fun AroundYouScreen(
           appDataStore = appDataStore,
           context = context,
           filterViewModel = filterViewModel)
+    }
+  }
+  // this makes sure that the manual refresh is stopped when profiles are loaded
+  LaunchedEffect(isLoading.value) {
+    if (!isLoading.value) {
+      isManualRefresh.value = false
     }
   }
 
@@ -205,8 +212,9 @@ fun AroundYouScreen(
               locationViewModel = locationViewModel,
               filterViewModel = filterViewModel,
               tagsViewModel = tagsViewModel,
-              isRefreshing = isLoading.value,
+              isRefreshing = isManualRefresh.value,
               onRefresh = { center, radiusInMeters, genders, ageRange, tags ->
+                isManualRefresh.value = true
                 profilesViewModel.getFilteredProfilesInRadius(
                     center, radiusInMeters, genders, ageRange, tags)
               },
