@@ -17,6 +17,9 @@ import com.github.se.icebreakrr.model.location.ILocationService
 import com.github.se.icebreakrr.model.location.LocationRepository
 import com.github.se.icebreakrr.model.location.LocationViewModel
 import com.github.se.icebreakrr.model.message.MeetingRequestViewModel
+import com.github.se.icebreakrr.model.notification.EngagementNotificationManager
+import com.github.se.icebreakrr.model.profile.ProfilePicRepository
+import com.github.se.icebreakrr.model.profile.ProfilesRepository
 import com.github.se.icebreakrr.model.profile.ProfilesViewModel
 import com.github.se.icebreakrr.model.tags.TagsRepository
 import com.github.se.icebreakrr.model.tags.TagsViewModel
@@ -61,6 +64,7 @@ class SignInScreenTest {
   private lateinit var meetingRequestViewModel: MeetingRequestViewModel
   private lateinit var functions: FirebaseFunctions
   private lateinit var ourUid: String
+  private lateinit var engagementNotificationManager: EngagementNotificationManager
 
   @Before
   fun setUp() {
@@ -88,6 +92,9 @@ class SignInScreenTest {
     functions = mock(FirebaseFunctions::class.java)
     ourUid = "UserId1"
     meetingRequestViewModel = MeetingRequestViewModel(profileViewModel, functions)
+    engagementNotificationManager =
+        EngagementNotificationManager(
+            profileViewModel, meetingRequestViewModel, appDataStore, filterViewModel, tagsViewModel)
   }
 
   @Test
@@ -96,6 +103,7 @@ class SignInScreenTest {
       SignInScreen(
           profileViewModel,
           meetingRequestViewModel,
+          engagementNotificationManager = engagementNotificationManager,
           navigationActions,
           filterViewModel = filterViewModel,
           tagsViewModel =

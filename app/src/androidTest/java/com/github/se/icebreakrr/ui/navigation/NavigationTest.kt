@@ -16,6 +16,7 @@ import com.github.se.icebreakrr.model.location.ILocationService
 import com.github.se.icebreakrr.model.location.LocationRepository
 import com.github.se.icebreakrr.model.location.LocationViewModel
 import com.github.se.icebreakrr.model.message.MeetingRequestViewModel
+import com.github.se.icebreakrr.model.notification.EngagementNotificationManager
 import com.github.se.icebreakrr.model.profile.ProfilePicRepositoryStorage
 import com.github.se.icebreakrr.model.profile.ProfilesRepository
 import com.github.se.icebreakrr.model.profile.ProfilesViewModel
@@ -68,6 +69,7 @@ class NavigationTest {
   private lateinit var mockAiRepository: AiRepository
   private lateinit var aiViewModel: AiViewModel
   private lateinit var locationViewModel: LocationViewModel
+  private lateinit var engagementNotificationManager: EngagementNotificationManager
 
   @Before
   fun setup() {
@@ -101,6 +103,14 @@ class NavigationTest {
     mockAiRepository = mock(AiRepository::class.java)
     aiViewModel = AiViewModel(mockAiRepository, mockProfileViewModel)
 
+    engagementNotificationManager =
+        EngagementNotificationManager(
+            mockProfileViewModel,
+            mockMeetingRequestViewModel,
+            appDataStore,
+            mockFilterViewModel,
+            tagsViewModel)
+
     locationViewModel =
         LocationViewModel(mockLocationService, mockLocationRepository, mockPermissionManager)
 
@@ -128,7 +138,8 @@ class NavigationTest {
           mock(FirebaseAuth::class.java),
           mock(IPermissionManager::class.java),
           aiViewModel,
-          true)
+          engagementNotificationManager = engagementNotificationManager,
+          isTesting = true)
     }
 
     // Assert that the login screen is shown on launch
