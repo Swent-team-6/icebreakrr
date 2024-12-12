@@ -70,7 +70,6 @@ import kotlinx.coroutines.delay
 // Constants for layout dimensions
 private val COLUMN_VERTICAL_PADDING = 16.dp
 private val COLUMN_HORIZONTAL_PADDING = 8.dp
-private val SORT_TOP_PADDING = 4.dp
 private val TEXT_SIZE_LARGE = 20.sp
 private val TEXT_SMALL_SIZE = 16.sp
 private const val REFRESH_DELAY = 10_000L
@@ -256,7 +255,7 @@ fun SortOptionsDropdown(
   // List of all options excluding the selected one
   val otherOptions = SortOption.values().filter { it != selectedOption }
 
-  Column(modifier = modifier.background(MaterialTheme.colorScheme.primaryContainer)) {
+  Column(modifier = modifier) {
     // Selected option with a dropdown indicator
     Row(
         modifier =
