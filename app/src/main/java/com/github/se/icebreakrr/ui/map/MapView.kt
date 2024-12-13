@@ -332,7 +332,9 @@ fun MapScreen(
               Icon(
                   imageVector =
                       if (isHeatmapVisible) Icons.Filled.Clear else Icons.Filled.LocationOn,
-                  contentDescription = if (isHeatmapVisible) "${R.string.hide_heatmap}" else "${R.string.show_heatmap}",
+                  contentDescription =
+                      if (isHeatmapVisible) "${R.string.hide_heatmap}"
+                      else "${R.string.show_heatmap}",
                   modifier = Modifier.padding(end = 8.dp) // Add padding to the right of the icon
                   )
               Text(if (isHeatmapVisible) "${R.string.hide_heatmap}" else "${R.string.show_heatmap}")
@@ -389,33 +391,45 @@ fun MapScreen(
 /**
  * Creates a bitmap for the user marker with a blue circle and a gray border.
  *
- * This function draws a blue circle with a gray border to represent the user's location
- * on the map. The bitmap is created programmatically using a Canvas.
+ * This function draws a blue circle with a gray border to represent the user's location on the map.
+ * The bitmap is created programmatically using a Canvas.
  *
  * @return BitmapDescriptor for the user marker.
  */
 private fun createUserMarkerBitmap(): BitmapDescriptor {
-    // Create a bitmap for the blue circle with a gray border programmatically
-    val circleBitmap = Bitmap.createBitmap(MARKER_SIZE, MARKER_SIZE, Bitmap.Config.ARGB_8888) // Increased size for border
-    val canvas = Canvas(circleBitmap)
+  // Create a bitmap for the blue circle with a gray border programmatically
+  val circleBitmap =
+      Bitmap.createBitmap(
+          MARKER_SIZE, MARKER_SIZE, Bitmap.Config.ARGB_8888) // Increased size for border
+  val canvas = Canvas(circleBitmap)
 
-    // Draw the gray border
-    val borderPaint = Paint().apply {
+  // Draw the gray border
+  val borderPaint =
+      Paint().apply {
         color = BORDER_COLOR // Gray color for the border
         isAntiAlias = true // Enable anti-aliasing for smooth edges
         style = Paint.Style.FILL // Fill the circle
-    }
-    canvas.drawCircle(MARKER_SIZE / 2f, MARKER_SIZE / 2f, OUTER_CIRCLE_RADIUS, borderPaint) // Draw the border circle
+      }
+  canvas.drawCircle(
+      MARKER_SIZE / 2f,
+      MARKER_SIZE / 2f,
+      OUTER_CIRCLE_RADIUS,
+      borderPaint) // Draw the border circle
 
-    // Draw the blue circle
-    val bluePaint = Paint().apply {
-        color = android.graphics.Color.parseColor(MARKER_COLOR.toString())// IceBreakrr Blue
+  // Draw the blue circle
+  val bluePaint =
+      Paint().apply {
+        color = android.graphics.Color.parseColor(MARKER_COLOR.toString()) // IceBreakrr Blue
         isAntiAlias = true // Enable anti-aliasing for smooth edges
-    }
-    canvas.drawCircle(MARKER_SIZE / 2f, MARKER_SIZE / 2f, INNER_CIRCLE_RADIUS, bluePaint) // Draw the inner blue circle
+      }
+  canvas.drawCircle(
+      MARKER_SIZE / 2f,
+      MARKER_SIZE / 2f,
+      INNER_CIRCLE_RADIUS,
+      bluePaint) // Draw the inner blue circle
 
-    // Return the bitmap descriptor for the created bitmap
-    return BitmapDescriptorFactory.fromBitmap(circleBitmap)
+  // Return the bitmap descriptor for the created bitmap
+  return BitmapDescriptorFactory.fromBitmap(circleBitmap)
 }
 
 @Composable
