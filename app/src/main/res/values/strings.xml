@@ -13,6 +13,11 @@
     <string name="location_loading">Map Loading...</string>
     <string name="Not_Implemented_Toast">Not yet implemented</string>
 
+    <string name="your_location_title">Your Location</string>
+    <string name="your_location_snippet">This is where you are</string>
+    <string name="show_heatmap">Show Heatmap</string>
+    <string name="hide_heatmap">Hide Heatmap</string>
+
     <string name="block_report_modal_title">What would you like to do?</string>
     <string name="block_confirmation_message">Do you really want to block this user?</string>
     <string name="report_reason_prompt">Select a reason for reporting:</string>

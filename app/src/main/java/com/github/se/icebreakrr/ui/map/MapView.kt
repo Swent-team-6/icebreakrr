@@ -57,6 +57,7 @@ import com.github.se.icebreakrr.ui.navigation.LIST_TOP_LEVEL_DESTINATIONS
 import com.github.se.icebreakrr.ui.navigation.NavigationActions
 import com.github.se.icebreakrr.ui.navigation.Route
 import com.github.se.icebreakrr.ui.navigation.Screen
+import com.github.se.icebreakrr.ui.theme.IceBreakrrBlue
 import com.github.se.icebreakrr.utils.cropUsername
 import com.google.android.gms.maps.model.BitmapDescriptor
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
@@ -111,6 +112,13 @@ private val GRADIENT_START_POINTS =
         )
 
 val gradient = Gradient(GRADIENT_COLORS, GRADIENT_START_POINTS)
+
+// Constants for marker size and colors
+private const val MARKER_SIZE = 60
+private const val INNER_CIRCLE_RADIUS = 25f
+private const val OUTER_CIRCLE_RADIUS = 30f
+private val MARKER_COLOR = IceBreakrrBlue
+private val BORDER_COLOR = android.graphics.Color.GRAY // Gray color for the border
 
 @Composable
 fun MapScreen(
@@ -289,8 +297,8 @@ fun MapScreen(
                   Marker(
                       state = rememberMarkerState(position = userLatLng),
                       icon = bitmapDescriptor, // Use the custom bitmap as the marker icon
-                      title = "Your Location",
-                      snippet = "This is where you are",
+                      title = "${R.string.your_location_title}",
+                      snippet = "${R.string.your_location_snippet}",
                       onClick = {
                         // Handle marker click if needed
                         true // Return true to indicate the event was handled
@@ -324,10 +332,10 @@ fun MapScreen(
               Icon(
                   imageVector =
                       if (isHeatmapVisible) Icons.Filled.Clear else Icons.Filled.LocationOn,
-                  contentDescription = if (isHeatmapVisible) "Hide Heatmap" else "Show Heatmap",
+                  contentDescription = if (isHeatmapVisible) "${R.string.hide_heatmap}" else "${R.string.show_heatmap}",
                   modifier = Modifier.padding(end = 8.dp) // Add padding to the right of the icon
                   )
-              Text(if (isHeatmapVisible) "Hide Heatmap" else "Show Heatmap")
+              Text(if (isHeatmapVisible) "${R.string.hide_heatmap}" else "${R.string.show_heatmap}")
             }
           }
 
@@ -379,34 +387,35 @@ fun MapScreen(
 }
 
 /**
- * Creates a bitmap for the user marker with a blue circle and a white border.
+ * Creates a bitmap for the user marker with a blue circle and a gray border.
+ *
+ * This function draws a blue circle with a gray border to represent the user's location
+ * on the map. The bitmap is created programmatically using a Canvas.
  *
  * @return BitmapDescriptor for the user marker.
  */
 private fun createUserMarkerBitmap(): BitmapDescriptor {
-  // Create a bitmap for the blue circle with a white border programmatically
-  val circleBitmap =
-      Bitmap.createBitmap(60, 60, Bitmap.Config.ARGB_8888) // Increased size for border
-  val canvas = Canvas(circleBitmap)
+    // Create a bitmap for the blue circle with a gray border programmatically
+    val circleBitmap = Bitmap.createBitmap(MARKER_SIZE, MARKER_SIZE, Bitmap.Config.ARGB_8888) // Increased size for border
+    val canvas = Canvas(circleBitmap)
 
-  // Draw the white border
-  val borderPaint =
-      Paint().apply {
-        color = android.graphics.Color.BLACK // White color for the border
-        isAntiAlias = true
+    // Draw the gray border
+    val borderPaint = Paint().apply {
+        color = BORDER_COLOR // Gray color for the border
+        isAntiAlias = true // Enable anti-aliasing for smooth edges
         style = Paint.Style.FILL // Fill the circle
-      }
-  canvas.drawCircle(30f, 30f, 30f, borderPaint) // Draw the border circle
+    }
+    canvas.drawCircle(MARKER_SIZE / 2f, MARKER_SIZE / 2f, OUTER_CIRCLE_RADIUS, borderPaint) // Draw the border circle
 
-  // Draw the blue circle
-  val bluePaint =
-      Paint().apply {
-        color = android.graphics.Color.parseColor("#1FAEF0") // IceBreakrr Blue
-        isAntiAlias = true
-      }
-  canvas.drawCircle(30f, 30f, 25f, bluePaint) // Draw the inner blue circle
+    // Draw the blue circle
+    val bluePaint = Paint().apply {
+        color = android.graphics.Color.parseColor(MARKER_COLOR.toString())// IceBreakrr Blue
+        isAntiAlias = true // Enable anti-aliasing for smooth edges
+    }
+    canvas.drawCircle(MARKER_SIZE / 2f, MARKER_SIZE / 2f, INNER_CIRCLE_RADIUS, bluePaint) // Draw the inner blue circle
 
-  return BitmapDescriptorFactory.fromBitmap(circleBitmap)
+    // Return the bitmap descriptor for the created bitmap
+    return BitmapDescriptorFactory.fromBitmap(circleBitmap)
 }
 
 @Composable
