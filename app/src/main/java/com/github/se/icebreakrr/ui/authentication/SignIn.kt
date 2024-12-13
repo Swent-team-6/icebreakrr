@@ -206,7 +206,7 @@ fun SignInScreen(
 
           // Add the app icon here
           Image(
-              painter = painterResource(id = R.drawable.turtle),
+              painter = painterResource(id = R.drawable.logo),
               contentDescription = "App Icon",
               modifier = Modifier.size(170.dp))
 
