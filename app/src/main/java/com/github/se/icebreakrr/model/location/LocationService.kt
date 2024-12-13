@@ -157,8 +157,8 @@ class LocationService(
    */
   private fun createNotification(): Notification {
     return Notification.Builder(this, NOTIFICATION_CHANNEL_ID)
-        .setContentTitle(R.string.app_name.toString())
-        .setContentText(R.string.background_notification.toString())
+        .setContentTitle(getString(R.string.app_name))
+        .setContentText(getString(R.string.background_notification))
         .setSmallIcon(android.R.drawable.ic_menu_mylocation)
         .setOngoing(true)
         .build()
