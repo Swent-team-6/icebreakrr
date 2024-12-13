@@ -23,7 +23,8 @@ class UserMarkerTest {
     assertEquals("User ID should match", uid, userMarker.uid)
     assertEquals("Username should match", username, userMarker.username)
     assertEquals("Location should match", location, userMarker.location)
-    assertEquals("Location description should match", locationDescription, userMarker.locationDescription)
+    assertEquals(
+        "Location description should match", locationDescription, userMarker.locationDescription)
     assertEquals("Overlay position should be null", overlayPosition, userMarker.overlayPosition)
   }
 
@@ -43,7 +44,8 @@ class UserMarkerTest {
     assertEquals("User ID should match", uid, userMarker.uid)
     assertEquals("Username should match", username, userMarker.username)
     assertEquals("Location should match", location, userMarker.location)
-    assertEquals("Location description should match", locationDescription, userMarker.locationDescription)
+    assertEquals(
+        "Location description should match", locationDescription, userMarker.locationDescription)
     assertEquals("Overlay position should match", overlayPosition, userMarker.overlayPosition)
   }
 
