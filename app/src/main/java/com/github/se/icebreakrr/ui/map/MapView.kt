@@ -42,6 +42,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
@@ -337,7 +338,10 @@ fun MapScreen(
                       else "${R.string.show_heatmap}",
                   modifier = Modifier.padding(end = 8.dp) // Add padding to the right of the icon
                   )
-              Text(if (isHeatmapVisible) "${R.string.hide_heatmap}" else "${R.string.show_heatmap}")
+              Text(
+                  text =
+                      stringResource(
+                          if (isHeatmapVisible) R.string.hide_heatmap else R.string.show_heatmap))
             }
           }
 
@@ -419,7 +423,7 @@ private fun createUserMarkerBitmap(): BitmapDescriptor {
   // Draw the blue circle
   val bluePaint =
       Paint().apply {
-        color = android.graphics.Color.parseColor(MARKER_COLOR.toString()) // IceBreakrr Blue
+        color = MARKER_COLOR.value.toInt() // IceBreakrr Blue
         isAntiAlias = true // Enable anti-aliasing for smooth edges
       }
   canvas.drawCircle(
