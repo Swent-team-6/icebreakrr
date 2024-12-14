@@ -141,7 +141,7 @@ class MainActivity : ComponentActivity() {
 
     functions = FirebaseFunctions.getInstance()
 
-      // Initialize Utils
+    // Initialize Utils
     NetworkUtils.init(this)
 
     // Initialize DataStore
@@ -172,35 +172,35 @@ class MainActivity : ComponentActivity() {
 
     val tagsViewModel = TagsViewModel(TagsRepository(firestore, auth))
 
-      val ourUid = auth.currentUser?.uid
-      val currentUser = auth.currentUser
-      if (currentUser != null) {
-          FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
-              if (task.isSuccessful) {
-                  val fcmToken = task.result
-                  MeetingRequestManager.ourFcmToken = fcmToken
-                  MeetingRequestManager.ourUid = ourUid
-                  Log.d("INIT VAL MSG MANAGER", "$fcmToken, $ourUid")
-
-              }
-              profilesViewModel.getSelfProfile {
-                  val updatedProfile =
-                      profilesViewModel.selfProfile.value?.copy(fcmToken = MeetingRequestManager.ourFcmToken)
-                  if (updatedProfile != null) {
-                      MeetingRequestManager.ourName = profilesViewModel.selfProfile.value!!.name
-                      profilesViewModel.updateProfile(updatedProfile, {}, {
-                          Log.e("NEW TOKEN ADDED ERROR", "The new fcm token couldn't be added")
-                      })
-                      meetingRequestViewModel.setInitialValues(
-                          MeetingRequestManager.ourFcmToken!!,
-                          MeetingRequestManager.ourUid!!,
-                          MeetingRequestManager.ourName!!
-                      )
-                  }
-                  MeetingRequestManager.meetingRequestViewModel = meetingRequestViewModel
-              }
+    val ourUid = auth.currentUser?.uid
+    val currentUser = auth.currentUser
+    if (currentUser != null) {
+      FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
+        if (task.isSuccessful) {
+          val fcmToken = task.result
+          MeetingRequestManager.ourFcmToken = fcmToken
+          MeetingRequestManager.ourUid = ourUid
+          Log.d("INIT VAL MSG MANAGER", "$fcmToken, $ourUid")
+        }
+        profilesViewModel.getSelfProfile {
+          val updatedProfile =
+              profilesViewModel.selfProfile.value?.copy(
+                  fcmToken = MeetingRequestManager.ourFcmToken)
+          if (updatedProfile != null) {
+            MeetingRequestManager.ourName = profilesViewModel.selfProfile.value!!.name
+            profilesViewModel.updateProfile(
+                updatedProfile,
+                {},
+                { Log.e("NEW TOKEN ADDED ERROR", "The new fcm token couldn't be added") })
+            meetingRequestViewModel.setInitialValues(
+                MeetingRequestManager.ourFcmToken!!,
+                MeetingRequestManager.ourUid!!,
+                MeetingRequestManager.ourName!!)
           }
+          MeetingRequestManager.meetingRequestViewModel = meetingRequestViewModel
+        }
       }
+    }
 
     engagementNotificationManager =
         EngagementNotificationManager(
@@ -229,8 +229,7 @@ class MainActivity : ComponentActivity() {
                   isTesting,
                   permissionManager,
                   profilesViewModel,
-                  meetingRequestViewModel
-              )
+                  meetingRequestViewModel)
             }
           }
         }
@@ -273,28 +272,33 @@ class MainActivity : ComponentActivity() {
 
     // Cancel all meeting requests and clear the heatmap
     meetingRequestViewModel.updateInboxOfMessages {
-        val sentMessage = profilesViewModel.sentItems.value
-        val inboxMessage = profilesViewModel.inboxItems.value
+      val sentMessage = profilesViewModel.sentItems.value
+      val inboxMessage = profilesViewModel.inboxItems.value
 
-        // Send meeting cancellations to all people to whom we sent a message
-        sentMessage.forEach { profile ->
-            meetingRequestViewModel.sendCancellationToBothUsers(profile.uid, profile.fcmToken!!, profile.name, MeetingRequestViewModel.CancellationType.CANCELLED)
-        }
+      // Send meeting cancellations to all people to whom we sent a message
+      sentMessage.forEach { profile ->
+        meetingRequestViewModel.sendCancellationToBothUsers(
+            profile.uid,
+            profile.fcmToken!!,
+            profile.name,
+            MeetingRequestViewModel.CancellationType.CANCELLED)
+      }
 
-        // Send meeting cancellations to all people to whom that send us a meeting request
-        inboxMessage.forEach {(key, value) ->
-            meetingRequestViewModel.sendCancellationToBothUsers(key.uid , key.fcmToken!!,key.name ,MeetingRequestViewModel.CancellationType.CANCELLED)
-        }
+      // Send meeting cancellations to all people to whom that send us a meeting request
+      inboxMessage.forEach { (key, value) ->
+        meetingRequestViewModel.sendCancellationToBothUsers(
+            key.uid, key.fcmToken!!, key.name, MeetingRequestViewModel.CancellationType.CANCELLED)
+      }
 
-        val clearedOfMessageProfile = profilesViewModel.selfProfile.value?.copy(
-            meetingRequestChosenLocalisation = mapOf(),
-            meetingRequestInbox = mapOf(),
-            meetingRequestSent = listOf()
-        )
-        if (clearedOfMessageProfile != null) {
-            Log.d("CLEAR", "Clear the inbox")
-            profilesViewModel.updateProfile(clearedOfMessageProfile, {}, {})
-        }
+      val clearedOfMessageProfile =
+          profilesViewModel.selfProfile.value?.copy(
+              meetingRequestChosenLocalisation = mapOf(),
+              meetingRequestInbox = mapOf(),
+              meetingRequestSent = listOf())
+      if (clearedOfMessageProfile != null) {
+        Log.d("CLEAR", "Clear the inbox")
+        profilesViewModel.updateProfile(clearedOfMessageProfile, {}, {})
+      }
     }
   }
 
@@ -516,19 +520,19 @@ fun IcebreakrrNavHost(
               "The Meeting Request View Model shouldn't be null : Bad initialization")
         }
       }
-      composable(Screen.MAP_MEETING_VIEW_LOCATION_SCREEN + "?userId={userId}"){ navBackStackEntry ->
-          if (meetingRequestViewModel != null) {
-              LocationViewMapScreen(
-                 profileViewModel,
-                 navigationActions,
-                 meetingRequestViewModel,
-                 navBackStackEntry,
-                 isTesting
-              )
-          } else {
-              throw IllegalStateException(
-                  "The Meeting Request View Model shouldn't be null : Bad initialization")
-          }
+      composable(Screen.MAP_MEETING_VIEW_LOCATION_SCREEN + "?userId={userId}") { navBackStackEntry
+        ->
+        if (meetingRequestViewModel != null) {
+          LocationViewMapScreen(
+              profileViewModel,
+              navigationActions,
+              meetingRequestViewModel,
+              navBackStackEntry,
+              isTesting)
+        } else {
+          throw IllegalStateException(
+              "The Meeting Request View Model shouldn't be null : Bad initialization")
+        }
       }
 
       navigation(

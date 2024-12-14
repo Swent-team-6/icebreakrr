@@ -158,8 +158,10 @@ fun InboxProfileViewScreen(
                           locationMessage)
                     }
                   },
-                  {navigationActions.navigateTo(Screen.MAP_MEETING_VIEW_LOCATION_SCREEN + "?userId=${profile.uid}")}
-              )
+                  {
+                    navigationActions.navigateTo(
+                        Screen.MAP_MEETING_VIEW_LOCATION_SCREEN + "?userId=${profile.uid}")
+                  })
               InfoSection(profile = profile, tagsViewModel = tagsViewModel)
             }
       }
@@ -278,19 +280,19 @@ fun AcceptDeclineRequest(
                           contentDescription = "Decline Request Button",
                           tint = Color.White)
                     }
-                  IconButton(
-                      onClick = onLocationClick,
-                      modifier = Modifier.padding(ACCEPT_DECLINE_ICON_BUTTON_PADDING.dp)
-                          .size(ACCEPT_DECLINE_ICON_BUTTON_SIZE.dp)
-                          .clip(RoundedCornerShape(ACCEPT_DECLINE_ICON_BUTTON_ROUNDED.dp))
-                          .background(Color(ACCEPT_DECLINE_ICON_BUTTON_COLOR))
-                          .testTag("locationButton")
-                  ) {
+                IconButton(
+                    onClick = onLocationClick,
+                    modifier =
+                        Modifier.padding(ACCEPT_DECLINE_ICON_BUTTON_PADDING.dp)
+                            .size(ACCEPT_DECLINE_ICON_BUTTON_SIZE.dp)
+                            .clip(RoundedCornerShape(ACCEPT_DECLINE_ICON_BUTTON_ROUNDED.dp))
+                            .background(Color(ACCEPT_DECLINE_ICON_BUTTON_COLOR))
+                            .testTag("locationButton")) {
                       Icon(
                           imageVector = Icons.Outlined.LocationOn,
                           contentDescription = "Decline Request Button",
                           tint = Color.White)
-                  }
+                    }
               }
             }
       }

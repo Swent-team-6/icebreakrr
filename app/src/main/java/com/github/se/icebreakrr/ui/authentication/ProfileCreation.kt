@@ -274,8 +274,8 @@ fun ProfileCreationScreen(
                 }
               }
 
-        val tagSelectorHeight = screenHeight * tagSelectorHeightFactor
-        val tagSelectorWidth = screenWidth * tagSelectorWidthFactor
+          val tagSelectorHeight = screenHeight * tagSelectorHeightFactor
+          val tagSelectorWidth = screenWidth * tagSelectorWidthFactor
 
           TagSelector(
               selectedTag = selectedTags.map { tag -> Pair(tag, tagsViewModel.tagToColor(tag)) },
