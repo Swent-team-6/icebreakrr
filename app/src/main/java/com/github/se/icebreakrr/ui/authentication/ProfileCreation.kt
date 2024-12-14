@@ -31,6 +31,9 @@ import com.github.se.icebreakrr.model.profile.ProfilesViewModel
 import com.github.se.icebreakrr.model.tags.TagsViewModel
 import com.github.se.icebreakrr.ui.navigation.NavigationActions
 import com.github.se.icebreakrr.ui.navigation.TopLevelDestinations
+import com.github.se.icebreakrr.ui.sections.tagSelectorHeightFactor
+import com.github.se.icebreakrr.ui.sections.tagSelectorTextSizeFactor
+import com.github.se.icebreakrr.ui.sections.tagSelectorWidthFactor
 import com.github.se.icebreakrr.ui.tags.TagSelector
 import com.google.firebase.Firebase
 import com.google.firebase.Timestamp
@@ -58,6 +61,11 @@ private object ProfileCreationConstants {
 
   // Date constants
   const val DEFAULT_AGE_YEARS = -20
+
+  // Tag selector constants
+  const val tagSelectorTextSizeFactor = 0.1f
+  const val tagSelectorHeightFactor = 0.25f
+  const val tagSelectorWidthFactor = 0.8f
 }
 
 /**
@@ -266,6 +274,9 @@ fun ProfileCreationScreen(
                 }
               }
 
+        val tagSelectorHeight = screenHeight * tagSelectorHeightFactor
+        val tagSelectorWidth = screenWidth * tagSelectorWidthFactor
+
           TagSelector(
               selectedTag = selectedTags.map { tag -> Pair(tag, tagsViewModel.tagToColor(tag)) },
               outputTag =
@@ -286,9 +297,9 @@ fun ProfileCreationScreen(
                 tagsViewModel.addFilter(tag)
                 isModified = true
               },
-              height = screenHeight,
-              width = screenWidth,
-              textSize = (screenHeight.value * 0.03).sp)
+              height = tagSelectorHeight,
+              width = tagSelectorWidth,
+              textSize = (tagSelectorHeight.value * tagSelectorTextSizeFactor).sp)
         }
 
     // Add confirmation button in top right corner
