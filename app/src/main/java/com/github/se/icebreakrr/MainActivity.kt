@@ -82,6 +82,8 @@ class MainActivity : ComponentActivity() {
   @Inject lateinit var firestore: FirebaseFirestore
   @Inject lateinit var authStateListener: FirebaseAuth.AuthStateListener
   private lateinit var engagementNotificationManager: EngagementNotificationManager
+  private lateinit var meetingRequestViewModel: MeetingRequestViewModel
+  private lateinit var profilesViewModel: ProfilesViewModel
   private lateinit var locationViewModel: LocationViewModel
   private lateinit var locationRepositoryFirestore: LocationRepositoryFirestore
   private lateinit var permissionManager: PermissionManager
@@ -157,7 +159,7 @@ class MainActivity : ComponentActivity() {
     // Initialize location services
     locationRepositoryFirestore = LocationRepositoryFirestore(firestore, auth)
 
-    val profilesViewModel =
+    profilesViewModel =
         ProfilesViewModel(
             repository = ProfilesRepositoryFirestore(firestore, auth),
             ppRepository = ProfilePicRepositoryStorage(Firebase.storage),
@@ -165,10 +167,40 @@ class MainActivity : ComponentActivity() {
 
     val filterViewModel = FilterViewModel()
 
-    val meetingRequestViewModel =
+    meetingRequestViewModel =
         MeetingRequestViewModel(profilesViewModel = profilesViewModel, functions = functions)
 
     val tagsViewModel = TagsViewModel(TagsRepository(firestore, auth))
+
+      val ourUid = auth.currentUser?.uid
+      val currentUser = auth.currentUser
+      if (currentUser != null) {
+          FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
+              if (task.isSuccessful) {
+                  val fcmToken = task.result
+                  MeetingRequestManager.ourFcmToken = fcmToken
+                  MeetingRequestManager.ourUid = ourUid
+                  Log.d("INIT VAL MSG MANAGER", "$fcmToken, $ourUid")
+
+              }
+              profilesViewModel.getSelfProfile {
+                  val updatedProfile =
+                      profilesViewModel.selfProfile.value?.copy(fcmToken = MeetingRequestManager.ourFcmToken)
+                  if (updatedProfile != null) {
+                      MeetingRequestManager.ourName = profilesViewModel.selfProfile.value!!.name
+                      profilesViewModel.updateProfile(updatedProfile, {}, {
+                          Log.e("NEW TOKEN ADDED ERROR", "The new fcm token couldn't be added")
+                      })
+                      meetingRequestViewModel.setInitialValues(
+                          MeetingRequestManager.ourFcmToken!!,
+                          MeetingRequestManager.ourUid!!,
+                          MeetingRequestManager.ourName!!
+                      )
+                  }
+                  MeetingRequestManager.meetingRequestViewModel = meetingRequestViewModel
+              }
+          }
+      }
 
     engagementNotificationManager =
         EngagementNotificationManager(
@@ -195,7 +227,10 @@ class MainActivity : ComponentActivity() {
                   firestore,
                   chatGptApiKey,
                   isTesting,
-                  permissionManager)
+                  permissionManager,
+                  profilesViewModel,
+                  meetingRequestViewModel
+              )
             }
           }
         }
@@ -235,6 +270,32 @@ class MainActivity : ComponentActivity() {
     super.onDestroy()
     // Stop monitoring when app closed
     engagementNotificationManager.stopMonitoring()
+
+    // Cancel all meeting requests and clear the heatmap
+    meetingRequestViewModel.updateInboxOfMessages {
+        val sentMessage = profilesViewModel.sentItems.value
+        val inboxMessage = profilesViewModel.inboxItems.value
+
+        // Send meeting cancellations to all people to whom we sent a message
+        sentMessage.forEach { profile ->
+            meetingRequestViewModel.sendCancellationToBothUsers(profile.uid, profile.fcmToken!!, profile.name, MeetingRequestViewModel.CancellationType.CANCELLED)
+        }
+
+        // Send meeting cancellations to all people to whom that send us a meeting request
+        inboxMessage.forEach {(key, value) ->
+            meetingRequestViewModel.sendCancellationToBothUsers(key.uid , key.fcmToken!!,key.name ,MeetingRequestViewModel.CancellationType.CANCELLED)
+        }
+
+        val clearedOfMessageProfile = profilesViewModel.selfProfile.value?.copy(
+            meetingRequestChosenLocalisation = mapOf(),
+            meetingRequestInbox = mapOf(),
+            meetingRequestSent = listOf()
+        )
+        if (clearedOfMessageProfile != null) {
+            Log.d("CLEAR", "Clear the inbox")
+            profilesViewModel.updateProfile(clearedOfMessageProfile, {}, {})
+        }
+    }
   }
 
   private fun getChatGptApiKey(): String {
@@ -270,9 +331,9 @@ fun IcebreakrrApp(
     chatGptApiKey: String,
     isTesting: Boolean,
     permissionManager: IPermissionManager,
+    profileViewModel: ProfilesViewModel,
+    meetingRequestViewModel: MeetingRequestViewModel
 ) {
-  val profileViewModel: ProfilesViewModel =
-      viewModel(factory = ProfilesViewModel.Companion.Factory(auth, firestore))
   val tagsViewModel: TagsViewModel =
       viewModel(factory = TagsViewModel.Companion.Factory(auth, firestore))
   val filterViewModel: FilterViewModel = viewModel(factory = FilterViewModel.Factory)
@@ -282,48 +343,18 @@ fun IcebreakrrApp(
       viewModel(factory = SortViewModel.createFactory(profileViewModel))
   val aiViewModel: AiViewModel =
       viewModel(factory = AiViewModel.provideFactory(chatGptApiKey, profileViewModel))
-  val meetingRequestViewModel = MeetingRequestManager.meetingRequestViewModel
 
-    val currentUser = auth.currentUser
-    val ourUid = auth.currentUser?.uid
-    if (currentUser != null) {
-        FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
-            if (task.isSuccessful) {
-                val fcmToken = task.result
-                MeetingRequestManager.ourFcmToken = fcmToken
-                MeetingRequestManager.ourUid = ourUid
-                Log.d("INIT VAL MSG MANAGER", "$fcmToken, $ourUid")
-
-            }
-            profileViewModel.getSelfProfile {
-                val updatedProfile =
-                    profileViewModel.selfProfile.value?.copy(fcmToken = MeetingRequestManager.ourFcmToken)
-                if (updatedProfile != null) {
-                    MeetingRequestManager.ourName = profileViewModel.selfProfile.value!!.name
-                    profileViewModel.updateProfile(updatedProfile, {}, {
-                        Log.e("NEW TOKEN ADDED ERROR", "The new fcm token couldn't be added")
-                    })
-                    meetingRequestViewModel?.setInitialValues(
-                        MeetingRequestManager.ourFcmToken!!,
-                        MeetingRequestManager.ourUid!!,
-                        MeetingRequestManager.ourName!!
-                    )
-                }
-            }
-        }
-    }
+  val currentUser = auth.currentUser
 
   // Initialize EngagementManager
   val engagementManager =
-      meetingRequestViewModel?.let {
-        EngagementNotificationManager(
-            profilesViewModel = profileViewModel,
-            meetingRequestViewModel = it,
-            appDataStore = appDataStore,
-            filterViewModel = filterViewModel,
-            tagsViewModel = tagsViewModel,
-            permissionManager = permissionManager)
-      }
+      EngagementNotificationManager(
+          profilesViewModel = profileViewModel,
+          meetingRequestViewModel = meetingRequestViewModel,
+          appDataStore = appDataStore,
+          filterViewModel = filterViewModel,
+          tagsViewModel = tagsViewModel,
+          permissionManager = permissionManager)
 
   val startDestination =
       if (isTesting) Route.AROUND_YOU
