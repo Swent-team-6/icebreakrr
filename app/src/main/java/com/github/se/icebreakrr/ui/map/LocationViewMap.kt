@@ -1,7 +1,5 @@
-package com.github.se.icebreakrr.ui.map
+﻿package com.github.se.icebreakrr.ui.map
 
-import android.util.Log
-import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -32,6 +30,7 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavBackStackEntry
@@ -46,6 +45,7 @@ import com.github.se.icebreakrr.ui.sections.DEFAULT_USER_LATITUDE
 import com.github.se.icebreakrr.ui.sections.DEFAULT_USER_LONGITUDE
 import com.github.se.icebreakrr.ui.sections.shared.TopBar
 import com.github.se.icebreakrr.ui.theme.IceBreakrrBlue
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.Circle
@@ -57,15 +57,7 @@ import com.google.maps.android.compose.rememberCameraPositionState
 import com.google.maps.android.ktx.utils.sphericalDistance
 
 private const val DEFAULT_ZOOM = 16F
-private const val BOTTOM_BAR_HEIGHT = 150
-private const val TEXTFIELD_MAX_CHAR = 113
-private const val TEXT_FIELD_VERTICAL_PADDING = 8
-private const val TEXT_FIELD_HORIZONTAL_PADDING = 16
-private const val TEXT_FIELD_ELEVATION = 8
-private const val TEXT_FIELD_ROUNDED_CORNER = 8
-private const val MAX_DISTANCE_MEETING_POINT = 500
-private const val COLOR_INSIDE_CIRCLE = 0x11FFFFFF
-private const val CIRCLE_STROKE = 2f
+
 
 @Composable
 fun LocationViewMapScreen(
@@ -76,75 +68,100 @@ fun LocationViewMapScreen(
     isTesting: Boolean
 ) {
     val loadingSelfProfile = profilesViewModel.loadingSelf.collectAsState()
-    val centerLatitude =
-        profilesViewModel.selfProfile.value?.location?.latitude ?: DEFAULT_USER_LATITUDE
-    val centerLongitude =
-        profilesViewModel.selfProfile.value?.location?.longitude ?: DEFAULT_USER_LONGITUDE
-    var markerState by remember { mutableStateOf<MarkerState?>(null) }
+    val centerLatitude = profilesViewModel.selfProfile.value?.location?.latitude ?: DEFAULT_USER_LATITUDE
+    val centerLongitude = profilesViewModel.selfProfile.value?.location?.longitude ?: DEFAULT_USER_LONGITUDE
     val profileId = if (!isTesting) navBackStackEntry?.arguments?.getString("userId") else "2"
-    val context = LocalContext.current
+
     var mapLoaded by remember { mutableStateOf(false) }
     var locationMessage by remember { mutableStateOf("") }
+    var markerState by remember { mutableStateOf<MarkerState?>(null) }
+    var selfMarkerState by remember { mutableStateOf<MarkerState?>(null) }
 
     LaunchedEffect(Unit) {
         profilesViewModel.getProfileByUidAndThen(profileId ?: "null") {
-        val userInviting = profilesViewModel.selectedProfile.value
-        meetingRequestViewModel.updateInboxOfMessages {
-            val meetingMessages = profilesViewModel.inboxItems.value[userInviting]!!
-            val (messagePair, coordinates) = meetingMessages
-            val (firstMessage, secondMessage) = messagePair
-            locationMessage = secondMessage
-            markerState =
-                MarkerState(
-                    position =
-                    LatLng(
-                        coordinates.first,
-                        coordinates.second
-                    )
+            val userInviting = profilesViewModel.selectedProfile.value
+            meetingRequestViewModel.updateInboxOfMessages {
+                val meetingMessages = profilesViewModel.inboxItems.value[userInviting]
+                val (messagePair, coordinates) = meetingMessages ?: Pair(Pair("null", "null"), Pair(0.0, 0.0))
+                val (firstMessage, secondMessage) = messagePair
+                locationMessage = secondMessage
+                markerState = MarkerState(
+                    position = LatLng(coordinates.first, coordinates.second)
                 )
+
+                val ourPosition = profilesViewModel.selfProfile.value?.location
+                if (ourPosition != null) {
+                    selfMarkerState = MarkerState(
+                        position = LatLng(ourPosition.latitude, ourPosition.longitude)
+                    )
+                }
+            }
         }
-    }
     }
 
     val cameraPositionState = rememberCameraPositionState {
-        position = CameraPosition.fromLatLngZoom(LatLng(centerLatitude, centerLongitude), DEFAULT_ZOOM)
+        position = CameraPosition.fromLatLngZoom(
+            LatLng(centerLatitude, centerLongitude),
+            DEFAULT_ZOOM
+        )
     }
 
     Scaffold(
-        modifier =
-        Modifier.fillMaxSize().background(Color.White).testTag("LocationViewMapScreen"),
+        modifier = Modifier.fillMaxSize().background(Color.White),
         topBar = { TopBar("Meeting Point", true) { navigationActions.goBack() } },
-        ) { paddingValues ->
+    ) { paddingValues ->
         if (!loadingSelfProfile.value) {
-            Column(verticalArrangement = Arrangement.Top) {
-
-                Box(modifier = Modifier.fillMaxSize()) {
-                    GoogleMap(
-                        modifier = Modifier.fillMaxSize().padding(paddingValues).testTag("meetingRequestLocationMap"),
-                        cameraPositionState = cameraPositionState,
-                        onMapClick = {},
-                        onMapLoaded = { mapLoaded = true },
-                        onMapLongClick = { markerState?.position = it },
-                        uiSettings = MapUiSettings(zoomControlsEnabled = false)) {
-                        if (mapLoaded) {
-                            Marker(
-                                state = markerState!!,
-                                title = "Meeting request location",
-                                snippet = "YOLO",
-                                onClick = { true },
-                                draggable = true)
-                        }
+            Box(modifier = Modifier.fillMaxSize()) {
+                GoogleMap(
+                    modifier = Modifier.matchParentSize().padding(paddingValues),
+                    cameraPositionState = cameraPositionState,
+                    onMapLoaded = { mapLoaded = true },
+                    uiSettings = MapUiSettings(
+                            scrollGesturesEnabled = false, // Disable scrolling/dragging
+                            zoomGesturesEnabled = true,   // Allow zooming (optional, set to false if you want to disable zoom)
+                            tiltGesturesEnabled = false,  // Disable tilt gestures (optional)
+                            rotationGesturesEnabled = false // Disable rotation gestures (optional)
+                )
+                ) {
+                    if (mapLoaded && markerState != null) {
+                        Marker(
+                            state = markerState!!,
+                            title = "Meeting Request's location",
+                            onClick = { true },
+                            draggable = false
+                        )
+                        Marker(
+                            state = selfMarkerState!!,
+                            title = "Our location",
+                            onClick = { true },
+                            icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE),
+                            draggable = false
+                        )
                     }
                 }
+
+                // Overlay text for the marker
                 val projection = cameraPositionState.projection
                 val markerScreenPosition = markerState?.let { projection?.toScreenLocation(it.position) }
-                if (projection == null || markerScreenPosition == null) {
-                    Log.d("MapScreen", "Projection or marker screen position is not ready")
+                val selfMarkerScreenPosition = selfMarkerState?.let{projection?.toScreenLocation(it.position) }
+                val density = LocalDensity.current
+                markerScreenPosition?.let { screenPosition ->
+                    val markerOffset = Offset(
+                        x = with(density) {
+                            screenPosition.x.toDp().toPx()
+                        }, // Convert to Float in pixels
+                        y = with(density) {
+                            screenPosition.y.toDp().toPx() + 90.dp.toPx()
+                        }  // Add marker height
+                    )
+                    MarkerOverlay(position = markerOffset, text = locationMessage)
                 }
-                val markerOffset =
-                    markerScreenPosition?.x?.let { Offset(it.toFloat(), markerScreenPosition.y.toFloat()) }
-                if (mapLoaded && markerState != null && markerOffset != null) {
-                    MarkerOverlay(markerOffset, locationMessage)
+                selfMarkerScreenPosition?.let { selfScreenPosition ->
+                        val selfMarkerOffset = Offset(
+                            x = with(density) { selfScreenPosition.x.toDp().toPx() }, // Convert to Float in pixels
+                            y = with(density) { selfScreenPosition.y.toDp().toPx() + 90.dp.toPx() }  // Add marker height
+                )
+                    MarkerOverlay(position = selfMarkerOffset, text = "You are here")
                 }
             }
         }
