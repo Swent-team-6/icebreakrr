@@ -44,6 +44,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -140,6 +141,8 @@ fun MapScreen(
   val meetingRequestChosenLocalisation =
       myProfile.value?.meetingRequestChosenLocalisation ?: emptyMap()
 
+  val inboxItems = profilesViewModel.inboxItems.value ?: emptyMap()
+
   // Create a list of UIDs to fetch profiles
   val uidsToFetch = meetingRequestChosenLocalisation.keys.toList()
 
@@ -169,7 +172,7 @@ fun MapScreen(
         profile?.let {
           UserMarker(
               uid = uid,
-              username = cropUsername(it.name, 10), // Crop username to 10 characters
+              username = it.name, // Crop username to 10 characters
               locationDescription = message,
               location = LatLng(coordinates.first, coordinates.second),
               overlayPosition = null // Initially set to null

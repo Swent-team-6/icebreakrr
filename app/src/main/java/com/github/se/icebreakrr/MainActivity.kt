@@ -47,6 +47,7 @@ import com.github.se.icebreakrr.model.tags.TagsRepository
 import com.github.se.icebreakrr.model.tags.TagsViewModel
 import com.github.se.icebreakrr.ui.authentication.SignInScreen
 import com.github.se.icebreakrr.ui.map.LocationSelectorMapScreen
+import com.github.se.icebreakrr.ui.map.LocationViewMapScreen
 import com.github.se.icebreakrr.ui.navigation.NavigationActions
 import com.github.se.icebreakrr.ui.navigation.Route
 import com.github.se.icebreakrr.ui.navigation.Screen
@@ -70,6 +71,7 @@ import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.functions.FirebaseFunctions
+import com.google.firebase.messaging.FirebaseMessaging
 import com.google.firebase.storage.storage
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -134,11 +136,10 @@ class MainActivity : ComponentActivity() {
 
     // Initialize Firebase
     FirebaseApp.initializeApp(this)
-    // auth = FirebaseAuth.getInstance()
-    // firestore = FirebaseFirestore.getInstance()
+
     functions = FirebaseFunctions.getInstance()
 
-    // Initialize Utils
+      // Initialize Utils
     NetworkUtils.init(this)
 
     // Initialize DataStore
@@ -283,6 +284,35 @@ fun IcebreakrrApp(
       viewModel(factory = AiViewModel.provideFactory(chatGptApiKey, profileViewModel))
   val meetingRequestViewModel = MeetingRequestManager.meetingRequestViewModel
 
+    val currentUser = auth.currentUser
+    val ourUid = auth.currentUser?.uid
+    if (currentUser != null) {
+        FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
+            if (task.isSuccessful) {
+                val fcmToken = task.result
+                MeetingRequestManager.ourFcmToken = fcmToken
+                MeetingRequestManager.ourUid = ourUid
+                Log.d("INIT VAL MSG MANAGER", "$fcmToken, $ourUid")
+
+            }
+            profileViewModel.getSelfProfile {
+                val updatedProfile =
+                    profileViewModel.selfProfile.value?.copy(fcmToken = MeetingRequestManager.ourFcmToken)
+                if (updatedProfile != null) {
+                    MeetingRequestManager.ourName = profileViewModel.selfProfile.value!!.name
+                    profileViewModel.updateProfile(updatedProfile, {}, {
+                        Log.e("NEW TOKEN ADDED ERROR", "The new fcm token couldn't be added")
+                    })
+                    meetingRequestViewModel?.setInitialValues(
+                        MeetingRequestManager.ourFcmToken!!,
+                        MeetingRequestManager.ourUid!!,
+                        MeetingRequestManager.ourName!!
+                    )
+                }
+            }
+        }
+    }
+
   // Initialize EngagementManager
   val engagementManager =
       meetingRequestViewModel?.let {
@@ -297,7 +327,7 @@ fun IcebreakrrApp(
 
   val startDestination =
       if (isTesting) Route.AROUND_YOU
-      else (if (auth.currentUser != null) Route.AROUND_YOU else Route.AUTH)
+      else (if (currentUser != null) Route.AROUND_YOU else Route.AUTH)
 
   IcebreakrrNavHost(
       profileViewModel,
@@ -343,10 +373,10 @@ fun IcebreakrrNavHost(
         if (meetingRequestViewModel != null) {
           if (engagementNotificationManager != null) {
             SignInScreen(
-                profileViewModel,
-                meetingRequestViewModel,
+                profilesViewModel = profileViewModel,
+                meetingRequestViewModel = meetingRequestViewModel,
                 engagementNotificationManager = engagementNotificationManager,
-                navigationActions,
+                navigationActions = navigationActions,
                 filterViewModel = filterViewModel,
                 tagsViewModel = tagsViewModel,
                 appDataStore = appDataStore,
@@ -454,6 +484,20 @@ fun IcebreakrrNavHost(
           throw IllegalStateException(
               "The Meeting Request View Model shouldn't be null : Bad initialization")
         }
+      }
+      composable(Screen.MAP_MEETING_VIEW_LOCATION_SCREEN + "?userId={userId}"){ navBackStackEntry ->
+          if (meetingRequestViewModel != null) {
+              LocationViewMapScreen(
+                 profileViewModel,
+                 navigationActions,
+                 meetingRequestViewModel,
+                 navBackStackEntry,
+                 isTesting
+              )
+          } else {
+              throw IllegalStateException(
+                  "The Meeting Request View Model shouldn't be null : Bad initialization")
+          }
       }
 
       navigation(

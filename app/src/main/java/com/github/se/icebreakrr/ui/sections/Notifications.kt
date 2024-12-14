@@ -71,7 +71,6 @@ fun NotificationScreen(
   meetingRequestViewModel.updateInboxOfMessages {}
   val inboxCardList = profileViewModel.inboxItems.collectAsState()
   val sentCardList = profileViewModel.sentItems.collectAsState()
-  val pendingLocation = profileViewModel.pendingLocalisations.collectAsState()
   val context = LocalContext.current
   var meetingRequestOption by remember { mutableStateOf(MeetingRequestOption.INBOX) }
   var alertDialogSent by remember { mutableStateOf(false) }
@@ -109,7 +108,7 @@ fun NotificationScreen(
             },
             tabList = LIST_TOP_LEVEL_DESTINATIONS,
             selectedItem = Route.NOTIFICATIONS,
-            notificationCount = inboxCardList.value.size + pendingLocation.value.size,
+            notificationCount = inboxCardList.value.size + sentCardList.value.size,
             heatMapCount = myProfile.value?.meetingRequestChosenLocalisation?.size ?: 0)
       },
       content = { innerPadding ->
@@ -119,7 +118,7 @@ fun NotificationScreen(
               onOptionSelected = { meetingRequestOption = it },
               modifier =
                   Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.primaryContainer),
-              pendingLocationsSize = pendingLocation.value.size,
+              sentSize = sentCardList.value.size,
               inboxSize = inboxCardList.value.size)
           when (meetingRequestOption) {
             MeetingRequestOption.INBOX -> {
@@ -142,7 +141,6 @@ fun NotificationScreen(
                   { alertDialogSent = true },
                   sentSelectedProfile)
             }
-            MeetingRequestOption.CHOOSE_LOCATION -> {}
           }
         }
       })
@@ -165,7 +163,7 @@ fun MeetingRequestOptionRow(
     selectedOption: MeetingRequestOption,
     onOptionSelected: (MeetingRequestOption) -> Unit,
     modifier: Modifier = Modifier,
-    pendingLocationsSize: Int,
+    sentSize: Int,
     inboxSize: Int
 ) {
   Row(
@@ -183,15 +181,8 @@ fun MeetingRequestOptionRow(
             option = MeetingRequestOption.SENT,
             isSelected = selectedOption == MeetingRequestOption.SENT,
             onClick = { onOptionSelected(MeetingRequestOption.SENT) },
-            badgeCount = pendingLocationsSize + inboxSize,
+            badgeCount = sentSize,
             modifier = Modifier.weight(1f).testTag("sentButton"))
-
-        MeetingRequestButton(
-            option = MeetingRequestOption.CHOOSE_LOCATION,
-            isSelected = selectedOption == MeetingRequestOption.CHOOSE_LOCATION,
-            onClick = { onOptionSelected(MeetingRequestOption.CHOOSE_LOCATION) },
-            badgeCount = pendingLocationsSize,
-            modifier = Modifier.weight(1f).testTag("locationButton"))
       }
 }
 
@@ -229,7 +220,6 @@ private fun MeetingRequestButton(
 enum class MeetingRequestOption(val displayName: String) {
   INBOX("Inbox"),
   SENT("Sent"),
-  CHOOSE_LOCATION("Location")
 }
 
 /**
