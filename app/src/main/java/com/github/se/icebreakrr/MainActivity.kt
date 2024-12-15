@@ -534,16 +534,7 @@ fun IcebreakrrNavHost(
       }
       composable(Screen.MAP_MEETING_VIEW_LOCATION_SCREEN + "?userId={userId}") { navBackStackEntry
         ->
-        if (meetingRequestViewModel != null) {
-          LocationViewMapScreen(
-              profileViewModel,
-              navigationActions,
-              navBackStackEntry,
-              isTesting)
-        } else {
-          throw IllegalStateException(
-              "The Meeting Request View Model shouldn't be null : Bad initialization")
-        }
+        LocationViewMapScreen(profileViewModel, navigationActions, navBackStackEntry, isTesting)
       }
 
       navigation(

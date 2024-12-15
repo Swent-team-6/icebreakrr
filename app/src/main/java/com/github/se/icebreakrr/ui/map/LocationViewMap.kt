@@ -19,7 +19,6 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavBackStackEntry
-import com.github.se.icebreakrr.model.message.MeetingRequestViewModel
 import com.github.se.icebreakrr.model.profile.ProfilesViewModel
 import com.github.se.icebreakrr.ui.navigation.NavigationActions
 import com.github.se.icebreakrr.ui.profile.MarkerOverlay
@@ -44,7 +43,7 @@ private const val OUR_MARKER_TEXT = "You are here"
 private const val TEST_UID = "2"
 private val MARKER_HEIGHT = 90.dp
 private const val DEFAULT_SCREEN_COORDINATE = 0F
-private const val KEY_TEST_UID = "userID"
+private const val USER_UID = "userId"
 
 /**
  * This Screen shows the location and the location message in the received meeting request
@@ -66,8 +65,7 @@ fun LocationViewMapScreen(
       profilesViewModel.selfProfile.value?.location?.latitude ?: DEFAULT_USER_LATITUDE
   val centerLongitude =
       profilesViewModel.selfProfile.value?.location?.longitude ?: DEFAULT_USER_LONGITUDE
-  val profileId =
-      if (!isTesting) navBackStackEntry?.arguments?.getString(KEY_TEST_UID) else TEST_UID
+  val profileId = if (!isTesting) navBackStackEntry?.arguments?.getString(USER_UID) else TEST_UID
 
   var mapLoaded by remember { mutableStateOf(false) }
   var locationMessage by remember { mutableStateOf("") }
@@ -90,10 +88,8 @@ fun LocationViewMapScreen(
       val meetingMessages = profilesViewModel.inboxItems.value[userInviting]
       val (messagePair, coordinates) = meetingMessages ?: DEFAULT_MEETING_MESSAGES
       val (firstMessage, secondMessage) = messagePair
-
       locationMessage = secondMessage
       markerState = MarkerState(position = LatLng(coordinates.first, coordinates.second))
-
       val ourPosition = profilesViewModel.selfProfile.value?.location
       if (ourPosition != null) {
         selfMarkerState =
@@ -101,6 +97,7 @@ fun LocationViewMapScreen(
       }
     }
   }
+
   // Update screen positions when the map is loaded
   LaunchedEffect(mapLoaded) {
     if (mapLoaded) {
