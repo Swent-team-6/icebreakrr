@@ -290,7 +290,7 @@ fun AcceptDeclineRequest(
                             .testTag("locationButton")) {
                       Icon(
                           imageVector = Icons.Outlined.LocationOn,
-                          contentDescription = "Decline Request Button",
+                          contentDescription = "Location Request Button",
                           tint = Color.White)
                     }
               }

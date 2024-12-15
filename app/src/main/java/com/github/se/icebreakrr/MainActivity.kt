@@ -180,7 +180,6 @@ class MainActivity : ComponentActivity() {
           val fcmToken = task.result
           MeetingRequestManager.ourFcmToken = fcmToken
           MeetingRequestManager.ourUid = ourUid
-          Log.d("INIT VAL MSG MANAGER", "$fcmToken, $ourUid")
         }
         profilesViewModel.getSelfProfile {
           val updatedProfile =
@@ -290,13 +289,13 @@ class MainActivity : ComponentActivity() {
             key.uid, key.fcmToken!!, key.name, MeetingRequestViewModel.CancellationType.CANCELLED)
       }
 
+      // Remove all objects in the inbox, sent and remove the markers in the heatmap
       val clearedOfMessageProfile =
           profilesViewModel.selfProfile.value?.copy(
               meetingRequestChosenLocalisation = mapOf(),
               meetingRequestInbox = mapOf(),
               meetingRequestSent = listOf())
       if (clearedOfMessageProfile != null) {
-        Log.d("CLEAR", "Clear the inbox")
         profilesViewModel.updateProfile(clearedOfMessageProfile, {}, {})
       }
     }

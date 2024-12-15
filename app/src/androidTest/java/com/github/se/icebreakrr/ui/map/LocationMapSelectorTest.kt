@@ -155,7 +155,7 @@ class LocationMapSelectorTest {
   fun locationSelectorTest() {
     composeTestRule.waitForIdle()
     composeTestRule.onNodeWithTag("LocationSelectorMapScreen").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("topBar").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("addTextAndSendLocationBox").assertIsDisplayed()
     composeTestRule.onNodeWithTag("topBar").assertIsDisplayed()
 
     composeTestRule
