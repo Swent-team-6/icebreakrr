@@ -1,5 +1,6 @@
 ﻿package com.github.se.icebreakrr.ui.map
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -34,7 +35,6 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavBackStackEntry
-import com.github.se.icebreakrr.model.location.LocationViewModel
 import com.github.se.icebreakrr.model.message.MeetingRequestViewModel
 import com.github.se.icebreakrr.model.profile.Profile
 import com.github.se.icebreakrr.model.profile.ProfilesViewModel
@@ -88,7 +88,6 @@ fun LocationViewMapScreen(
                 markerState = MarkerState(
                     position = LatLng(coordinates.first, coordinates.second)
                 )
-
                 val ourPosition = profilesViewModel.selfProfile.value?.location
                 if (ourPosition != null) {
                     selfMarkerState = MarkerState(
@@ -107,8 +106,12 @@ fun LocationViewMapScreen(
     }
 
     Scaffold(
-        modifier = Modifier.fillMaxSize().background(Color.White),
-        topBar = { TopBar("Meeting Point", true) { navigationActions.goBack() } },
+        modifier = Modifier.fillMaxSize().background(Color.White).testTag("LocationViewMapScreen"),
+        topBar = {
+            TopBar("Meeting Point", true) {
+                navigationActions.goBack()
+            }
+        }
     ) { paddingValues ->
         if (!loadingSelfProfile.value) {
             Box(modifier = Modifier.fillMaxSize()) {
@@ -117,11 +120,11 @@ fun LocationViewMapScreen(
                     cameraPositionState = cameraPositionState,
                     onMapLoaded = { mapLoaded = true },
                     uiSettings = MapUiSettings(
-                            scrollGesturesEnabled = false, // Disable scrolling/dragging
-                            zoomGesturesEnabled = true,   // Allow zooming (optional, set to false if you want to disable zoom)
-                            tiltGesturesEnabled = false,  // Disable tilt gestures (optional)
-                            rotationGesturesEnabled = false // Disable rotation gestures (optional)
-                )
+                            scrollGesturesEnabled = false,
+                            zoomGesturesEnabled = false,
+                            tiltGesturesEnabled = false,
+                            rotationGesturesEnabled = false
+                    )
                 ) {
                     if (mapLoaded && markerState != null) {
                         Marker(
@@ -146,23 +149,18 @@ fun LocationViewMapScreen(
                 val selfMarkerScreenPosition = selfMarkerState?.let{projection?.toScreenLocation(it.position) }
                 val density = LocalDensity.current
                 markerScreenPosition?.let { screenPosition ->
-                    val markerOffset = Offset(
-                        x = with(density) {
-                            screenPosition.x.toDp().toPx()
-                        }, // Convert to Float in pixels
-                        y = with(density) {
-                            screenPosition.y.toDp().toPx() + 90.dp.toPx()
-                        }  // Add marker height
-                    )
+                    val xOffset = with(density) { screenPosition.x.toDp().toPx() }
+                    val yOffset = with(density) { screenPosition.y.toDp().toPx() + 90.dp.toPx() }
+                    val markerOffset = Offset(x = xOffset, y = yOffset)
                     MarkerOverlay(position = markerOffset, text = locationMessage)
                 }
                 selfMarkerScreenPosition?.let { selfScreenPosition ->
-                        val selfMarkerOffset = Offset(
-                            x = with(density) { selfScreenPosition.x.toDp().toPx() }, // Convert to Float in pixels
-                            y = with(density) { selfScreenPosition.y.toDp().toPx() + 90.dp.toPx() }  // Add marker height
-                )
+                    val xOffset = with(density) { selfScreenPosition.x.toDp().toPx() } // Convert X to pixels
+                    val yOffset = with(density) { selfScreenPosition.y.toDp().toPx() + 90.dp.toPx() } // Convert Y to pixels and add marker height
+                    val selfMarkerOffset = Offset(x = xOffset, y = yOffset) // Create Offset with calculated values
                     MarkerOverlay(position = selfMarkerOffset, text = "You are here")
                 }
+
             }
         }
     }
