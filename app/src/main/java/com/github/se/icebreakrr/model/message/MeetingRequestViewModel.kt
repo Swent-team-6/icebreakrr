@@ -300,6 +300,9 @@ class MeetingRequestViewModel(
           profilesViewModel.selfProfile.value?.copy(
               meetingRequestInbox =
                   currentMeetingRequestInbox + (senderUID to ((message1 to message2) to location)))
+      Log.d(
+          "TESTEST",
+          "updated profile meeting request view model : ${updatedProfile?.meetingRequestInbox}")
       if (updatedProfile != null) {
         profilesViewModel.updateProfile(updatedProfile, { onComplete() }, {})
       } else {
@@ -317,6 +320,7 @@ class MeetingRequestViewModel(
   fun removeFromMeetingRequestInbox(senderUID: String, onComplete: () -> Unit) {
     val currentMeetingRequestInbox =
         profilesViewModel.selfProfile.value?.meetingRequestInbox ?: mapOf()
+    Log.d("TESTEST", "must be true : ${currentMeetingRequestInbox.keys.contains(senderUID)}")
     if (currentMeetingRequestInbox.keys.contains(senderUID)) {
       val updatedMeetingRequestInbox = currentMeetingRequestInbox.filterKeys { it != senderUID }
       val updatedProfile =

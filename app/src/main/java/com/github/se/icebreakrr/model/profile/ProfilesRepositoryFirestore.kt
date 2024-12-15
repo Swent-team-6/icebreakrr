@@ -278,6 +278,7 @@ class ProfilesRepositoryFirestore(
     db.collection("profiles").document(uid).get(source).addOnCompleteListener { task ->
       if (task.isSuccessful) {
         val profile = task.result?.let { document -> documentToProfile(document) }
+        Log.d("TESTEST", "[getProfileByUid] profile : ${profile}")
         onSuccess(profile)
       } else {
         task.exception?.let { e ->
@@ -336,6 +337,7 @@ class ProfilesRepositoryFirestore(
    */
   private fun documentToProfile(document: DocumentSnapshot): Profile? {
     return try {
+      Log.d("TESTEST", "document to profile inbox : ${document.get("meetingRequestInbox")}")
       val uid = document.id
       val name = document.getString("name") ?: return null
       val genderString = document.getString("gender") ?: return null
@@ -368,31 +370,51 @@ class ProfilesRepositoryFirestore(
       val meetingRequestSent =
           (document.get("meetingRequestSent") as? List<*>)?.filterIsInstance<String>() ?: listOf()
       val meetingRequestInbox =
-          (document.get("meetingRequestInbox") as? Map<String, Map<Any, Any>>)
+          (document.get("meetingRequestInbox") as? Map<String, Any>)
               ?.mapNotNull { (key, value) ->
-                val messagePair = (value["first"] as? Map<String, String>)
-                val message1 = messagePair?.get("first") ?: ""
-                val message2 = messagePair?.get("second") ?: ""
-                val loc = (value["second"] as? Map<String, Any>)
-                val latitude = (loc?.get("first") as? Double)
-                val longitude = (loc?.get("second") as? Double)
-                if (latitude == null || longitude == null)
-                    throw Exception("Could not retrieve location from chosen location")
+                val outerPair = value as? Pair<*, *> ?: return@mapNotNull null
+
+                // Extract the first pair
+                val messagePair = outerPair.first as? Pair<*, *> ?: return@mapNotNull null
+                val message1 = messagePair.first as? String ?: ""
+                val message2 = messagePair.second as? String ?: ""
+
+                // Extract the second pair
+                val locPair = outerPair.second as? Pair<*, *> ?: return@mapNotNull null
+                val latitude = locPair.first as? Double
+                val longitude = locPair.second as? Double
+
+                if (latitude == null || longitude == null) {
+                  throw Exception("Could not retrieve location from chosen location")
+                }
+
                 key to Pair(Pair(message1, message2), Pair(latitude, longitude))
               }
               ?.toMap() ?: mapOf()
+
       val meetingRequestChosenLocation =
-          (document.get("meetingRequestChosenLocalisation") as? Map<String, Map<String, Any>>)
+          (document.get("meetingRequestChosenLocalisation") as? Map<String, Any>)
               ?.mapNotNull { (key, value) ->
-                val message = (value["first"] as? String)
-                val loc = (value["second"] as? Map<String, Any>)
-                val latitude = (loc?.get("first") as? Double)
-                val longitude = (loc?.get("second") as? Double)
-                if (latitude == null || longitude == null)
-                    throw Exception("Could not retrieve location from chosen location")
-                key to Pair(message ?: "", Pair(latitude, longitude))
+                // Cast the outer value as a Pair
+                val outerPair = value as? Pair<*, *> ?: return@mapNotNull null
+
+                // Extract the first part (message)
+                val message = outerPair.first as? String ?: ""
+
+                // Extract the second part (location pair)
+                val locPair = outerPair.second as? Pair<*, *> ?: return@mapNotNull null
+                val latitude = locPair.first as? Double
+                val longitude = locPair.second as? Double
+
+                if (latitude == null || longitude == null) {
+                  throw Exception("Could not retrieve location from chosen location")
+                }
+
+                // Return a mapped entry
+                key to Pair(message, Pair(latitude, longitude))
               }
               ?.toMap() ?: mapOf()
+
       Profile(
           uid = uid,
           name = name,

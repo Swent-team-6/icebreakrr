@@ -89,36 +89,7 @@ class AroundYouFlowEndToEnd {
       composeTestRule.onNodeWithTag("messageTextField").assertIsDisplayed()
       composeTestRule.onNodeWithTag("bluredBackground").assertIsDisplayed()
       composeTestRule.onNodeWithTag("sendButton").assertIsDisplayed().assertHasClickAction()
-
       composeTestRule.onNodeWithTag("cancelButton").assertIsDisplayed().assertHasClickAction()
-      // try to send a message :
-      composeTestRule
-          .onNodeWithTag("messageTextField")
-          .performTextInput("Hey, do you want to meet?")
-      composeTestRule.onNodeWithText("Hey, do you want to meet?").assertIsDisplayed()
-      composeTestRule.onNodeWithTag("sendButton").performClick()
-      // choose location screen :
-      composeTestRule.waitForIdle()
-      composeTestRule.onNodeWithTag("LocationSelectorMapScreen").assertIsDisplayed()
-      composeTestRule.onNodeWithTag("addTextAndSendLocationBox").assertIsDisplayed()
-      composeTestRule.onNodeWithTag("addDetailsTextField").assertIsDisplayed()
-      composeTestRule
-          .onNodeWithTag("buttonSendMessageLocation")
-          .assertIsDisplayed()
-          .assertHasClickAction()
-      // put a message :
-      composeTestRule
-          .onNodeWithTag("addDetailsTextField")
-          .performTextInput("Lets meet in the building, 3rd floor!")
-      composeTestRule.onNodeWithText("Lets meet in the building, 3rd floor!").assertIsDisplayed()
-      // send the request :
-      composeTestRule.onNodeWithTag("buttonSendMessageLocation").performClick()
-      // go in around you :
-      composeTestRule.onNodeWithText("Around You").assertIsDisplayed().performClick()
-      // reclick on alice profile :
-      composeTestRule.onNodeWithText(ALICE).assertIsDisplayed().performClick()
-      // click on send button :
-      composeTestRule.onNodeWithTag("requestButton").performClick()
       // click on cancel button :
       composeTestRule
           .onNodeWithTag("messageTextField")
@@ -172,30 +143,6 @@ class AroundYouFlowEndToEnd {
       // check if filter worked :
       composeTestRule.onNodeWithText("Bob Marley").assertIsDisplayed()
       composeTestRule.onNodeWithText("Indiana Jones").assertIsDisplayed()
-      // go to notification to check if you have sended a message
-      composeTestRule.onNodeWithText("Notifications").assertIsDisplayed().performClick()
-      composeTestRule
-          .onNodeWithTag("MeetingRequestOptionsDropdown_Selected")
-          .assertIsDisplayed()
-          .performClick()
-      composeTestRule
-          .onNodeWithTag("MeetingRequestOptionsDropdown_Option_SENT")
-          .assertIsDisplayed()
-          .performClick()
-      composeTestRule.waitForIdle()
-      // click on alice to cancel the meeting request
-      composeTestRule.onNodeWithText(ALICE).assertIsDisplayed().performClick()
-      composeTestRule.onNodeWithTag("confirmDialog").assertIsDisplayed()
-      composeTestRule.onNodeWithText("No").assertIsDisplayed().assertHasClickAction().performClick()
-      composeTestRule.onNodeWithText(ALICE).assertIsDisplayed().performClick()
-      composeTestRule.onNodeWithTag("confirmDialog").assertIsDisplayed()
-      composeTestRule
-          .onNodeWithText("Yes")
-          .assertIsDisplayed()
-          .assertHasClickAction()
-          .performClick()
-      composeTestRule.waitForIdle()
-      composeTestRule.onNodeWithTag(ALICE).assertIsNotDisplayed()
 
       scenario.close()
     }

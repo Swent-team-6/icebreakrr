@@ -744,9 +744,11 @@ open class ProfilesViewModel(
    */
   fun getSelfProfile(onComplete: () -> Unit) {
     _loadingSelf.value = true
+    Log.d("TESTEST", "[getSelfProfile] uid ${auth.currentUser?.uid ?: "null"}")
     repository.getProfileByUid(
         auth.currentUser?.uid ?: "null",
         onSuccess = { profile ->
+          Log.d("TESTEST", "[getSelfProfile] profile ${profile}")
           _selfProfile.value = profile
           _loadingSelf.value = false
           onComplete()
