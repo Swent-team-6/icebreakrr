@@ -46,9 +46,11 @@ private val MARKER_HEIGHT = 90.dp
 
 /**
  * This Screen shows the location and the location message in the received meeting request
+ *
  * @param profilesViewModel: The profile view model, to get and modify profiles
  * @param navigationActions: Navigation to go between screens
- * @param meetingRequestViewModel: The meeting request VM, used to manage the messaging system and get the messages in the inbox
+ * @param meetingRequestViewModel: The meeting request VM, used to manage the messaging system and
+ *   get the messages in the inbox
  * @param navBackStackEntry: The back stack : gives the UID of the target profile
  * @param isTesting: attests if we are in testing mode or in functional mode
  */
@@ -77,8 +79,7 @@ fun LocationViewMapScreen(
       val userInviting = profilesViewModel.selectedProfile.value
       meetingRequestViewModel.updateInboxOfMessages {
         val meetingMessages = profilesViewModel.inboxItems.value[userInviting]
-        val (messagePair, coordinates) =
-            meetingMessages ?: DEFAULT_MEETING_MESSAGES
+        val (messagePair, coordinates) = meetingMessages ?: DEFAULT_MEETING_MESSAGES
         val (firstMessage, secondMessage) = messagePair
         locationMessage = secondMessage
         markerState = MarkerState(position = LatLng(coordinates.first, coordinates.second))
@@ -135,7 +136,7 @@ fun LocationViewMapScreen(
             val density = LocalDensity.current
             markerScreenPosition?.let { screenPosition ->
               val xOffset = with(density) { screenPosition.x.toDp().toPx() }
-              val yOffset = with(density) { screenPosition.y.toDp().toPx() + MARKER_HEIGHT.toPx()}
+              val yOffset = with(density) { screenPosition.y.toDp().toPx() + MARKER_HEIGHT.toPx() }
               val markerOffset = Offset(x = xOffset, y = yOffset)
               MarkerOverlay(position = markerOffset, text = locationMessage)
             }
