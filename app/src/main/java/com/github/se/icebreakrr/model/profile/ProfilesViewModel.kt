@@ -703,13 +703,13 @@ open class ProfilesViewModel(
    *
    * @param uid : uid of the user you have met
    */
-  fun removeChosenLocalisation(uid: String) {
+  fun removeChosenLocalisation(uid: String, onComplete: () -> Unit) {
     updateProfile(
         _selfProfile.value?.copy(
             meetingRequestChosenLocalisation =
                 _selfProfile.value?.meetingRequestChosenLocalisation?.filter { it.key != uid }
                     ?: emptyMap())!!,
-        {},
+        onComplete,
         {})
   }
 
