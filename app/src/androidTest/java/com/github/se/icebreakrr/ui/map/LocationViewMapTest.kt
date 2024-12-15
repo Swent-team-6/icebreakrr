@@ -123,7 +123,6 @@ class LocationViewMapTest {
       LocationViewMapScreen(
           profilesViewModel = profilesViewModel,
           navigationActions = mockNavigationActions,
-          meetingRequestViewModel = meetingRequestViewModel,
           navBackStackEntry = null,
           isTesting = true)
     }
