@@ -1,7 +1,6 @@
 package com.github.se.icebreakrr.ui.map
 
 import android.content.Context
-import android.util.Log
 import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -96,11 +95,9 @@ class LocationViewMapTest {
           val uid = it.getArgument<(String)>(0)
           val onSuccess = it.getArgument<(Profile) -> Unit>(1)
           if (uid == "1") {
-            Log.d("GET UID FIRST", "")
             onSuccess(profile1)
           }
           if (uid == "2") {
-            Log.d("GET UID SECOND", "")
             onSuccess(profile2)
           }
         }
@@ -110,11 +107,9 @@ class LocationViewMapTest {
           val onSuccess = it.getArgument<(List<Profile>) -> Unit>(1)
           val uidList = it.getArgument<List<String>>(0)
           if (uidList == listOf("2")) {
-            Log.d("GET IN INBOX SECOND", "")
             onSuccess(listOf(profile2))
           }
           if (uidList == listOf("1")) {
-            Log.d("GET IN INBOX FIRST", "")
             onSuccess(listOf(profile1))
           }
         }
@@ -136,8 +131,6 @@ class LocationViewMapTest {
 
   @Test
   fun locationViewTest() {
-    Log.d("SELF PROFILE", profilesViewModel.selfProfile.value.toString())
-    Log.d("INBOX PROFILE", profilesViewModel.inboxItems.value.toString())
     composeTestRule.waitForIdle()
     composeTestRule.onNodeWithTag("LocationViewMapScreen").assertIsDisplayed()
     composeTestRule.onNodeWithTag("topBar").assertIsDisplayed()

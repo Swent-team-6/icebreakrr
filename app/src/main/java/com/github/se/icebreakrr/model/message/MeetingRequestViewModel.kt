@@ -63,7 +63,7 @@ class MeetingRequestViewModel(
   enum class CancellationType(val reason: String) {
     DISTANCE("distance"),
     TIME("time"),
-    REPORTED("reported"),
+    CLOSED("closed app"),
     CANCELLED("cancel")
   }
   /**
@@ -336,8 +336,8 @@ class MeetingRequestViewModel(
    *
    * @param uid : uid of the user you have met
    */
-  fun removeChosenLocalisation(uid: String) {
-    profilesViewModel.removeChosenLocalisation(uid)
+  fun removeChosenLocalisation(uid: String, onComplete: () -> Unit) {
+    profilesViewModel.removeChosenLocalisation(uid) { onComplete() }
   }
 
   /**
@@ -464,8 +464,6 @@ class MeetingRequestViewModel(
       targetName: String,
       reason: CancellationType
   ) {
-    Log.d("SENT MSG", "$targetName $targetUID $targetToken")
-    Log.d("OUR MSG", "$senderName $senderUID $senderToken")
     sendMeetingCancellation(targetToken, reason.toString(), senderUID, senderName)
     sendMeetingCancellation(senderToken, reason.toString(), targetUID, targetName)
   }

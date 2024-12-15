@@ -43,14 +43,14 @@ private const val OUR_MARKER_TITLE = "Our location"
 private const val OUR_MARKER_TEXT = "You are here"
 private const val TEST_UID = "2"
 private val MARKER_HEIGHT = 90.dp
+private const val DEFAULT_SCREEN_COORDINATE = 0F
+private const val KEY_TEST_UID = "userID"
 
 /**
  * This Screen shows the location and the location message in the received meeting request
  *
  * @param profilesViewModel: The profile view model, to get and modify profiles
  * @param navigationActions: Navigation to go between screens
- * @param meetingRequestViewModel: The meeting request VM, used to manage the messaging system and
- *   get the messages in the inbox
  * @param navBackStackEntry: The back stack : gives the UID of the target profile
  * @param isTesting: attests if we are in testing mode or in functional mode
  */
@@ -58,7 +58,6 @@ private val MARKER_HEIGHT = 90.dp
 fun LocationViewMapScreen(
     profilesViewModel: ProfilesViewModel,
     navigationActions: NavigationActions,
-    meetingRequestViewModel: MeetingRequestViewModel,
     navBackStackEntry: NavBackStackEntry?,
     isTesting: Boolean
 ) {
@@ -67,33 +66,73 @@ fun LocationViewMapScreen(
       profilesViewModel.selfProfile.value?.location?.latitude ?: DEFAULT_USER_LATITUDE
   val centerLongitude =
       profilesViewModel.selfProfile.value?.location?.longitude ?: DEFAULT_USER_LONGITUDE
-  val profileId = if (!isTesting) navBackStackEntry?.arguments?.getString("userId") else TEST_UID
+  val profileId =
+      if (!isTesting) navBackStackEntry?.arguments?.getString(KEY_TEST_UID) else TEST_UID
 
   var mapLoaded by remember { mutableStateOf(false) }
   var locationMessage by remember { mutableStateOf("") }
   var markerState by remember { mutableStateOf<MarkerState?>(null) }
   var selfMarkerState by remember { mutableStateOf<MarkerState?>(null) }
+  val markerScreenPosition = remember {
+    mutableStateOf(Offset(DEFAULT_SCREEN_COORDINATE, DEFAULT_SCREEN_COORDINATE))
+  }
+  val selfMarkerScreenPosition = remember {
+    mutableStateOf(Offset(DEFAULT_SCREEN_COORDINATE, DEFAULT_SCREEN_COORDINATE))
+  }
+  val cameraPositionState = rememberCameraPositionState {
+    position = CameraPosition.fromLatLngZoom(LatLng(centerLatitude, centerLongitude), DEFAULT_ZOOM)
+  }
 
+  // Fetch data on initial load
   LaunchedEffect(Unit) {
     profilesViewModel.getProfileByUidAndThen(profileId ?: "null") {
       val userInviting = profilesViewModel.selectedProfile.value
-      meetingRequestViewModel.updateInboxOfMessages {
-        val meetingMessages = profilesViewModel.inboxItems.value[userInviting]
-        val (messagePair, coordinates) = meetingMessages ?: DEFAULT_MEETING_MESSAGES
-        val (firstMessage, secondMessage) = messagePair
-        locationMessage = secondMessage
-        markerState = MarkerState(position = LatLng(coordinates.first, coordinates.second))
-        val ourPosition = profilesViewModel.selfProfile.value?.location
-        if (ourPosition != null) {
-          selfMarkerState =
-              MarkerState(position = LatLng(ourPosition.latitude, ourPosition.longitude))
+      val meetingMessages = profilesViewModel.inboxItems.value[userInviting]
+      val (messagePair, coordinates) = meetingMessages ?: DEFAULT_MEETING_MESSAGES
+      val (firstMessage, secondMessage) = messagePair
+
+      locationMessage = secondMessage
+      markerState = MarkerState(position = LatLng(coordinates.first, coordinates.second))
+
+      val ourPosition = profilesViewModel.selfProfile.value?.location
+      if (ourPosition != null) {
+        selfMarkerState =
+            MarkerState(position = LatLng(ourPosition.latitude, ourPosition.longitude))
+      }
+    }
+  }
+  // Update screen positions when the map is loaded
+  LaunchedEffect(mapLoaded) {
+    if (mapLoaded) {
+      val projection = cameraPositionState.projection
+      if (projection != null) {
+        markerState?.position?.let { latLng ->
+          val point = projection.toScreenLocation(latLng)
+          markerScreenPosition.value = Offset(point.x.toFloat(), point.y.toFloat())
+        }
+
+        selfMarkerState?.position?.let { latLng ->
+          val point = projection.toScreenLocation(latLng)
+          selfMarkerScreenPosition.value = Offset(point.x.toFloat(), point.y.toFloat())
         }
       }
     }
   }
 
-  val cameraPositionState = rememberCameraPositionState {
-    position = CameraPosition.fromLatLngZoom(LatLng(centerLatitude, centerLongitude), DEFAULT_ZOOM)
+  // Continuously update screen positions during camera movement
+  LaunchedEffect(cameraPositionState.position) {
+    val projection = cameraPositionState.projection
+    if (projection != null) {
+      markerState?.position?.let { latLng ->
+        val point = projection.toScreenLocation(latLng)
+        markerScreenPosition.value = Offset(point.x.toFloat(), point.y.toFloat())
+      }
+
+      selfMarkerState?.position?.let { latLng ->
+        val point = projection.toScreenLocation(latLng)
+        selfMarkerScreenPosition.value = Offset(point.x.toFloat(), point.y.toFloat())
+      }
+    }
   }
 
   Scaffold(
@@ -107,40 +146,33 @@ fun LocationViewMapScreen(
                 onMapLoaded = { mapLoaded = true },
                 uiSettings =
                     MapUiSettings(
-                        scrollGesturesEnabled = false,
-                        zoomGesturesEnabled = false,
-                        tiltGesturesEnabled = false,
-                        rotationGesturesEnabled = false)) {
-                  if (mapLoaded && markerState != null) {
-                    Marker(
-                        state = markerState!!,
-                        title = MARKER_TITLE,
-                        onClick = { true },
-                        draggable = false)
-                    Marker(
-                        state = selfMarkerState!!,
-                        title = OUR_MARKER_TITLE,
-                        onClick = { true },
-                        icon =
-                            BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE),
-                        draggable = false)
-                  }
-                }
+                        scrollGesturesEnabled = true,
+                        zoomGesturesEnabled = true,
+                        tiltGesturesEnabled = true,
+                    ),
+            ) {
+              if (mapLoaded && markerState != null) {
+                Marker(state = markerState!!, title = MARKER_TITLE, draggable = false)
+                Marker(
+                    state = selfMarkerState!!,
+                    title = OUR_MARKER_TITLE,
+                    icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE),
+                    draggable = false)
+              }
+            }
 
             // Overlay text for the marker
-            val projection = cameraPositionState.projection
-            val markerScreenPosition =
-                markerState?.let { projection?.toScreenLocation(it.position) }
-            val selfMarkerScreenPosition =
-                selfMarkerState?.let { projection?.toScreenLocation(it.position) }
             val density = LocalDensity.current
-            markerScreenPosition?.let { screenPosition ->
+            markerScreenPosition.value.let { screenPosition ->
               val xOffset = with(density) { screenPosition.x.toDp().toPx() }
               val yOffset = with(density) { screenPosition.y.toDp().toPx() + MARKER_HEIGHT.toPx() }
               val markerOffset = Offset(x = xOffset, y = yOffset)
-              MarkerOverlay(position = markerOffset, text = locationMessage)
+
+              if (xOffset > 0 && yOffset > 0) {
+                MarkerOverlay(position = markerOffset, text = locationMessage)
+              }
             }
-            selfMarkerScreenPosition?.let { selfScreenPosition ->
+            selfMarkerScreenPosition.value.let { selfScreenPosition ->
               val xOffset =
                   with(density) { selfScreenPosition.x.toDp().toPx() } // Convert X to pixels
               val yOffset =
@@ -149,7 +181,9 @@ fun LocationViewMapScreen(
                   } // Convert Y to pixels and add marker height
               val selfMarkerOffset =
                   Offset(x = xOffset, y = yOffset) // Create Offset with calculated values
-              MarkerOverlay(position = selfMarkerOffset, text = OUR_MARKER_TEXT)
+              if (xOffset > 0 && yOffset > 0) {
+                MarkerOverlay(position = selfMarkerOffset, text = OUR_MARKER_TEXT)
+              }
             }
           }
         }

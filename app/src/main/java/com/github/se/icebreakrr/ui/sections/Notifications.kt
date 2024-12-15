@@ -53,6 +53,8 @@ private val HORIZONTAL_PADDING = 7.dp
 private val TEXT_VERTICAL_PADDING = 16.dp
 private val CARD_SPACING = 16.dp
 private val DROPDOWN_VERTICAL_PADDING = 8.dp
+private val SENT_SIZE = 0
+private val MEETING_REQUEST_BUTTON_SIZE = 1f
 
 /**
  * Composable function for displaying the notification screen.
@@ -175,14 +177,14 @@ fun MeetingRequestOptionRow(
             isSelected = selectedOption == MeetingRequestOption.INBOX,
             onClick = { onOptionSelected(MeetingRequestOption.INBOX) },
             badgeCount = inboxSize,
-            modifier = Modifier.weight(1f).testTag("inboxButton"))
+            modifier = Modifier.weight(MEETING_REQUEST_BUTTON_SIZE).testTag("inboxButton"))
 
         MeetingRequestButton(
             option = MeetingRequestOption.SENT,
             isSelected = selectedOption == MeetingRequestOption.SENT,
             onClick = { onOptionSelected(MeetingRequestOption.SENT) },
-            badgeCount = sentSize,
-            modifier = Modifier.weight(1f).testTag("sentButton"))
+            badgeCount = SENT_SIZE,
+            modifier = Modifier.weight(MEETING_REQUEST_BUTTON_SIZE).testTag("sentButton"))
       }
 }
 

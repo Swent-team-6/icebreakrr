@@ -273,6 +273,7 @@ class MainActivity : ComponentActivity() {
     meetingRequestViewModel.updateInboxOfMessages {
       val sentMessage = profilesViewModel.sentItems.value
       val inboxMessage = profilesViewModel.inboxItems.value
+      val chosenLocation = profilesViewModel.chosenLocalisations.value
 
       // Send meeting cancellations to all people to whom we sent a message
       sentMessage.forEach { profile ->
@@ -280,16 +281,28 @@ class MainActivity : ComponentActivity() {
             profile.uid,
             profile.fcmToken!!,
             profile.name,
-            MeetingRequestViewModel.CancellationType.CANCELLED)
+            MeetingRequestViewModel.CancellationType.CLOSED)
       }
 
       // Send meeting cancellations to all people to whom that send us a meeting request
-      inboxMessage.forEach { (key, value) ->
+      inboxMessage.forEach { (profile, value) ->
         meetingRequestViewModel.sendCancellationToBothUsers(
-            key.uid, key.fcmToken!!, key.name, MeetingRequestViewModel.CancellationType.CANCELLED)
+            profile.uid,
+            profile.fcmToken!!,
+            profile.name,
+            MeetingRequestViewModel.CancellationType.CLOSED)
       }
 
-      // Remove all objects in the inbox, sent and remove the markers in the heatmap
+      // Remove the pin in the other user's map
+      chosenLocation.forEach { (profile, value) ->
+        meetingRequestViewModel.sendMeetingCancellation(
+            targetToken = profile.fcmToken!!,
+            cancellationReason = MeetingRequestViewModel.CancellationType.CLOSED.toString(),
+            senderUID = meetingRequestViewModel.senderUID,
+            senderName = meetingRequestViewModel.senderName)
+      }
+
+      // Remove the pin from our map
       val clearedOfMessageProfile =
           profilesViewModel.selfProfile.value?.copy(
               meetingRequestChosenLocalisation = mapOf(),
@@ -525,7 +538,6 @@ fun IcebreakrrNavHost(
           LocationViewMapScreen(
               profileViewModel,
               navigationActions,
-              meetingRequestViewModel,
               navBackStackEntry,
               isTesting)
         } else {
