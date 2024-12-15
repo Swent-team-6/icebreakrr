@@ -36,7 +36,22 @@ import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.rememberCameraPositionState
 
 private const val DEFAULT_ZOOM = 16F
+private val DEFAULT_MEETING_MESSAGES = Pair(Pair("null", "null"), Pair(0.0, 0.0))
+private const val TOP_BAR_TEXT = "Meeting Point"
+private const val MARKER_TITLE = "Meeting Request's location"
+private const val OUR_MARKER_TITLE = "Our location"
+private const val OUR_MARKER_TEXT = "You are here"
+private const val TEST_UID = "2"
+private val MARKER_HEIGHT = 90.dp
 
+/**
+ * This Screen shows the location and the location message in the received meeting request
+ * @param profilesViewModel: The profile view model, to get and modify profiles
+ * @param navigationActions: Navigation to go between screens
+ * @param meetingRequestViewModel: The meeting request VM, used to manage the messaging system and get the messages in the inbox
+ * @param navBackStackEntry: The back stack : gives the UID of the target profile
+ * @param isTesting: attests if we are in testing mode or in functional mode
+ */
 @Composable
 fun LocationViewMapScreen(
     profilesViewModel: ProfilesViewModel,
@@ -50,7 +65,7 @@ fun LocationViewMapScreen(
       profilesViewModel.selfProfile.value?.location?.latitude ?: DEFAULT_USER_LATITUDE
   val centerLongitude =
       profilesViewModel.selfProfile.value?.location?.longitude ?: DEFAULT_USER_LONGITUDE
-  val profileId = if (!isTesting) navBackStackEntry?.arguments?.getString("userId") else "2"
+  val profileId = if (!isTesting) navBackStackEntry?.arguments?.getString("userId") else TEST_UID
 
   var mapLoaded by remember { mutableStateOf(false) }
   var locationMessage by remember { mutableStateOf("") }
@@ -63,7 +78,7 @@ fun LocationViewMapScreen(
       meetingRequestViewModel.updateInboxOfMessages {
         val meetingMessages = profilesViewModel.inboxItems.value[userInviting]
         val (messagePair, coordinates) =
-            meetingMessages ?: Pair(Pair("null", "null"), Pair(0.0, 0.0))
+            meetingMessages ?: DEFAULT_MEETING_MESSAGES
         val (firstMessage, secondMessage) = messagePair
         locationMessage = secondMessage
         markerState = MarkerState(position = LatLng(coordinates.first, coordinates.second))
@@ -82,7 +97,7 @@ fun LocationViewMapScreen(
 
   Scaffold(
       modifier = Modifier.fillMaxSize().background(Color.White).testTag("LocationViewMapScreen"),
-      topBar = { TopBar("Meeting Point", true) { navigationActions.goBack() } }) { paddingValues ->
+      topBar = { TopBar(TOP_BAR_TEXT, true) { navigationActions.goBack() } }) { paddingValues ->
         if (!loadingSelfProfile.value) {
           Box(modifier = Modifier.fillMaxSize()) {
             GoogleMap(
@@ -98,12 +113,12 @@ fun LocationViewMapScreen(
                   if (mapLoaded && markerState != null) {
                     Marker(
                         state = markerState!!,
-                        title = "Meeting Request's location",
+                        title = MARKER_TITLE,
                         onClick = { true },
                         draggable = false)
                     Marker(
                         state = selfMarkerState!!,
-                        title = "Our location",
+                        title = OUR_MARKER_TITLE,
                         onClick = { true },
                         icon =
                             BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE),
@@ -120,7 +135,7 @@ fun LocationViewMapScreen(
             val density = LocalDensity.current
             markerScreenPosition?.let { screenPosition ->
               val xOffset = with(density) { screenPosition.x.toDp().toPx() }
-              val yOffset = with(density) { screenPosition.y.toDp().toPx() + 90.dp.toPx() }
+              val yOffset = with(density) { screenPosition.y.toDp().toPx() + MARKER_HEIGHT.toPx()}
               val markerOffset = Offset(x = xOffset, y = yOffset)
               MarkerOverlay(position = markerOffset, text = locationMessage)
             }
@@ -129,11 +144,11 @@ fun LocationViewMapScreen(
                   with(density) { selfScreenPosition.x.toDp().toPx() } // Convert X to pixels
               val yOffset =
                   with(density) {
-                    selfScreenPosition.y.toDp().toPx() + 90.dp.toPx()
+                    selfScreenPosition.y.toDp().toPx() + MARKER_HEIGHT.toPx()
                   } // Convert Y to pixels and add marker height
               val selfMarkerOffset =
                   Offset(x = xOffset, y = yOffset) // Create Offset with calculated values
-              MarkerOverlay(position = selfMarkerOffset, text = "You are here")
+              MarkerOverlay(position = selfMarkerOffset, text = OUR_MARKER_TEXT)
             }
           }
         }
