@@ -7,6 +7,7 @@ import com.github.se.icebreakrr.model.profile.Profile
 import com.github.se.icebreakrr.model.profile.ProfilePicRepositoryStorage
 import com.github.se.icebreakrr.model.profile.ProfilesRepository
 import com.github.se.icebreakrr.model.profile.ProfilesViewModel
+import com.github.se.icebreakrr.model.profile.reportType
 import com.google.firebase.Firebase
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
@@ -147,6 +148,11 @@ open class MockProfileViewModel :
     _loading.value = isLoading
   }
 
+    /** Sets the selfLoading state directly for testing purposes */
+    fun setLoadingSelf(isLoading: Boolean) {
+        _loadingSelf.value = isLoading
+    }
+
   // create factory
   companion object {
     val Factory: ViewModelProvider.Factory =
@@ -157,6 +163,17 @@ open class MockProfileViewModel :
           }
         }
   }
+}
+
+fun Profile.Companion.emptyProfile(): Profile {
+    return Profile(
+        uid = "",
+        name = "",
+        gender = Gender.OTHER,
+        birthDate = Timestamp.now(),
+        catchPhrase = "",
+        description = ""
+    )
 }
 
 fun Profile.Companion.getMockedProfiles(): List<Profile> {
