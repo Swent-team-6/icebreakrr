@@ -77,7 +77,7 @@ private val ICON_SPACING = 8.dp
 private const val USER_ALREADY_SEND_REQUEST_TOAST_MESSAGE =
     "this user has already send you a meeting request!"
 
-private val MESSAGE_MAX_SIZE = 72
+private val MESSAGE_MAX_SIZE = 72 //(number of characters that fit in the SendRequestScreen input)
 
 @Composable
 fun OtherProfileView(

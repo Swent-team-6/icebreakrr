@@ -82,15 +82,15 @@ fun ProfileEditingScreen(
 
   val isLoading = profilesViewModel.loadingSelf.collectAsState().value
   val pictureChangeState = profilesViewModel.pictureChangeState.collectAsState().value
-  val user = profilesViewModel.selfProfile.collectAsState().value!!
+  val user = profilesViewModel.selfProfile.collectAsState().value
   val editedSelfProfile = profilesViewModel.editedSelfProfile.collectAsState().value
   val tempBitmap = profilesViewModel.tempProfilePictureBitmap.collectAsState().value
 
   var catchphrase by remember {
-    mutableStateOf(TextFieldValue(editedSelfProfile?.catchPhrase ?: user.catchPhrase))
+    mutableStateOf(TextFieldValue(editedSelfProfile?.catchPhrase ?: user!!.catchPhrase))
   }
   var description by remember {
-    mutableStateOf(TextFieldValue(editedSelfProfile?.description ?: user.description))
+    mutableStateOf(TextFieldValue(editedSelfProfile?.description ?: user!!.description))
   }
   val expanded = remember { mutableStateOf(false) }
 
@@ -103,7 +103,7 @@ fun ProfileEditingScreen(
   val tagsSuggestions = tagsViewModel.tagsSuggestions.collectAsState()
   val stringQuery = remember { mutableStateOf("") }
   fun getEditedProfile(): Profile {
-    return user.copy(
+    return user!!.copy(
         catchPhrase = catchphrase.text, description = description.text, tags = selectedTags)
   }
 
@@ -158,7 +158,7 @@ fun ProfileEditingScreen(
               horizontalAlignment = Alignment.CenterHorizontally) {
                 // A composable that allows the user to preview and edit a profile picture
                 ProfilePictureSelector(
-                    url = user.profilePictureUrl,
+                    url = user!!.profilePictureUrl,
                     localBitmap = tempBitmap,
                     pictureChangeState = pictureChangeState,
                     size = profilePictureSize,
