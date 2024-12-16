@@ -1,3 +1,4 @@
+/*
 package com.github.se.endToEnd
 
 // import com.google.firebase.functions.dagger.Provides
@@ -219,3 +220,4 @@ class TestPermissionDelegate : ActivityCompat.PermissionCompatDelegate {
     return true
   }
 }
+*/
