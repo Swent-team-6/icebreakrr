@@ -15,14 +15,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 // Define constants for layout dimensions
-private val TOP_BAR_HEIGHT_1LINE = 90.dp
+private val TOP_BAR_HEIGHT_1LINE = 60.dp
 private val BACK_BUTTON_PADDING_START = 8.dp
 private val BACK_BUTTON_SIZE = 48.dp
 private val BACK_BUTTON_ICON_SIZE = 32.dp
 
 // Define constants for font sizes and colors
-private val TOP_BAR_TEXT_SIZE_BIG = 40.sp
-private val TOP_BAR_TEXT_SIZE_SMALL = 25.sp
+private val TOP_BAR_TEXT_SIZE_BIG = 20.sp
+private val TOP_BAR_TEXT_SIZE_SMALL = 15.sp
 
 private val TITLE_TEXT_WEIGHT = 1f
 private const val MAX_CHAR_ONE_LINE = 15
