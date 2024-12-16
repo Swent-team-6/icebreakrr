@@ -230,7 +230,6 @@ fun AroundYouScreen(
               notificationCount = (myProfile.value?.meetingRequestInbox?.size ?: 0),
               heatMapCount = myProfile.value?.meetingRequestChosenLocalisation?.size ?: 0)
         },
-        topBar = { TopBar("Around You") },
         content = { innerPadding ->
 
           // Wrapping dropdown and profile list in a Column
