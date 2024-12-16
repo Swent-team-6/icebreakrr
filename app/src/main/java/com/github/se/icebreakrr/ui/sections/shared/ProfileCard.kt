@@ -51,52 +51,49 @@ private val TAKE_TAGS = 3
 
 @Composable
 fun TagDisplay(tags: List<String>, isSettings: Boolean) {
-    if (!isSettings) {
-        // Determine the number of tags to display
-        val tagsToDisplay = when {
-            tags.size > 3 -> 2 // Display only 2 if there are more than 3 tags
-            else -> tags.size // Otherwise, display all available tags
+  if (!isSettings) {
+    // Determine the number of tags to display
+    val tagsToDisplay =
+        when {
+          tags.size > 3 -> 2 // Display only 2 if there are more than 3 tags
+          else -> tags.size // Otherwise, display all available tags
         }
 
-        // Display the tags with a background and spacing
-        FlowRow(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(TEXT_SPACER_PADDING)
-        ) {
-            // Create a Text for each tag, limiting to the calculated number of tags
-            tags.take(tagsToDisplay).forEachIndexed { index, tag ->
-                Text(
-                    text = "#$tag",
-                    fontSize = TAGS_FONT_SIZE,
-                    fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.primaryContainer,
-                    modifier = Modifier
-                        .padding(2.dp)
-                        .clip(RoundedCornerShape(25.dp)) // Rounded corners for each tag
-                        .background(MaterialTheme.colorScheme.secondary) // Tag background color
-                        .padding(horizontal = 10.dp, vertical = 4.dp) // Padding inside the tag
-                )
-            }
+    // Display the tags with a background and spacing
+    FlowRow(modifier = Modifier.fillMaxWidth().padding(TEXT_SPACER_PADDING)) {
+      // Create a Text for each tag, limiting to the calculated number of tags
+      tags.take(tagsToDisplay).forEachIndexed { index, tag ->
+        Text(
+            text = "#$tag",
+            fontSize = TAGS_FONT_SIZE,
+            fontWeight = FontWeight.SemiBold,
+            color = MaterialTheme.colorScheme.primaryContainer,
+            modifier =
+                Modifier.padding(2.dp)
+                    .clip(RoundedCornerShape(25.dp)) // Rounded corners for each tag
+                    .background(MaterialTheme.colorScheme.secondary) // Tag background color
+                    .padding(horizontal = 10.dp, vertical = 4.dp) // Padding inside the tag
+            )
+      }
 
-            // If there are more than 3 tags, add "..." at the end
-            if (tags.size > 3) {
-                Text(
-                    text = "...",
-                    fontSize = TAGS_FONT_SIZE,
-                    fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.primaryContainer,
-                    modifier = Modifier
-                        .padding(2.dp)
-                        .clip(RoundedCornerShape(25.dp)) // Rounded corners for the ellipsis
-                        .background(MaterialTheme.colorScheme.secondary) // Tag background color
-                        .padding(horizontal = 10.dp, vertical = 4.dp) // Padding inside the ellipsis
-                )
-            }
-        }
-    } else {
-        Text(text = "Tap to preview profile")
+      // If there are more than 3 tags, add "..." at the end
+      if (tags.size > 3) {
+        Text(
+            text = "...",
+            fontSize = TAGS_FONT_SIZE,
+            fontWeight = FontWeight.SemiBold,
+            color = MaterialTheme.colorScheme.primaryContainer,
+            modifier =
+                Modifier.padding(2.dp)
+                    .clip(RoundedCornerShape(25.dp)) // Rounded corners for the ellipsis
+                    .background(MaterialTheme.colorScheme.secondary) // Tag background color
+                    .padding(horizontal = 10.dp, vertical = 4.dp) // Padding inside the ellipsis
+            )
+      }
     }
+  } else {
+    Text(text = "Tap to preview profile")
+  }
 }
 
 /**
@@ -118,9 +115,7 @@ fun ProfileCard(
   Card(
       onClick = onclick,
       shape = RoundedCornerShape(CARD_CORNER_RADIUS),
-      elevation = CardDefaults.cardElevation(
-          defaultElevation = CARD_ELEVATION
-      ),
+      elevation = CardDefaults.cardElevation(defaultElevation = CARD_ELEVATION),
       colors =
           CardDefaults.cardColors(
               containerColor = MaterialTheme.colorScheme.primaryContainer,
