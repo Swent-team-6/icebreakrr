@@ -71,7 +71,7 @@ fun TagDisplay(tags: List<String>, isSettings: Boolean) {
             modifier =
                 Modifier.padding(2.dp)
                     .clip(RoundedCornerShape(25.dp)) // Rounded corners for each tag
-                    .background(MaterialTheme.colorScheme.secondary) // Tag background color
+                    .background(MaterialTheme.colorScheme.secondaryContainer) // Tag background color
                     .padding(horizontal = 10.dp, vertical = 4.dp) // Padding inside the tag
             )
       }
@@ -86,13 +86,13 @@ fun TagDisplay(tags: List<String>, isSettings: Boolean) {
             modifier =
                 Modifier.padding(2.dp)
                     .clip(RoundedCornerShape(25.dp)) // Rounded corners for the ellipsis
-                    .background(MaterialTheme.colorScheme.secondary) // Tag background color
+                    .background(MaterialTheme.colorScheme.secondaryContainer) // Tag background color
                     .padding(horizontal = 10.dp, vertical = 4.dp) // Padding inside the ellipsis
             )
       }
     }
   } else {
-    Text(text = "Tap to preview profile")
+    Text(text = "Tap to preview profile", color=MaterialTheme.colorScheme.secondaryContainer, fontWeight = FontWeight.Bold)
   }
 }
 
