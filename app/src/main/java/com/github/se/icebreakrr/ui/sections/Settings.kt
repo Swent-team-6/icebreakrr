@@ -101,7 +101,6 @@ fun SettingsScreen(
   val myProfile = profilesViewModel.selfProfile.collectAsState()
 
   Scaffold(
-      topBar = { TopBar("Settings") },
       modifier = Modifier.testTag("settingsScreen").fillMaxSize(),
       bottomBar = {
         BottomNavigationMenu(
