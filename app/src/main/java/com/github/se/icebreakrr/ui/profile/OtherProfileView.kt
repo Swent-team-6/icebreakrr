@@ -205,7 +205,8 @@ fun OtherProfileView(
                     .testTag("bluredBackground"),
             contentAlignment = Alignment.Center) {
               SendRequestScreen(
-                  onValueChange = { writtenMessage = it },
+                  onValueChange = {
+                      writtenMessage = it.slice(0..minOf(it.length - 1, MESSAGE_MAX_SIZE)) },
                   value = writtenMessage,
                   onSendClick = {
                     navigationActions.navigateTo(
