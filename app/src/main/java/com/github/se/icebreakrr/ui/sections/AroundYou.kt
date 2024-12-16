@@ -70,6 +70,7 @@ import com.github.se.icebreakrr.ui.navigation.Route
 import com.github.se.icebreakrr.ui.navigation.Screen
 import com.github.se.icebreakrr.ui.sections.shared.FilterFloatingActionButton
 import com.github.se.icebreakrr.ui.sections.shared.ProfileCard
+import com.github.se.icebreakrr.ui.sections.shared.TopBar
 import com.github.se.icebreakrr.utils.IPermissionManager
 import com.github.se.icebreakrr.utils.NetworkUtils.isNetworkAvailable
 import com.github.se.icebreakrr.utils.NetworkUtils.isNetworkAvailableWithContext
@@ -217,6 +218,7 @@ fun AroundYouScreen(
 
     Scaffold(
         modifier = Modifier.testTag("aroundYouScreen"),
+        topBar = { TopBar("Around You") },
         bottomBar = {
           BottomNavigationMenu(
               onTabSelect = { route ->
