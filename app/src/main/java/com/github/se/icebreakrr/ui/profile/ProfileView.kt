@@ -20,8 +20,6 @@ import com.github.se.icebreakrr.ui.navigation.Screen
 import com.github.se.icebreakrr.ui.sections.shared.InfoSection
 import com.github.se.icebreakrr.ui.sections.shared.MessageWhenLoadingProfile
 import com.github.se.icebreakrr.ui.sections.shared.ProfileHeader
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.auth
 
 /**
  * Displays the main profile view with the profile header and information section. The profile

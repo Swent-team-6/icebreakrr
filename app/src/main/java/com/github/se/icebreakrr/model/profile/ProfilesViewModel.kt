@@ -273,14 +273,14 @@ open class ProfilesViewModel(
    * @param onFailure: callback to propagate erorrs higher
    */
   fun updateProfile(profile: Profile, onComplete: () -> Unit, onFailure: (Exception) -> Unit) {
-      if (_selfProfile.value == null) {
-          _loadingSelf.value = true
-      }
+    if (_selfProfile.value == null) {
+      _loadingSelf.value = true
+    }
     _selfProfile.value = profile
     repository.updateProfile(
         profile,
         onSuccess = {
-            _loadingSelf.value = false
+          _loadingSelf.value = false
           onComplete()
         },
         onFailure = { e ->
@@ -381,7 +381,7 @@ open class ProfilesViewModel(
 
   /** Clears the edited profile from the state. */
   private fun clearEditedProfile() {
-      _editedSelfProfile.value = null
+    _editedSelfProfile.value = null
   }
 
   /** Resets every state related to profile edition. */
@@ -411,17 +411,18 @@ open class ProfilesViewModel(
       ProfilePictureState.TO_UPLOAD ->
           validateAndUploadProfilePicture(context) { url ->
             val newProfile = _editedSelfProfile.value!!.copy(profilePictureUrl = url)
-            updateProfile(newProfile, {_selfProfile.value = newProfile}, {})
+            updateProfile(newProfile, { _selfProfile.value = newProfile }, {})
             resetProfileEditionState()
           }
       TO_DELETE ->
           deleteCurrentUserProfilePicture {
             val newProfile = _editedSelfProfile.value?.copy(profilePictureUrl = null)
-            updateProfile(newProfile!!, {_selfProfile.value = newProfile}, {})
+            updateProfile(newProfile!!, { _selfProfile.value = newProfile }, {})
             resetProfileEditionState()
           }
       else -> {
-        updateProfile(_editedSelfProfile.value!!, {_selfProfile.value = _editedSelfProfile.value}, {})
+        updateProfile(
+            _editedSelfProfile.value!!, { _selfProfile.value = _editedSelfProfile.value }, {})
         resetProfileEditionState()
       }
     }
@@ -736,7 +737,7 @@ open class ProfilesViewModel(
    */
   fun getSelfProfile(onComplete: () -> Unit) {
     if (_selfProfile.value == null) {
-        _loadingSelf.value = true
+      _loadingSelf.value = true
     }
     repository.getProfileByUid(
         auth.currentUser?.uid ?: "null",

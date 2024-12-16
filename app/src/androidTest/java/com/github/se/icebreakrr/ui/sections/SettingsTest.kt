@@ -160,13 +160,13 @@ class SettingsTest {
     composeTestRule.onNodeWithTag("Toggle Discoverability").assertIsDisplayed()
     composeTestRule.onNodeWithTag("Toggle Discoverability").performClick()
 
-      // Assert the delete Account button is displayed and clickable
-      composeTestRule.onNodeWithTag("deleteAccountButton").assertIsDisplayed()
-      composeTestRule.onNodeWithTag("deleteAccountButton").performClick()
+    // Assert the delete Account button is displayed and clickable
+    composeTestRule.onNodeWithTag("deleteAccountButton").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("deleteAccountButton").performClick()
 
-      composeTestRule.onNodeWithTag("alertDialog").assertIsDisplayed()
-      composeTestRule.onNodeWithText("Cancel").performClick()
-      composeTestRule.onNodeWithTag("alertDialog").assertIsNotDisplayed()
+    composeTestRule.onNodeWithTag("alertDialog").assertIsDisplayed()
+    composeTestRule.onNodeWithText("Cancel").performClick()
+    composeTestRule.onNodeWithTag("alertDialog").assertIsNotDisplayed()
 
     // Assert that the Log Out button is displayed and clickable
     composeTestRule.onNodeWithTag("logOutButton").assertIsDisplayed()

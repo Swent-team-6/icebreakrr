@@ -9,9 +9,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -34,19 +32,16 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
 import com.github.se.icebreakrr.R
 import com.github.se.icebreakrr.authentication.logout
 import com.github.se.icebreakrr.config.LocalIsTesting
 import com.github.se.icebreakrr.data.AppDataStore
 import com.github.se.icebreakrr.mock.emptyProfile
-import com.github.se.icebreakrr.mock.getMockedProfiles
 import com.github.se.icebreakrr.model.location.LocationViewModel
 import com.github.se.icebreakrr.model.notification.EngagementNotificationManager
 import com.github.se.icebreakrr.model.profile.Profile
@@ -58,7 +53,6 @@ import com.github.se.icebreakrr.ui.navigation.Route
 import com.github.se.icebreakrr.ui.navigation.Screen
 import com.github.se.icebreakrr.ui.sections.shared.ProfileCard
 import com.github.se.icebreakrr.ui.sections.shared.TopBar
-import com.github.se.icebreakrr.ui.sections.shared.UnsavedChangesDialog
 import com.github.se.icebreakrr.utils.NetworkUtils.isNetworkAvailableWithContext
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.launch
@@ -95,9 +89,7 @@ fun SettingsScreen(
   val context = LocalContext.current
   val coroutineScope = rememberCoroutineScope()
 
-    var deleteAccountDialog by remember {
-        mutableStateOf(false)
-    }
+  var deleteAccountDialog by remember { mutableStateOf(false) }
 
   // Collect the discoverability state from DataStore
   val isDiscoverable by appDataStore.isDiscoverable.collectAsState(initial = true)
@@ -126,84 +118,81 @@ fun SettingsScreen(
       },
   ) { innerPadding ->
     Column(
-        modifier = Modifier.fillMaxSize()
-            .padding(innerPadding)
-            .padding(SCREEN_PADDING)
-            .fillMaxSize(),
+        modifier =
+            Modifier.fillMaxSize().padding(innerPadding).padding(SCREEN_PADDING).fillMaxSize(),
         verticalArrangement = Arrangement.Top,
-        horizontalAlignment = Alignment.Start
-    ) {
-        // Profile Card
-        val displayProfile = myProfile.value ?: Profile.emptyProfile()
-        ProfileCard(profile = displayProfile, isSettings = true) {
+        horizontalAlignment = Alignment.Start) {
+          // Profile Card
+          val displayProfile = myProfile.value ?: Profile.emptyProfile()
+          ProfileCard(profile = displayProfile, isSettings = true) {
             navigationActions.navigateTo(Screen.PROFILE)
-        }
+          }
 
-        Spacer(modifier = Modifier.height(screenHeight * RELATIVE_SPACING))
+          Spacer(modifier = Modifier.height(screenHeight * RELATIVE_SPACING))
 
-        // Toggle Options
-        ToggleOptionBox(
-            label = "Toggle Discoverability",
-            isChecked = isDiscoverable,
-            onCheckedChange = { discoverable ->
+          // Toggle Options
+          ToggleOptionBox(
+              label = "Toggle Discoverability",
+              isChecked = isDiscoverable,
+              onCheckedChange = { discoverable ->
                 when (discoverable) {
-                    true -> locationViewModel.tryToStartLocationUpdates()
-                    false -> locationViewModel.stopLocationUpdates()
+                  true -> locationViewModel.tryToStartLocationUpdates()
+                  false -> locationViewModel.stopLocationUpdates()
                 }
                 coroutineScope.launch { appDataStore.saveDiscoverableStatus(discoverable) }
-            }
-        )
+              })
 
-        Spacer(modifier = Modifier.height(screenHeight * RELATIVE_SPACING))
+          Spacer(modifier = Modifier.height(screenHeight * RELATIVE_SPACING))
 
-        Button(
-            onClick = {
+          Button(
+              onClick = {
                 if (isNetworkAvailableWithContext(context) || isTesting) {
-                    navigationActions.navigateTo(Screen.UNBLOCK_PROFILE)
+                  navigationActions.navigateTo(Screen.UNBLOCK_PROFILE)
                 } else {
-                    Toast.makeText(context, R.string.No_Internet_Toast, Toast.LENGTH_SHORT).show()
+                  Toast.makeText(context, R.string.No_Internet_Toast, Toast.LENGTH_SHORT).show()
                 }
-            },
-            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary),
-            modifier = Modifier.fillMaxWidth().testTag("blockedUsersButton")
-        ) {
-            Text(stringResource(R.string.unblock_button), color = Color.White)
-        }
+              },
+              colors =
+                  ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary),
+              modifier = Modifier.fillMaxWidth().testTag("blockedUsersButton")) {
+                Text(stringResource(R.string.unblock_button), color = Color.White)
+              }
 
-        Spacer(modifier = Modifier.height(screenHeight * RELATIVE_SPACING))
+          Spacer(modifier = Modifier.height(screenHeight * RELATIVE_SPACING))
 
-        Button(
-            onClick = {
+          Button(
+              onClick = {
                 if (isNetworkAvailableWithContext(context) || isTesting) {
-                    navigationActions.navigateTo(Screen.ALREADY_MET)
+                  navigationActions.navigateTo(Screen.ALREADY_MET)
                 } else {
-                    Toast.makeText(context, R.string.No_Internet_Toast, Toast.LENGTH_SHORT).show()
+                  Toast.makeText(context, R.string.No_Internet_Toast, Toast.LENGTH_SHORT).show()
                 }
-            },
-            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary),
-            modifier = Modifier.fillMaxWidth().testTag("alreadyMetButton")
-        ) {
-            Text(stringResource(R.string.Already_Met_Settings_Button), color = Color.White)
-        }
+              },
+              colors =
+                  ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary),
+              modifier = Modifier.fillMaxWidth().testTag("alreadyMetButton")) {
+                Text(stringResource(R.string.Already_Met_Settings_Button), color = Color.White)
+              }
 
-        Spacer(modifier = Modifier.height(screenHeight * RELATIVE_SPACING))
+          Spacer(modifier = Modifier.height(screenHeight * RELATIVE_SPACING))
 
-        Button(
-            onClick = {
-                deleteAccountDialog = true
-            },
-            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.errorContainer),
-            modifier = Modifier.fillMaxWidth().testTag("deleteAccountButton")
-        ) {
-            Text(stringResource(R.string.Already_Met_Delete_Accout_Button), color = MaterialTheme.colorScheme.onErrorContainer)
-        }
+          Button(
+              onClick = { deleteAccountDialog = true },
+              colors =
+                  ButtonDefaults.buttonColors(
+                      containerColor = MaterialTheme.colorScheme.errorContainer),
+              modifier = Modifier.fillMaxWidth().testTag("deleteAccountButton")) {
+                Text(
+                    stringResource(R.string.Already_Met_Delete_Accout_Button),
+                    color = MaterialTheme.colorScheme.onErrorContainer)
+              }
 
-        Spacer(modifier = Modifier.height(screenHeight * RELATIVE_SPACING))
+          Spacer(modifier = Modifier.height(screenHeight * RELATIVE_SPACING))
 
-        Button(
-            onClick = {
+          Button(
+              onClick = {
                 if (isTesting) {
-                    navigationActions.navigateTo(Screen.AUTH)
+                  navigationActions.navigateTo(Screen.AUTH)
                 } else {
                   auth.currentUser?.let {
                     logout(
@@ -218,26 +207,27 @@ fun SettingsScreen(
                       appDataStore,
                       engagementManager = engagementNotificationManager)
                 }
-            },
-            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),
-            modifier = Modifier.fillMaxWidth().testTag("logOutButton")
-        ) {
-            Text(stringResource(R.string.Already_Met_Logout_Button), color = MaterialTheme.colorScheme.onError)
+              },
+              colors =
+                  ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),
+              modifier = Modifier.fillMaxWidth().testTag("logOutButton")) {
+                Text(
+                    stringResource(R.string.Already_Met_Logout_Button),
+                    color = MaterialTheme.colorScheme.onError)
+              }
         }
-    }
     DeleteAccountDialog(
         showDialog = deleteAccountDialog,
         onDismiss = { deleteAccountDialog = false },
         onDelete = {
-            val uid = auth.currentUser?.uid ?: ""
-            logout(
-                context,
-                navigationActions,
-                appDataStore,
-                engagementManager = engagementNotificationManager)
-            profilesViewModel.deleteProfileByUid(uid)
-        }
-    )
+          val uid = auth.currentUser?.uid ?: ""
+          logout(
+              context,
+              navigationActions,
+              appDataStore,
+              engagementManager = engagementNotificationManager)
+          profilesViewModel.deleteProfileByUid(uid)
+        })
   }
 }
 
@@ -281,32 +271,27 @@ fun ToggleOptionBox(
 }
 
 @Composable
-fun DeleteAccountDialog(
-        showDialog: Boolean,
-        onDismiss: () -> Unit,
-        onDelete: () -> Unit
-    ) {
-    if (showDialog) {
-        AlertDialog(
-            onDismissRequest = onDismiss,
-            title = { Text(stringResource(R.string.delete_account_dialog_title)) },
-            text = { Text(stringResource(R.string.delete_account_dialog_message)) },
-            confirmButton = {
-                TextButton(onClick = onDelete, modifier = Modifier.testTag("deleteAccountConfirmationButton")) {
-                    Text(
-                        stringResource(R.string.delete_account_confirm),
-                        color = MaterialTheme.colorScheme.error
-                    )
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = onDismiss) {
-                    Text(
-                        stringResource(R.string.delete_account_cancel),
-                        color = MaterialTheme.colorScheme.onSecondary
-                    )
-                }
-            },
-            modifier = Modifier.testTag("alertDialog"))
-    }
+fun DeleteAccountDialog(showDialog: Boolean, onDismiss: () -> Unit, onDelete: () -> Unit) {
+  if (showDialog) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.delete_account_dialog_title)) },
+        text = { Text(stringResource(R.string.delete_account_dialog_message)) },
+        confirmButton = {
+          TextButton(
+              onClick = onDelete, modifier = Modifier.testTag("deleteAccountConfirmationButton")) {
+                Text(
+                    stringResource(R.string.delete_account_confirm),
+                    color = MaterialTheme.colorScheme.error)
+              }
+        },
+        dismissButton = {
+          TextButton(onClick = onDismiss) {
+            Text(
+                stringResource(R.string.delete_account_cancel),
+                color = MaterialTheme.colorScheme.onSecondary)
+          }
+        },
+        modifier = Modifier.testTag("alertDialog"))
+  }
 }
