@@ -1,5 +1,6 @@
 package com.github.se.icebreakrr.ui.sections.shared
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -26,25 +27,77 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.github.se.icebreakrr.R
 import com.github.se.icebreakrr.model.profile.Profile
+import com.google.accompanist.flowlayout.FlowRow
 
 // Define constants for layout dimensions and other configurations
 private val CARD_CORNER_RADIUS = 14.dp
-private val CARD_MAX_HEIGHT = 150.dp
-private val CARD_PADDING_HORIZONTAL = 10.dp
-private val CARD_PADDING_VERTICAL = 6.dp
+private val CARD_MAX_HEIGHT = 200.dp
+private val CARD_PADDING_HORIZONTAL = 20.dp
+private val CARD_PADDING_VERTICAL = 20.dp
+private val CARD_ELEVATION = 2.dp
 private val IMAGE_SIZE = 80.dp
 private val IMAGE_SPACING = 18.dp
-private val TEXT_SPACER_PADDING = 6.dp
+private val TEXT_SPACER_PADDING = 3.dp
 
 // Define constants for font sizes
-private val NAME_FONT_SIZE = 24.sp
+private val NAME_FONT_SIZE = 18.sp
 private val CATCHPHRASE_FONT_SIZE = 16.sp
-private val TAGS_FONT_SIZE = 16.sp
+private val TAGS_FONT_SIZE = 10.sp
 
 // Define colors used
 
 // Define math constants
-private val TAKE_TAGS = 5
+private val TAKE_TAGS = 3
+
+@Composable
+fun TagDisplay(tags: List<String>, isSettings: Boolean) {
+    if (!isSettings) {
+        // Determine the number of tags to display
+        val tagsToDisplay = when {
+            tags.size > 3 -> 2 // Display only 2 if there are more than 3 tags
+            else -> tags.size // Otherwise, display all available tags
+        }
+
+        // Display the tags with a background and spacing
+        FlowRow(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(TEXT_SPACER_PADDING)
+        ) {
+            // Create a Text for each tag, limiting to the calculated number of tags
+            tags.take(tagsToDisplay).forEachIndexed { index, tag ->
+                Text(
+                    text = "#$tag",
+                    fontSize = TAGS_FONT_SIZE,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.primaryContainer,
+                    modifier = Modifier
+                        .padding(2.dp)
+                        .clip(RoundedCornerShape(25.dp)) // Rounded corners for each tag
+                        .background(MaterialTheme.colorScheme.secondary) // Tag background color
+                        .padding(horizontal = 10.dp, vertical = 4.dp) // Padding inside the tag
+                )
+            }
+
+            // If there are more than 3 tags, add "..." at the end
+            if (tags.size > 3) {
+                Text(
+                    text = "...",
+                    fontSize = TAGS_FONT_SIZE,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.primaryContainer,
+                    modifier = Modifier
+                        .padding(2.dp)
+                        .clip(RoundedCornerShape(25.dp)) // Rounded corners for the ellipsis
+                        .background(MaterialTheme.colorScheme.secondary) // Tag background color
+                        .padding(horizontal = 10.dp, vertical = 4.dp) // Padding inside the ellipsis
+                )
+            }
+        }
+    } else {
+        Text(text = "Tap to preview profile")
+    }
+}
 
 /**
  * Displays the ProfileCard, a summarized version of the profiles, that are used in the AroundYou
@@ -65,6 +118,9 @@ fun ProfileCard(
   Card(
       onClick = onclick,
       shape = RoundedCornerShape(CARD_CORNER_RADIUS),
+      elevation = CardDefaults.cardElevation(
+          defaultElevation = CARD_ELEVATION
+      ),
       colors =
           CardDefaults.cardColors(
               containerColor = MaterialTheme.colorScheme.primaryContainer,
@@ -72,7 +128,7 @@ fun ProfileCard(
       modifier = Modifier.fillMaxWidth().heightIn(max = CARD_MAX_HEIGHT).testTag("profileCard")) {
         Row(
             horizontalArrangement = Arrangement.spacedBy(IMAGE_SPACING),
-            verticalAlignment = Alignment.CenterVertically,
+            verticalAlignment = Alignment.Top,
             modifier =
                 Modifier.fillMaxWidth()
                     .padding(
@@ -114,13 +170,7 @@ fun ProfileCard(
 
                 Spacer(modifier = Modifier.padding(TEXT_SPACER_PADDING))
 
-                if (!isSettings) {
-                  // Display the first 5 tags in a string format
-                  val tags = profile.tags.take(TAKE_TAGS).joinToString(" ") { "#$it" }
-                  Text(text = tags, fontSize = TAGS_FONT_SIZE)
-                } else {
-                  Text(text = "Tap to preview profile")
-                }
+                TagDisplay(tags = profile.tags, isSettings = isSettings)
               }
             }
       }
