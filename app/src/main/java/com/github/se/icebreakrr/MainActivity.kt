@@ -487,7 +487,7 @@ fun IcebreakrrNavHost(
         }
       }
       composable(Screen.PROFILE) {
-        ProfileView(profileViewModel, tagsViewModel, navigationActions, auth)
+        ProfileView(profileViewModel, tagsViewModel, navigationActions)
       }
       composable(Screen.ALREADY_MET) { AlreadyMetScreen(navigationActions, profileViewModel) }
     }

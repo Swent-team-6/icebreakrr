@@ -77,27 +77,26 @@ fun ProfileEditingScreen(
   val DESCRIPTION_MAX = 400
 
   LaunchedEffect(Unit) {
-    auth.currentUser?.let { profilesViewModel.getProfileByUid(it.uid) }
-    profilesViewModel.selectedProfile.value?.tags?.forEach { tag -> tagsViewModel.addFilter(tag) }
+    profilesViewModel.selfProfile.value?.tags?.forEach { tag -> tagsViewModel.addFilter(tag) }
   }
 
-  val isLoading = profilesViewModel.loading.collectAsState(initial = true).value
+  val isLoading = profilesViewModel.loadingSelf.collectAsState().value
   val pictureChangeState = profilesViewModel.pictureChangeState.collectAsState().value
   val user = profilesViewModel.selfProfile.collectAsState().value!!
-  val editedCurrentProfile = profilesViewModel.editedCurrentProfile.collectAsState().value
+  val editedSelfProfile = profilesViewModel.editedSelfProfile.collectAsState().value
   val tempBitmap = profilesViewModel.tempProfilePictureBitmap.collectAsState().value
 
   var catchphrase by remember {
-    mutableStateOf(TextFieldValue(editedCurrentProfile?.catchPhrase ?: user.catchPhrase))
+    mutableStateOf(TextFieldValue(editedSelfProfile?.catchPhrase ?: user.catchPhrase))
   }
   var description by remember {
-    mutableStateOf(TextFieldValue(editedCurrentProfile?.description ?: user.description))
+    mutableStateOf(TextFieldValue(editedSelfProfile?.description ?: user.description))
   }
   val expanded = remember { mutableStateOf(false) }
 
   var showDialog by remember { mutableStateOf(false) }
   var isModified by remember {
-    mutableStateOf(editedCurrentProfile != null || pictureChangeState != UNCHANGED)
+    mutableStateOf(editedSelfProfile != null || pictureChangeState != UNCHANGED)
   }
 
   val selectedTags = tagsViewModel.filteringTags.collectAsState().value
