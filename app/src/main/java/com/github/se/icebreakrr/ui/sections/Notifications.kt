@@ -44,6 +44,7 @@ import com.github.se.icebreakrr.ui.navigation.NavigationActions
 import com.github.se.icebreakrr.ui.navigation.Route
 import com.github.se.icebreakrr.ui.navigation.Screen
 import com.github.se.icebreakrr.ui.sections.shared.ProfileCard
+import com.github.se.icebreakrr.ui.sections.shared.TopBar
 import com.github.se.icebreakrr.utils.NetworkUtils.isNetworkAvailableWithContext
 import com.github.se.icebreakrr.utils.NetworkUtils.showNoInternetToast
 
@@ -99,6 +100,7 @@ fun NotificationScreen(
   }
   Scaffold(
       modifier = Modifier.testTag("notificationScreen"),
+      topBar = { TopBar("Inbox") },
       bottomBar = {
         BottomNavigationMenu(
             onTabSelect = { route ->
