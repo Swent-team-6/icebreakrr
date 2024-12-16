@@ -265,7 +265,7 @@ fun ProfileCreationScreen(
                                   else MaterialTheme.colorScheme.surface)) {
                         Text(
                             text = gender.displayName,
-                            style = MaterialTheme.typography.bodyMedium,
+                            style = MaterialTheme.typography.bodySmall,
                             color =
                                 if (selectedGender == gender)
                                     MaterialTheme.colorScheme.onPrimaryContainer

@@ -20,8 +20,6 @@ import com.github.se.icebreakrr.ui.navigation.Screen
 import com.github.se.icebreakrr.ui.sections.shared.InfoSection
 import com.github.se.icebreakrr.ui.sections.shared.MessageWhenLoadingProfile
 import com.github.se.icebreakrr.ui.sections.shared.ProfileHeader
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.auth
 
 /**
  * Displays the main profile view with the profile header and information section. The profile
@@ -36,14 +34,13 @@ fun ProfileView(
     profilesViewModel: ProfilesViewModel,
     tagsViewModel: TagsViewModel,
     navigationActions: NavigationActions,
-    auth: FirebaseAuth = FirebaseAuth.getInstance()
 ) {
 
   // Launch a coroutine to fetch the profile when this composable is first displayed
-  LaunchedEffect(Unit) { auth.currentUser?.let { profilesViewModel.getProfileByUid(it.uid) } }
+  LaunchedEffect(Unit) { profilesViewModel.getSelfProfile {} }
 
-  val isLoading = profilesViewModel.loading.collectAsState(initial = true).value
-  val profile = profilesViewModel.selectedProfile.collectAsState().value
+  val isLoading = profilesViewModel.loadingSelf.collectAsState().value
+  val profile = profilesViewModel.selfProfile.collectAsState().value
 
   Scaffold(
       modifier = Modifier.testTag("profileScreen"),

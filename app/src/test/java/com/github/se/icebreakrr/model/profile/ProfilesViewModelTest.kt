@@ -436,7 +436,7 @@ class ProfilesViewModelTest {
   @Test
   fun saveEditedProfileUpdatesState() {
     profilesViewModel.saveEditedProfile(profile1)
-    assertThat(profilesViewModel.editedCurrentProfile.value, `is`(profile1))
+    assertThat(profilesViewModel.editedSelfProfile.value, `is`(profile1))
   }
 
   @Test
@@ -446,7 +446,7 @@ class ProfilesViewModelTest {
 
     profilesViewModel.resetProfileEditionState()
 
-    assertThat(profilesViewModel.editedCurrentProfile.value, `is`(nullValue()))
+    assertThat(profilesViewModel.editedSelfProfile.value, `is`(nullValue()))
     assertThat(
         profilesViewModel.pictureChangeState.value,
         `is`(ProfilesViewModel.ProfilePictureState.UNCHANGED))
