@@ -12,10 +12,15 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.Place
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
@@ -32,6 +37,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.github.se.icebreakrr.R
 import com.github.se.icebreakrr.authentication.logout
@@ -48,6 +54,7 @@ import com.github.se.icebreakrr.ui.navigation.NavigationActions
 import com.github.se.icebreakrr.ui.navigation.Route
 import com.github.se.icebreakrr.ui.navigation.Screen
 import com.github.se.icebreakrr.ui.sections.shared.ProfileCard
+import com.github.se.icebreakrr.ui.sections.shared.TopBar
 import com.github.se.icebreakrr.utils.NetworkUtils.isNetworkAvailableWithContext
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.launch
@@ -101,6 +108,7 @@ fun SettingsScreen(
 
   Scaffold(
       modifier = Modifier.testTag("settingsScreen").fillMaxSize(),
+      topBar = { TopBar("Settings") },
       bottomBar = {
         BottomNavigationMenu(
             onTabSelect = { route ->
@@ -220,13 +228,17 @@ fun ToggleOptionBox(
               .testTag(label),
       colors =
           CardDefaults.cardColors(
-              containerColor = MaterialTheme.colorScheme.secondaryContainer,
-              contentColor = MaterialTheme.colorScheme.onPrimary),
-      elevation = CardDefaults.cardElevation(defaultElevation = CARD_ELEVATION)) {
+              containerColor = MaterialTheme.colorScheme.background,
+              contentColor = MaterialTheme.colorScheme.onSecondary)) {
         Row(
             modifier = Modifier.fillMaxWidth().padding(CARD_PADDING),
             verticalAlignment = Alignment.CenterVertically) {
-              Text(label)
+            Icon(
+                imageVector = Icons.Filled.Place,
+                contentDescription = "",
+                modifier = Modifier.padding(end = 8.dp) // Add padding to the right of the icon
+            )
+              Text(label, fontWeight = FontWeight.Bold)
               Spacer(modifier = Modifier.weight(1f))
               Switch(
                   checked = isChecked,
