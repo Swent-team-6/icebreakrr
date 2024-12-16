@@ -158,7 +158,7 @@ fun ProfileEditingScreen(
               horizontalAlignment = Alignment.CenterHorizontally) {
                 // A composable that allows the user to preview and edit a profile picture
                 ProfilePictureSelector(
-                    url = user!!.profilePictureUrl,
+                    url = user?.profilePictureUrl,
                     localBitmap = tempBitmap,
                     pictureChangeState = pictureChangeState,
                     size = profilePictureSize,
@@ -174,7 +174,7 @@ fun ProfileEditingScreen(
                     onDeletion = {
                       when (pictureChangeState) {
                         UNCHANGED -> { // delete current profile picture
-                          if (user.profilePictureUrl != null) {
+                          if (user?.profilePictureUrl != null) {
                             profilesViewModel.setPictureChangeState(TO_DELETE)
                             isModified = true
                           }
@@ -188,7 +188,7 @@ fun ProfileEditingScreen(
 
                 // Name Input
                 Text(
-                    text = user.name,
+                    text = user!!.name,
                     style = TextStyle(fontSize = textSize.value.sp),
                     modifier =
                         Modifier.fillMaxWidth()

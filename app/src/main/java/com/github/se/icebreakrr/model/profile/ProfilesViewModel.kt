@@ -411,18 +411,17 @@ open class ProfilesViewModel(
       ProfilePictureState.TO_UPLOAD ->
           validateAndUploadProfilePicture(context) { url ->
             val newProfile = _editedSelfProfile.value!!.copy(profilePictureUrl = url)
-            updateProfile(newProfile, { _selfProfile.value = newProfile }, {})
+            updateProfile(newProfile, { getSelfProfile {} }, {})
             resetProfileEditionState()
           }
       TO_DELETE ->
           deleteCurrentUserProfilePicture {
-            val newProfile = _editedSelfProfile.value?.copy(profilePictureUrl = null)
-            updateProfile(newProfile!!, { _selfProfile.value = newProfile }, {})
+            val newProfile = _editedSelfProfile.value!!.copy(profilePictureUrl = null)
+            updateProfile(newProfile, { getSelfProfile {} }, {})
             resetProfileEditionState()
           }
       else -> {
-        updateProfile(
-            _editedSelfProfile.value!!, { _selfProfile.value = _editedSelfProfile.value }, {})
+        updateProfile(_editedSelfProfile.value!!, { getSelfProfile {} }, {})
         resetProfileEditionState()
       }
     }
