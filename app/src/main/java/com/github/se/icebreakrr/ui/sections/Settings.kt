@@ -13,8 +13,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Clear
-import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -233,11 +231,11 @@ fun ToggleOptionBox(
         Row(
             modifier = Modifier.fillMaxWidth().padding(CARD_PADDING),
             verticalAlignment = Alignment.CenterVertically) {
-            Icon(
-                imageVector = Icons.Filled.Place,
-                contentDescription = "",
-                modifier = Modifier.padding(end = 8.dp) // Add padding to the right of the icon
-            )
+              Icon(
+                  imageVector = Icons.Filled.Place,
+                  contentDescription = "",
+                  modifier = Modifier.padding(end = 8.dp) // Add padding to the right of the icon
+                  )
               Text(label, fontWeight = FontWeight.Bold)
               Spacer(modifier = Modifier.weight(1f))
               Switch(

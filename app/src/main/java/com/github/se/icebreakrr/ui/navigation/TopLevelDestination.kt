@@ -2,7 +2,6 @@ package com.github.se.icebreakrr.ui.navigation
 
 import androidx.annotation.StringRes
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.twotone.AccountCircle
 import androidx.compose.material.icons.twotone.LocationOn
 import androidx.compose.material.icons.twotone.Settings
 import androidx.compose.ui.graphics.vector.ImageVector
