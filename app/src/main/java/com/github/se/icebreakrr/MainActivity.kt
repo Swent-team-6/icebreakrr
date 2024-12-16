@@ -372,9 +372,7 @@ fun IcebreakrrApp(
           tagsViewModel = tagsViewModel,
           permissionManager = permissionManager)
 
-  val startDestination =
-      if (isTesting) Route.AROUND_YOU
-      else Route.AUTH
+  val startDestination = if (isTesting) Route.AROUND_YOU else Route.AUTH
 
   IcebreakrrNavHost(
       profileViewModel,

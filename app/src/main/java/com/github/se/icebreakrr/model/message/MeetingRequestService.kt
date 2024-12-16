@@ -191,16 +191,14 @@ class MeetingRequestService : FirebaseMessagingService() {
    */
   fun createNotificationBuilder(title: String, message: String): NotificationCompat.Builder {
     // Create an intent to launch the MainActivity
-    val intent = Intent(this, MainActivity::class.java).apply {
-        flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-    }
-    
-    val pendingIntent = PendingIntent.getActivity(
-        this, 
-        0, 
-        intent,
-        PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
-    )
+    val intent =
+        Intent(this, MainActivity::class.java).apply {
+          flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        }
+
+    val pendingIntent =
+        PendingIntent.getActivity(
+            this, 0, intent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
 
     return NotificationCompat.Builder(this, MSG_CHANNEL_ID)
         .setSmallIcon(R.drawable.ic_launcher_foreground)

@@ -54,12 +54,14 @@ open class AppDataStore(private val dataStore: DataStore<Preferences>) {
       getPreference(lastKnownLocationKey, "").map { json ->
         if (json.isNotBlank()) gson.fromJson(json, GeoPoint::class.java) else null
       }
-  val lastNotificationTimes: Flow<Map<String, Long>> = dataStore.data.map { preferences ->
-    preferences.asMap()
-        .filterKeys { it.toString().startsWith(NOTIFICATION_TIME_PREFIX) }
-        .mapKeys { it.key.toString().removePrefix(NOTIFICATION_TIME_PREFIX) }
-        .mapValues { (it.value as Long) }
-  }
+  val lastNotificationTimes: Flow<Map<String, Long>> =
+      dataStore.data.map { preferences ->
+        preferences
+            .asMap()
+            .filterKeys { it.toString().startsWith(NOTIFICATION_TIME_PREFIX) }
+            .mapKeys { it.key.toString().removePrefix(NOTIFICATION_TIME_PREFIX) }
+            .mapValues { (it.value as Long) }
+      }
 
   /**
    * Saves an authentication token to persistent storage.

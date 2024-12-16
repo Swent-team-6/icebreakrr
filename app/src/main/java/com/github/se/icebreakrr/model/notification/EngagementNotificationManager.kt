@@ -203,9 +203,7 @@ class EngagementNotificationManager(
           try {
             meetingRequestViewModel.engagementNotification(
                 targetToken = nearbyProfile.fcmToken ?: "null", tag = commonTag)
-            scope.launch {
-              updateLastNotificationTime(nearbyProfile.uid)
-            }
+            scope.launch { updateLastNotificationTime(nearbyProfile.uid) }
             Log.i(TAG, "Successfully sent notification to ${nearbyProfile.uid}")
           } catch (e: Exception) {
             Log.e(TAG, "Failed to send notification to ${nearbyProfile.uid}: ${e.message}", e)
