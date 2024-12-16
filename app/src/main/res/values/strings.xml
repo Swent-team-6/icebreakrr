@@ -38,6 +38,8 @@
     <string name="AI_button">See Discussion Starters</string>
     <string name="Already_Met_Button_Text">"I Already Met This Person"</string>
     <string name="Already_Met_Settings_Button">People You Already Met</string>
+    <string name="Already_Met_Delete_Accout_Button">Delete account</string>
+    <string name="Already_Met_Logout_Button">Log Out</string>
     <string name="Already_Met_Button_Success">You successfully added this user to your already met list</string>
     <string name="no_already_met_users">You haven\'t met anyone yet. Go explore the world!</string>
     <string name="unmeet_confirm">Did you add this user by mistake?</string>
@@ -65,5 +67,10 @@
     <string name="gender_women">Women</string>
     <string name="gender_other">Other</string>
     <string name="age_range">Age Range</string>
+
+    <string name="delete_account_dialog_title">You are about to delete your account</string>
+    <string name="delete_account_dialog_message">Are you sure you want to delete your account?</string>
+    <string name="delete_account_confirm">Delete account</string>
+    <string name="delete_account_cancel">Cancel</string>
 
 </resources>
