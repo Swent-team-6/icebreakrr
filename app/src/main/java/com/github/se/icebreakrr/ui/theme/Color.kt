@@ -11,7 +11,7 @@ val md_theme_light_onPrimary = Color(0xFFFFFFFF)
 val md_theme_light_primaryContainer = Color(0xFFFAFEFF)
 val md_theme_light_onPrimaryContainer = Color(0xFFE1E1E1)
 
-val md_theme_light_secondary = Color(0xFF4893E4)
+val md_theme_light_secondary = Color(0xFF699FEE)
 val md_theme_light_onSecondary = Color(0xFF000000)
 val md_theme_light_secondaryContainer = Color(0xFF3985D7)
 val md_theme_light_onSecondaryContainer = Color(0xFF000000)

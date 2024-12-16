@@ -158,7 +158,7 @@ fun SettingsScreen(
                 }
               },
               colors =
-                  ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary),
+                  ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondaryContainer),
               modifier = Modifier.fillMaxWidth().testTag("blockedUsersButton")) {
                 Text(stringResource(R.string.unblock_button), color = Color.White)
               }
@@ -174,7 +174,7 @@ fun SettingsScreen(
                 }
               },
               colors =
-                  ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary),
+                  ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondaryContainer),
               modifier = Modifier.fillMaxWidth().testTag("alreadyMetButton")) {
                 Text(stringResource(R.string.Already_Met_Settings_Button), color = Color.White)
               }
