@@ -56,7 +56,16 @@ class EngagementNotificationManager(
 ) {
   private var notificationJob: Job? = null
   private val scope = CoroutineScope(Dispatchers.Main + SupervisorJob())
-  private val lastNotificationTimes = mutableMapOf<String, Long>()
+  private var lastNotificationTimes = mutableMapOf<String, Long>()
+
+  init {
+    // Load saved notification times when initialized
+    scope.launch {
+      appDataStore.lastNotificationTimes.collect { savedTimes ->
+        lastNotificationTimes = savedTimes.toMutableMap()
+      }
+    }
+  }
 
   /**
    * Starts monitoring nearby users with common tags. Ensures POST_NOTIFICATIONS permission on
@@ -194,7 +203,9 @@ class EngagementNotificationManager(
           try {
             meetingRequestViewModel.engagementNotification(
                 targetToken = nearbyProfile.fcmToken ?: "null", tag = commonTag)
-            lastNotificationTimes[nearbyProfile.uid] = System.currentTimeMillis()
+            scope.launch {
+              updateLastNotificationTime(nearbyProfile.uid)
+            }
             Log.i(TAG, "Successfully sent notification to ${nearbyProfile.uid}")
           } catch (e: Exception) {
             Log.e(TAG, "Failed to send notification to ${nearbyProfile.uid}: ${e.message}", e)
@@ -204,6 +215,12 @@ class EngagementNotificationManager(
         Log.e(TAG, "Error processing profile ${nearbyProfile.uid}: ${e.message}", e)
       }
     }
+  }
+
+  private suspend fun updateLastNotificationTime(uid: String) {
+    val currentTime = System.currentTimeMillis()
+    lastNotificationTimes[uid] = currentTime
+    appDataStore.saveNotificationTime(uid, currentTime)
   }
 
   // Add this method for testing purposes

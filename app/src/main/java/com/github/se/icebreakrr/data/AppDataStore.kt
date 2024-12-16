@@ -5,6 +5,7 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.google.firebase.firestore.GeoPoint
@@ -34,6 +35,7 @@ open class AppDataStore(private val dataStore: DataStore<Preferences>) {
 
     // Default values
     const val DEFAULT_DISCOVERABLE_STATUS = true
+    const val NOTIFICATION_TIME_PREFIX = "last_notification_time_"
   }
 
   /**
@@ -52,6 +54,12 @@ open class AppDataStore(private val dataStore: DataStore<Preferences>) {
       getPreference(lastKnownLocationKey, "").map { json ->
         if (json.isNotBlank()) gson.fromJson(json, GeoPoint::class.java) else null
       }
+  val lastNotificationTimes: Flow<Map<String, Long>> = dataStore.data.map { preferences ->
+    preferences.asMap()
+        .filterKeys { it.toString().startsWith(NOTIFICATION_TIME_PREFIX) }
+        .mapKeys { it.key.toString().removePrefix(NOTIFICATION_TIME_PREFIX) }
+        .mapValues { (it.value as Long) }
+  }
 
   /**
    * Saves an authentication token to persistent storage.
@@ -126,5 +134,15 @@ open class AppDataStore(private val dataStore: DataStore<Preferences>) {
    */
   private suspend fun <T> removePreference(key: Preferences.Key<T>) {
     dataStore.edit { preferences -> preferences.remove(key) }
+  }
+
+  suspend fun saveNotificationTime(uid: String, timestamp: Long) {
+    putPreference(longPreferencesKey(NOTIFICATION_TIME_PREFIX + uid), timestamp)
+  }
+
+  suspend fun clearNotificationTime(uid: String) {
+    dataStore.edit { preferences ->
+      preferences.remove(longPreferencesKey(NOTIFICATION_TIME_PREFIX + uid))
+    }
   }
 }
