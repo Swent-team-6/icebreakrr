@@ -297,7 +297,7 @@ fun IcebreakrrApp(
 
   val startDestination =
       if (isTesting) Route.AROUND_YOU
-      else (if (auth.currentUser != null) Route.AROUND_YOU else Route.AUTH)
+      else Route.AUTH
 
   IcebreakrrNavHost(
       profileViewModel,
