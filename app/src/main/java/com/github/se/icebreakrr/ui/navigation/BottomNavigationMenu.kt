@@ -64,7 +64,6 @@ fun BottomNavigationMenu(
                   }
                 }
               },
-              label = { Text(stringResource(id = tab.textId)) },
               selected = tab.route == selectedItem,
               onClick = { onTabSelect(tab) },
               colors =
