@@ -59,7 +59,6 @@ import com.github.se.icebreakrr.ui.navigation.NavigationActions
 import com.github.se.icebreakrr.ui.navigation.Route
 import com.github.se.icebreakrr.ui.navigation.Screen
 import com.github.se.icebreakrr.ui.theme.IceBreakrrBlue
-import com.github.se.icebreakrr.utils.cropUsername
 import com.google.android.gms.maps.model.BitmapDescriptor
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.CameraPosition
@@ -140,6 +139,8 @@ fun MapScreen(
   val meetingRequestChosenLocalisation =
       myProfile.value?.meetingRequestChosenLocalisation ?: emptyMap()
 
+  val inboxItems = profilesViewModel.inboxItems.value ?: emptyMap()
+
   // Create a list of UIDs to fetch profiles
   val uidsToFetch = meetingRequestChosenLocalisation.keys.toList()
 
@@ -169,7 +170,7 @@ fun MapScreen(
         profile?.let {
           UserMarker(
               uid = uid,
-              username = cropUsername(it.name, 10), // Crop username to 10 characters
+              username = it.name, // Crop username to 10 characters
               locationDescription = message,
               location = LatLng(coordinates.first, coordinates.second),
               overlayPosition = null // Initially set to null

@@ -47,6 +47,7 @@ import com.github.se.icebreakrr.model.tags.TagsRepository
 import com.github.se.icebreakrr.model.tags.TagsViewModel
 import com.github.se.icebreakrr.ui.authentication.SignInScreen
 import com.github.se.icebreakrr.ui.map.LocationSelectorMapScreen
+import com.github.se.icebreakrr.ui.map.LocationViewMapScreen
 import com.github.se.icebreakrr.ui.navigation.NavigationActions
 import com.github.se.icebreakrr.ui.navigation.Route
 import com.github.se.icebreakrr.ui.navigation.Screen
@@ -70,6 +71,7 @@ import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.functions.FirebaseFunctions
+import com.google.firebase.messaging.FirebaseMessaging
 import com.google.firebase.storage.storage
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -80,6 +82,8 @@ class MainActivity : ComponentActivity() {
   @Inject lateinit var firestore: FirebaseFirestore
   @Inject lateinit var authStateListener: FirebaseAuth.AuthStateListener
   private lateinit var engagementNotificationManager: EngagementNotificationManager
+  private lateinit var meetingRequestViewModel: MeetingRequestViewModel
+  private lateinit var profilesViewModel: ProfilesViewModel
   private lateinit var locationViewModel: LocationViewModel
   private lateinit var locationRepositoryFirestore: LocationRepositoryFirestore
   private lateinit var permissionManager: PermissionManager
@@ -134,8 +138,7 @@ class MainActivity : ComponentActivity() {
 
     // Initialize Firebase
     FirebaseApp.initializeApp(this)
-    // auth = FirebaseAuth.getInstance()
-    // firestore = FirebaseFirestore.getInstance()
+
     functions = FirebaseFunctions.getInstance()
 
     // Initialize Utils
@@ -156,7 +159,7 @@ class MainActivity : ComponentActivity() {
     // Initialize location services
     locationRepositoryFirestore = LocationRepositoryFirestore(firestore, auth)
 
-    val profilesViewModel =
+    profilesViewModel =
         ProfilesViewModel(
             repository = ProfilesRepositoryFirestore(firestore, auth),
             ppRepository = ProfilePicRepositoryStorage(Firebase.storage),
@@ -164,10 +167,39 @@ class MainActivity : ComponentActivity() {
 
     val filterViewModel = FilterViewModel()
 
-    val meetingRequestViewModel =
+    meetingRequestViewModel =
         MeetingRequestViewModel(profilesViewModel = profilesViewModel, functions = functions)
 
     val tagsViewModel = TagsViewModel(TagsRepository(firestore, auth))
+
+    val ourUid = auth.currentUser?.uid
+    val currentUser = auth.currentUser
+    if (currentUser != null) {
+      FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
+        if (task.isSuccessful) {
+          val fcmToken = task.result
+          MeetingRequestManager.ourFcmToken = fcmToken
+          MeetingRequestManager.ourUid = ourUid
+        }
+        profilesViewModel.getSelfProfile {
+          val updatedProfile =
+              profilesViewModel.selfProfile.value?.copy(
+                  fcmToken = MeetingRequestManager.ourFcmToken)
+          if (updatedProfile != null) {
+            MeetingRequestManager.ourName = profilesViewModel.selfProfile.value!!.name
+            profilesViewModel.updateProfile(
+                updatedProfile,
+                {},
+                { Log.e("NEW TOKEN ADDED ERROR", "The new fcm token couldn't be added") })
+            meetingRequestViewModel.setInitialValues(
+                MeetingRequestManager.ourFcmToken!!,
+                MeetingRequestManager.ourUid!!,
+                MeetingRequestManager.ourName!!)
+          }
+          MeetingRequestManager.meetingRequestViewModel = meetingRequestViewModel
+        }
+      }
+    }
 
     engagementNotificationManager =
         EngagementNotificationManager(
@@ -194,7 +226,9 @@ class MainActivity : ComponentActivity() {
                   firestore,
                   chatGptApiKey,
                   isTesting,
-                  permissionManager)
+                  permissionManager,
+                  profilesViewModel,
+                  meetingRequestViewModel)
             }
           }
         }
@@ -234,6 +268,50 @@ class MainActivity : ComponentActivity() {
     super.onDestroy()
     // Stop monitoring when app closed
     engagementNotificationManager.stopMonitoring()
+
+    // Cancel all meeting requests and clear the heatmap
+    meetingRequestViewModel.updateInboxOfMessages {
+      val sentMessage = profilesViewModel.sentItems.value
+      val inboxMessage = profilesViewModel.inboxItems.value
+      val chosenLocation = profilesViewModel.chosenLocalisations.value
+
+      // Send meeting cancellations to all people to whom we sent a message
+      sentMessage.forEach { profile ->
+        meetingRequestViewModel.sendCancellationToBothUsers(
+            profile.uid,
+            profile.fcmToken!!,
+            profile.name,
+            MeetingRequestViewModel.CancellationType.CLOSED)
+      }
+
+      // Send meeting cancellations to all people to whom that send us a meeting request
+      inboxMessage.forEach { (profile, value) ->
+        meetingRequestViewModel.sendCancellationToBothUsers(
+            profile.uid,
+            profile.fcmToken!!,
+            profile.name,
+            MeetingRequestViewModel.CancellationType.CLOSED)
+      }
+
+      // Remove the pin in the other user's map
+      chosenLocation.forEach { (profile, value) ->
+        meetingRequestViewModel.sendMeetingCancellation(
+            targetToken = profile.fcmToken!!,
+            cancellationReason = MeetingRequestViewModel.CancellationType.CLOSED.toString(),
+            senderUID = meetingRequestViewModel.senderUID,
+            senderName = meetingRequestViewModel.senderName)
+      }
+
+      // Remove the pin from our map
+      val clearedOfMessageProfile =
+          profilesViewModel.selfProfile.value?.copy(
+              meetingRequestChosenLocalisation = mapOf(),
+              meetingRequestInbox = mapOf(),
+              meetingRequestSent = listOf())
+      if (clearedOfMessageProfile != null) {
+        profilesViewModel.updateProfile(clearedOfMessageProfile, {}, {})
+      }
+    }
   }
 
   private fun getChatGptApiKey(): String {
@@ -269,9 +347,9 @@ fun IcebreakrrApp(
     chatGptApiKey: String,
     isTesting: Boolean,
     permissionManager: IPermissionManager,
+    profileViewModel: ProfilesViewModel,
+    meetingRequestViewModel: MeetingRequestViewModel
 ) {
-  val profileViewModel: ProfilesViewModel =
-      viewModel(factory = ProfilesViewModel.Companion.Factory(auth, firestore))
   val tagsViewModel: TagsViewModel =
       viewModel(factory = TagsViewModel.Companion.Factory(auth, firestore))
   val filterViewModel: FilterViewModel = viewModel(factory = FilterViewModel.Factory)
@@ -281,19 +359,18 @@ fun IcebreakrrApp(
       viewModel(factory = SortViewModel.createFactory(profileViewModel))
   val aiViewModel: AiViewModel =
       viewModel(factory = AiViewModel.provideFactory(chatGptApiKey, profileViewModel))
-  val meetingRequestViewModel = MeetingRequestManager.meetingRequestViewModel
+
+  val currentUser = auth.currentUser
 
   // Initialize EngagementManager
   val engagementManager =
-      meetingRequestViewModel?.let {
-        EngagementNotificationManager(
-            profilesViewModel = profileViewModel,
-            meetingRequestViewModel = it,
-            appDataStore = appDataStore,
-            filterViewModel = filterViewModel,
-            tagsViewModel = tagsViewModel,
-            permissionManager = permissionManager)
-      }
+      EngagementNotificationManager(
+          profilesViewModel = profileViewModel,
+          meetingRequestViewModel = meetingRequestViewModel,
+          appDataStore = appDataStore,
+          filterViewModel = filterViewModel,
+          tagsViewModel = tagsViewModel,
+          permissionManager = permissionManager)
 
   val startDestination =
       if (isTesting) Route.AROUND_YOU
@@ -343,10 +420,10 @@ fun IcebreakrrNavHost(
         if (meetingRequestViewModel != null) {
           if (engagementNotificationManager != null) {
             SignInScreen(
-                profileViewModel,
-                meetingRequestViewModel,
+                profilesViewModel = profileViewModel,
+                meetingRequestViewModel = meetingRequestViewModel,
                 engagementNotificationManager = engagementNotificationManager,
-                navigationActions,
+                navigationActions = navigationActions,
                 filterViewModel = filterViewModel,
                 tagsViewModel = tagsViewModel,
                 appDataStore = appDataStore,
@@ -454,6 +531,10 @@ fun IcebreakrrNavHost(
           throw IllegalStateException(
               "The Meeting Request View Model shouldn't be null : Bad initialization")
         }
+      }
+      composable(Screen.MAP_MEETING_VIEW_LOCATION_SCREEN + "?userId={userId}") { navBackStackEntry
+        ->
+        LocationViewMapScreen(profileViewModel, navigationActions, navBackStackEntry, isTesting)
       }
 
       navigation(

@@ -26,7 +26,8 @@ class MeetingRequestService : FirebaseMessagingService() {
   private val DISTANCE_REASON_CANCELLATION = "Reason : You are too far away"
   private val TIME_REASON_CANCELLATION = "Reason : Request reached timeout"
   private val DEFAULT_REASON_CANCELLATION = "Reason : Unknown"
-  private val CANCELLED_REASON_CANCELLATION = "Reason : sender cancelled request"
+  private val CANCELLED_REASON_CANCELLATION = "Reason : Sender cancelled request"
+  private val CLOSED_APP_REASON_CANCELLATION = "Reason : The other user closed the app"
   private val NOTIFICATION_ID = 0
 
   /**
@@ -124,15 +125,19 @@ class MeetingRequestService : FirebaseMessagingService() {
               "DISTANCE" -> DISTANCE_REASON_CANCELLATION
               "TIME" -> TIME_REASON_CANCELLATION
               "CANCELLED" -> CANCELLED_REASON_CANCELLATION
+              "CLOSED" -> CLOSED_APP_REASON_CANCELLATION
               else -> DEFAULT_REASON_CANCELLATION
             }
+
         MeetingRequestManager.meetingRequestViewModel?.removeFromMeetingRequestSent(senderUid) {
           MeetingRequestManager.meetingRequestViewModel?.removeFromMeetingRequestInbox(senderUid) {
-            MeetingRequestManager.meetingRequestViewModel?.updateInboxOfMessages {}
+            MeetingRequestManager.meetingRequestViewModel?.removeChosenLocalisation(senderUid) {
+              MeetingRequestManager.meetingRequestViewModel?.updateInboxOfMessages {}
+            }
           }
-          MeetingRequestManager.meetingRequestViewModel?.stopMeetingRequestTimer(senderUid, this)
-          showNotification("Cancelled meeting with $senderName", stringReason)
         }
+        MeetingRequestManager.meetingRequestViewModel?.stopMeetingRequestTimer(senderUid, this)
+        showNotification("Cancelled meeting with $senderName", stringReason)
       }
       "ENGAGEMENT NOTIFICATION" -> {
         // Only show engagement notifications if app is in background

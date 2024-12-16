@@ -488,7 +488,7 @@ class ProfilesViewModelTest {
                 mapOf("2" to Pair("we can meat here", Pair(5.0, 6.0))))
     val finalProfile = profile1.copy(meetingRequestChosenLocalisation = mapOf())
     profilesViewModel.updateProfile(updatedProfile, {}) {}
-    profilesViewModel.removeChosenLocalisation("2")
+    profilesViewModel.removeChosenLocalisation("2") {}
     verify(profilesRepository).updateProfile(eq(finalProfile), any(), any())
   }
 

@@ -46,6 +46,7 @@ object Screen {
   const val ALREADY_MET = "Already Met Screen"
   const val INBOX_PROFILE_VIEW = "Inbox Profile View Screen"
   const val MAP_MEETING_LOCATION_SCREEN = "Map Meeting Location Screen"
+  const val MAP_MEETING_VIEW_LOCATION_SCREEN = "Map View Location Screen"
 }
 
 object TopLevelDestinations {

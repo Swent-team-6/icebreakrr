@@ -32,6 +32,7 @@ import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
 import org.mockito.kotlin.any
+import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 
@@ -428,8 +429,8 @@ class MeetingRequestViewModelTest {
       onSuccess(profile1)
     }
     profilesViewModel.getSelfProfile {}
-    meetingRequestViewModel.removeChosenLocalisation(profile2.uid)
-    verify(profilesViewModel).removeChosenLocalisation(profile2.uid)
+    meetingRequestViewModel.removeChosenLocalisation(profile2.uid) {}
+    verify(profilesViewModel).removeChosenLocalisation(eq(profile2.uid), anyOrNull())
   }
 
   @Test
