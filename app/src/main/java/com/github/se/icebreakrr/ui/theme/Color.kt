@@ -6,14 +6,14 @@ import androidx.compose.ui.graphics.Color
 val IceBreakrrBlue = Color(0xFF1C9EDA)
 
 // Light Theme
-val md_theme_light_primary = Color(0xFF11A9E5)
+val md_theme_light_primary = Color(0xFF40A5E8)
 val md_theme_light_onPrimary = Color(0xFFFFFFFF)
 val md_theme_light_primaryContainer = Color(0xFFFAFEFF)
-val md_theme_light_onPrimaryContainer = Color(0xFFF7FAFF)
+val md_theme_light_onPrimaryContainer = Color(0xFFE1E1E1)
 
 val md_theme_light_secondary = Color(0xFF4893E4)
 val md_theme_light_onSecondary = Color(0xFF000000)
-val md_theme_light_secondaryContainer = Color(0xFF4893E4)
+val md_theme_light_secondaryContainer = Color(0xFF3985D7)
 val md_theme_light_onSecondaryContainer = Color(0xFF000000)
 
 val md_theme_light_tertiary = Color(0xFF88B4F1)
@@ -26,7 +26,7 @@ val md_theme_light_onError = Color(0xFFFFFFFF)
 val md_theme_light_errorContainer = Color(0xFFFFDAD6)
 val md_theme_light_onErrorContainer = Color(0xFF410002)
 
-val md_theme_light_background = Color(0xFFFAFCFF)
+val md_theme_light_background = Color(0xFFF6F6F6)
 val md_theme_light_onBackground = Color(0xFF001F2A)
 val md_theme_light_surface = Color(0xFFFAFCFF)
 val md_theme_light_onSurface = Color(0xFF001F2A)
