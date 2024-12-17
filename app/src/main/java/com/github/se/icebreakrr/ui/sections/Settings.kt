@@ -10,11 +10,14 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Place
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
@@ -31,11 +34,11 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.github.se.icebreakrr.R
 import com.github.se.icebreakrr.authentication.logout
@@ -65,6 +68,7 @@ private val CARD_ELEVATION = 4.dp
 private val TOGGLE_BOX_HEIGHT = 55.dp
 private val BUTTON_PADDING = 0.08f.dp
 private val CARD_PADDING = 16.dp
+private val ICON_PADDING = 8.dp
 private val RELATIVE_SPACING = 0.02f
 
 /**
@@ -102,8 +106,8 @@ fun SettingsScreen(
   val screenHeight = LocalConfiguration.current.screenHeightDp.dp
 
   Scaffold(
-      topBar = { TopBar("Settings") },
       modifier = Modifier.testTag("settingsScreen").fillMaxSize(),
+      topBar = { TopBar(stringResource(R.string.settings_screen_title)) },
       bottomBar = {
         BottomNavigationMenu(
             onTabSelect = { route ->
@@ -153,9 +157,12 @@ fun SettingsScreen(
                 }
               },
               colors =
-                  ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary),
+                  ButtonDefaults.buttonColors(
+                      containerColor = MaterialTheme.colorScheme.secondaryContainer),
               modifier = Modifier.fillMaxWidth().testTag("blockedUsersButton")) {
-                Text(stringResource(R.string.unblock_button), color = Color.White)
+                Text(
+                    stringResource(R.string.unblock_button),
+                    color = MaterialTheme.colorScheme.primaryContainer)
               }
 
           Spacer(modifier = Modifier.height(screenHeight * RELATIVE_SPACING))
@@ -169,9 +176,12 @@ fun SettingsScreen(
                 }
               },
               colors =
-                  ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary),
+                  ButtonDefaults.buttonColors(
+                      containerColor = MaterialTheme.colorScheme.secondaryContainer),
               modifier = Modifier.fillMaxWidth().testTag("alreadyMetButton")) {
-                Text(stringResource(R.string.Already_Met_Settings_Button), color = Color.White)
+                Text(
+                    stringResource(R.string.Already_Met_Settings_Button),
+                    color = MaterialTheme.colorScheme.primaryContainer)
               }
 
           Spacer(modifier = Modifier.height(screenHeight * RELATIVE_SPACING))
@@ -184,7 +194,7 @@ fun SettingsScreen(
               modifier = Modifier.fillMaxWidth().testTag("deleteAccountButton")) {
                 Text(
                     stringResource(R.string.Already_Met_Delete_Accout_Button),
-                    color = MaterialTheme.colorScheme.onErrorContainer)
+                    color = MaterialTheme.colorScheme.onError)
               }
 
           Spacer(modifier = Modifier.height(screenHeight * RELATIVE_SPACING))
@@ -249,13 +259,18 @@ fun ToggleOptionBox(
               .testTag(label),
       colors =
           CardDefaults.cardColors(
-              containerColor = MaterialTheme.colorScheme.secondaryContainer,
-              contentColor = MaterialTheme.colorScheme.onPrimary),
-      elevation = CardDefaults.cardElevation(defaultElevation = CARD_ELEVATION)) {
+              containerColor = MaterialTheme.colorScheme.background,
+              contentColor = MaterialTheme.colorScheme.onSecondary)) {
         Row(
             modifier = Modifier.fillMaxWidth().padding(CARD_PADDING),
             verticalAlignment = Alignment.CenterVertically) {
-              Text(label)
+              Icon(
+                  imageVector = Icons.Filled.Place,
+                  contentDescription = "",
+                  modifier =
+                      Modifier.padding(end = ICON_PADDING) // Add padding to the right of the icon
+                  )
+              Text(label, fontWeight = FontWeight.Bold)
               Spacer(modifier = Modifier.weight(1f))
               Switch(
                   checked = isChecked,

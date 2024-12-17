@@ -18,6 +18,13 @@
     <string name="show_heatmap">Show Heatmap</string>
     <string name="hide_heatmap">Hide Heatmap</string>
 
+    <string name="settings_screen_title">Settings</string>
+    <string name="notifications_screen_title">Inbox</string>
+    <string name="around_you_screen_title">Around You</string>
+
+    <string name="more_tags">...</string>
+    <string name="preview_profile">Tap to preview profile</string>
+
     <string name="block_report_modal_title">What would you like to do?</string>
     <string name="block_confirmation_message">Do you really want to block this user?</string>
     <string name="report_reason_prompt">Select a reason for reporting:</string>

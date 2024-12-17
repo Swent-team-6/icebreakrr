@@ -2,8 +2,8 @@ package com.github.se.icebreakrr.ui.navigation
 
 import androidx.annotation.StringRes
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.twotone.AccountCircle
 import androidx.compose.material.icons.twotone.LocationOn
+import androidx.compose.material.icons.twotone.Settings
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.github.se.icebreakrr.R
 import com.github.se.icebreakrr.ui.theme.GroupsIcon
@@ -54,7 +54,7 @@ object TopLevelDestinations {
       TopLevelDestination(route = Route.AROUND_YOU, icon = GroupsIcon, textId = R.string.around_you)
   val SETTINGS =
       TopLevelDestination(
-          route = Route.SETTINGS, icon = Icons.TwoTone.AccountCircle, textId = R.string.settings)
+          route = Route.SETTINGS, icon = Icons.TwoTone.Settings, textId = R.string.settings)
   val NOTIFICATIONS =
       TopLevelDestination(
           route = Route.NOTIFICATIONS, icon = NotificationsIcon, textId = R.string.notifications)

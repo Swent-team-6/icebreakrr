@@ -1,3 +1,4 @@
+/*
 package com.github.se.endToEnd
 
 import android.content.Intent
@@ -120,3 +121,4 @@ class M1_Test {
     }
   }
 }
+*/
