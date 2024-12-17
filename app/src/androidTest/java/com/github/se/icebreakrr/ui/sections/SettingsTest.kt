@@ -2,10 +2,12 @@ package com.github.se.icebreakrr.ui.sections
 
 import android.content.Context
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsNotDisplayed
 import androidx.compose.ui.test.assertIsOff
 import androidx.compose.ui.test.assertIsOn
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
@@ -157,6 +159,14 @@ class SettingsTest {
     // Assert that the toggle options are displayed and clickable
     composeTestRule.onNodeWithTag("Toggle Discoverability").assertIsDisplayed()
     composeTestRule.onNodeWithTag("Toggle Discoverability").performClick()
+
+    // Assert the delete Account button is displayed and clickable
+    composeTestRule.onNodeWithTag("deleteAccountButton").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("deleteAccountButton").performClick()
+
+    composeTestRule.onNodeWithTag("alertDialog").assertIsDisplayed()
+    composeTestRule.onNodeWithText("Cancel").performClick()
+    composeTestRule.onNodeWithTag("alertDialog").assertIsNotDisplayed()
 
     // Assert that the Log Out button is displayed and clickable
     composeTestRule.onNodeWithTag("logOutButton").assertIsDisplayed()

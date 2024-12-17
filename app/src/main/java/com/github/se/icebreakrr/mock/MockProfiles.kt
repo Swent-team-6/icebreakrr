@@ -147,6 +147,11 @@ open class MockProfileViewModel :
     _loading.value = isLoading
   }
 
+  /** Sets the selfLoading state directly for testing purposes */
+  fun setLoadingSelf(isLoading: Boolean) {
+    _loadingSelf.value = isLoading
+  }
+
   // create factory
   companion object {
     val Factory: ViewModelProvider.Factory =
@@ -157,6 +162,16 @@ open class MockProfileViewModel :
           }
         }
   }
+}
+
+fun Profile.Companion.emptyProfile(): Profile {
+  return Profile(
+      uid = "",
+      name = "",
+      gender = Gender.OTHER,
+      birthDate = Timestamp.now(),
+      catchPhrase = "",
+      description = "")
 }
 
 fun Profile.Companion.getMockedProfiles(): List<Profile> {

@@ -77,34 +77,33 @@ fun ProfileEditingScreen(
   val DESCRIPTION_MAX = 400
 
   LaunchedEffect(Unit) {
-    auth.currentUser?.let { profilesViewModel.getProfileByUid(it.uid) }
-    profilesViewModel.selectedProfile.value?.tags?.forEach { tag -> tagsViewModel.addFilter(tag) }
+    profilesViewModel.selfProfile.value?.tags?.forEach { tag -> tagsViewModel.addFilter(tag) }
   }
 
-  val isLoading = profilesViewModel.loading.collectAsState(initial = true).value
+  val isLoading = profilesViewModel.loadingSelf.collectAsState().value
   val pictureChangeState = profilesViewModel.pictureChangeState.collectAsState().value
-  val user = profilesViewModel.selfProfile.collectAsState().value!!
-  val editedCurrentProfile = profilesViewModel.editedCurrentProfile.collectAsState().value
+  val user = profilesViewModel.selfProfile.collectAsState().value
+  val editedSelfProfile = profilesViewModel.editedSelfProfile.collectAsState().value
   val tempBitmap = profilesViewModel.tempProfilePictureBitmap.collectAsState().value
 
   var catchphrase by remember {
-    mutableStateOf(TextFieldValue(editedCurrentProfile?.catchPhrase ?: user.catchPhrase))
+    mutableStateOf(TextFieldValue(editedSelfProfile?.catchPhrase ?: user!!.catchPhrase))
   }
   var description by remember {
-    mutableStateOf(TextFieldValue(editedCurrentProfile?.description ?: user.description))
+    mutableStateOf(TextFieldValue(editedSelfProfile?.description ?: user!!.description))
   }
   val expanded = remember { mutableStateOf(false) }
 
   var showDialog by remember { mutableStateOf(false) }
   var isModified by remember {
-    mutableStateOf(editedCurrentProfile != null || pictureChangeState != UNCHANGED)
+    mutableStateOf(editedSelfProfile != null || pictureChangeState != UNCHANGED)
   }
 
   val selectedTags = tagsViewModel.filteringTags.collectAsState().value
   val tagsSuggestions = tagsViewModel.tagsSuggestions.collectAsState()
   val stringQuery = remember { mutableStateOf("") }
   fun getEditedProfile(): Profile {
-    return user.copy(
+    return user!!.copy(
         catchPhrase = catchphrase.text, description = description.text, tags = selectedTags)
   }
 
@@ -159,7 +158,7 @@ fun ProfileEditingScreen(
               horizontalAlignment = Alignment.CenterHorizontally) {
                 // A composable that allows the user to preview and edit a profile picture
                 ProfilePictureSelector(
-                    url = user.profilePictureUrl,
+                    url = user?.profilePictureUrl,
                     localBitmap = tempBitmap,
                     pictureChangeState = pictureChangeState,
                     size = profilePictureSize,
@@ -175,7 +174,7 @@ fun ProfileEditingScreen(
                     onDeletion = {
                       when (pictureChangeState) {
                         UNCHANGED -> { // delete current profile picture
-                          if (user.profilePictureUrl != null) {
+                          if (user?.profilePictureUrl != null) {
                             profilesViewModel.setPictureChangeState(TO_DELETE)
                             isModified = true
                           }
@@ -189,7 +188,7 @@ fun ProfileEditingScreen(
 
                 // Name Input
                 Text(
-                    text = user.name,
+                    text = user!!.name,
                     style = TextStyle(fontSize = textSize.value.sp),
                     modifier =
                         Modifier.fillMaxWidth()

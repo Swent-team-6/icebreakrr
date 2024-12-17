@@ -54,11 +54,12 @@ class ProfileEditingScreenTest {
     fakeProfilesViewModel.setSelectedProfile(mockProfile)
     fakeProfilesViewModel.setLoading(false)
     fakeProfilesViewModel.setSelfProfile(mockProfile)
+    fakeProfilesViewModel.setLoadingSelf(false)
   }
 
   @Test
   fun testLoadingState() {
-    fakeProfilesViewModel.setLoading(true)
+    fakeProfilesViewModel.setLoadingSelf(true)
 
     composeTestRule.setContent {
       ProfileEditingScreen(navigationActions, tagsViewModel, fakeProfilesViewModel)
