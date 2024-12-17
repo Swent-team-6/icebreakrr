@@ -1,8 +1,10 @@
 package com.github.se.icebreakrr.ui.sections.shared
 
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
+import com.github.se.icebreakrr.R
 import org.junit.Rule
 import org.junit.Test
 
@@ -30,7 +32,7 @@ class TagDisplayTest {
     composeTestRule.onNodeWithText("#Tag2").assertIsDisplayed()
 
     // Check if the ellipsis is displayed
-    composeTestRule.onNodeWithText("...").assertIsDisplayed()
+    composeTestRule.onNodeWithText("${R.string.more_tags}").assertIsDisplayed()
   }
 
   @Test
@@ -43,7 +45,7 @@ class TagDisplayTest {
     tags.forEach { tag -> composeTestRule.onNodeWithText("#$tag").assertIsDisplayed() }
 
     // Ensure ellipsis is not displayed
-    composeTestRule.onNodeWithText("...").assertDoesNotExist()
+    composeTestRule.onNodeWithText("${R.string.more_tags}").assertDoesNotExist()
   }
 
   @Test
@@ -51,6 +53,6 @@ class TagDisplayTest {
     composeTestRule.setContent { TagDisplay(tags = emptyList(), isSettings = true) }
 
     // Check if the "Tap to preview profile" text is displayed
-    composeTestRule.onNodeWithText("Tap to preview profile").assertIsDisplayed()
+    composeTestRule.onNodeWithText("${R.string.preview_profile}").assertIsDisplayed()
   }
 }
