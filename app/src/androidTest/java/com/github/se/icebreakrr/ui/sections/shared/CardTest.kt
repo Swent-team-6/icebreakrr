@@ -1,6 +1,5 @@
 package com.github.se.icebreakrr.ui.sections.shared
 
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
