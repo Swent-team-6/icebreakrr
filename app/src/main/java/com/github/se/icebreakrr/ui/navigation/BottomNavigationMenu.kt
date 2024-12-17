@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.dp
 private const val BADGE_OFFSET_X = 10
 private const val BADGE_OFFSET_Y = -5
 private const val BADGE_SIZE = 17
+private const val ICON_SIZE = 30
 
 /**
  * Composable function that creates a bottom navigation menu.
@@ -49,13 +50,13 @@ fun BottomNavigationMenu(
     heatMapCount: Int
 ) {
   NavigationBar(
-      modifier = Modifier.fillMaxWidth().height(60.dp).testTag("bottomNavigationMenu"),
+      modifier = Modifier.fillMaxWidth().height(70.dp).testTag("bottomNavigationMenu"),
       containerColor = MaterialTheme.colorScheme.primary) {
         tabList.forEach { tab ->
           NavigationBarItem(
               icon = {
                 Box {
-                  Icon(tab.icon, contentDescription = stringResource(id = tab.textId))
+                  Icon(tab.icon, contentDescription = stringResource(id = tab.textId), modifier=Modifier.size(ICON_SIZE.dp))
                   if (tab.route == Route.NOTIFICATIONS && notificationCount > 0) {
                     Badge(notificationCount, "badgeNotification")
                   }
