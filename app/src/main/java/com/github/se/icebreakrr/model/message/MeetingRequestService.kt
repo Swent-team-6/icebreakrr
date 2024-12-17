@@ -3,9 +3,12 @@ package com.github.se.icebreakrr.model.message
 import android.app.ActivityManager
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.app.PendingIntent
 import android.content.Context
+import android.content.Intent
 import android.util.Log
 import androidx.core.app.NotificationCompat
+import com.github.se.icebreakrr.MainActivity
 import com.github.se.icebreakrr.R
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
@@ -25,7 +28,12 @@ class MeetingRequestService : FirebaseMessagingService() {
   private val DEFAULT_REASON_CANCELLATION = "Reason : Unknown"
   private val CANCELLED_REASON_CANCELLATION = "Reason : Sender cancelled request"
   private val CLOSED_APP_REASON_CANCELLATION = "Reason : The other user closed the app"
-  private val NOTIFICATION_ID = 0
+  private val ENGAGEMENT_NOTIFICATION_ID = 1
+  private val MEETING_REQUEST_NOTIFICATION_ID = 2
+  private val MEETING_RESPONSE_NOTIFICATION_ID = 3
+  private val MEETING_CANCELLATION_NOTIFICATION_ID = 4
+  private val ENGAGEMENT_NOTIFICATION_START = "A person with similar interests"
+  private val MEETING_CANCELLATION_START = "Cancelled meeting"
 
   /**
    * Checks if the application is currently running in the foreground.
@@ -176,8 +184,17 @@ class MeetingRequestService : FirebaseMessagingService() {
     notificationManager.createNotificationChannel(channel)
 
     val notificationBuilder = createNotificationBuilder(title, message)
+    val notificationId =
+        when {
+          title == MSG_REQUEST -> MEETING_REQUEST_NOTIFICATION_ID
+          title.contains(MSG_RESPONSE_ACCEPTED) || title.contains(MSG_RESPONSE_REJECTED) ->
+              MEETING_RESPONSE_NOTIFICATION_ID
+          title.startsWith(MEETING_CANCELLATION_START) -> MEETING_CANCELLATION_NOTIFICATION_ID
+          title.startsWith(ENGAGEMENT_NOTIFICATION_START) -> ENGAGEMENT_NOTIFICATION_ID
+          else -> MEETING_REQUEST_NOTIFICATION_ID // Default fallback
+        }
 
-    notificationManager.notify(NOTIFICATION_ID, notificationBuilder.build())
+    notificationManager.notify(notificationId, notificationBuilder.build())
   }
 
   /**
@@ -187,11 +204,23 @@ class MeetingRequestService : FirebaseMessagingService() {
    * @param message : the message of the notification
    */
   fun createNotificationBuilder(title: String, message: String): NotificationCompat.Builder {
+    // Create an intent to launch the MainActivity
+    val intent =
+        Intent(this, MainActivity::class.java).apply {
+          flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        }
+
+    val pendingIntent =
+        PendingIntent.getActivity(
+            this, 0, intent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
+
     return NotificationCompat.Builder(this, MSG_CHANNEL_ID)
-        .setSmallIcon(R.drawable.ic_launcher_foreground) // Replace with app icon
+        .setSmallIcon(R.drawable.ic_launcher_foreground)
         .setContentTitle(title)
         .setContentText(message)
         .setPriority(NotificationCompat.PRIORITY_DEFAULT)
         .setAutoCancel(true)
+        // Add the pending intent to make notification clickable
+        .setContentIntent(pendingIntent)
   }
 }

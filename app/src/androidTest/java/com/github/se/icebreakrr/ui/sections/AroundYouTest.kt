@@ -19,12 +19,15 @@ import com.github.se.icebreakrr.model.filter.FilterViewModel
 import com.github.se.icebreakrr.model.location.ILocationService
 import com.github.se.icebreakrr.model.location.LocationRepository
 import com.github.se.icebreakrr.model.location.LocationViewModel
+import com.github.se.icebreakrr.model.message.MeetingRequestViewModel
+import com.github.se.icebreakrr.model.notification.EngagementNotificationManager
 import com.github.se.icebreakrr.model.profile.Gender
 import com.github.se.icebreakrr.model.profile.Profile
 import com.github.se.icebreakrr.model.profile.ProfilePicRepository
 import com.github.se.icebreakrr.model.profile.ProfilesRepository
 import com.github.se.icebreakrr.model.profile.ProfilesViewModel
 import com.github.se.icebreakrr.model.sort.SortViewModel
+import com.github.se.icebreakrr.model.tags.TagsRepository
 import com.github.se.icebreakrr.model.tags.TagsViewModel
 import com.github.se.icebreakrr.ui.navigation.NavigationActions
 import com.github.se.icebreakrr.ui.navigation.Route
@@ -34,6 +37,7 @@ import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.GeoPoint
+import com.google.firebase.functions.FirebaseFunctions
 import java.io.File
 import java.util.Calendar
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -60,7 +64,7 @@ class AroundYouScreenTest {
   private lateinit var mockProfilesRepository: ProfilesRepository
   private lateinit var mockPPRepository: ProfilePicRepository
   private lateinit var profilesViewModel: ProfilesViewModel
-
+  private lateinit var engagementNotificationManager: EngagementNotificationManager
   private lateinit var sortViewModel: SortViewModel
   private lateinit var mockLocationService: ILocationService
   private lateinit var mockLocationRepository: LocationRepository
@@ -68,6 +72,10 @@ class AroundYouScreenTest {
   private lateinit var testDataStore: DataStore<Preferences>
   private lateinit var appDataStore: AppDataStore
   private lateinit var mockContext: Context
+  private lateinit var meetingRequestViewModel: MeetingRequestViewModel
+  private lateinit var functions: FirebaseFunctions
+  private lateinit var filterViewModel: FilterViewModel
+  private lateinit var tagsViewModel: TagsViewModel
 
   private lateinit var locationViewModel: LocationViewModel
 
@@ -116,6 +124,20 @@ class AroundYouScreenTest {
       onSuccessCallback(emptyList())
       null
     }
+    tagsViewModel =
+        TagsViewModel(
+            TagsRepository(mock(FirebaseFirestore::class.java), mock(FirebaseAuth::class.java)))
+    filterViewModel = FilterViewModel()
+    functions = mock(FirebaseFunctions::class.java)
+    meetingRequestViewModel = MeetingRequestViewModel(profilesViewModel, functions)
+    engagementNotificationManager =
+        EngagementNotificationManager(
+            profilesViewModel,
+            meetingRequestViewModel,
+            appDataStore,
+            filterViewModel,
+            tagsViewModel,
+            permissionManager = mockPermissionManager)
 
     // Mock initial behavior of repository
     `when`(navigationActions.currentRoute()).thenReturn(Route.AROUND_YOU)
@@ -133,8 +155,8 @@ class AroundYouScreenTest {
           sortViewModel,
           mockPermissionManager,
           appDataStore,
-          true,
-      )
+          isTestMode = true,
+          engagementManager = engagementNotificationManager)
     }
 
     // Trigger initial connection check

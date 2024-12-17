@@ -158,7 +158,8 @@ class MeetingRequestServiceTest {
     meetingRequestService.showNotification(title, message)
 
     // Assert that the NotificationManager is called with correct parameters
-    verify(mockNotificationManager).notify(eq(0), any())
+    // In the eq() one has to put the fallback notification ID
+    verify(mockNotificationManager).notify(eq(2), any())
   }
 
   @Test
