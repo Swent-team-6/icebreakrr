@@ -163,19 +163,18 @@ fun ProfileHeader(
               .aspectRatio(PROFILE_IMAGE_ASPECT_RATIO)
               .background(Color.LightGray)
               .testTag("profileHeader")) {
-        val boxHeight =
 
-            // Profile image
-            AsyncImage(
-                model = profile.profilePictureUrl,
-                contentDescription = "Profile Image",
-                contentScale = ContentScale.Crop,
-                modifier =
-                    Modifier.fillMaxSize()
-                        .background(MaterialTheme.colorScheme.surfaceVariant, CircleShape)
-                        .testTag("profilePicture"),
-                placeholder = painterResource(id = R.drawable.nopp),
-                error = painterResource(id = R.drawable.nopp))
+        // Profile image
+        AsyncImage(
+            model = profile.profilePictureUrl,
+            contentDescription = "Profile Image",
+            contentScale = ContentScale.Crop,
+            modifier =
+                Modifier.fillMaxSize()
+                    .background(MaterialTheme.colorScheme.surfaceVariant, CircleShape)
+                    .testTag("profilePicture"),
+            placeholder = painterResource(id = R.drawable.nopp),
+            error = painterResource(id = R.drawable.nopp))
 
         // Back button
         IconButton(
