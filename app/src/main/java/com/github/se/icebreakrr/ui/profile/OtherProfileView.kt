@@ -38,10 +38,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.TextUnitType
@@ -238,7 +240,10 @@ fun OtherProfileView(
 
       // this displays the bottom sheet
       if (bottomSheetVisible) {
-        BottomSheet(aiState) { bottomSheetVisible = false }
+        BottomSheet(
+            aiState =  aiState,
+            onDismissRequest = { bottomSheetVisible = false },
+            onAiRetry = { aiViewModel.findDiscussionStarter() })
       }
     }
   }
@@ -246,8 +251,9 @@ fun OtherProfileView(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun BottomSheet(aiState: AiViewModel.UiState, onDismissRequest: () -> Unit) {
+fun BottomSheet(aiState: AiViewModel.UiState, onDismissRequest: () -> Unit, onAiRetry: () -> Unit) {
   val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val clipboardManager = LocalClipboardManager.current
 
   ModalBottomSheet(
       sheetState = sheetState,
@@ -287,7 +293,7 @@ fun BottomSheet(aiState: AiViewModel.UiState, onDismissRequest: () -> Unit) {
                         modifier = Modifier.fillMaxWidth()
                     ){
                         Button(
-                            onClick = { /*TODO*/ },
+                            onClick = onAiRetry,
                             elevation =  ButtonDefaults.buttonElevation(BUTTONS_ELEVATION),
                         ) {
                             Icon(imageVector = Icons.Filled.Refresh, contentDescription = "Retry")
@@ -296,7 +302,9 @@ fun BottomSheet(aiState: AiViewModel.UiState, onDismissRequest: () -> Unit) {
                         Spacer(modifier = Modifier.width(20.dp))
 
                         Button(
-                            onClick = { /*TODO*/ },
+                            onClick = {
+                                clipboardManager.setText(AnnotatedString(aiState.data))
+                            },
                             elevation =  ButtonDefaults.buttonElevation(BUTTONS_ELEVATION),
                         ) {
                             Icon(painter = painterResource(id = R.drawable.copy_icon), contentDescription = "Copy")
