@@ -372,7 +372,9 @@ fun IcebreakrrApp(
           tagsViewModel = tagsViewModel,
           permissionManager = permissionManager)
 
-  val startDestination = if (isTesting) Route.AROUND_YOU else Route.AUTH
+  val startDestination =
+      if (isTesting) Route.AROUND_YOU
+      else (if (currentUser != null) Route.AROUND_YOU else Route.AUTH)
 
   IcebreakrrNavHost(
       profileViewModel,
@@ -442,16 +444,19 @@ fun IcebreakrrNavHost(
         route = Route.AROUND_YOU,
     ) {
       composable(Screen.AROUND_YOU) {
-        AroundYouScreen(
-            navigationActions,
-            profileViewModel,
-            tagsViewModel,
-            filterViewModel,
-            locationViewModel,
-            sortViewModel,
-            permissionManager,
-            appDataStore,
-            isTesting)
+        if (engagementNotificationManager != null) {
+          AroundYouScreen(
+              navigationActions,
+              profileViewModel,
+              tagsViewModel,
+              filterViewModel,
+              locationViewModel,
+              sortViewModel,
+              permissionManager,
+              appDataStore,
+              engagementManager = engagementNotificationManager,
+              isTestMode = isTesting)
+        }
       }
       composable(Screen.OTHER_PROFILE_VIEW + "?userId={userId}") { navBackStackEntry ->
         if (meetingRequestViewModel != null) {
