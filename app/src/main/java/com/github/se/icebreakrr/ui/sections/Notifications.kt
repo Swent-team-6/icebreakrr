@@ -100,7 +100,7 @@ fun NotificationScreen(
   }
   Scaffold(
       modifier = Modifier.testTag("notificationScreen"),
-      topBar = { TopBar("Inbox") },
+      topBar = { TopBar("${R.string.notifications_screen_title}") },
       bottomBar = {
         BottomNavigationMenu(
             onTabSelect = { route ->

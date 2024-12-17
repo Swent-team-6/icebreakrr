@@ -79,7 +79,7 @@ fun TagDisplay(tags: List<String>, isSettings: Boolean) {
       // If there are more than 3 tags, add "..." at the end
       if (tags.size > TAKE_TAGS) {
         Text(
-            text = "...",
+            text = "${R.string.more_tags}",
             fontSize = TAGS_FONT_SIZE,
             fontWeight = FontWeight.SemiBold,
             color = MaterialTheme.colorScheme.primaryContainer,
@@ -94,7 +94,7 @@ fun TagDisplay(tags: List<String>, isSettings: Boolean) {
     }
   } else {
     Text(
-        text = "Tap to preview profile",
+        text = "${R.string.preview_profile}",
         color = MaterialTheme.colorScheme.secondaryContainer,
         fontWeight = FontWeight.Bold)
   }

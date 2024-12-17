@@ -218,7 +218,7 @@ fun AroundYouScreen(
 
     Scaffold(
         modifier = Modifier.testTag("aroundYouScreen"),
-        topBar = { TopBar("Around You") },
+        topBar = { TopBar("${R.string.around_you_screen_title}") },
         bottomBar = {
           BottomNavigationMenu(
               onTabSelect = { route ->

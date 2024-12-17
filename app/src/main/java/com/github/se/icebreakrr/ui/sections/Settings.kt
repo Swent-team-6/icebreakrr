@@ -106,7 +106,7 @@ fun SettingsScreen(
 
   Scaffold(
       modifier = Modifier.testTag("settingsScreen").fillMaxSize(),
-      topBar = { TopBar("Settings") },
+      topBar = { TopBar("${R.string.settings_screen_title}") },
       bottomBar = {
         BottomNavigationMenu(
             onTabSelect = { route ->
