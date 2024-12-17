@@ -56,7 +56,10 @@ fun BottomNavigationMenu(
           NavigationBarItem(
               icon = {
                 Box {
-                  Icon(tab.icon, contentDescription = stringResource(id = tab.textId), modifier=Modifier.size(ICON_SIZE.dp))
+                  Icon(
+                      tab.icon,
+                      contentDescription = stringResource(id = tab.textId),
+                      modifier = Modifier.size(ICON_SIZE.dp))
                   if (tab.route == Route.NOTIFICATIONS && notificationCount > 0) {
                     Badge(notificationCount, "badgeNotification")
                   }
