@@ -37,10 +37,11 @@ private val CARD_PADDING_VERTICAL = 20.dp
 private val CARD_ELEVATION = 2.dp
 private val IMAGE_SIZE = 80.dp
 private val IMAGE_SPACING = 18.dp
-private val TEXT_SPACER_PADDING = 3.dp
+private val TEXT_SPACER_PADDING = 15.dp
+private val TEXT_SPACER_PADDING_SMALL = 5.dp
 
 // Define constants for font sizes
-private val NAME_FONT_SIZE = 18.sp
+private val NAME_FONT_SIZE = 22.sp
 private val CATCHPHRASE_FONT_SIZE = 16.sp
 private val TAGS_FONT_SIZE = 10.sp
 
@@ -58,7 +59,7 @@ fun TagDisplay(tags: List<String>, isSettings: Boolean) {
         }
 
     // Display the tags with a background and spacing
-    FlowRow(modifier = Modifier.fillMaxWidth().padding(TEXT_SPACER_PADDING)) {
+    FlowRow(modifier = Modifier.fillMaxWidth()) {
       // Create a Text for each tag, limiting to the calculated number of tags
       tags.take(tagsToDisplay).forEachIndexed { index, tag ->
         Text(
@@ -163,8 +164,9 @@ fun ProfileCard(
                           fontSize = CATCHPHRASE_FONT_SIZE, // Smaller font size
                           fontWeight = FontWeight.Normal)
                     }
+                Spacer(modifier = Modifier.padding(TEXT_SPACER_PADDING_SMALL))
 
-                Text(text = "\"${profile.catchPhrase}\"", fontSize = CATCHPHRASE_FONT_SIZE)
+                Text(text = "${profile.catchPhrase}", fontSize = CATCHPHRASE_FONT_SIZE)
 
                 Spacer(modifier = Modifier.padding(TEXT_SPACER_PADDING))
 
