@@ -28,7 +28,10 @@ class MeetingRequestService : FirebaseMessagingService() {
   private val DEFAULT_REASON_CANCELLATION = "Reason : Unknown"
   private val CANCELLED_REASON_CANCELLATION = "Reason : Sender cancelled request"
   private val CLOSED_APP_REASON_CANCELLATION = "Reason : The other user closed the app"
-  private val NOTIFICATION_ID = 0
+  private val ENGAGEMENT_NOTIFICATION_ID = 1
+  private val MEETING_REQUEST_NOTIFICATION_ID = 2
+  private val MEETING_RESPONSE_NOTIFICATION_ID = 3
+  private val MEETING_CANCELLATION_NOTIFICATION_ID =4
 
   /**
    * Checks if the application is currently running in the foreground.
@@ -179,8 +182,16 @@ class MeetingRequestService : FirebaseMessagingService() {
     notificationManager.createNotificationChannel(channel)
 
     val notificationBuilder = createNotificationBuilder(title, message)
+    val notificationId = when {
+      title == MSG_REQUEST -> MEETING_REQUEST_NOTIFICATION_ID
+      title.contains(MSG_RESPONSE_ACCEPTED) || title.contains(MSG_RESPONSE_REJECTED) ->
+        MEETING_RESPONSE_NOTIFICATION_ID
+      title.startsWith("Cancelled meeting") -> MEETING_CANCELLATION_NOTIFICATION_ID
+      title.startsWith("A person with similar interests") -> ENGAGEMENT_NOTIFICATION_ID
+      else -> MEETING_REQUEST_NOTIFICATION_ID // Default fallback
+    }
 
-    notificationManager.notify(NOTIFICATION_ID, notificationBuilder.build())
+    notificationManager.notify(notificationId, notificationBuilder.build())
   }
 
   /**
