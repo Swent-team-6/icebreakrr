@@ -16,6 +16,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -73,6 +75,7 @@ private val HEADER_FONT_SIZE = 25f
 private val HEADER_LINE_HEIGHT = 30f
 private val CONTENT_FONT_SIZE = 20f
 private val CONTENT_LINE_HEIGHT = 25f
+private val BUTTONS_ELEVATION = 2.dp
 private val ICON_SPACING = 8.dp
 private const val USER_ALREADY_SEND_REQUEST_TOAST_MESSAGE =
     "this user has already send you a meeting request!"
@@ -106,12 +109,16 @@ fun OtherProfileView(
   val profile = profilesViewModel.selectedProfile.collectAsState().value
   val aiState = aiViewModel.uiState.collectAsState().value
 
-  Scaffold(modifier = Modifier.fillMaxSize().testTag("aroundYouProfileScreen")) { paddingValues ->
+  Scaffold(modifier = Modifier
+      .fillMaxSize()
+      .testTag("aroundYouProfileScreen")) { paddingValues ->
     if (isLoading) {
       MessageWhenLoadingProfile(paddingValues)
     } else if (profile != null) {
       Column(
-          modifier = Modifier.fillMaxWidth().padding(paddingValues),
+          modifier = Modifier
+              .fillMaxWidth()
+              .padding(paddingValues),
           horizontalAlignment = Alignment.CenterHorizontally) {
 
             // 2 sections one for the profile image with overlay and
@@ -128,7 +135,9 @@ fun OtherProfileView(
             }
 
             // Scrollable content
-            Column(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
+            Column(modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())) {
               InfoSection(profile, tagsViewModel)
 
               // Add spacer for some padding
@@ -140,14 +149,16 @@ fun OtherProfileView(
                     bottomSheetVisible = true
                     aiViewModel.findDiscussionStarter()
                   },
+                  elevation =  ButtonDefaults.buttonElevation(BUTTONS_ELEVATION),
                   colors =
                       ButtonDefaults.buttonColors(
                           containerColor = MaterialTheme.colorScheme.primary),
                   modifier =
-                      Modifier.fillMaxWidth()
-                          .padding(horizontal = BUTTONS_HORIZONTAL_PADDING)
-                          .align(Alignment.CenterHorizontally)
-                          .testTag("aiButton")) {
+                  Modifier
+                      .fillMaxWidth()
+                      .padding(horizontal = BUTTONS_HORIZONTAL_PADDING)
+                      .align(Alignment.CenterHorizontally)
+                      .testTag("aiButton")) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.Center,
@@ -179,14 +190,16 @@ fun OtherProfileView(
                       showNoInternetToast(context = context)
                     }
                   },
+                  elevation =  ButtonDefaults.buttonElevation(BUTTONS_ELEVATION),
                   colors =
                       ButtonDefaults.buttonColors(
                           containerColor = MaterialTheme.colorScheme.primary),
                   modifier =
-                      Modifier.fillMaxWidth()
-                          .padding(BUTTONS_HORIZONTAL_PADDING)
-                          .align(Alignment.CenterHorizontally)
-                          .testTag("alreadyMetButton")) {
+                  Modifier
+                      .fillMaxWidth()
+                      .padding(BUTTONS_HORIZONTAL_PADDING)
+                      .align(Alignment.CenterHorizontally)
+                      .testTag("alreadyMetButton")) {
                     Text(
                         text = stringResource(R.string.Already_Met_Button_Text),
                         color = MaterialTheme.colorScheme.onPrimary)
@@ -201,10 +214,11 @@ fun OtherProfileView(
       if (sendRequest) {
         Box(
             modifier =
-                Modifier.fillMaxSize()
-                    .background(Color.Black.copy(alpha = ALPHA))
-                    .clickable {}
-                    .testTag("bluredBackground"),
+            Modifier
+                .fillMaxSize()
+                .background(Color.Black.copy(alpha = ALPHA))
+                .clickable {}
+                .testTag("bluredBackground"),
             contentAlignment = Alignment.Center) {
               SendRequestScreen(
                   onValueChange = {
@@ -241,9 +255,10 @@ fun BottomSheet(aiState: AiViewModel.UiState, onDismissRequest: () -> Unit) {
       modifier = Modifier.testTag("aiBottomSheet")) {
         Column(
             modifier =
-                Modifier.fillMaxWidth()
-                    .heightIn(min = MIN_SHEET_HEIGHT)
-                    .padding(SHEET_INNER_PADDING),
+            Modifier
+                .fillMaxWidth()
+                .heightIn(min = MIN_SHEET_HEIGHT)
+                .padding(SHEET_INNER_PADDING),
             verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.Start) {
               // Header
@@ -259,11 +274,35 @@ fun BottomSheet(aiState: AiViewModel.UiState, onDismissRequest: () -> Unit) {
               when (aiState) {
                 is AiViewModel.UiState.Success -> {
                   Text(
-                      text = "\"${aiState.data}\"",
+                      text = "«${aiState.data}»",
                       fontWeight = FontWeight.Normal,
                       fontSize = TextUnit(CONTENT_FONT_SIZE, TextUnitType.Sp),
                       lineHeight = TextUnit(CONTENT_LINE_HEIGHT, TextUnitType.Sp),
                       modifier = Modifier.testTag("aiResponse"))
+
+                    Spacer(modifier = Modifier.height(30.dp))
+
+                    Row (
+                        horizontalArrangement = Arrangement.Center,
+                        modifier = Modifier.fillMaxWidth()
+                    ){
+                        Button(
+                            onClick = { /*TODO*/ },
+                            elevation =  ButtonDefaults.buttonElevation(BUTTONS_ELEVATION),
+                        ) {
+                            Icon(imageVector = Icons.Filled.Refresh, contentDescription = "Retry")
+                        }
+
+                        Spacer(modifier = Modifier.width(20.dp))
+
+                        Button(
+                            onClick = { /*TODO*/ },
+                            elevation =  ButtonDefaults.buttonElevation(BUTTONS_ELEVATION),
+                        ) {
+                            Icon(painter = painterResource(id = R.drawable.copy_icon), contentDescription = "Copy")
+
+                        }
+                    }
                 }
                 is AiViewModel.UiState.Loading -> {
                   Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
