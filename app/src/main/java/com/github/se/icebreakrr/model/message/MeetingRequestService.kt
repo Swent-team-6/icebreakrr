@@ -32,6 +32,8 @@ class MeetingRequestService : FirebaseMessagingService() {
   private val MEETING_REQUEST_NOTIFICATION_ID = 2
   private val MEETING_RESPONSE_NOTIFICATION_ID = 3
   private val MEETING_CANCELLATION_NOTIFICATION_ID = 4
+  private val ENGAGEMENT_NOTIFICATION_START = "A person with similar interests"
+  private val MEETING_CANCELLATION_START = "Cancelled meeting"
 
   /**
    * Checks if the application is currently running in the foreground.
@@ -187,8 +189,8 @@ class MeetingRequestService : FirebaseMessagingService() {
           title == MSG_REQUEST -> MEETING_REQUEST_NOTIFICATION_ID
           title.contains(MSG_RESPONSE_ACCEPTED) || title.contains(MSG_RESPONSE_REJECTED) ->
               MEETING_RESPONSE_NOTIFICATION_ID
-          title.startsWith("Cancelled meeting") -> MEETING_CANCELLATION_NOTIFICATION_ID
-          title.startsWith("A person with similar interests") -> ENGAGEMENT_NOTIFICATION_ID
+          title.startsWith(MEETING_CANCELLATION_START) -> MEETING_CANCELLATION_NOTIFICATION_ID
+          title.startsWith(ENGAGEMENT_NOTIFICATION_START) -> ENGAGEMENT_NOTIFICATION_ID
           else -> MEETING_REQUEST_NOTIFICATION_ID // Default fallback
         }
 
