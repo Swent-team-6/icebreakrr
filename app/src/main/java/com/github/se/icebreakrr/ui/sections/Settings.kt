@@ -68,6 +68,7 @@ private val CARD_ELEVATION = 4.dp
 private val TOGGLE_BOX_HEIGHT = 55.dp
 private val BUTTON_PADDING = 0.08f.dp
 private val CARD_PADDING = 16.dp
+private val ICON_PADDING = 8.dp
 private val RELATIVE_SPACING = 0.02f
 
 /**
@@ -266,7 +267,8 @@ fun ToggleOptionBox(
               Icon(
                   imageVector = Icons.Filled.Place,
                   contentDescription = "",
-                  modifier = Modifier.padding(end = 8.dp) // Add padding to the right of the icon
+                  modifier =
+                      Modifier.padding(end = ICON_PADDING) // Add padding to the right of the icon
                   )
               Text(label, fontWeight = FontWeight.Bold)
               Spacer(modifier = Modifier.weight(1f))
