@@ -56,15 +56,29 @@ class EngagementNotificationManager(
 ) {
   private var notificationJob: Job? = null
   private val scope = CoroutineScope(Dispatchers.Main + SupervisorJob())
-  private val lastNotificationTimes = mutableMapOf<String, Long>()
+  private var lastNotificationTimes = mutableMapOf<String, Long>()
+
+  init {
+    // Load saved notification times when initialized
+    scope.launch {
+      appDataStore.lastNotificationTimes.collect { savedTimes ->
+        lastNotificationTimes = savedTimes.toMutableMap()
+      }
+    }
+  }
 
   /**
    * Starts monitoring nearby users with common tags. Ensures POST_NOTIFICATIONS permission on
    * Android TIRAMISU+ and launches monitoring in a coroutine.
    */
   fun startMonitoring() {
+    // If already monitoring, just return
+    if (isMonitoring()) {
+      Log.i(TAG, "Monitoring already active, skipping start")
+      return
+    }
+
     Log.i(TAG, "Starting engagement monitoring")
-    stopMonitoring() // Stop any existing monitoring
 
     // Handle permission request
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -194,7 +208,7 @@ class EngagementNotificationManager(
           try {
             meetingRequestViewModel.engagementNotification(
                 targetToken = nearbyProfile.fcmToken ?: "null", tag = commonTag)
-            lastNotificationTimes[nearbyProfile.uid] = System.currentTimeMillis()
+            scope.launch { updateLastNotificationTime(nearbyProfile.uid) }
             Log.i(TAG, "Successfully sent notification to ${nearbyProfile.uid}")
           } catch (e: Exception) {
             Log.e(TAG, "Failed to send notification to ${nearbyProfile.uid}: ${e.message}", e)
@@ -204,6 +218,22 @@ class EngagementNotificationManager(
         Log.e(TAG, "Error processing profile ${nearbyProfile.uid}: ${e.message}", e)
       }
     }
+  }
+
+  /**
+   * Updates the timestamp of the last notification sent to a specific user.
+   *
+   * This method:
+   * 1. Records the current time as the last notification time for the given user ID
+   * 2. Updates both the in-memory cache (lastNotificationTimes) and persistent storage
+   *    (appDataStore)
+   *
+   * @param uid The unique identifier of the user who received the notification
+   */
+  private suspend fun updateLastNotificationTime(uid: String) {
+    val currentTime = System.currentTimeMillis()
+    lastNotificationTimes[uid] = currentTime
+    appDataStore.saveNotificationTime(uid, currentTime)
   }
 
   // Add this method for testing purposes

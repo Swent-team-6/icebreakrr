@@ -24,7 +24,11 @@ import kotlinx.coroutines.test.setMain
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import org.mockito.Mockito.*
+import org.mockito.Mockito.doAnswer
+import org.mockito.Mockito.mock
+import org.mockito.Mockito.never
+import org.mockito.Mockito.spy
+import org.mockito.Mockito.times
 import org.mockito.kotlin.any
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
@@ -44,7 +48,6 @@ class EngagementNotificationManagerTest {
   private lateinit var tagsViewModel: TagsViewModel
   private lateinit var mockProfilesRepo: ProfilesRepository
   private lateinit var permissionManager: IPermissionManager
-  private val testDispatcher = UnconfinedTestDispatcher()
 
   private val selfProfile =
       Profile(
@@ -73,14 +76,18 @@ class EngagementNotificationManagerTest {
 
   @Before
   fun setUp() {
-    Dispatchers.setMain(testDispatcher)
+    Dispatchers.setMain(UnconfinedTestDispatcher())
 
-    // Mock dependencies
+    // create and configure the mock
+    appDataStore = mock()
     mockProfilesRepo = mock(ProfilesRepository::class.java)
     meetingRequestViewModel = mock()
-    appDataStore = mock()
     filterViewModel = mock()
     tagsViewModel = mock()
+
+    // Mock the required DataStore methods with correct property name
+    whenever(appDataStore.lastNotificationTimes).thenReturn(MutableStateFlow(mapOf<String, Long>()))
+    whenever(appDataStore.isDiscoverable).thenReturn(MutableStateFlow(true))
 
     // Setup profilesViewModel
     val mockProfilePicRepo = mock(ProfilePicRepository::class.java)

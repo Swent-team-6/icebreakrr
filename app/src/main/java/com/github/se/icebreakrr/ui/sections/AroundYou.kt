@@ -58,6 +58,7 @@ import com.github.se.icebreakrr.R
 import com.github.se.icebreakrr.data.AppDataStore
 import com.github.se.icebreakrr.model.filter.FilterViewModel
 import com.github.se.icebreakrr.model.location.LocationViewModel
+import com.github.se.icebreakrr.model.notification.EngagementNotificationManager
 import com.github.se.icebreakrr.model.profile.Gender
 import com.github.se.icebreakrr.model.profile.ProfilesViewModel
 import com.github.se.icebreakrr.model.sort.SortOption
@@ -115,6 +116,7 @@ fun AroundYouScreen(
     permissionManager: IPermissionManager,
     appDataStore: AppDataStore,
     isTestMode: Boolean = false,
+    engagementManager: EngagementNotificationManager
 ) {
   val filteredProfiles = profilesViewModel.filteredProfiles.collectAsState()
   val isLoading = profilesViewModel.loading.collectAsState()
@@ -188,6 +190,11 @@ fun AroundYouScreen(
     }
   }
   LaunchedEffect(Unit) {
+    // Only start monitoring if it's not already running
+    if (!engagementManager.isMonitoring()) {
+      engagementManager.startMonitoring()
+    }
+
     profilesViewModel.getFilteredProfilesInRadius(
         userLocation.value ?: GeoPoint(DEFAULT_USER_LATITUDE, DEFAULT_USER_LONGITUDE),
         filterViewModel.selectedRadius.value,
