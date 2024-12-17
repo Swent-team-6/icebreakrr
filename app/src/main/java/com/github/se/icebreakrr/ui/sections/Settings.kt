@@ -15,6 +15,7 @@ import androidx.compose.material.icons.filled.Place
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ButtonElevation
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -106,7 +107,9 @@ fun SettingsScreen(
   val screenHeight = LocalConfiguration.current.screenHeightDp.dp
 
   Scaffold(
-      modifier = Modifier.testTag("settingsScreen").fillMaxSize(),
+      modifier = Modifier
+          .testTag("settingsScreen")
+          .fillMaxSize(),
       topBar = { TopBar(stringResource(R.string.settings_screen_title)) },
       bottomBar = {
         BottomNavigationMenu(
@@ -123,7 +126,11 @@ fun SettingsScreen(
   ) { innerPadding ->
     Column(
         modifier =
-            Modifier.fillMaxSize().padding(innerPadding).padding(SCREEN_PADDING).fillMaxSize(),
+        Modifier
+            .fillMaxSize()
+            .padding(innerPadding)
+            .padding(SCREEN_PADDING)
+            .fillMaxSize(),
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.Start) {
           // Profile Card
@@ -156,10 +163,13 @@ fun SettingsScreen(
                   Toast.makeText(context, R.string.No_Internet_Toast, Toast.LENGTH_SHORT).show()
                 }
               },
+              elevation =  ButtonDefaults.buttonElevation(CARD_ELEVATION),
               colors =
                   ButtonDefaults.buttonColors(
                       containerColor = MaterialTheme.colorScheme.secondaryContainer),
-              modifier = Modifier.fillMaxWidth().testTag("blockedUsersButton")) {
+              modifier = Modifier
+                  .fillMaxWidth()
+                  .testTag("blockedUsersButton")) {
                 Text(
                     stringResource(R.string.unblock_button),
                     color = MaterialTheme.colorScheme.primaryContainer)
@@ -175,26 +185,16 @@ fun SettingsScreen(
                   Toast.makeText(context, R.string.No_Internet_Toast, Toast.LENGTH_SHORT).show()
                 }
               },
+              elevation =  ButtonDefaults.buttonElevation(CARD_ELEVATION),
               colors =
                   ButtonDefaults.buttonColors(
                       containerColor = MaterialTheme.colorScheme.secondaryContainer),
-              modifier = Modifier.fillMaxWidth().testTag("alreadyMetButton")) {
+              modifier = Modifier
+                  .fillMaxWidth()
+                  .testTag("alreadyMetButton")) {
                 Text(
                     stringResource(R.string.Already_Met_Settings_Button),
                     color = MaterialTheme.colorScheme.primaryContainer)
-              }
-
-          Spacer(modifier = Modifier.height(screenHeight * RELATIVE_SPACING))
-
-          Button(
-              onClick = { deleteAccountDialog = true },
-              colors =
-                  ButtonDefaults.buttonColors(
-                      containerColor = MaterialTheme.colorScheme.errorContainer),
-              modifier = Modifier.fillMaxWidth().testTag("deleteAccountButton")) {
-                Text(
-                    stringResource(R.string.Already_Met_Delete_Accout_Button),
-                    color = MaterialTheme.colorScheme.onError)
               }
 
           Spacer(modifier = Modifier.height(screenHeight * RELATIVE_SPACING))
@@ -218,13 +218,34 @@ fun SettingsScreen(
                       engagementManager = engagementNotificationManager)
                 }
               },
+              elevation =  ButtonDefaults.buttonElevation(CARD_ELEVATION),
               colors =
-                  ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),
-              modifier = Modifier.fillMaxWidth().testTag("logOutButton")) {
+                  ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.outline),
+              modifier = Modifier
+                  .fillMaxWidth()
+                  .testTag("logOutButton")) {
                 Text(
                     stringResource(R.string.Already_Met_Logout_Button),
+                    color = MaterialTheme.colorScheme.onPrimary)
+              }
+
+          Spacer(modifier = Modifier.height(screenHeight * RELATIVE_SPACING))
+
+          Button(
+              onClick = { deleteAccountDialog = true },
+              elevation =  ButtonDefaults.buttonElevation(CARD_ELEVATION),
+              colors =
+                  ButtonDefaults.buttonColors(
+                      containerColor = MaterialTheme.colorScheme.error),
+              modifier = Modifier
+                  .fillMaxWidth()
+                  .testTag("deleteAccountButton")) {
+                Text(
+                    stringResource(R.string.Already_Met_Delete_Accout_Button),
                     color = MaterialTheme.colorScheme.onError)
               }
+
+
         }
     DeleteAccountDialog(
         showDialog = deleteAccountDialog,
@@ -252,17 +273,19 @@ fun ToggleOptionBox(
   Card(
       shape = CARD_SHAPE,
       modifier =
-          modifier
-              .fillMaxWidth()
-              .padding(vertical = BUTTON_PADDING)
-              .height(TOGGLE_BOX_HEIGHT)
-              .testTag(label),
+      modifier
+          .fillMaxWidth()
+          .padding(vertical = BUTTON_PADDING)
+          .height(TOGGLE_BOX_HEIGHT)
+          .testTag(label),
       colors =
           CardDefaults.cardColors(
               containerColor = MaterialTheme.colorScheme.background,
               contentColor = MaterialTheme.colorScheme.onSecondary)) {
         Row(
-            modifier = Modifier.fillMaxWidth().padding(CARD_PADDING),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(CARD_PADDING),
             verticalAlignment = Alignment.CenterVertically) {
               Icon(
                   imageVector = Icons.Filled.Place,
