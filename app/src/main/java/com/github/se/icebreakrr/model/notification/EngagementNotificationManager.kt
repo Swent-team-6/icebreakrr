@@ -215,6 +215,16 @@ class EngagementNotificationManager(
     }
   }
 
+  /**
+   * Updates the timestamp of the last notification sent to a specific user.
+   *
+   * This method:
+   * 1. Records the current time as the last notification time for the given user ID
+   * 2. Updates both the in-memory cache (lastNotificationTimes) and persistent storage
+   *    (appDataStore)
+   *
+   * @param uid The unique identifier of the user who received the notification
+   */
   private suspend fun updateLastNotificationTime(uid: String) {
     val currentTime = System.currentTimeMillis()
     lastNotificationTimes[uid] = currentTime
