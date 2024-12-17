@@ -143,7 +143,7 @@ class ProfilesRepositoryFirestore(
       onFailure: (Exception) -> Unit
   ) {
     // Determine the precision of the geohash based on the radius
-    val geohashPrecision = if (radiusInMeters <= 50) 7 else 6
+    val geohashPrecision = getGeohashPrecision(radiusInMeters)
     val centerGeohash = GeoHashUtils.encode(center.latitude, center.longitude, geohashPrecision)
 
     // Get profiles in geohash range
@@ -325,6 +325,29 @@ class ProfilesRepositoryFirestore(
           onFailure(e)
         }
       }
+    }
+  }
+
+  /**
+   * Determines the geohash precision based on the specified radius. The precision dynamically
+   * adjusts to optimize coverage and performance:
+   * - Higher precision for smaller radii (more detailed grid).
+   * - Lower precision for larger radii (coarser grid).
+   *
+   * @param radiusInMeters The search radius in meters.
+   * @return The appropriate geohash precision as an integer (1 to 9).
+   */
+  private fun getGeohashPrecision(radiusInMeters: Int): Int {
+    return when {
+      radiusInMeters <= 1 -> 9 // Ultra-precise (~5 m x 5 m)
+      radiusInMeters <= 5 -> 8 // Very high precision (~19 m x 19 m)
+      radiusInMeters <= 20 -> 7 // High precision (~152 m x 152 m)
+      radiusInMeters <= 100 -> 6 // Moderate precision (~600 m x 600 m)
+      radiusInMeters <= 1000 -> 5 // Medium precision (~4.9 km x 4.9 km)
+      radiusInMeters <= 10000 -> 4 // Low precision (~39 km x 19.5 km)
+      radiusInMeters <= 50000 -> 3 // Broad region (~156 km x 156 km)
+      radiusInMeters <= 250000 -> 2 // Very broad region (~1,250 km x 625 km)
+      else -> 1 // Extremely coarse precision (~5,000 km x 5,000 km)
     }
   }
 
