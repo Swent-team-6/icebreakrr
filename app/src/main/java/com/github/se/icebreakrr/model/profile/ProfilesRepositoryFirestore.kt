@@ -150,7 +150,7 @@ class ProfilesRepositoryFirestore(
     db.collection(collectionPath)
         .whereGreaterThanOrEqualTo("geohash", centerGeohash)
         .whereLessThanOrEqualTo("geohash", centerGeohash + "\uf8ff")
-        .get()
+        .get(Source.SERVER)
         .addOnSuccessListener { result ->
           waitingDone.value = false
           isWaiting.value = false

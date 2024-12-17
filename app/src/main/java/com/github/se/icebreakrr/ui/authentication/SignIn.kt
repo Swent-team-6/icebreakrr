@@ -53,6 +53,7 @@ import com.github.se.icebreakrr.model.filter.FilterViewModel
 import com.github.se.icebreakrr.model.location.LocationViewModel
 import com.github.se.icebreakrr.model.message.MeetingRequestManager
 import com.github.se.icebreakrr.model.message.MeetingRequestViewModel
+import com.github.se.icebreakrr.model.notification.EngagementNotificationManager
 import com.github.se.icebreakrr.model.profile.ProfilesViewModel
 import com.github.se.icebreakrr.model.tags.TagsViewModel
 import com.github.se.icebreakrr.ui.navigation.NavigationActions
@@ -97,6 +98,7 @@ private const val BUTTON_TEXT_FONT_SIZE = 16
 fun SignInScreen(
     profilesViewModel: ProfilesViewModel,
     meetingRequestViewModel: MeetingRequestViewModel,
+    engagementNotificationManager: EngagementNotificationManager,
     navigationActions: NavigationActions,
     filterViewModel: FilterViewModel,
     tagsViewModel: TagsViewModel,
@@ -142,7 +144,7 @@ fun SignInScreen(
                   val profile = profilesViewModel.selectedProfile.value
                   MeetingRequestManager.ourName = profile?.name
                   MeetingRequestManager.ourUid = firebaseUser.uid
-                  // checking if profile already exists and add it its fcmToken
+                  // checking if profile already exists and add its fcmToken
                   FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
                     if (task.isSuccessful) {
                       val fcmToken = task.result
@@ -157,6 +159,8 @@ fun SignInScreen(
                       } else {
                         val updatedProfile = profile.copy(fcmToken = fcmToken)
                         profilesViewModel.updateProfile(updatedProfile, {}, {})
+                        // Start monitoring here since user is logged in and profile exists
+                        engagementNotificationManager.startMonitoring()
                         navigationActions.navigateTo(TopLevelDestinations.AROUND_YOU)
                       }
                     }
@@ -202,7 +206,7 @@ fun SignInScreen(
 
           // Add the app icon here
           Image(
-              painter = painterResource(id = R.drawable.turtle),
+              painter = painterResource(id = R.drawable.logo),
               contentDescription = "App Icon",
               modifier = Modifier.size(170.dp))
 

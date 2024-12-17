@@ -63,8 +63,8 @@ open class ProfilesViewModel(
   open var selfProfile: StateFlow<Profile?> = _selfProfile
 
   // This stores the state of the modification during the profile edition (null if not in edition)
-  private val _editedCurrentProfile = MutableStateFlow<Profile?>(null)
-  open val editedCurrentProfile: StateFlow<Profile?> = _editedCurrentProfile
+  private val _editedSelfProfile = MutableStateFlow<Profile?>(null)
+  open val editedSelfProfile: StateFlow<Profile?> = _editedSelfProfile
 
   // This stores the state of the modification during the profile edition
   private val _pictureChangeState = MutableStateFlow(ProfilePictureState.UNCHANGED)
@@ -273,12 +273,14 @@ open class ProfilesViewModel(
    * @param onFailure: callback to propagate erorrs higher
    */
   fun updateProfile(profile: Profile, onComplete: () -> Unit, onFailure: (Exception) -> Unit) {
-    _loading.value = true
+    if (_selfProfile.value == null) {
+      _loadingSelf.value = true
+    }
     _selfProfile.value = profile
     repository.updateProfile(
         profile,
         onSuccess = {
-          _loading.value = false
+          _loadingSelf.value = false
           onComplete()
         },
         onFailure = { e ->
@@ -369,7 +371,7 @@ open class ProfilesViewModel(
    * @param profile The profile to be saved.
    */
   fun saveEditedProfile(profile: Profile) {
-    _editedCurrentProfile.value = profile
+    _editedSelfProfile.value = profile
   }
 
   /** Clears the temporary profile picture Bitmap. */
@@ -408,28 +410,18 @@ open class ProfilesViewModel(
     when (_pictureChangeState.value) {
       ProfilePictureState.TO_UPLOAD ->
           validateAndUploadProfilePicture(context) { url ->
-            val newProfile = _editedCurrentProfile.value!!.copy(profilePictureUrl = url)
-            updateProfile(newProfile, {}, {})
-            _selfProfile.value = newProfile
-            // todo: "_selectedProfile.value = newProfile" needs to be removed when all the other
-            // personal profile views are updated to use the selfProfile instead of the
-            // selectedProfile
-            _selectedProfile.value = newProfile
-
+            val newProfile = _editedSelfProfile.value!!.copy(profilePictureUrl = url)
+            updateProfile(newProfile, { getSelfProfile {} }, {})
             resetProfileEditionState()
           }
       TO_DELETE ->
           deleteCurrentUserProfilePicture {
-            val newProfile = _editedCurrentProfile.value?.copy(profilePictureUrl = null)
-            updateProfile(newProfile!!, {}, {})
-            _selfProfile.value = newProfile
-            _selectedProfile.value = newProfile // todo: same as above
+            val newProfile = _editedSelfProfile.value!!.copy(profilePictureUrl = null)
+            updateProfile(newProfile, { getSelfProfile {} }, {})
             resetProfileEditionState()
           }
       else -> {
-        updateProfile(_editedCurrentProfile.value!!, {}, {})
-        _selfProfile.value = _editedCurrentProfile.value
-        _selectedProfile.value = _editedCurrentProfile.value // todo: same as above
+        updateProfile(_editedSelfProfile.value!!, { getSelfProfile {} }, {})
         resetProfileEditionState()
       }
     }
@@ -703,13 +695,13 @@ open class ProfilesViewModel(
    *
    * @param uid : uid of the user you have met
    */
-  fun removeChosenLocalisation(uid: String) {
+  fun removeChosenLocalisation(uid: String, onComplete: () -> Unit) {
     updateProfile(
         _selfProfile.value?.copy(
             meetingRequestChosenLocalisation =
                 _selfProfile.value?.meetingRequestChosenLocalisation?.filter { it.key != uid }
                     ?: emptyMap())!!,
-        {},
+        onComplete,
         {})
   }
 
@@ -743,12 +735,12 @@ open class ProfilesViewModel(
    * @param onComplete : callback to avoid racing conditions
    */
   fun getSelfProfile(onComplete: () -> Unit) {
-    _loadingSelf.value = true
-    Log.d("TESTEST", "[getSelfProfile] uid ${auth.currentUser?.uid ?: "null"}")
+    if (_selfProfile.value == null) {
+      _loadingSelf.value = true
+    }
     repository.getProfileByUid(
         auth.currentUser?.uid ?: "null",
         onSuccess = { profile ->
-          Log.d("TESTEST", "[getSelfProfile] profile ${profile}")
           _selfProfile.value = profile
           _loadingSelf.value = false
           onComplete()

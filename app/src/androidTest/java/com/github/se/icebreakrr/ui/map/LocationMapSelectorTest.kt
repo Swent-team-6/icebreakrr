@@ -1,5 +1,6 @@
 package com.github.se.icebreakrr.ui.map
 
+import android.content.Context
 import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -47,6 +48,7 @@ class LocationMapSelectorTest {
   private lateinit var mockLocationRepository: LocationRepository
   private lateinit var mockUser: FirebaseUser
   private lateinit var mockFunctions: FirebaseFunctions
+  private lateinit var mockContext: Context
 
   private val profile1 =
       Profile(
@@ -130,11 +132,14 @@ class LocationMapSelectorTest {
     meetingRequestViewModel = MeetingRequestViewModel(profilesViewModel, mockFunctions)
 
     mockNavigationActions = mock(NavigationActions::class.java)
+    mockContext = mock(Context::class.java)
+
     locationViewModel =
         LocationViewModel(
             mock(ILocationService::class.java),
             mockLocationRepository,
-            mock(IPermissionManager::class.java))
+            mock(IPermissionManager::class.java),
+            mockContext)
     composeTestRule.setContent {
       LocationSelectorMapScreen(
           profilesViewModel,
@@ -151,6 +156,8 @@ class LocationMapSelectorTest {
     composeTestRule.waitForIdle()
     composeTestRule.onNodeWithTag("LocationSelectorMapScreen").assertIsDisplayed()
     composeTestRule.onNodeWithTag("addTextAndSendLocationBox").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("topBar").assertIsDisplayed()
+
     composeTestRule
         .onNodeWithTag("addDetailsTextField")
         .assertIsDisplayed()

@@ -107,7 +107,7 @@ class ProfilesRepositoryFirestoreTest {
     `when`(mockCollectionReference.whereGreaterThanOrEqualTo(eq("geohash"), any()))
         .thenReturn(mockQuery)
     `when`(mockQuery.whereLessThanOrEqualTo(eq("geohash"), any())).thenReturn(mockQuery)
-    `when`(mockQuery.get()).thenReturn(Tasks.forException(Exception("Test exception")))
+    `when`(mockQuery.get(Source.SERVER)).thenReturn(Tasks.forException(Exception("Test exception")))
 
     profilesRepositoryFirestore.getProfilesInRadius(
         center = GeoPoint(0.0, 0.0),
@@ -239,7 +239,7 @@ class ProfilesRepositoryFirestoreTest {
     `when`(mockCollectionReference.whereGreaterThanOrEqualTo(eq("geohash"), any()))
         .thenReturn(mockQuery)
     `when`(mockQuery.whereLessThanOrEqualTo(eq("geohash"), any())).thenReturn(mockQuery)
-    `when`(mockQuery.get()).thenReturn(Tasks.forResult(mockProfileQuerySnapshot))
+    `when`(mockQuery.get(Source.SERVER)).thenReturn(Tasks.forResult(mockProfileQuerySnapshot))
 
     `when`(mockProfileQuerySnapshot.documents).thenReturn(listOf())
 
@@ -262,7 +262,7 @@ class ProfilesRepositoryFirestoreTest {
     `when`(mockCollectionReference.whereGreaterThanOrEqualTo(eq("geohash"), any()))
         .thenReturn(mockQuery)
     `when`(mockQuery.whereLessThanOrEqualTo(eq("geohash"), any())).thenReturn(mockQuery)
-    `when`(mockQuery.get())
+    `when`(mockQuery.get(Source.SERVER))
         .thenReturn(
             Tasks.forException(
                 FirebaseFirestoreException(
@@ -292,7 +292,7 @@ class ProfilesRepositoryFirestoreTest {
     `when`(mockCollectionReference.whereGreaterThanOrEqualTo(eq("geohash"), any()))
         .thenReturn(mockQuery)
     `when`(mockQuery.whereLessThanOrEqualTo(eq("geohash"), any())).thenReturn(mockQuery)
-    `when`(mockQuery.get()).thenReturn(Tasks.forResult(mockProfileQuerySnapshot))
+    `when`(mockQuery.get(Source.SERVER)).thenReturn(Tasks.forResult(mockProfileQuerySnapshot))
 
     `when`(mockProfileQuerySnapshot.documents).thenReturn(listOf())
 
@@ -318,7 +318,7 @@ class ProfilesRepositoryFirestoreTest {
     `when`(mockCollectionReference.whereGreaterThanOrEqualTo(eq("geohash"), any()))
         .thenReturn(mockQuery)
     `when`(mockQuery.whereLessThanOrEqualTo(eq("geohash"), any())).thenReturn(mockQuery)
-    `when`(mockQuery.get())
+    `when`(mockQuery.get(Source.SERVER))
         .thenReturn(
             Tasks.forException(
                 FirebaseFirestoreException(

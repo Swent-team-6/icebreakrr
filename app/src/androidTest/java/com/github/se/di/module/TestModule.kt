@@ -21,6 +21,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.GeoPoint
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.QuerySnapshot
+import com.google.firebase.firestore.Source
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.components.SingletonComponent
@@ -159,7 +160,7 @@ object MockFirebaseFirestoreModule {
         .thenReturn(mockProfilesQuery)
     `when`(mockProfilesQuery.whereLessThanOrEqualTo(anyString(), anyString()))
         .thenReturn(mockProfilesQuery)
-    `when`(mockProfilesQuery.get()).thenReturn(mockTaskQuerySnapshotProfiles)
+    `when`(mockProfilesQuery.get(Source.SERVER)).thenReturn(mockTaskQuerySnapshotProfiles)
     doAnswer { invocation ->
           val listener = invocation.arguments[0] as OnSuccessListener<QuerySnapshot>
           listener.onSuccess(mockQuerySnapshotProfiles)

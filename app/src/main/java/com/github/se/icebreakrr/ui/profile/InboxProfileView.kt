@@ -20,6 +20,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material.icons.outlined.Close
+import androidx.compose.material.icons.outlined.LocationOn
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
@@ -44,6 +45,7 @@ import com.github.se.icebreakrr.model.message.MeetingRequestViewModel
 import com.github.se.icebreakrr.model.profile.ProfilesViewModel
 import com.github.se.icebreakrr.model.tags.TagsViewModel
 import com.github.se.icebreakrr.ui.navigation.NavigationActions
+import com.github.se.icebreakrr.ui.navigation.Screen
 import com.github.se.icebreakrr.ui.sections.shared.InfoSection
 import com.github.se.icebreakrr.ui.sections.shared.MessageWhenLoadingProfile
 import com.github.se.icebreakrr.ui.sections.shared.ProfileHeader
@@ -155,6 +157,10 @@ fun InboxProfileViewScreen(
                           location,
                           locationMessage)
                     }
+                  },
+                  {
+                    navigationActions.navigateTo(
+                        Screen.MAP_MEETING_VIEW_LOCATION_SCREEN + "?userId=${profile.uid}")
                   })
               InfoSection(profile = profile, tagsViewModel = tagsViewModel)
             }
@@ -211,6 +217,7 @@ fun AcceptDeclineRequest(
     requestMessage: String,
     onAcceptClick: () -> Unit = {},
     onDeclineClick: () -> Unit = {},
+    onLocationClick: () -> Unit = {}
 ) {
   val configuration = LocalConfiguration.current
   val screenWidth = configuration.screenWidthDp.dp
@@ -273,6 +280,19 @@ fun AcceptDeclineRequest(
                       Icon(
                           imageVector = Icons.Outlined.Close,
                           contentDescription = "Decline Request Button",
+                          tint = Color.White)
+                    }
+                IconButton(
+                    onClick = onLocationClick,
+                    modifier =
+                        Modifier.padding(ACCEPT_DECLINE_ICON_BUTTON_PADDING.dp)
+                            .size(ACCEPT_DECLINE_ICON_BUTTON_SIZE.dp)
+                            .clip(RoundedCornerShape(ACCEPT_DECLINE_ICON_BUTTON_ROUNDED.dp))
+                            .background(Color(ACCEPT_DECLINE_ICON_BUTTON_COLOR))
+                            .testTag("locationButton")) {
+                      Icon(
+                          imageVector = Icons.Outlined.LocationOn,
+                          contentDescription = "Location Request Button",
                           tint = Color.White)
                     }
               }

@@ -61,9 +61,8 @@ class ProfileViewTest {
 
   @Test
   fun testProfileHeaderDisplaysCorrectlyAsUser() {
-
     fakeProfilesViewModel.setLoading(false)
-    fakeProfilesViewModel.setSelectedProfile(Profile.getMockedProfiles()[0])
+    fakeProfilesViewModel.setSelfProfile(Profile.getMockedProfiles()[0])
 
     composeTestRule.setContent {
       ProfileView(fakeProfilesViewModel, tagsViewModel, navigationActions)
@@ -79,10 +78,7 @@ class ProfileViewTest {
 
   @Test
   fun testProfileHeaderDisplaysCorrectlyAsUserLoading() {
-
-    fakeProfilesViewModel.setLoading(true)
-    fakeProfilesViewModel.setSelectedProfile(Profile.getMockedProfiles()[0])
-
+    fakeProfilesViewModel.setLoadingSelf(true)
     composeTestRule.setContent {
       ProfileView(fakeProfilesViewModel, tagsViewModel, navigationActions)
     }
@@ -94,7 +90,7 @@ class ProfileViewTest {
   @Test
   fun testGoBackButtonFunctionality() {
     fakeProfilesViewModel.setLoading(false)
-    fakeProfilesViewModel.setSelectedProfile(Profile.getMockedProfiles()[0])
+    fakeProfilesViewModel.setSelfProfile(Profile.getMockedProfiles()[0])
 
     composeTestRule.setContent {
       ProfileView(fakeProfilesViewModel, tagsViewModel, navigationActions)
@@ -109,7 +105,7 @@ class ProfileViewTest {
   @Test
   fun testEditButtonFunctionality() {
     fakeProfilesViewModel.setLoading(false)
-    fakeProfilesViewModel.setSelectedProfile(Profile.getMockedProfiles()[0])
+    fakeProfilesViewModel.setSelfProfile(Profile.getMockedProfiles()[0])
 
     composeTestRule.setContent {
       ProfileView(fakeProfilesViewModel, tagsViewModel, navigationActions)
@@ -122,7 +118,7 @@ class ProfileViewTest {
   @Test
   fun testInfoSectionDisplaysCorrectly() {
     fakeProfilesViewModel.setLoading(false)
-    fakeProfilesViewModel.setSelectedProfile(Profile.getMockedProfiles()[0])
+    fakeProfilesViewModel.setSelfProfile(Profile.getMockedProfiles()[0])
 
     composeTestRule.setContent {
       ProfileView(fakeProfilesViewModel, tagsViewModel, navigationActions)
@@ -144,7 +140,7 @@ class ProfileViewTest {
   @Test
   fun testProfileDescriptionDisplaysCorrectly() {
     fakeProfilesViewModel.setLoading(false)
-    fakeProfilesViewModel.setSelectedProfile(Profile.getMockedProfiles()[0])
+    fakeProfilesViewModel.setSelfProfile(Profile.getMockedProfiles()[0])
 
     composeTestRule.setContent {
       ProfileView(fakeProfilesViewModel, tagsViewModel, navigationActions)

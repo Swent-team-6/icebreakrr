@@ -5,6 +5,7 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.google.firebase.firestore.GeoPoint
@@ -34,6 +35,7 @@ open class AppDataStore(private val dataStore: DataStore<Preferences>) {
 
     // Default values
     const val DEFAULT_DISCOVERABLE_STATUS = true
+    const val NOTIFICATION_TIME_PREFIX = "last_notification_time_"
   }
 
   /**
@@ -51,6 +53,14 @@ open class AppDataStore(private val dataStore: DataStore<Preferences>) {
   val lastKnownLocation: Flow<GeoPoint?> =
       getPreference(lastKnownLocationKey, "").map { json ->
         if (json.isNotBlank()) gson.fromJson(json, GeoPoint::class.java) else null
+      }
+  val lastNotificationTimes: Flow<Map<String, Long>> =
+      dataStore.data.map { preferences ->
+        preferences
+            .asMap()
+            .filterKeys { it.toString().startsWith(NOTIFICATION_TIME_PREFIX) }
+            .mapKeys { it.key.toString().removePrefix(NOTIFICATION_TIME_PREFIX) }
+            .mapValues { (it.value as Long) }
       }
 
   /**
@@ -126,5 +136,30 @@ open class AppDataStore(private val dataStore: DataStore<Preferences>) {
    */
   private suspend fun <T> removePreference(key: Preferences.Key<T>) {
     dataStore.edit { preferences -> preferences.remove(key) }
+  }
+
+  /**
+   * Saves the timestamp of the last notification sent to a specific user. This is useful for
+   * tracking when notifications were last sent to prevent spam or implement cooldown periods
+   * between notifications.
+   *
+   * @param uid The unique identifier of the user
+   * @param timestamp The time when the notification was sent (in milliseconds since epoch)
+   */
+  suspend fun saveNotificationTime(uid: String, timestamp: Long) {
+    putPreference(longPreferencesKey(NOTIFICATION_TIME_PREFIX + uid), timestamp)
+  }
+
+  /**
+   * Removes the stored notification timestamp for a specific user. This can be used when you want
+   * to reset the notification history for a user, for example when they opt out of notifications or
+   * when testing.
+   *
+   * @param uid The unique identifier of the user whose notification timestamp should be cleared
+   */
+  suspend fun clearNotificationTime(uid: String) {
+    dataStore.edit { preferences ->
+      preferences.remove(longPreferencesKey(NOTIFICATION_TIME_PREFIX + uid))
+    }
   }
 }

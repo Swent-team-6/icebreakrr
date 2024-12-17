@@ -1,5 +1,6 @@
 package com.github.se.icebreakrr.ui.authentication
 
+import android.content.Context
 import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertTextEquals
@@ -17,6 +18,7 @@ import com.github.se.icebreakrr.model.location.ILocationService
 import com.github.se.icebreakrr.model.location.LocationRepository
 import com.github.se.icebreakrr.model.location.LocationViewModel
 import com.github.se.icebreakrr.model.message.MeetingRequestViewModel
+import com.github.se.icebreakrr.model.notification.EngagementNotificationManager
 import com.github.se.icebreakrr.model.profile.ProfilesViewModel
 import com.github.se.icebreakrr.model.tags.TagsRepository
 import com.github.se.icebreakrr.model.tags.TagsViewModel
@@ -61,6 +63,8 @@ class SignInScreenTest {
   private lateinit var meetingRequestViewModel: MeetingRequestViewModel
   private lateinit var functions: FirebaseFunctions
   private lateinit var ourUid: String
+  private lateinit var engagementNotificationManager: EngagementNotificationManager
+  private lateinit var mockContext: Context
 
   @Before
   fun setUp() {
@@ -75,9 +79,11 @@ class SignInScreenTest {
     mockLocationService = mock(ILocationService::class.java)
     mockLocationRepository = mock(LocationRepository::class.java)
     mockPermissionManager = mock(IPermissionManager::class.java)
+    mockContext = mock(Context::class.java)
 
     locationViewModel =
-        LocationViewModel(mockLocationService, mockLocationRepository, mockPermissionManager)
+        LocationViewModel(
+            mockLocationService, mockLocationRepository, mockPermissionManager, mockContext)
     navHostController = mock(NavHostController::class.java)
     navigationActions = NavigationActions(navHostController)
     profileViewModel = mock(ProfilesViewModel::class.java)
@@ -88,6 +94,14 @@ class SignInScreenTest {
     functions = mock(FirebaseFunctions::class.java)
     ourUid = "UserId1"
     meetingRequestViewModel = MeetingRequestViewModel(profileViewModel, functions)
+    engagementNotificationManager =
+        EngagementNotificationManager(
+            profileViewModel,
+            meetingRequestViewModel,
+            appDataStore,
+            filterViewModel,
+            tagsViewModel,
+            permissionManager = mockPermissionManager)
   }
 
   @Test
@@ -96,6 +110,7 @@ class SignInScreenTest {
       SignInScreen(
           profileViewModel,
           meetingRequestViewModel,
+          engagementNotificationManager = engagementNotificationManager,
           navigationActions,
           filterViewModel = filterViewModel,
           tagsViewModel =

@@ -5,9 +5,9 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithTag
-import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import com.github.se.icebreakrr.R
 import com.github.se.icebreakrr.model.message.MeetingRequestViewModel
@@ -130,7 +130,7 @@ class NotificationTest {
       NotificationScreen(navigationActions, profilesViewModel, meetingRequestViewModel)
     }
     composeTestRule.onNodeWithTag("topBar").assertIsDisplayed()
-    composeTestRule.onNodeWithText("Inbox").assertIsDisplayed()
+    composeTestRule.onAllNodesWithText("Inbox").onFirst().assertIsDisplayed()
     composeTestRule.onNodeWithTag("bottomNavigationMenu").assertIsDisplayed()
     composeTestRule.onNodeWithTag("notificationScroll").assertIsDisplayed()
     composeTestRule.onNodeWithTag("notificationFirstText").assertIsDisplayed()
@@ -241,18 +241,9 @@ class NotificationTest {
     }
     composeTestRule.waitForIdle()
     composeTestRule.onNodeWithTag("profileCard").assertIsDisplayed()
-    composeTestRule
-        .onNodeWithTag("MeetingRequestOptionsDropdown_Selected")
-        .assertIsDisplayed()
-        .performClick()
-    composeTestRule
-        .onNodeWithTag("MeetingRequestOptionsDropdown_Option_SENT")
-        .assertIsDisplayed()
-        .performClick()
-    composeTestRule
-        .onNodeWithTag("MeetingRequestOptionsDropdown_Selected")
-        .assertIsDisplayed()
-        .performClick()
+    composeTestRule.onNodeWithTag("inboxButton").assertIsDisplayed().performClick()
+    composeTestRule.onNodeWithTag("profileCard").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("sentButton").assertIsDisplayed().performClick()
   }
 
   // Helper function to create a mock profile

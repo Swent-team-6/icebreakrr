@@ -11,6 +11,7 @@ import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -86,5 +87,77 @@ class AppDataStoreTest {
 
     assertEquals(null, retrievedToken)
     assertEquals(true, isDiscoverable) // Default value is true
+  }
+
+  @Test
+  fun testSaveAndRetrieveNotificationTime() = runTest {
+    val uid = "test_user_123"
+    val timestamp = System.currentTimeMillis()
+
+    // Save notification time
+    appDataStore.saveNotificationTime(uid, timestamp)
+
+    // Retrieve and verify the saved time
+    val retrievedTimes = appDataStore.lastNotificationTimes.first()
+    assertEquals(timestamp, retrievedTimes[uid])
+  }
+
+  @Test
+  fun testClearNotificationTime() = runTest {
+    val uid = "test_user_123"
+    val timestamp = System.currentTimeMillis()
+
+    // First save a notification time
+    appDataStore.saveNotificationTime(uid, timestamp)
+
+    // Verify it was saved
+    var retrievedTimes = appDataStore.lastNotificationTimes.first()
+    assertEquals(timestamp, retrievedTimes[uid])
+
+    // Clear the notification time
+    appDataStore.clearNotificationTime(uid)
+
+    // Verify it was cleared
+    retrievedTimes = appDataStore.lastNotificationTimes.first()
+    assertNull(retrievedTimes[uid])
+  }
+
+  @Test
+  fun testMultipleNotificationTimes() = runTest {
+    val uid1 = "user_1"
+    val uid2 = "user_2"
+    val timestamp1 = System.currentTimeMillis()
+    val timestamp2 = timestamp1 + 1000 // 1 second later
+
+    // Save notification times for multiple users
+    appDataStore.saveNotificationTime(uid1, timestamp1)
+    appDataStore.saveNotificationTime(uid2, timestamp2)
+
+    // Retrieve and verify all times
+    val retrievedTimes = appDataStore.lastNotificationTimes.first()
+    assertEquals(2, retrievedTimes.size)
+    assertEquals(timestamp1, retrievedTimes[uid1])
+    assertEquals(timestamp2, retrievedTimes[uid2])
+  }
+
+  @Test
+  fun testOverwriteNotificationTime() = runTest {
+    val uid = "test_user_123"
+    val timestamp1 = System.currentTimeMillis()
+    val timestamp2 = timestamp1 + 1000 // 1 second later
+
+    // Save initial notification time
+    appDataStore.saveNotificationTime(uid, timestamp1)
+
+    // Verify initial save
+    var retrievedTimes = appDataStore.lastNotificationTimes.first()
+    assertEquals(timestamp1, retrievedTimes[uid])
+
+    // Overwrite with new timestamp
+    appDataStore.saveNotificationTime(uid, timestamp2)
+
+    // Verify overwrite
+    retrievedTimes = appDataStore.lastNotificationTimes.first()
+    assertEquals(timestamp2, retrievedTimes[uid])
   }
 }
