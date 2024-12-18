@@ -36,6 +36,24 @@ class ProfilesRepositoryFirestore(
   private val PERIOD = 1000
   private val UID = "uid"
 
+  enum class GeohashPrecision(val maxRadius: Int, val precision: Int) {
+    ULTRA_PRECISE(1, 9),
+    VERY_HIGH_PRECISION(5, 8),
+    HIGH_PRECISION(20, 7),
+    MODERATE_PRECISION(100, 6),
+    MEDIUM_PRECISION(1000, 5),
+    LOW_PRECISION(10000, 4),
+    BROAD_REGION(50000, 3),
+    VERY_BROAD_REGION(250000, 2),
+    EXTREMELY_COARSE(Int.MAX_VALUE, 1);
+
+    companion object {
+      fun fromRadius(radiusInMeters: Int): Int {
+        return values().first { radiusInMeters <= it.maxRadius }.precision
+      }
+    }
+  }
+
   // Generated with the help of CursorAI
   /**
    * Periodically checks the connection status by attempting to fetch profiles. If the connection
@@ -338,17 +356,7 @@ class ProfilesRepositoryFirestore(
    * @return The appropriate geohash precision as an integer (1 to 9).
    */
   private fun getGeohashPrecision(radiusInMeters: Int): Int {
-    return when {
-      radiusInMeters <= 1 -> 9 // Ultra-precise (~5 m x 5 m)
-      radiusInMeters <= 5 -> 8 // Very high precision (~19 m x 19 m)
-      radiusInMeters <= 20 -> 7 // High precision (~152 m x 152 m)
-      radiusInMeters <= 100 -> 6 // Moderate precision (~600 m x 600 m)
-      radiusInMeters <= 1000 -> 5 // Medium precision (~4.9 km x 4.9 km)
-      radiusInMeters <= 10000 -> 4 // Low precision (~39 km x 19.5 km)
-      radiusInMeters <= 50000 -> 3 // Broad region (~156 km x 156 km)
-      radiusInMeters <= 250000 -> 2 // Very broad region (~1,250 km x 625 km)
-      else -> 1 // Extremely coarse precision (~5,000 km x 5,000 km)
-    }
+    return GeohashPrecision.fromRadius(radiusInMeters)
   }
 
   /**
