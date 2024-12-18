@@ -41,7 +41,7 @@ private const val MARKER_TITLE = "Meeting Request's location"
 private const val OUR_MARKER_TITLE = "Our location"
 private const val OUR_MARKER_TEXT = "You are here"
 private const val TEST_UID = "2"
-private val MARKER_HEIGHT = 40.dp
+private val MARKER_HEIGHT = 42.dp
 private const val DEFAULT_SCREEN_COORDINATE = 0F
 private const val USER_UID = "userId"
 

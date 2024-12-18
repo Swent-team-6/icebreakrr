@@ -24,7 +24,6 @@ class MeetingRequestService : FirebaseMessagingService() {
   private val MSG_RESPONSE_REJECTED = " rejected your meeting request :("
   private val MSG_REQUEST = "Meeting request received!"
   private val DISTANCE_REASON_CANCELLATION = "Reason : You are too far away"
-  private val TIME_REASON_CANCELLATION = "Reason : Request reached timeout"
   private val DEFAULT_REASON_CANCELLATION = "Reason : Unknown"
   private val CANCELLED_REASON_CANCELLATION = "Reason : Sender cancelled request"
   private val CLOSED_APP_REASON_CANCELLATION = "Reason : The other user closed the app"
@@ -34,6 +33,7 @@ class MeetingRequestService : FirebaseMessagingService() {
   private val MEETING_CANCELLATION_NOTIFICATION_ID = 4
   private val ENGAGEMENT_NOTIFICATION_START = "A person with similar interests"
   private val MEETING_CANCELLATION_START = "Cancelled meeting"
+  private val MEETING_REQUEST_CANCELLED_WITH = "Cancelled meeting with "
 
   /**
    * Checks if the application is currently running in the foreground.
@@ -144,7 +144,7 @@ class MeetingRequestService : FirebaseMessagingService() {
                 }
           }
           MeetingRequestManager.meetingRequestViewModel?.stopMeetingRequestTimer(senderUid, this)
-          showNotification("Cancelled meeting with $senderName", stringReason)
+          showNotification(MEETING_REQUEST_CANCELLED_WITH + senderName, stringReason)
         }
       }
       "ENGAGEMENT NOTIFICATION" -> {
