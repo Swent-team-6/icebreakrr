@@ -36,6 +36,24 @@ class ProfilesRepositoryFirestore(
   private val PERIOD = 1000
   private val UID = "uid"
 
+  enum class GeohashPrecision(val maxRadius: Int, val precision: Int) {
+    ULTRA_PRECISE(1, 9),
+    VERY_HIGH_PRECISION(5, 8),
+    HIGH_PRECISION(20, 7),
+    MODERATE_PRECISION(100, 6),
+    MEDIUM_PRECISION(1000, 5),
+    LOW_PRECISION(10000, 4),
+    BROAD_REGION(50000, 3),
+    VERY_BROAD_REGION(250000, 2),
+    EXTREMELY_COARSE(Int.MAX_VALUE, 1);
+
+    companion object {
+      fun fromRadius(radiusInMeters: Int): Int {
+        return values().first { radiusInMeters <= it.maxRadius }.precision
+      }
+    }
+  }
+
   // Generated with the help of CursorAI
   /**
    * Periodically checks the connection status by attempting to fetch profiles. If the connection
@@ -143,7 +161,7 @@ class ProfilesRepositoryFirestore(
       onFailure: (Exception) -> Unit
   ) {
     // Determine the precision of the geohash based on the radius
-    val geohashPrecision = if (radiusInMeters <= 50) 7 else 6
+    val geohashPrecision = getGeohashPrecision(radiusInMeters)
     val centerGeohash = GeoHashUtils.encode(center.latitude, center.longitude, geohashPrecision)
 
     // Get profiles in geohash range
@@ -326,6 +344,19 @@ class ProfilesRepositoryFirestore(
         }
       }
     }
+  }
+
+  /**
+   * Determines the geohash precision based on the specified radius. The precision dynamically
+   * adjusts to optimize coverage and performance:
+   * - Higher precision for smaller radii (more detailed grid).
+   * - Lower precision for larger radii (coarser grid).
+   *
+   * @param radiusInMeters The search radius in meters.
+   * @return The appropriate geohash precision as an integer (1 to 9).
+   */
+  private fun getGeohashPrecision(radiusInMeters: Int): Int {
+    return GeohashPrecision.fromRadius(radiusInMeters)
   }
 
   /**
