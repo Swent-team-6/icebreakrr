@@ -82,7 +82,7 @@ class SettingsFlowEndToEnd {
       composeTestRule.onNodeWithTag("settingsScreen").assertIsDisplayed()
       composeTestRule.onNodeWithTag("logOutButton").assertIsDisplayed().assertHasClickAction()
       composeTestRule
-          .onNodeWithTag("Toggle Discoverability")
+          .onNodeWithTag("switchToggle Discoverability")
           .assertIsDisplayed()
           .assertHasClickAction()
       composeTestRule.onNodeWithTag("blockedUsersButton").assertIsDisplayed().assertHasClickAction()
