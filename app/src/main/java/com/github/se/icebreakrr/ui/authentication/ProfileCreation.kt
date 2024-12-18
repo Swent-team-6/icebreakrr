@@ -82,9 +82,9 @@ fun ProfileCreationScreen(
     profilesViewModel: ProfilesViewModel,
     navigationActions: NavigationActions
 ) {
-    // this makes sure that the back button does nothing, thus preventing
-    // the user to end in an undefined state
-    BackHandler {}
+  // this makes sure that the back button does nothing, thus preventing
+  // the user to end in an undefined state
+  BackHandler {}
 
   val configuration = LocalConfiguration.current
   val screenWidth = configuration.screenWidthDp.dp
@@ -160,18 +160,15 @@ fun ProfileCreationScreen(
   Box(modifier = Modifier.fillMaxSize()) {
     Column(
         modifier =
-        Modifier
-            .fillMaxSize()
-            .padding(ProfileCreationConstants.DEFAULT_PADDING.dp)
-            .verticalScroll(scrollState)
-            .testTag("profileCreationContent"),
+            Modifier.fillMaxSize()
+                .padding(ProfileCreationConstants.DEFAULT_PADDING.dp)
+                .verticalScroll(scrollState)
+                .testTag("profileCreationContent"),
         horizontalAlignment = Alignment.CenterHorizontally) {
           Text(
               text = "Create Profile",
               style = MaterialTheme.typography.headlineMedium,
-              modifier = Modifier
-                  .padding(bottom = 16.dp)
-                  .testTag("profileCreationTitle"))
+              modifier = Modifier.padding(bottom = 16.dp).testTag("profileCreationTitle"))
 
           // Full Name Input
           OutlinedTextField(
@@ -181,10 +178,9 @@ fun ProfileCreationScreen(
                 Text("Full Name", fontSize = ProfileCreationConstants.INPUT_LABEL_FONT_SIZE.sp)
               },
               modifier =
-              Modifier
-                  .fillMaxWidth()
-                  .padding(vertical = ProfileCreationConstants.VERTICAL_SPACING.dp)
-                  .testTag("fullName"),
+                  Modifier.fillMaxWidth()
+                      .padding(vertical = ProfileCreationConstants.VERTICAL_SPACING.dp)
+                      .testTag("fullName"),
               textStyle = inputTextStyle)
 
           // Birthdate Input
@@ -195,10 +191,9 @@ fun ProfileCreationScreen(
                 Text("Birthday", fontSize = ProfileCreationConstants.INPUT_LABEL_FONT_SIZE.sp)
               },
               modifier =
-              Modifier
-                  .fillMaxWidth()
-                  .padding(vertical = ProfileCreationConstants.VERTICAL_SPACING.dp)
-                  .testTag("birthdate"),
+                  Modifier.fillMaxWidth()
+                      .padding(vertical = ProfileCreationConstants.VERTICAL_SPACING.dp)
+                      .testTag("birthdate"),
               textStyle = inputTextStyle,
               readOnly = true,
               trailingIcon = {
@@ -224,10 +219,9 @@ fun ProfileCreationScreen(
                 Text("Catchphrase", fontSize = ProfileCreationConstants.INPUT_LABEL_FONT_SIZE.sp)
               },
               modifier =
-              Modifier
-                  .fillMaxWidth()
-                  .padding(vertical = ProfileCreationConstants.VERTICAL_SPACING.dp)
-                  .testTag("catchphrase"),
+                  Modifier.fillMaxWidth()
+                      .padding(vertical = ProfileCreationConstants.VERTICAL_SPACING.dp)
+                      .testTag("catchphrase"),
               textStyle = inputTextStyle)
 
           // Description Input
@@ -238,10 +232,9 @@ fun ProfileCreationScreen(
                 Text("Description", fontSize = ProfileCreationConstants.INPUT_LABEL_FONT_SIZE.sp)
               },
               modifier =
-              Modifier
-                  .fillMaxWidth()
-                  .padding(vertical = ProfileCreationConstants.VERTICAL_SPACING.dp)
-                  .testTag("description"),
+                  Modifier.fillMaxWidth()
+                      .padding(vertical = ProfileCreationConstants.VERTICAL_SPACING.dp)
+                      .testTag("description"),
               textStyle = inputTextStyle,
               minLines = ProfileCreationConstants.DESCRIPTION_MIN_LINES)
 
@@ -252,25 +245,22 @@ fun ProfileCreationScreen(
               text = "Gender",
               style = MaterialTheme.typography.titleMedium,
               modifier =
-              Modifier
-                  .fillMaxWidth()
-                  .padding(bottom = ProfileCreationConstants.VERTICAL_SPACING.dp))
+                  Modifier.fillMaxWidth()
+                      .padding(bottom = ProfileCreationConstants.VERTICAL_SPACING.dp))
 
           // Gender Selection Buttons Row
           Row(
               modifier =
-              Modifier
-                  .fillMaxWidth()
-                  .padding(vertical = ProfileCreationConstants.VERTICAL_SPACING.dp)
-                  .testTag("genderSelection"),
+                  Modifier.fillMaxWidth()
+                      .padding(vertical = ProfileCreationConstants.VERTICAL_SPACING.dp)
+                      .testTag("genderSelection"),
               horizontalArrangement = Arrangement.SpaceEvenly) {
                 Gender.values().forEach { gender ->
                   OutlinedButton(
                       onClick = { selectedGender = gender },
                       modifier =
-                      Modifier
-                          .weight(1f)
-                          .padding(horizontal = ProfileCreationConstants.VERTICAL_SPACING.dp),
+                          Modifier.weight(1f)
+                              .padding(horizontal = ProfileCreationConstants.VERTICAL_SPACING.dp),
                       colors =
                           ButtonDefaults.outlinedButtonColors(
                               containerColor =
@@ -352,10 +342,9 @@ fun ProfileCreationScreen(
           }
         },
         modifier =
-        Modifier
-            .align(Alignment.TopEnd)
-            .padding(ProfileCreationConstants.DEFAULT_PADDING.dp)
-            .testTag("confirmButton")) {
+            Modifier.align(Alignment.TopEnd)
+                .padding(ProfileCreationConstants.DEFAULT_PADDING.dp)
+                .testTag("confirmButton")) {
           Icon(
               imageVector = Icons.Default.Check,
               contentDescription = "Confirm",
