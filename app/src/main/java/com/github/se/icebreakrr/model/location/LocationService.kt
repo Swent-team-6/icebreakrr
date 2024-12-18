@@ -52,7 +52,7 @@ class LocationService(
   }
 
   // LocationCallback instance used to handle location updates and availability changes
-  private val locationCallback: LocationCallback =
+  val locationCallback: LocationCallback =
       object : LocationCallback() {
         override fun onLocationResult(locationResult: LocationResult) {
           locationResult.lastLocation?.let { newLocation ->
@@ -182,6 +182,15 @@ class LocationService(
     stopSelf()
   }
 
+  /** Creates the notification channel required for Android Oreo and later. */
+  override fun createNotificationChannel() {
+    val channel =
+        NotificationChannel(
+            NOTIFICATION_CHANNEL_ID, "Location Service", NotificationManager.IMPORTANCE_LOW)
+    val manager = getSystemService(NotificationManager::class.java)
+    manager?.createNotificationChannel(channel)
+  }
+
   /**
    * Creates a notification for the foreground service.
    *
@@ -194,14 +203,5 @@ class LocationService(
         .setSmallIcon(android.R.drawable.ic_menu_mylocation)
         .setOngoing(true)
         .build()
-  }
-
-  /** Creates the notification channel required for Android Oreo and later. */
-  private fun createNotificationChannel() {
-    val channel =
-        NotificationChannel(
-            NOTIFICATION_CHANNEL_ID, "Location Service", NotificationManager.IMPORTANCE_LOW)
-    val manager = getSystemService(NotificationManager::class.java)
-    manager?.createNotificationChannel(channel)
   }
 }
