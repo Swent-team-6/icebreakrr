@@ -118,7 +118,7 @@ class MeetingRequestServiceTest {
         mapOf(
             "title" to "MEETING CANCELLATION",
             "senderUID" to "1",
-            "message" to "hello",
+            "message" to MeetingRequestViewModel.CancellationType.CANCELLED.toString(),
             "senderName" to "John Doe")
     `when`(mockRemoteMessage.data).thenReturn(data)
     assertNotNull(MeetingRequestManager.meetingRequestViewModel)
