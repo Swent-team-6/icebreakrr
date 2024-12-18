@@ -220,7 +220,7 @@ class TagViewTest {
   fun testExtendedTag() {
     composeTestRule.setContent { ExtendTag(TagStyle(), onClickMock) }
     composeTestRule.onNodeWithTag("testExtendTag").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("testExtendTag").assertTextEquals("...")
+    composeTestRule.onNodeWithTag("testExtendTag").assertTextEquals(" ... ")
     composeTestRule.onNodeWithTag("testExtendTag").performClick()
     verify(onClickMock).invoke()
   }
@@ -249,11 +249,11 @@ class TagViewTest {
 
     composeTestRule.setContent { ExtendTag(tagStyle) {} }
 
-    // Verify that the text is displayed with "..."
-    composeTestRule.onNodeWithText("...").assertIsDisplayed()
+    // Verify that the text is displayed with " ... "
+    composeTestRule.onNodeWithText(" ... ").assertIsDisplayed()
 
     // Verify that the text color and other properties are applied
-    composeTestRule.onNodeWithText("...").assertExists().assertHasClickAction()
+    composeTestRule.onNodeWithText(" ... ").assertExists().assertHasClickAction()
   }
 
   @Test
@@ -261,7 +261,7 @@ class TagViewTest {
     composeTestRule.setContent { RowOfTags(selectedTag, TagStyle()) }
     composeTestRule.onAllNodesWithTag("testTag").onFirst().assertIsDisplayed()
     composeTestRule.onNodeWithTag("testExtendTag").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("testExtendTag").assertTextEquals("...")
+    composeTestRule.onNodeWithTag("testExtendTag").assertTextEquals(" ... ")
     composeTestRule.onAllNodesWithTag("testTag").assertCountEquals(3)
     composeTestRule.onNodeWithTag("testExtendTag").performClick()
     composeTestRule.onAllNodesWithTag("testTag").assertCountEquals(5)
@@ -294,7 +294,7 @@ class TagViewTest {
     composeTestRule.onAllNodesWithText("#coca-cola").assertCountEquals(1)
 
     // Assert that "Extend" button is displayed
-    composeTestRule.onNodeWithText("...").assertIsDisplayed()
+    composeTestRule.onNodeWithText(" ... ").assertIsDisplayed()
 
     // Assert that other tags are not displayed initially
     composeTestRule.onAllNodesWithText("#pepsi").assertCountEquals(0)
@@ -316,7 +316,7 @@ class TagViewTest {
     }
 
     // Simulate clicking the "Extend" button
-    composeTestRule.onNodeWithText("...").performClick()
+    composeTestRule.onNodeWithText(" ... ").performClick()
 
     // Assert that all tags are displayed after expanding
     composeTestRule.onAllNodesWithText("#salsa").assertCountEquals(1)
@@ -362,7 +362,7 @@ class TagViewTest {
     }
     composeTestRule.onAllNodesWithTag("clickTestTag").onFirst().assertIsDisplayed()
     composeTestRule.onNodeWithTag("testExtendTag").assertIsDisplayed()
-    composeTestRule.onNodeWithTag("testExtendTag").assertTextEquals("...")
+    composeTestRule.onNodeWithTag("testExtendTag").assertTextEquals(" ... ")
     composeTestRule.onAllNodesWithTag("clickTestTag").assertCountEquals(3)
     composeTestRule.onNodeWithTag("testExtendTag").performClick()
     composeTestRule.onAllNodesWithTag("clickTestTag").assertCountEquals(5)

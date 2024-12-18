@@ -122,7 +122,7 @@ fun ExtendTag(tagStyle: TagStyle, onClick: () -> Unit) {
       color = tagStyle.backGroundColor,
       shape = RoundedCornerShape(CLICKABLE_TAG_CORNER_RADIUS)) {
         Text(
-            text = "  ...  ",
+            text = " ... ",
             color = tagStyle.textColor,
             fontSize = tagStyle.fontSize,
             modifier = Modifier.padding(TAG_BOX_PADDING),
