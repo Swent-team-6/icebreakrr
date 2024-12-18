@@ -3,6 +3,7 @@ package com.github.se.icebreakrr.model.location
 import android.location.Location
 import android.os.Looper
 import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationAvailability
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
@@ -123,5 +124,95 @@ class LocationServiceTest {
 
     // Assert
     verify(mockFusedLocationProviderClient).removeLocationUpdates(any<LocationCallback>())
+  }
+
+  @Test
+  fun `test startLocationUpdates handles error when requestLocationUpdates fails`() =
+      runBlockingTest {
+        // Arrange
+        // Mock lastLocation to return a valid task
+        val mockTask: Task<Location> = Tasks.forResult(null)
+        whenever(mockFusedLocationProviderClient.lastLocation).thenReturn(mockTask)
+
+        // Mock requestLocationUpdates to throw an exception
+        whenever(
+                mockFusedLocationProviderClient.requestLocationUpdates(
+                    any(), any<LocationCallback>(), eq(Looper.getMainLooper())))
+            .thenThrow(IllegalStateException("Mock exception"))
+
+        var errorMessage: String? = null
+
+        // Act
+        locationService.startLocationUpdates(
+            onLocationUpdate = { fail("Location update should not be called") },
+            onError = { error -> errorMessage = error })
+
+        // Assert
+        assertEquals("Error with location request: Mock exception", errorMessage)
+      }
+
+  @Test
+  fun `test locationCallback updates location correctly`() = runBlockingTest {
+    // Arrange
+    val mockLocation =
+        mock<Location> {
+          on { latitude } doReturn 37.4219983
+          on { longitude } doReturn -122.084
+        }
+
+    val mockTask: Task<Location> = Tasks.forResult(mockLocation)
+    whenever(mockFusedLocationProviderClient.lastLocation).thenReturn(mockTask)
+
+    // Mock requestLocationUpdates to invoke the callback with the mocked location
+    whenever(
+            mockFusedLocationProviderClient.requestLocationUpdates(
+                any(), any<LocationCallback>(), eq(Looper.getMainLooper())))
+        .thenAnswer { invocation ->
+          val callback = invocation.arguments[1] as LocationCallback
+          val locationResult = mock<LocationResult> { on { lastLocation } doReturn mockLocation }
+          callback.onLocationResult(locationResult)
+          null
+        }
+
+    var locationUpdated: Location? = null
+    locationService.startLocationUpdates(
+        onLocationUpdate = { location -> locationUpdated = location },
+        onError = { fail("Error callback invoked") })
+
+    // Act
+    val mockLocationResult = mock<LocationResult> { on { lastLocation } doReturn mockLocation }
+    locationService.locationCallback.onLocationResult(mockLocationResult)
+
+    // Assert
+    assertNotNull(locationUpdated)
+    locationUpdated?.latitude?.let { assertEquals(37.4219983, it, 0.0) }
+    locationUpdated?.longitude?.let { assertEquals(-122.084, it, 0.0) }
+  }
+
+  @Test
+  fun `test locationCallback handles unavailable location`() = runBlockingTest {
+    // Arrange
+    var errorMessage: String? = null
+    locationService.startLocationUpdates(
+        onLocationUpdate = { fail("Location update should not be called") },
+        onError = { error -> errorMessage = error })
+
+    val mockAvailability = mock<LocationAvailability> { on { isLocationAvailable } doReturn false }
+
+    // Act
+    locationService.locationCallback.onLocationAvailability(mockAvailability)
+
+    // Assert
+    assertEquals("Location service is currently unavailable.", errorMessage)
+  }
+
+  @Test
+  fun `test createNotificationChannel does not throw exceptions`() {
+    // Act
+    try {
+      locationService.createNotificationChannel()
+    } catch (e: Exception) {
+      fail("Notification channel creation should not throw exceptions")
+    }
   }
 }
