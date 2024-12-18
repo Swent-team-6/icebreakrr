@@ -99,6 +99,6 @@ fun Badge(count: Int, tag: String) {
             text = count.toString(),
             color = Color.White,
             style = MaterialTheme.typography.labelSmall,
-            modifier = Modifier.testTag(tag))
+        )
       }
 }

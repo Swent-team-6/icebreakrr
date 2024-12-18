@@ -371,6 +371,7 @@ class MeetingRequestViewModel(
    * @param onComplete : callback function to remove racing conditions
    */
   fun updateInboxOfMessages(onComplete: () -> Unit) {
+    Log.d("TESTEST", "[updateInboxOfMessages] --------------")
     profilesViewModel.getSelfProfile {
       profilesViewModel.getInboxOfSelfProfile {
         profilesViewModel.getMessageCancellationUsers { onComplete() }

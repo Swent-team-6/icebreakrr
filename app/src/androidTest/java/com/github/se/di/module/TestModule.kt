@@ -1,5 +1,6 @@
 package com.github.se.di.module
 
+import android.util.Log
 import com.github.se.icebreakrr.di.module.AuthStateListenerModule
 import com.github.se.icebreakrr.di.module.FirebaseAuthModule
 import com.github.se.icebreakrr.di.module.FirestoreModule
@@ -197,6 +198,10 @@ object MockFirebaseFirestoreModule {
         .thenReturn(myProfile.profilePictureUrl)
     `when`(mockMyDocumentSnapshot.getString("fcmToken")).thenReturn(myProfile.fcmToken)
     `when`(mockMyDocumentSnapshot.getGeoPoint("location")).thenReturn(globalMockGeopoint)
+    `when`(mockMyDocumentSnapshot.get("meetingRequestInbox"))
+        .thenReturn(myProfile.meetingRequestInbox)
+    `when`(mockMyDocumentSnapshot.get("meetingRequestChosenLocalisation"))
+        .thenReturn(myProfile.meetingRequestChosenLocalisation)
 
     // actions in updateProfile when uid is our uid :
     val mockMyTask = mock(Task::class.java) as Task<Void>
@@ -220,10 +225,22 @@ object MockFirebaseFirestoreModule {
           `when`(mockMyDocumentSnapshot.get("hasBlocked")).thenReturn(myProfile.hasBlocked)
           `when`(mockMyDocumentSnapshot.get("hasAlreadyMet")).thenReturn(myProfile.hasAlreadyMet)
           `when`(mockMyDocumentSnapshot.get("reports")).thenReturn(myProfile.reports)
+          `when`(mockMyDocumentSnapshot.get("meetingRequestInbox"))
+              .thenReturn(myProfile.meetingRequestInbox)
+          `when`(mockMyDocumentSnapshot.get("meetingRequestChosenLocalisation"))
+              .thenReturn(myProfile.meetingRequestChosenLocalisation)
+          Log.d("TESTEST", "[TestModule] update my profile ${myProfile}")
           mockMyTask
         }
         .`when`(mockMyDocumentReference)
         .set(any())
+    doAnswer { invocation ->
+          val onComplete = invocation.arguments[0] as OnCompleteListener<Void>
+          onComplete.onComplete(mockMyTask)
+          mockMyTask
+        }
+        .`when`(mockMyTask)
+        .addOnCompleteListener(anyOrNull())
     `when`(mockMyTask.isSuccessful).thenReturn(true)
 
     // actions when get profile by uid of around you :
