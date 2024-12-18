@@ -266,7 +266,11 @@ class MainActivity : ComponentActivity() {
 
   override fun onDestroy() {
     super.onDestroy()
-    // Stop monitoring when app closed
+
+    // Stop location update when app closed
+    locationViewModel.stopLocationUpdates()
+
+    // Stop monitoring engagement when app closed
     engagementNotificationManager.stopMonitoring()
 
     // Cancel all meeting requests and clear the heatmap

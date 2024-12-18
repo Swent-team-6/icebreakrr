@@ -145,47 +145,50 @@ fun AroundYouScreen(
   }
 
   // Start monitoring when the screen is active
-  LaunchedEffect(isConnected.value, userLocation.value) {
-    // Show a popup to explain why the app need the location permission
-    if (!hasLocationPermission) {
-      showPopup = true
-    } else {
-      locationViewModel.tryToStartLocationUpdates()
-    }
+  LaunchedEffect(isConnected.value, userLocation.value, isDiscoverable) {
+    if (isDiscoverable) {
+      // Show a popup to explain why the app need the location permission
+      if (!hasLocationPermission) {
+        showPopup = true
+      } else {
+        locationViewModel.tryToStartLocationUpdates()
+      }
 
-    // Show message to request background location permission
-    if (hasLocationPermission && !hasBackgroundLocationPermission) {
-      showBackgroundPermissionPopup = true
-    }
+      // Show message to request background location permission
+      if (hasLocationPermission && !hasBackgroundLocationPermission) {
+        showBackgroundPermissionPopup = true
+      }
 
-    // Check network availability in non-test mode
-    if (!isTestMode && !isNetworkAvailable()) {
-      profilesViewModel.updateIsConnected(false)
-      return@LaunchedEffect // Stop execution if no network is available
-    }
+      // Check network availability in non-test mode
+      if (!isTestMode && !isNetworkAvailable()) {
+        profilesViewModel.updateIsConnected(false)
+        return@LaunchedEffect // Stop execution if no network is available
+      }
 
-    // Proceed only if location permission is granted
-    if (hasLocationPermission) {
-      // Start location updates
-      locationViewModel.tryToStartLocationUpdates()
+      // Proceed only if location permission is granted
+      if (hasLocationPermission) {
+        // Start location updates
+        locationViewModel.tryToStartLocationUpdates()
 
-      // Loop to periodically refresh data
-      while (true) {
-        val location = userLocation.value ?: GeoPoint(DEFAULT_USER_LATITUDE, DEFAULT_USER_LONGITUDE)
+        // Loop to periodically refresh data
+        while (true) {
+          val location =
+              userLocation.value ?: GeoPoint(DEFAULT_USER_LATITUDE, DEFAULT_USER_LONGITUDE)
 
-        // Fetch filtered profiles within a radius
-        profilesViewModel.getFilteredProfilesInRadius(
-            center = location,
-            radiusInMeters = filterViewModel.selectedRadius.value,
-            genders = filterViewModel.selectedGenders.value,
-            ageRange = filterViewModel.ageRange.value,
-            tags = tagsViewModel.filteredTags.value)
+          // Fetch filtered profiles within a radius
+          profilesViewModel.getFilteredProfilesInRadius(
+              center = location,
+              radiusInMeters = filterViewModel.selectedRadius.value,
+              genders = filterViewModel.selectedGenders.value,
+              ageRange = filterViewModel.ageRange.value,
+              tags = tagsViewModel.filteredTags.value)
 
-        // Fetch profiles within the messaging radius
-        profilesViewModel.getMessagingRadiusProfile(location)
+          // Fetch profiles within the messaging radius
+          profilesViewModel.getMessagingRadiusProfile(location)
 
-        // Pause before the next update
-        delay(REFRESH_DELAY)
+          // Pause before the next update
+          delay(REFRESH_DELAY)
+        }
       }
     }
   }
@@ -219,7 +222,7 @@ fun AroundYouScreen(
       LocationPermissionPopup(
           onDismiss = {
             showPopup = false
-            locationViewModel.tryToStartLocationUpdates()
+            if (isDiscoverable) locationViewModel.tryToStartLocationUpdates()
           })
     }
 

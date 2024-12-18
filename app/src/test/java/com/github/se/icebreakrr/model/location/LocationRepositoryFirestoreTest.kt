@@ -20,6 +20,7 @@ import org.mockito.Mockito.atLeastOnce
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
+import org.mockito.kotlin.anyOrNull
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows.shadowOf
 
@@ -50,6 +51,8 @@ class LocationRepositoryFirestoreTest {
 
     `when`(mockAuth.currentUser).thenReturn(mockUser)
     `when`(mockUser.uid).thenReturn("testUserId")
+
+    `when`(mockDocumentReference.update(anyString(), anyOrNull())).thenReturn(Tasks.forResult(null))
 
     locationRepository = LocationRepositoryFirestore(mockFirestore, mockAuth)
   }
@@ -95,6 +98,47 @@ class LocationRepositoryFirestoreTest {
         .thenReturn(Tasks.forException(Exception("Test exception")))
 
     locationRepository.setUserPosition(testGeoPoint)
+
+    shadowOf(Looper.getMainLooper()).idle()
+  }
+
+  @Test
+  fun removeUserGeohash_shouldLogWarningWhenUserNotAuthenticated() {
+    `when`(mockAuth.currentUser).thenReturn(null)
+
+    locationRepository.removeUserGeohash()
+
+    // Verify that the currentUser check is made
+    verify(mockAuth, atLeastOnce()).currentUser
+  }
+
+  @Test
+  fun removeUserGeohash_shouldRemoveGeohashFieldWhenUserIsAuthenticated() {
+    val mockUserId = "testUserId"
+
+    `when`(mockAuth.currentUser?.uid).thenReturn(mockUserId)
+    `when`(mockFirestore.collection("profiles").document(mockUserId))
+        .thenReturn(mockDocumentReference)
+    `when`(mockDocumentReference.update("geohash", null)).thenReturn(Tasks.forResult(null))
+
+    locationRepository.removeUserGeohash()
+
+    shadowOf(Looper.getMainLooper()).idle()
+
+    verify(mockDocumentReference).update("geohash", null)
+  }
+
+  @Test
+  fun removeUserGeohash_shouldCallFailureCallback_onError() {
+    val mockUserId = "testUserId"
+
+    `when`(mockAuth.currentUser?.uid).thenReturn(mockUserId)
+    `when`(mockFirestore.collection("profiles").document(mockUserId))
+        .thenReturn(mockDocumentReference)
+    `when`(mockDocumentReference.update(mapOf("geohash" to null)))
+        .thenReturn(Tasks.forException(Exception("Test exception")))
+
+    locationRepository.removeUserGeohash()
 
     shadowOf(Looper.getMainLooper()).idle()
   }

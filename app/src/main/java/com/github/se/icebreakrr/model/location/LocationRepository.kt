@@ -9,4 +9,7 @@ interface LocationRepository {
    * @param newLocation The new geographic location of the user as a `GeoPoint`.
    */
   fun setUserPosition(newLocation: GeoPoint)
+
+  /** Removes the geohash field for the current user in Firestore. */
+  fun removeUserGeohash()
 }
