@@ -128,7 +128,9 @@ class ProfileViewTest {
     composeTestRule.onNodeWithTag("infoSection").assertIsDisplayed()
 
     // Verify that the catchphrase is displayed
-    composeTestRule.onNodeWithText("«${Profile.getMockedProfiles()[0].catchPhrase}»").assertIsDisplayed()
+    composeTestRule
+        .onNodeWithText("«${Profile.getMockedProfiles()[0].catchPhrase}»")
+        .assertIsDisplayed()
 
     // Verify that all tags are displayed
     composeTestRule.onNodeWithTag("tagSection").assertIsDisplayed()
