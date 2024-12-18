@@ -79,6 +79,8 @@ private val CONTENT_FONT_SIZE = 20f
 private val CONTENT_LINE_HEIGHT = 25f
 private val BUTTONS_ELEVATION = 2.dp
 private val ICON_SPACING = 8.dp
+private val AI_OPTIONS_SPACING = 20.dp
+private val AI_OPTIONS_TOP_SPACING = 30.dp
 private const val USER_ALREADY_SEND_REQUEST_TOAST_MESSAGE =
     "this user has already send you a meeting request!"
 
@@ -165,7 +167,7 @@ fun OtherProfileView(
 
                           Icon(
                               painter = painterResource(id = R.drawable.sparkles),
-                              contentDescription = "AI icon",
+                              contentDescription = stringResource(R.string.ai_icon),
                               tint = MaterialTheme.colorScheme.onPrimary)
                         }
                   }
@@ -276,7 +278,7 @@ fun BottomSheet(aiState: AiViewModel.UiState, onDismissRequest: () -> Unit, onAi
                       lineHeight = TextUnit(CONTENT_LINE_HEIGHT, TextUnitType.Sp),
                       modifier = Modifier.testTag("aiResponse"))
 
-                  Spacer(modifier = Modifier.height(30.dp))
+                  Spacer(modifier = Modifier.height(AI_OPTIONS_TOP_SPACING))
 
                   Row(
                       horizontalArrangement = Arrangement.Center,
@@ -285,10 +287,12 @@ fun BottomSheet(aiState: AiViewModel.UiState, onDismissRequest: () -> Unit, onAi
                             onClick = onAiRetry,
                             elevation = ButtonDefaults.buttonElevation(BUTTONS_ELEVATION),
                             modifier = Modifier.testTag("aiRetry")) {
-                              Icon(imageVector = Icons.Filled.Refresh, contentDescription = "Retry")
+                              Icon(
+                                  imageVector = Icons.Filled.Refresh,
+                                  contentDescription = stringResource(R.string.ai_retry))
                             }
 
-                        Spacer(modifier = Modifier.width(20.dp))
+                        Spacer(modifier = Modifier.width(AI_OPTIONS_SPACING))
 
                         Button(
                             onClick = { clipboardManager.setText(AnnotatedString(aiState.data)) },
@@ -296,7 +300,7 @@ fun BottomSheet(aiState: AiViewModel.UiState, onDismissRequest: () -> Unit, onAi
                             modifier = Modifier.testTag("aiCopy")) {
                               Icon(
                                   painter = painterResource(id = R.drawable.copy_icon),
-                                  contentDescription = "Copy")
+                                  contentDescription = stringResource(R.string.ai_copy))
                             }
                       }
                 }
