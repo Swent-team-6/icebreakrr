@@ -109,13 +109,16 @@ class LocationService(
   }
 
   /**
-   * Starts high-accuracy location updates.
+   * Starts high-accuracy location updates and sets the initial location immediately.
    *
-   * Requests location updates, invoking [onLocationUpdate] with each new [Location]. Returns `true`
-   * if updates start successfully, `false` otherwise.
+   * This function begins by retrieving the last known location or, if unavailable, requesting the
+   * current location. The retrieved location is immediately passed to the provided callback
+   * `onLocationUpdate`. Subsequently, it starts regular location updates to track the user's
+   * movement in real-time.
    *
-   * @param onLocationUpdate Callback with the latest [Location].
-   * @return `true` if updates started, `false` if an error occurred.
+   * @param onLocationUpdate Callback invoked with the latest [Location].
+   * @param onError Callback invoked with an error message in case of failure.
+   * @return `true` if updates started successfully, `false` otherwise.
    */
   @SuppressLint("MissingPermission")
   override fun startLocationUpdates(
@@ -130,6 +133,35 @@ class LocationService(
               .setMinUpdateIntervalMillis(MIN_UPDATE_INTERVAL_MS)
               .setWaitForAccurateLocation(true)
               .build()
+
+      // Request the last known location immediately
+      fusedLocationProviderClient.lastLocation
+          .addOnSuccessListener { lastLocation ->
+            if (lastLocation != null) {
+              this.lastKnownLocation = lastLocation
+              onLocationUpdate.invoke(lastLocation)
+            } else {
+              // In case there is no last known location, request an immediate update
+              fusedLocationProviderClient
+                  .getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, null)
+                  .addOnSuccessListener { currentLocation ->
+                    if (currentLocation != null) {
+                      this.lastKnownLocation = currentLocation
+                      onLocationUpdate.invoke(currentLocation)
+                    } else {
+                      onError?.invoke("Failed to retrieve initial location.")
+                    }
+                  }
+                  .addOnFailureListener { e ->
+                    onError?.invoke("Error retrieving current location: ${e.message}")
+                  }
+            }
+          }
+          .addOnFailureListener { e ->
+            onError?.invoke("Error retrieving last known location: ${e.message}")
+          }
+
+      // Start regular location updates
       fusedLocationProviderClient.requestLocationUpdates(
           locationRequest, locationCallback, Looper.getMainLooper())
       Log.d("LocationService", "Location updates started")
