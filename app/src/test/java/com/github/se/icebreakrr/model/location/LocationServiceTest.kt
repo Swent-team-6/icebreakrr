@@ -10,6 +10,7 @@ import com.google.android.gms.location.LocationResult
 import com.google.android.gms.tasks.Task
 import com.google.android.gms.tasks.Tasks
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runBlockingTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
@@ -214,5 +215,86 @@ class LocationServiceTest {
     } catch (e: Exception) {
       fail("Notification channel creation should not throw exceptions")
     }
+  }
+
+  @Test
+  fun test_startLocationUpdates_invokesCallbackWithLastLocation() = runBlockingTest {
+    // Arrange
+    val mockLocation =
+        mock<Location> {
+          on { latitude } doReturn 37.4219983
+          on { longitude } doReturn -122.084
+        }
+
+    val mockTask: Task<Location> = mock()
+    // Mock the addOnSuccessListener behavior
+    whenever(mockTask.addOnSuccessListener(any())).thenAnswer { invocation ->
+      val listener =
+          invocation.arguments[0] as com.google.android.gms.tasks.OnSuccessListener<Location>
+      listener.onSuccess(mockLocation) // Simulate success
+      mockTask
+    }
+    whenever(mockFusedLocationProviderClient.lastLocation).thenReturn(mockTask)
+
+    var locationUpdated: Location? = null
+
+    // Act
+    val started =
+        locationService.startLocationUpdates(
+            onLocationUpdate = { location -> locationUpdated = location },
+            onError = { fail("Error callback invoked: $it") })
+
+    // Advance time to ensure the coroutine completes
+    advanceUntilIdle()
+
+    // Assert
+    assertTrue(started) // Ensure location updates started successfully
+    assertNotNull(locationUpdated) // Ensure the location was updated
+    locationUpdated?.latitude?.let { assertEquals(37.4219983, it, 0.0) }
+    locationUpdated?.longitude?.let { assertEquals(-122.084, it, 0.0) }
+
+    // Verify interaction with FusedLocationProviderClient
+    verify(mockFusedLocationProviderClient).lastLocation
+  }
+
+  @Test
+  fun `test getCurrentLocation provides current location successfully`() = runBlockingTest {
+    // Arrange
+    val mockLocation =
+        mock<Location> {
+          on { latitude } doReturn 37.4219983
+          on { longitude } doReturn -122.084
+        }
+
+    // Mock the task returned by getLastLocation
+    val mockTask: Task<Location> = mock()
+    whenever(mockTask.addOnSuccessListener(any())).thenAnswer { invocation ->
+      val listener =
+          invocation.arguments[0] as com.google.android.gms.tasks.OnSuccessListener<Location>
+      listener.onSuccess(mockLocation) // Simulate success
+      mockTask
+    }
+
+    whenever(mockFusedLocationProviderClient.getLastLocation()).thenReturn(mockTask)
+
+    var locationUpdated: Location? = null
+
+    // Act
+    val started =
+        locationService.startLocationUpdates(
+            onLocationUpdate = { location -> locationUpdated = location },
+            onError = { fail("Error callback invoked: $it") })
+
+    // Advance coroutine time to ensure completion
+    advanceUntilIdle()
+
+    // Assert
+    assertTrue(started)
+    assertNotNull(locationUpdated)
+    locationUpdated?.latitude?.let { assertEquals(37.4219983, it, 0.0) }
+    locationUpdated?.longitude?.let { assertEquals(-122.084, it, 0.0) }
+
+    // Verify the interaction with getLastLocation
+    verify(mockFusedLocationProviderClient).getLastLocation()
   }
 }
