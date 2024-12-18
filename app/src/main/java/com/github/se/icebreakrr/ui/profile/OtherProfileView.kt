@@ -284,6 +284,7 @@ fun BottomSheet(aiState: AiViewModel.UiState, onDismissRequest: () -> Unit, onAi
                         Button(
                             onClick = onAiRetry,
                             elevation = ButtonDefaults.buttonElevation(BUTTONS_ELEVATION),
+                            modifier = Modifier.testTag("aiRetry")
                         ) {
                           Icon(imageVector = Icons.Filled.Refresh, contentDescription = "Retry")
                         }
@@ -293,6 +294,7 @@ fun BottomSheet(aiState: AiViewModel.UiState, onDismissRequest: () -> Unit, onAi
                         Button(
                             onClick = { clipboardManager.setText(AnnotatedString(aiState.data)) },
                             elevation = ButtonDefaults.buttonElevation(BUTTONS_ELEVATION),
+                            modifier = Modifier.testTag("aiCopy")
                         ) {
                           Icon(
                               painter = painterResource(id = R.drawable.copy_icon),
