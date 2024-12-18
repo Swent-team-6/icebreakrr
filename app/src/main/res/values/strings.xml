@@ -43,6 +43,9 @@
     <string name="unblock_confirm_message">Are you sure you want to unblock %1$s?</string>
 
     <string name="AI_button">See Discussion Starters</string>
+    <string name="ai_retry">Retry</string>
+    <string name="ai_copy">Copy</string>
+    <string name="ai_icon">AI icon</string>
     <string name="Already_Met_Button_Text">"I Already Met This Person"</string>
     <string name="Already_Met_Settings_Button">People You Already Met</string>
     <string name="Already_Met_Delete_Accout_Button">Delete account</string>

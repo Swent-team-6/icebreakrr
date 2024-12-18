@@ -1,5 +1,6 @@
 import android.app.DatePickerDialog
 import android.widget.Toast
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -81,6 +82,9 @@ fun ProfileCreationScreen(
     profilesViewModel: ProfilesViewModel,
     navigationActions: NavigationActions
 ) {
+  // this makes sure that the back button does nothing, thus preventing
+  // the user to end in an undefined state
+  BackHandler {}
 
   val configuration = LocalConfiguration.current
   val screenWidth = configuration.screenWidthDp.dp

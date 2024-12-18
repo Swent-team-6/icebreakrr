@@ -3,6 +3,7 @@ package com.github.se.icebreakrr.ui.authentication
 import ProfileCreationScreen
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.test.espresso.Espresso
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.github.se.icebreakrr.mock.MockProfileViewModel
 import com.github.se.icebreakrr.model.profile.ProfilesRepository
@@ -130,5 +131,17 @@ class ProfileCreationTest {
         .assertExists()
         .assertIsDisplayed()
         .assertTextEquals("Create Profile")
+  }
+
+  @Test
+  fun testBackButtoDoesNothing() {
+    composeTestRule.setContent {
+      ProfileCreationScreen(tagsViewModel, fakeProfilesViewModel, navigationActions)
+    }
+
+    Espresso.pressBack()
+
+    // Verify that navigation didn't occur
+    verify(navigationActions, Mockito.never()).navigateTo(TopLevelDestinations.AROUND_YOU)
   }
 }

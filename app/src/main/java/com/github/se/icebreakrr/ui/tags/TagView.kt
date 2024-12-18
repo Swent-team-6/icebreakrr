@@ -41,7 +41,7 @@ private val TAG_PADDING = 8.dp
 private val CLICKABLE_TAG_PADDING = 4.dp
 private val TAG_CORNER_RADIUS = 16.dp
 private val CLICKABLE_TAG_CORNER_RADIUS = 12.dp
-private val DEFAULT_TAG_FONT_SIZE = 12.sp
+private val DEFAULT_TAG_FONT_SIZE = 16.sp
 private val DROP_DOWN_MENU_HEIGHT = 60.dp
 private val DROP_DOWN_MENU_MAX_ITEMS = 5
 private val TAG_BOX_PADDING = 8.dp
@@ -119,10 +119,10 @@ fun ExtendTag(tagStyle: TagStyle, onClick: () -> Unit) {
           Modifier.padding(CLICKABLE_TAG_PADDING)
               .clickable(onClick = onClick)
               .testTag("testExtendTag"),
-      color = MaterialTheme.colorScheme.onPrimary,
+      color = tagStyle.backGroundColor,
       shape = RoundedCornerShape(CLICKABLE_TAG_CORNER_RADIUS)) {
         Text(
-            text = "...",
+            text = " ... ",
             color = tagStyle.textColor,
             fontSize = tagStyle.fontSize,
             modifier = Modifier.padding(TAG_BOX_PADDING),
@@ -140,17 +140,21 @@ fun ExtendTag(tagStyle: TagStyle, onClick: () -> Unit) {
 @Composable
 fun RowOfTags(tags: List<Pair<String, Color>>, tagStyle: TagStyle = TagStyle()) {
   val isExtended = remember { mutableStateOf(false) }
+  // This is could be removed category colors are reimplemented
+  val consistentTagStyle =
+      TagStyle(
+          MaterialTheme.colorScheme.onPrimary,
+          MaterialTheme.colorScheme.secondaryContainer,
+          tagStyle.fontSize)
   Column(modifier = Modifier.fillMaxWidth().wrapContentHeight()) {
     FlowRow(
         modifier = Modifier.wrapContentHeight(),
         horizontalArrangement = Arrangement.Start,
         verticalArrangement = Arrangement.Top) {
           val tagsToShow = if (isExtended.value) tags else tags.take(TAGS_SHOWN_DEFAULT)
-          tagsToShow.forEach { (text, color) ->
-            Tag(text, TagStyle(tagStyle.textColor, color, tagStyle.fontSize))
-          }
+          tagsToShow.forEach { (text, color) -> Tag(text, consistentTagStyle) }
           if (!isExtended.value && tags.size > TAGS_SHOWN_DEFAULT) {
-            ExtendTag(tagStyle) { isExtended.value = true }
+            ExtendTag(consistentTagStyle) { isExtended.value = true }
           }
         }
   }
@@ -168,6 +172,12 @@ fun RowOfTags(tags: List<Pair<String, Color>>, tagStyle: TagStyle = TagStyle()) 
 @Composable
 fun RowOfClickTags(tags: List<Pair<String, Color>>, tagStyle: TagStyle, onClick: (String) -> Unit) {
   val isExtended = remember { mutableStateOf(false) }
+  // This is could be removed category colors are reimplemented
+  val consistentTagStyle =
+      TagStyle(
+          MaterialTheme.colorScheme.onPrimary,
+          MaterialTheme.colorScheme.secondaryContainer,
+          tagStyle.fontSize)
   LazyColumn(modifier = Modifier.fillMaxSize()) {
     item {
       FlowRow(
@@ -176,12 +186,10 @@ fun RowOfClickTags(tags: List<Pair<String, Color>>, tagStyle: TagStyle, onClick:
           verticalArrangement = Arrangement.Top) {
             val tagsToShow = if (isExtended.value) tags else tags.take(TAGS_SHOWN_DEFAULT)
             tagsToShow.forEach { (text, color) ->
-              ClickTag(text, TagStyle(tagStyle.textColor, color, tagStyle.fontSize)) {
-                onClick(text)
-              }
+              ClickTag(text, consistentTagStyle) { onClick(text) }
             }
             if (!isExtended.value && tags.size > TAGS_SHOWN_DEFAULT) {
-              ExtendTag(tagStyle) { isExtended.value = true }
+              ExtendTag(consistentTagStyle) { isExtended.value = true }
             }
           }
     }
@@ -222,6 +230,13 @@ fun TagSelector(
   val dropdownMenuHeight =
       (outputTag.size.coerceAtMost(DROP_DOWN_MENU_MAX_ITEMS) * DROP_DOWN_MENU_HEIGHT.value).dp
 
+  // This is could be removed category colors are reimplemented
+  val consistentTagStyle =
+      TagStyle(
+          MaterialTheme.colorScheme.onPrimary,
+          MaterialTheme.colorScheme.secondaryContainer,
+          textSize)
+
   Box(modifier = Modifier.size(width, height).testTag("sizeTagSelector")) {
     Column(modifier = Modifier.fillMaxWidth().wrapContentHeight()) {
       Box(modifier = Modifier.fillMaxWidth().wrapContentHeight()) {
@@ -229,7 +244,8 @@ fun TagSelector(
             expanded = expanded.value && dropdownMenuHeight != 0.dp,
             onDismissRequest = { expanded.value = false },
             properties = PopupProperties(focusable = false),
-            modifier = Modifier.height(dropdownMenuHeight)) {
+            modifier =
+                Modifier.height(dropdownMenuHeight).background(MaterialTheme.colorScheme.surface)) {
               outputTag.forEach { (text, color) ->
                 DropdownMenuItem(
                     onClick = {
@@ -237,7 +253,7 @@ fun TagSelector(
                       onDropDownItemClicked(text)
                       stringQuery.value = ""
                     },
-                    text = { Tag(text, TagStyle(textColor, color, textSize)) },
+                    text = { Tag(text, consistentTagStyle) },
                     modifier = Modifier.testTag("tagSelectorDropDownMenuItem"))
               }
             }
@@ -253,9 +269,7 @@ fun TagSelector(
             },
             modifier = Modifier.testTag("inputTagSelector"))
       }
-      RowOfClickTags(selectedTag, TagStyle(textColor, SELECTED_TAG_COLOR, textSize)) {
-        onTagClick(it)
-      }
+      RowOfClickTags(selectedTag, consistentTagStyle) { onTagClick(it) }
     }
   }
 }

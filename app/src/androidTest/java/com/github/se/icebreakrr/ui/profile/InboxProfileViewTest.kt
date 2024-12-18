@@ -122,7 +122,7 @@ class InboxProfileViewTest {
     composeTestRule.onNodeWithTag("declineButton").assertIsDisplayed().assertHasClickAction()
 
     composeTestRule.onNodeWithTag("infoSection").assertIsDisplayed()
-    composeTestRule.onNodeWithText("Hello world!").assertIsDisplayed()
+    composeTestRule.onNodeWithText("«Hello world!»").assertIsDisplayed()
     composeTestRule.onNodeWithText("Test description").assertIsDisplayed()
     composeTestRule.onNodeWithTag("username").assertIsDisplayed()
   }

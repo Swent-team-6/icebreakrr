@@ -156,6 +156,7 @@ fun SettingsScreen(
                   Toast.makeText(context, R.string.No_Internet_Toast, Toast.LENGTH_SHORT).show()
                 }
               },
+              elevation = ButtonDefaults.buttonElevation(CARD_ELEVATION),
               colors =
                   ButtonDefaults.buttonColors(
                       containerColor = MaterialTheme.colorScheme.secondaryContainer),
@@ -175,6 +176,7 @@ fun SettingsScreen(
                   Toast.makeText(context, R.string.No_Internet_Toast, Toast.LENGTH_SHORT).show()
                 }
               },
+              elevation = ButtonDefaults.buttonElevation(CARD_ELEVATION),
               colors =
                   ButtonDefaults.buttonColors(
                       containerColor = MaterialTheme.colorScheme.secondaryContainer),
@@ -182,19 +184,6 @@ fun SettingsScreen(
                 Text(
                     stringResource(R.string.Already_Met_Settings_Button),
                     color = MaterialTheme.colorScheme.primaryContainer)
-              }
-
-          Spacer(modifier = Modifier.height(screenHeight * RELATIVE_SPACING))
-
-          Button(
-              onClick = { deleteAccountDialog = true },
-              colors =
-                  ButtonDefaults.buttonColors(
-                      containerColor = MaterialTheme.colorScheme.errorContainer),
-              modifier = Modifier.fillMaxWidth().testTag("deleteAccountButton")) {
-                Text(
-                    stringResource(R.string.Already_Met_Delete_Accout_Button),
-                    color = MaterialTheme.colorScheme.onError)
               }
 
           Spacer(modifier = Modifier.height(screenHeight * RELATIVE_SPACING))
@@ -218,11 +207,25 @@ fun SettingsScreen(
                       engagementManager = engagementNotificationManager)
                 }
               },
+              elevation = ButtonDefaults.buttonElevation(CARD_ELEVATION),
               colors =
-                  ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),
+                  ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.outline),
               modifier = Modifier.fillMaxWidth().testTag("logOutButton")) {
                 Text(
                     stringResource(R.string.Already_Met_Logout_Button),
+                    color = MaterialTheme.colorScheme.onPrimary)
+              }
+
+          Spacer(modifier = Modifier.height(screenHeight * RELATIVE_SPACING))
+
+          Button(
+              onClick = { deleteAccountDialog = true },
+              elevation = ButtonDefaults.buttonElevation(CARD_ELEVATION),
+              colors =
+                  ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),
+              modifier = Modifier.fillMaxWidth().testTag("deleteAccountButton")) {
+                Text(
+                    stringResource(R.string.Already_Met_Delete_Accout_Button),
                     color = MaterialTheme.colorScheme.onError)
               }
         }
