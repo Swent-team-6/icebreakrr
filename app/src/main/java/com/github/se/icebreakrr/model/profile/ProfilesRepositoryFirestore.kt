@@ -278,7 +278,6 @@ class ProfilesRepositoryFirestore(
     db.collection("profiles").document(uid).get(source).addOnCompleteListener { task ->
       if (task.isSuccessful) {
         val profile = task.result?.let { document -> documentToProfile(document) }
-        Log.d("TESTEST", "[getProfileByUid] profile : ${profile}")
         onSuccess(profile)
       } else {
         task.exception?.let { e ->
@@ -337,7 +336,6 @@ class ProfilesRepositoryFirestore(
    */
   private fun documentToProfile(document: DocumentSnapshot): Profile? {
     return try {
-      Log.d("TESTEST", "document to profile inbox : ${document.get("meetingRequestInbox")}")
       val uid = document.id
       val name = document.getString("name") ?: return null
       val genderString = document.getString("gender") ?: return null

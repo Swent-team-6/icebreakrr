@@ -1,10 +1,12 @@
 package com.github.se.endToEnd
 
 import android.content.Intent
+import android.os.StrictMode
 import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -79,6 +81,7 @@ class SendRequestFlowEndToEnd {
       // go to inbox to be sure it is empty :
       composeTestRule.onNodeWithTag("inboxButton").performClick()
       composeTestRule.onNodeWithTag("profileCard").assertIsNotDisplayed()
+      scenario.close()
     }
   }
 
@@ -98,6 +101,7 @@ class SendRequestFlowEndToEnd {
 
       // check that alice disapear :
       composeTestRule.onNodeWithTag("profileCard").assertIsNotDisplayed()
+      scenario.close()
     }
   }
 
@@ -106,14 +110,22 @@ class SendRequestFlowEndToEnd {
     ActivityScenario.launch<MainActivity>(intent).use { scenario ->
       sendRequestAliceAndCheck()
 
+      StrictMode.setThreadPolicy(
+          StrictMode.ThreadPolicy.Builder()
+              .permitAll() // Allows all disk and network operations
+              .build())
+
       // receives a cancellation for time :
       message.addData("message", "TIME").addData("title", "MEETING CANCELLATION")
       service.onMessageReceived(message.build())
 
       composeTestRule.waitForIdle()
 
-      // check that alice disapear :
-      composeTestRule.onNodeWithTag("profileCard").assertIsNotDisplayed()
+      // Wait for the profile card to disappear
+      composeTestRule.waitUntil(timeoutMillis = 20000) {
+        composeTestRule.onAllNodesWithTag("profileCard").fetchSemanticsNodes().isEmpty()
+      }
+      scenario.close()
     }
   }
 
@@ -130,6 +142,7 @@ class SendRequestFlowEndToEnd {
 
       // check that alice disapear :
       composeTestRule.onNodeWithTag("profileCard").assertIsNotDisplayed()
+      scenario.close()
     }
   }
 
@@ -146,6 +159,24 @@ class SendRequestFlowEndToEnd {
 
       // check that alice disapear :
       composeTestRule.onNodeWithTag("profileCard").assertIsNotDisplayed()
+      scenario.close()
+    }
+  }
+
+  @Test
+  fun sendRequestClosedCancellationFlowEndToEnd() {
+    ActivityScenario.launch<MainActivity>(intent).use { scenario ->
+      sendRequestAliceAndCheck()
+
+      // receives a cancellation for time :
+      message.addData("message", "CLOSED").addData("title", "MEETING CANCELLATION")
+      service.onMessageReceived(message.build())
+
+      composeTestRule.waitForIdle()
+
+      // check that alice disapear :
+      composeTestRule.onNodeWithTag("profileCard").assertIsNotDisplayed()
+      scenario.close()
     }
   }
 
@@ -175,10 +206,11 @@ class SendRequestFlowEndToEnd {
 
       // go on heat map :
       composeTestRule
-          .onNodeWithText("Map")
+          .onNodeWithTag("navItem_2131689769")
           .assertIsDisplayed()
           .assertHasClickAction()
           .performClick()
+      scenario.close()
     }
   }
 
@@ -242,7 +274,7 @@ class SendRequestFlowEndToEnd {
     composeTestRule.onNodeWithTag("buttonSendMessageLocation").performClick()
 
     // go to notification to check if you have sended a message
-    composeTestRule.onNodeWithText("Notifications").assertIsDisplayed().performClick()
+    composeTestRule.onNodeWithTag("navItem_2131689863").assertIsDisplayed().performClick()
     composeTestRule.onNodeWithTag("inboxButton").assertIsDisplayed().performClick()
     composeTestRule.onNodeWithTag("sentButton").assertIsDisplayed().performClick()
     composeTestRule.waitForIdle()

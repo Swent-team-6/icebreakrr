@@ -280,6 +280,7 @@ open class ProfilesViewModel(
     repository.updateProfile(
         profile,
         onSuccess = {
+          Log.d("TESTEST", "[updateProfile] updated profile ${profile}")
           _loadingSelf.value = false
           onComplete()
         },
@@ -381,7 +382,7 @@ open class ProfilesViewModel(
 
   /** Clears the edited profile from the state. */
   private fun clearEditedProfile() {
-    _editedCurrentProfile.value = null
+    _editedSelfProfile.value = null
   }
 
   /** Resets every state related to profile edition. */
@@ -665,6 +666,7 @@ open class ProfilesViewModel(
    * @param onComplete : callback to avoid race conditions
    */
   fun getInboxOfSelfProfile(onComplete: () -> Unit) {
+    Log.d("TESTEST", "[getInboxOfSelfProfile] --------------")
     val inboxUidList = selfProfile.value?.meetingRequestInbox
     val sentUidList = selfProfile.value?.meetingRequestSent
     if (inboxUidList != null && sentUidList != null) {
@@ -674,6 +676,7 @@ open class ProfilesViewModel(
       getInboxUsers(uidsList) {
         _inboxItems.value = _inboxProfiles.value.filterNotNull().zip(messageList).toMap()
         getSentUsers(sentUidList) {
+          Log.d("TESTEST", "[getInboxOfSelfProfile] send number : ${sentUidList.size}")
           _sentItems.value = _sentProfiles.value.filterNotNull()
           onComplete()
         }
@@ -696,6 +699,7 @@ open class ProfilesViewModel(
    * @param uid : uid of the user you have met
    */
   fun removeChosenLocalisation(uid: String, onComplete: () -> Unit) {
+    Log.d("TESTEST", "[removeChosenLocalisation] start")
     updateProfile(
         _selfProfile.value?.copy(
             meetingRequestChosenLocalisation =
@@ -703,6 +707,7 @@ open class ProfilesViewModel(
                     ?: emptyMap())!!,
         onComplete,
         {})
+    Log.d("TESTEST", "[removeChosenLocalisation] finish")
   }
 
   /**
@@ -741,6 +746,7 @@ open class ProfilesViewModel(
     repository.getProfileByUid(
         auth.currentUser?.uid ?: "null",
         onSuccess = { profile ->
+          Log.d("TESTEST", "[getSelfProfile] ${profile}")
           _selfProfile.value = profile
           _loadingSelf.value = false
           onComplete()

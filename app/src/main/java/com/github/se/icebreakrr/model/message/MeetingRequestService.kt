@@ -138,9 +138,13 @@ class MeetingRequestService : FirebaseMessagingService() {
               else -> DEFAULT_REASON_CANCELLATION
             }
 
+        Log.d("TESTEST", "-------------START UPDATE ------------------")
         MeetingRequestManager.meetingRequestViewModel?.removeFromMeetingRequestSent(senderUid) {
+          Log.d("TESTEST", "REMOVED SENT")
           MeetingRequestManager.meetingRequestViewModel?.removeFromMeetingRequestInbox(senderUid) {
+            Log.d("TESTEST", "REMOVED INBOX")
             MeetingRequestManager.meetingRequestViewModel?.removeChosenLocalisation(senderUid) {
+              Log.d("TESTEST", "REMOVED CHOSEN")
               MeetingRequestManager.meetingRequestViewModel?.updateInboxOfMessages {}
             }
           }
@@ -181,31 +185,29 @@ class MeetingRequestService : FirebaseMessagingService() {
    */
   fun showNotification(title: String, message: String) {
     try {
-        val notificationManager =
-            getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        val channel =
-            NotificationChannel(
-                MSG_CHANNEL_ID, MSG_CHANNEL_NAME, NotificationManager.IMPORTANCE_DEFAULT
-            )
-                .apply { description = "Channel for messaging notifications" }
-        notificationManager.createNotificationChannel(channel)
+      val notificationManager =
+          getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+      val channel =
+          NotificationChannel(
+                  MSG_CHANNEL_ID, MSG_CHANNEL_NAME, NotificationManager.IMPORTANCE_DEFAULT)
+              .apply { description = "Channel for messaging notifications" }
+      notificationManager.createNotificationChannel(channel)
 
-        val notificationBuilder = createNotificationBuilder(title, message)
-        val notificationId =
-            when {
-                title == MSG_REQUEST -> MEETING_REQUEST_NOTIFICATION_ID
-                title.contains(MSG_RESPONSE_ACCEPTED) || title.contains(MSG_RESPONSE_REJECTED) ->
-                    MEETING_RESPONSE_NOTIFICATION_ID
+      val notificationBuilder = createNotificationBuilder(title, message)
+      val notificationId =
+          when {
+            title == MSG_REQUEST -> MEETING_REQUEST_NOTIFICATION_ID
+            title.contains(MSG_RESPONSE_ACCEPTED) || title.contains(MSG_RESPONSE_REJECTED) ->
+                MEETING_RESPONSE_NOTIFICATION_ID
+            title.startsWith(MEETING_CANCELLATION_START) -> MEETING_CANCELLATION_NOTIFICATION_ID
+            title.startsWith(ENGAGEMENT_NOTIFICATION_START) -> ENGAGEMENT_NOTIFICATION_ID
+            else -> MEETING_REQUEST_NOTIFICATION_ID // Default fallback
+          }
 
-                title.startsWith(MEETING_CANCELLATION_START) -> MEETING_CANCELLATION_NOTIFICATION_ID
-                title.startsWith(ENGAGEMENT_NOTIFICATION_START) -> ENGAGEMENT_NOTIFICATION_ID
-                else -> MEETING_REQUEST_NOTIFICATION_ID // Default fallback
-            }
-
-        notificationManager.notify(notificationId, notificationBuilder.build())
-    } catch (e: NullPointerException){
-        Log.d("endToEnd", "Normal in testing mode but this should not happen in production.")
-        }
+      notificationManager.notify(notificationId, notificationBuilder.build())
+    } catch (e: NullPointerException) {
+      Log.d("endToEnd", "Normal in testing mode but this should not happen in production.")
+    }
   }
 
   /**

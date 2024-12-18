@@ -7,8 +7,10 @@ import androidx.compose.ui.test.assertIsNotDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.printToLog
 import androidx.core.app.ActivityCompat
 import androidx.test.core.app.ActivityScenario
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -75,7 +77,7 @@ class ReceiveRequestFlowEndToEnd {
       composeTestRule.onNodeWithTag("badgeHeatmap").assertIsNotDisplayed()
 
       // go on heatmap
-      composeTestRule.onNodeWithText("Map").performClick()
+      composeTestRule.onNodeWithTag("navItem_2131689769").performClick()
       scenario.close()
     }
   }
@@ -141,6 +143,26 @@ class ReceiveRequestFlowEndToEnd {
   }
 
   @Test
+  fun receiveRequestClosedCancellationFlowEndToEnd() {
+    ActivityScenario.launch<MainActivity>(intent).use { scenario ->
+      receiveRequestAndCheckProfile()
+
+      // receives a cancellation because the other one cancelled :
+      message.addData("message", "CLOSED").addData("title", "MEETING CANCELLATION")
+      service.onMessageReceived(message.build())
+
+      composeTestRule.waitForIdle()
+
+      // check that alice disapear :
+      composeTestRule.onNodeWithTag("profileCard").assertIsNotDisplayed()
+      composeTestRule
+          .onNodeWithTag("badgeNotification", useUnmergedTree = true)
+          .assertIsNotDisplayed()
+      scenario.close()
+    }
+  }
+
+  @Test
   fun receiveRequestAcceptFlowEndToEnd() {
     ActivityScenario.launch<MainActivity>(intent).use { scenario ->
       receiveRequestAndCheckProfile()
@@ -156,7 +178,7 @@ class ReceiveRequestFlowEndToEnd {
 
       // go in heatmap
       composeTestRule
-          .onNodeWithText("Map")
+          .onNodeWithTag("navItem_2131689769")
           .assertIsDisplayed()
           .assertHasClickAction()
           .performClick()
@@ -173,6 +195,7 @@ class ReceiveRequestFlowEndToEnd {
   }
 
   private fun receiveRequestAndCheckProfile() {
+    composeTestRule.onRoot().printToLog("UIHierarchy")
     // check if everything is displayed in the around you
     composeTestRule.onNodeWithTag("aroundYouScreen").assertIsDisplayed()
     composeTestRule.onNodeWithTag("topBar").assertIsDisplayed()
@@ -194,7 +217,7 @@ class ReceiveRequestFlowEndToEnd {
 
     // go to notification to see the profile :
     composeTestRule
-        .onNodeWithText("Notifications")
+        .onNodeWithTag("navItem_2131689863")
         .assertIsDisplayed()
         .assertHasClickAction()
         .performClick()
@@ -232,5 +255,17 @@ class ReceiveRequestFlowEndToEnd {
     composeTestRule.onNodeWithTag("RequestMessage").assertIsDisplayed()
     composeTestRule.onNodeWithTag("acceptButton").assertIsDisplayed().assertHasClickAction()
     composeTestRule.onNodeWithTag("declineButton").assertIsDisplayed().assertHasClickAction()
+    // click on the location button and come back
+    composeTestRule
+        .onNodeWithTag("locationButton")
+        .assertIsDisplayed()
+        .assertHasClickAction()
+        .performClick()
+    composeTestRule.waitForIdle()
+    composeTestRule
+        .onNodeWithTag("goBackButton")
+        .assertIsDisplayed()
+        .assertHasClickAction()
+        .performClick()
   }
 }

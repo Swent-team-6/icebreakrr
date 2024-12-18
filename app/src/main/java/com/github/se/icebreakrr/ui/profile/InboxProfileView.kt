@@ -192,7 +192,6 @@ fun acceptDeclineCode(
   meetingRequestViewModel.setMeetingResponse(
       fcm, "accepting/decline request", accepted, location.toString())
   meetingRequestViewModel.sendMeetingResponse()
-  Log.d("TESTEST", "[InboxProfileView] DECLINED")
   meetingRequestViewModel.removeFromMeetingRequestInbox(uid) {
     meetingRequestViewModel.updateInboxOfMessages {
       if (accepted) {

@@ -229,14 +229,18 @@ object MockFirebaseFirestoreModule {
               .thenReturn(myProfile.meetingRequestInbox)
           `when`(mockMyDocumentSnapshot.get("meetingRequestChosenLocalisation"))
               .thenReturn(myProfile.meetingRequestChosenLocalisation)
-          Log.d(
-              "TESTEST",
-              "[provideMockFirebaseFIrestore] inbox : ${mockMyDocumentSnapshot.get("meetingRequestInbox")}")
-          Log.d("TESTEST", "[provideMockFirebaseFIrestore] new profile : ${myProfile}")
+          Log.d("TESTEST", "[TestModule] update my profile ${myProfile}")
           mockMyTask
         }
         .`when`(mockMyDocumentReference)
         .set(any())
+    doAnswer { invocation ->
+          val onComplete = invocation.arguments[0] as OnCompleteListener<Void>
+          onComplete.onComplete(mockMyTask)
+          mockMyTask
+        }
+        .`when`(mockMyTask)
+        .addOnCompleteListener(anyOrNull())
     `when`(mockMyTask.isSuccessful).thenReturn(true)
 
     // actions when get profile by uid of around you :
