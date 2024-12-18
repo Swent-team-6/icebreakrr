@@ -1,7 +1,6 @@
 package com.github.se.icebreakrr.ui.profile
 
 import android.util.Log
-import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -68,6 +67,7 @@ private const val ACCEPT_DECLINE_ICON_BUTTON_PADDING = 12
 private const val ACCEPT_DECLINE_ICON_BUTTON_SIZE = 48
 private const val ACCEPT_DECLINE_ICON_BUTTON_ROUNDED = 100
 private const val ACCEPT_DECLINE_ICON_BUTTON_COLOR = 0xFF65558F
+private const val ACCEPT_MEETING_REQUEST = "The user accepted your meeting request"
 
 /**
  * Screen that appears when you click on a profile in the notification tab. You can accept or
@@ -138,13 +138,6 @@ fun InboxProfileViewScreen(
                           location,
                           locationMessage)
                     }
-                    Toast.makeText(
-                            context,
-                            "You've accepted the request, " +
-                                profile.name +
-                                " is choosing the location of your meeting!",
-                            Toast.LENGTH_SHORT)
-                        .show()
                   },
                   {
                     if (location != null) {
@@ -190,7 +183,7 @@ fun acceptDeclineCode(
     locationMessage: String
 ) {
   meetingRequestViewModel.setMeetingResponse(
-      fcm, "accepting/decline request", accepted, location.toString())
+      fcm, ACCEPT_MEETING_REQUEST, accepted, location.toString())
   meetingRequestViewModel.sendMeetingResponse()
   if (accepted) {
     meetingRequestViewModel.confirmMeetingRequest(uid, Pair(locationMessage, location)) {
