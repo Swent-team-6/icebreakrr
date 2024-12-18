@@ -9,4 +9,6 @@ interface ILocationService {
   ): Boolean
 
   fun stopLocationUpdates()
+
+  fun createNotificationChannel()
 }
