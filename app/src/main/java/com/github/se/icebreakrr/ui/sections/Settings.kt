@@ -209,13 +209,15 @@ fun SettingsScreen(
                         context,
                         navigationActions,
                         appDataStore = appDataStore,
-                        engagementManager = engagementNotificationManager)
+                        engagementManager = engagementNotificationManager,
+                        locationViewModel = locationViewModel)
                   }
                   logout(
                       context,
                       navigationActions,
                       appDataStore,
-                      engagementManager = engagementNotificationManager)
+                      engagementManager = engagementNotificationManager,
+                      locationViewModel = locationViewModel)
                 }
               },
               colors =
@@ -235,7 +237,8 @@ fun SettingsScreen(
               context,
               navigationActions,
               appDataStore,
-              engagementManager = engagementNotificationManager)
+              engagementManager = engagementNotificationManager,
+              locationViewModel = locationViewModel)
           profilesViewModel.deleteProfileByUid(uid)
         })
   }
