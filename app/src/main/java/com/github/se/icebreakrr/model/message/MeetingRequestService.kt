@@ -128,18 +128,20 @@ class MeetingRequestService : FirebaseMessagingService() {
         val stringReason =
             when (message) {
               "DISTANCE" -> DISTANCE_REASON_CANCELLATION
-              //"TIME" -> TIME_REASON_CANCELLATION
+              // "TIME" -> TIME_REASON_CANCELLATION
               "CANCELLED" -> CANCELLED_REASON_CANCELLATION
               "CLOSED" -> CLOSED_APP_REASON_CANCELLATION
               else -> DEFAULT_REASON_CANCELLATION
             }
-        if(stringReason != DEFAULT_REASON_CANCELLATION) {
+        if (stringReason != DEFAULT_REASON_CANCELLATION) {
           MeetingRequestManager.meetingRequestViewModel?.removeFromMeetingRequestSent(senderUid) {
-            MeetingRequestManager.meetingRequestViewModel?.removeFromMeetingRequestInbox(senderUid) {
-              MeetingRequestManager.meetingRequestViewModel?.removeChosenLocalisation(senderUid) {
-                MeetingRequestManager.meetingRequestViewModel?.updateInboxOfMessages {}
-              }
-            }
+            MeetingRequestManager.meetingRequestViewModel?.removeFromMeetingRequestInbox(
+                senderUid) {
+                  MeetingRequestManager.meetingRequestViewModel?.removeChosenLocalisation(
+                      senderUid) {
+                        MeetingRequestManager.meetingRequestViewModel?.updateInboxOfMessages {}
+                      }
+                }
           }
           MeetingRequestManager.meetingRequestViewModel?.stopMeetingRequestTimer(senderUid, this)
           showNotification("Cancelled meeting with $senderName", stringReason)
