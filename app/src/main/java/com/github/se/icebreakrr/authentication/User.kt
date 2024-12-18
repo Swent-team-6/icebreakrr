@@ -4,6 +4,7 @@ import android.content.Context
 import android.util.Log
 import com.github.se.icebreakrr.R
 import com.github.se.icebreakrr.data.AppDataStore
+import com.github.se.icebreakrr.model.location.LocationViewModel
 import com.github.se.icebreakrr.model.notification.EngagementNotificationManager
 import com.github.se.icebreakrr.ui.navigation.NavigationActions
 import com.github.se.icebreakrr.ui.navigation.Screen
@@ -28,10 +29,14 @@ fun logout(
     context: Context,
     navigationActions: NavigationActions,
     appDataStore: AppDataStore,
-    engagementManager: EngagementNotificationManager
+    engagementManager: EngagementNotificationManager,
+    locationViewModel: LocationViewModel
 ) {
-  // Stop monitoring before logout
+  // Stop monitoring engagement before logout
   engagementManager.stopMonitoring()
+
+  // Stop updating location before logout
+  locationViewModel.stopLocationUpdates()
 
   // Initialize FirebaseAuth
   val auth = FirebaseAuth.getInstance()
