@@ -18,14 +18,12 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconButtonColors
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarColors
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -114,10 +112,9 @@ fun ProfileEditingScreen(
   if (isLoading) {
     Box(
         modifier =
-        Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.surfaceVariant)
-            .testTag("loadingBox"),
+            Modifier.fillMaxSize()
+                .background(MaterialTheme.colorScheme.surfaceVariant)
+                .testTag("loadingBox"),
         contentAlignment = Alignment.Center) {
           Text("Loading profile...", textAlign = TextAlign.Center)
         }
@@ -128,10 +125,10 @@ fun ProfileEditingScreen(
         topBar = {
           TopAppBar(
               colors =
-              TopAppBarDefaults.topAppBarColors(
-                  containerColor = MaterialTheme.colorScheme.primary,
-                  navigationIconContentColor = MaterialTheme.colorScheme.onPrimary,
-                  titleContentColor = MaterialTheme.colorScheme.onPrimary),
+                  TopAppBarDefaults.topAppBarColors(
+                      containerColor = MaterialTheme.colorScheme.primary,
+                      navigationIconContentColor = MaterialTheme.colorScheme.onPrimary,
+                      titleContentColor = MaterialTheme.colorScheme.onPrimary),
               modifier = Modifier.testTag("topAppBar"),
               title = { Text("") },
               navigationIcon = {
@@ -151,8 +148,9 @@ fun ProfileEditingScreen(
               actions = {
                 IconButton(
                     modifier = Modifier.testTag("checkButton"),
-                    colors = IconButtonDefaults.iconButtonColors(
-                        contentColor = MaterialTheme.colorScheme.onPrimary),
+                    colors =
+                        IconButtonDefaults.iconButtonColors(
+                            contentColor = MaterialTheme.colorScheme.onPrimary),
                     onClick = {
                       if (isModified) {
                         profilesViewModel.saveEditedProfile(getEditedProfile())
@@ -166,10 +164,7 @@ fun ProfileEditingScreen(
               })
         }) {
           Column(
-              modifier = Modifier
-                  .padding(it)
-                  .padding(padding)
-                  .testTag("profileEditScreenContent"),
+              modifier = Modifier.padding(it).padding(padding).testTag("profileEditScreenContent"),
               horizontalAlignment = Alignment.CenterHorizontally) {
                 // A composable that allows the user to preview and edit a profile picture
                 ProfilePictureSelector(
@@ -206,10 +201,9 @@ fun ProfileEditingScreen(
                     text = user!!.name,
                     style = TextStyle(fontSize = textSize.value.sp),
                     modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .wrapContentWidth(Alignment.CenterHorizontally)
-                        .testTag("nameAndAge"))
+                        Modifier.fillMaxWidth()
+                            .wrapContentWidth(Alignment.CenterHorizontally)
+                            .testTag("nameAndAge"))
                 Spacer(modifier = Modifier.height(padding))
 
                 // Catchphrase Input
@@ -226,10 +220,7 @@ fun ProfileEditingScreen(
                     },
                     textStyle = TextStyle(fontSize = textSize.value.sp * 0.6),
                     modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .height(catchphraseHeight)
-                        .testTag("catchphrase"))
+                        Modifier.fillMaxWidth().height(catchphraseHeight).testTag("catchphrase"))
 
                 Spacer(modifier = Modifier.height(padding))
 
@@ -245,10 +236,7 @@ fun ProfileEditingScreen(
                     label = { Text("Description") },
                     textStyle = TextStyle(fontSize = textSize.value.sp * 0.6),
                     modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .height(descriptionHeight)
-                        .testTag("description"))
+                        Modifier.fillMaxWidth().height(descriptionHeight).testTag("description"))
                 Spacer(modifier = Modifier.height(padding))
 
                 TagSelector(

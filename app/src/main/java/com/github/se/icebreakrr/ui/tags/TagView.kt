@@ -140,17 +140,19 @@ fun ExtendTag(tagStyle: TagStyle, onClick: () -> Unit) {
 @Composable
 fun RowOfTags(tags: List<Pair<String, Color>>, tagStyle: TagStyle = TagStyle()) {
   val isExtended = remember { mutableStateOf(false) }
-    // This is could be removed category colors are reimplemented
-  val consistentTagStyle = TagStyle(MaterialTheme.colorScheme.onPrimary, MaterialTheme.colorScheme.secondaryContainer, tagStyle.fontSize)
+  // This is could be removed category colors are reimplemented
+  val consistentTagStyle =
+      TagStyle(
+          MaterialTheme.colorScheme.onPrimary,
+          MaterialTheme.colorScheme.secondaryContainer,
+          tagStyle.fontSize)
   Column(modifier = Modifier.fillMaxWidth().wrapContentHeight()) {
     FlowRow(
         modifier = Modifier.wrapContentHeight(),
         horizontalArrangement = Arrangement.Start,
         verticalArrangement = Arrangement.Top) {
           val tagsToShow = if (isExtended.value) tags else tags.take(TAGS_SHOWN_DEFAULT)
-          tagsToShow.forEach { (text, color) ->
-            Tag(text, consistentTagStyle)
-          }
+          tagsToShow.forEach { (text, color) -> Tag(text, consistentTagStyle) }
           if (!isExtended.value && tags.size > TAGS_SHOWN_DEFAULT) {
             ExtendTag(consistentTagStyle) { isExtended.value = true }
           }
@@ -171,7 +173,11 @@ fun RowOfTags(tags: List<Pair<String, Color>>, tagStyle: TagStyle = TagStyle()) 
 fun RowOfClickTags(tags: List<Pair<String, Color>>, tagStyle: TagStyle, onClick: (String) -> Unit) {
   val isExtended = remember { mutableStateOf(false) }
   // This is could be removed category colors are reimplemented
-  val consistentTagStyle = TagStyle(MaterialTheme.colorScheme.onPrimary, MaterialTheme.colorScheme.secondaryContainer, tagStyle.fontSize)
+  val consistentTagStyle =
+      TagStyle(
+          MaterialTheme.colorScheme.onPrimary,
+          MaterialTheme.colorScheme.secondaryContainer,
+          tagStyle.fontSize)
   LazyColumn(modifier = Modifier.fillMaxSize()) {
     item {
       FlowRow(
@@ -180,9 +186,7 @@ fun RowOfClickTags(tags: List<Pair<String, Color>>, tagStyle: TagStyle, onClick:
           verticalArrangement = Arrangement.Top) {
             val tagsToShow = if (isExtended.value) tags else tags.take(TAGS_SHOWN_DEFAULT)
             tagsToShow.forEach { (text, color) ->
-              ClickTag(text, consistentTagStyle) {
-                onClick(text)
-              }
+              ClickTag(text, consistentTagStyle) { onClick(text) }
             }
             if (!isExtended.value && tags.size > TAGS_SHOWN_DEFAULT) {
               ExtendTag(consistentTagStyle) { isExtended.value = true }
@@ -227,7 +231,11 @@ fun TagSelector(
       (outputTag.size.coerceAtMost(DROP_DOWN_MENU_MAX_ITEMS) * DROP_DOWN_MENU_HEIGHT.value).dp
 
   // This is could be removed category colors are reimplemented
-  val consistentTagStyle = TagStyle(MaterialTheme.colorScheme.onPrimary, MaterialTheme.colorScheme.secondaryContainer, textSize)
+  val consistentTagStyle =
+      TagStyle(
+          MaterialTheme.colorScheme.onPrimary,
+          MaterialTheme.colorScheme.secondaryContainer,
+          textSize)
 
   Box(modifier = Modifier.size(width, height).testTag("sizeTagSelector")) {
     Column(modifier = Modifier.fillMaxWidth().wrapContentHeight()) {
@@ -236,7 +244,8 @@ fun TagSelector(
             expanded = expanded.value && dropdownMenuHeight != 0.dp,
             onDismissRequest = { expanded.value = false },
             properties = PopupProperties(focusable = false),
-            modifier = Modifier.height(dropdownMenuHeight).background(MaterialTheme.colorScheme.surface)) {
+            modifier =
+                Modifier.height(dropdownMenuHeight).background(MaterialTheme.colorScheme.surface)) {
               outputTag.forEach { (text, color) ->
                 DropdownMenuItem(
                     onClick = {
@@ -260,9 +269,7 @@ fun TagSelector(
             },
             modifier = Modifier.testTag("inputTagSelector"))
       }
-      RowOfClickTags(selectedTag, consistentTagStyle) {
-        onTagClick(it)
-      }
+      RowOfClickTags(selectedTag, consistentTagStyle) { onTagClick(it) }
     }
   }
 }
