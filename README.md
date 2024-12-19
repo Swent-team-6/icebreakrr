@@ -5,16 +5,22 @@ Welcome to our project: Icebreakrr, an application designed to facilitate first 
 Icebreakrr uses the location of the phone to allow people in close proximity to discover each other and meet in real life.
 Each user creates a profile based on a photo, a catchphrase, a brief description and a few relevant tags, then shares it with all nearby users. By sharing profiles with nearby users, people can identify common interests, break the ice, and initiate conversations more naturally.
 
+## Architecture
+[Architecture Diagram](https://excalidraw.com/#json=xr8nIGOyFCQl1ITXszMxX,HQjWMof_Uxx4vO8OCieNZw)
+
+## Design
+[Figma](https://www.figma.com/design/eCJ4gIM5Yq8mz8Fblrk8Yb/IceBreakrr-App-Mockup?node-id=21-9&p=f&t=Dy2pDPcABQN4weOJ-0)
+
 ## Features (subject to change): 
 
 - Account Creation & Multi-Device Sync: Create an account for seamless access across multiple devices.
 - Nearby User Discovery: Find profiles of people in vicinity using real-time location data.
 - Profile Filtering: Sort and filter profiles based on tags, interests, or other parameters to find relevant matches.
 - Meet-up Requests: Ask for a meet-up via the app’s meeting request feature.
-- Offline Mode: Profiles can be saved manually or automatically (last seen) so they can be accessed even when offline
+- Offline Mode: One can log-in, see one's profile
 - Privacy Controls:
   - Toggle location services on or off to control when the user is discoverable.
-  - Set custom discoverability filters (e.g., limit who can see the user's profile based on age, interests, or other factors).
+  - Users can be blocked and reported
 
 ## Contact
 For any inquiries about the project, please reach out to us at icebreakrr.team@gmail.com. We’ll respond as soon as possible.
