@@ -77,7 +77,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class MainActivity : ComponentActivity() {
+class Icebreakrr : ComponentActivity() {
   @Inject lateinit var auth: FirebaseAuth
   @Inject lateinit var firestore: FirebaseFirestore
   @Inject lateinit var authStateListener: FirebaseAuth.AuthStateListener
@@ -110,12 +110,12 @@ class MainActivity : ComponentActivity() {
           // Initialize ViewModel after the service is connected
           locationViewModel =
               ViewModelProvider(
-                  this@MainActivity,
+                  this@Icebreakrr,
                   LocationViewModel.provideFactory(
                       locationService!!,
                       locationRepositoryFirestore,
                       permissionManager,
-                      this@MainActivity))[LocationViewModel::class.java]
+                      this@Icebreakrr))[LocationViewModel::class.java]
 
           // Mark ViewModel as initialized
           isLocationViewModelInitialized = true

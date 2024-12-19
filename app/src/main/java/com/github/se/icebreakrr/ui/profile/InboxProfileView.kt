@@ -185,13 +185,14 @@ fun acceptDeclineCode(
   meetingRequestViewModel.setMeetingResponse(
       fcm, ACCEPT_MEETING_REQUEST, accepted, location.toString())
   meetingRequestViewModel.sendMeetingResponse()
-  if (accepted) {
-    meetingRequestViewModel.confirmMeetingRequest(uid, Pair(locationMessage, location)) {
-      Log.e("MeetingRequestService", "error when confirmMeetingLocation : ${it.message}")
-    }
-  }
   meetingRequestViewModel.removeFromMeetingRequestInbox(uid) {
-    meetingRequestViewModel.updateInboxOfMessages {}
+    meetingRequestViewModel.updateInboxOfMessages {
+      if (accepted) {
+        meetingRequestViewModel.confirmMeetingRequest(uid, Pair(locationMessage, location)) {
+          Log.e("MeetingRequestService", "error when confirmMeetingLocation : ${it.message}")
+        }
+      }
+    }
   }
   navigationActions.goBack()
 }

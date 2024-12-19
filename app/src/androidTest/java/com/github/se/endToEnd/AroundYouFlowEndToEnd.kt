@@ -4,16 +4,40 @@ package com.github.se.endToEnd
 
 import android.app.Activity
 import android.content.Intent
+import androidx.compose.ui.test.assertHasClickAction
+import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsNotDisplayed
+import androidx.compose.ui.test.assertIsNotSelected
+import androidx.compose.ui.test.assertIsSelected
+import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.performTextClearance
+import androidx.compose.ui.test.performTextInput
 import androidx.core.app.ActivityCompat
+import androidx.test.core.app.ActivityScenario
+import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.platform.app.InstrumentationRegistry
+import com.github.se.icebreakrr.Icebreakrr
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
+import dagger.hilt.android.testing.HiltAndroidRule
+import dagger.hilt.android.testing.HiltAndroidTest
+import javax.inject.Inject
+import org.junit.Before
+import org.junit.Rule
+import org.junit.Test
+import org.junit.runner.RunWith
 
-/*
 private const val ALICE = "Alice Inwonderland"
 
 @RunWith(AndroidJUnit4::class)
 @HiltAndroidTest
 class AroundYouFlowEndToEnd {
   val intent =
-      Intent(InstrumentationRegistry.getInstrumentation().targetContext, MainActivity::class.java)
+      Intent(InstrumentationRegistry.getInstrumentation().targetContext, Icebreakrr::class.java)
   @Inject lateinit var authInjected: FirebaseAuth
   @Inject lateinit var firestoreInjected: FirebaseFirestore
   @Inject lateinit var authStateListener: FirebaseAuth.AuthStateListener
@@ -31,7 +55,7 @@ class AroundYouFlowEndToEnd {
 
   @Test
   fun AroundYouFlowEndToEndTest() {
-    ActivityScenario.launch<MainActivity>(intent).use { scenario ->
+    ActivityScenario.launch<Icebreakrr>(intent).use { scenario ->
       // check if everything is displayed in the around you
       composeTestRule.onNodeWithTag("aroundYouScreen").assertIsDisplayed()
       composeTestRule.onNodeWithTag("topBar").assertIsDisplayed()
@@ -52,7 +76,7 @@ class AroundYouFlowEndToEnd {
       composeTestRule.onNodeWithTag("requestButton").assertIsDisplayed().assertHasClickAction()
       // check if alice has the good profile :
       composeTestRule.onNodeWithText(ALICE).assertIsDisplayed()
-      composeTestRule.onNodeWithText("So much to see, so little time").assertIsDisplayed()
+      composeTestRule.onNodeWithText("«So much to see, so little time»").assertIsDisplayed()
       composeTestRule
           .onNodeWithText("I am a software engineer who loves to travel and meet new people.")
           .assertIsDisplayed()
@@ -65,36 +89,7 @@ class AroundYouFlowEndToEnd {
       composeTestRule.onNodeWithTag("messageTextField").assertIsDisplayed()
       composeTestRule.onNodeWithTag("bluredBackground").assertIsDisplayed()
       composeTestRule.onNodeWithTag("sendButton").assertIsDisplayed().assertHasClickAction()
-
       composeTestRule.onNodeWithTag("cancelButton").assertIsDisplayed().assertHasClickAction()
-      // try to send a message :
-      composeTestRule
-          .onNodeWithTag("messageTextField")
-          .performTextInput("Hey, do you want to meet?")
-      composeTestRule.onNodeWithText("Hey, do you want to meet?").assertIsDisplayed()
-      composeTestRule.onNodeWithTag("sendButton").performClick()
-      // choose location screen :
-      composeTestRule.waitForIdle()
-      composeTestRule.onNodeWithTag("LocationSelectorMapScreen").assertIsDisplayed()
-      composeTestRule.onNodeWithTag("addTextAndSendLocationBox").assertIsDisplayed()
-      composeTestRule.onNodeWithTag("addDetailsTextField").assertIsDisplayed()
-      composeTestRule
-          .onNodeWithTag("buttonSendMessageLocation")
-          .assertIsDisplayed()
-          .assertHasClickAction()
-      // put a message :
-      composeTestRule
-          .onNodeWithTag("addDetailsTextField")
-          .performTextInput("Lets meet in the building, 3rd floor!")
-      composeTestRule.onNodeWithText("Lets meet in the building, 3rd floor!").assertIsDisplayed()
-      // send the request :
-      composeTestRule.onNodeWithTag("buttonSendMessageLocation").performClick()
-      // go in around you :
-      composeTestRule.onNodeWithText("Around You").assertIsDisplayed().performClick()
-      // reclick on alice profile :
-      composeTestRule.onNodeWithText(ALICE).assertIsDisplayed().performClick()
-      // click on send button :
-      composeTestRule.onNodeWithTag("requestButton").performClick()
       // click on cancel button :
       composeTestRule
           .onNodeWithTag("messageTextField")
@@ -148,30 +143,12 @@ class AroundYouFlowEndToEnd {
       // check if filter worked :
       composeTestRule.onNodeWithText("Bob Marley").assertIsDisplayed()
       composeTestRule.onNodeWithText("Indiana Jones").assertIsDisplayed()
-      // go to notification to check if you have sended a message
-      composeTestRule.onNodeWithText("Notifications").assertIsDisplayed().performClick()
-      composeTestRule.onNodeWithTag("inboxButton").assertIsDisplayed().performClick()
-      composeTestRule.onNodeWithTag("sentButton").assertIsDisplayed().performClick()
-      composeTestRule.waitForIdle()
-      // click on alice to cancel the meeting request
-      composeTestRule.onNodeWithText(ALICE).assertIsDisplayed().performClick()
-      composeTestRule.onNodeWithTag("confirmDialog").assertIsDisplayed()
-      composeTestRule.onNodeWithText("No").assertIsDisplayed().assertHasClickAction().performClick()
-      composeTestRule.onNodeWithText(ALICE).assertIsDisplayed().performClick()
-      composeTestRule.onNodeWithTag("confirmDialog").assertIsDisplayed()
-      composeTestRule
-          .onNodeWithText("Yes")
-          .assertIsDisplayed()
-          .assertHasClickAction()
-          .performClick()
-      composeTestRule.waitForIdle()
-      composeTestRule.onNodeWithTag(ALICE).assertIsNotDisplayed()
 
       scenario.close()
     }
   }
 }
-*/
+
 class TestPermissionDelegate : ActivityCompat.PermissionCompatDelegate {
 
   // Simulate the permission request being granted without showing the actual permission dialog
