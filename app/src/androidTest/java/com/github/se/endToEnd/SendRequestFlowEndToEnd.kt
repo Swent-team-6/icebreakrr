@@ -27,6 +27,13 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 private const val ALICE = "Alice Inwonderland"
+private const val MESSAGE = "message"
+private const val TITLE = "title"
+private const val MEETING_CANCELLATION = "MEETING CANCELLATION"
+private const val MEETING_RESPONSE = "MEETING RESPONSE"
+private const val DISTANCE = "DISTANCE"
+private const val CANCELLED = "CANCELLED"
+private const val CLOSED = "CLOSED"
 
 @RunWith(AndroidJUnit4::class)
 @HiltAndroidTest
@@ -90,7 +97,7 @@ class SendRequestFlowEndToEnd {
 
       // receives a message
       message
-          .addData("title", "MEETING RESPONSE")
+          .addData(TITLE, MEETING_RESPONSE)
           .addData("accepted", "false")
           .addData("location", "(46.0, 6.0)")
       service.onMessageReceived(message.build())
@@ -109,7 +116,7 @@ class SendRequestFlowEndToEnd {
       sendRequestAliceAndCheck()
 
       // receives a cancellation for time :
-      message.addData("message", "DISTANCE").addData("title", "MEETING CANCELLATION")
+      message.addData(MESSAGE, DISTANCE).addData(TITLE, MEETING_CANCELLATION)
       service.onMessageReceived(message.build())
 
       composeTestRule.waitForIdle()
@@ -126,7 +133,7 @@ class SendRequestFlowEndToEnd {
       sendRequestAliceAndCheck()
 
       // receives a cancellation for time :
-      message.addData("message", "CANCELLED").addData("title", "MEETING CANCELLATION")
+      message.addData(MESSAGE, CANCELLED).addData(TITLE, MEETING_CANCELLATION)
       service.onMessageReceived(message.build())
 
       composeTestRule.waitForIdle()
@@ -143,7 +150,7 @@ class SendRequestFlowEndToEnd {
       sendRequestAliceAndCheck()
 
       // receives a cancellation for time :
-      message.addData("message", "CLOSED").addData("title", "MEETING CANCELLATION")
+      message.addData(MESSAGE, CLOSED).addData(TITLE, MEETING_CANCELLATION)
       service.onMessageReceived(message.build())
 
       composeTestRule.waitForIdle()
@@ -188,6 +195,11 @@ class SendRequestFlowEndToEnd {
     }
   }
 
+  /**
+   * This function checks that everything is displayed in the Around You Then it clicks on Alice's
+   * profile and check that everything is displayed it sends a message with a location and go on the
+   * notification to check that it has a send
+   */
   private fun sendRequestAliceAndCheck() {
     // check if everything is displayed in the around you
     composeTestRule.onNodeWithTag("aroundYouScreen").assertIsDisplayed()

@@ -26,6 +26,15 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
+private const val TIME = "TIME"
+private const val MESSAGE = "message"
+private const val TITLE = "title"
+private const val MEETING_CANCELLATION = "MEETING CANCELLATION"
+private const val DISTANCE = "DISTANCE"
+private const val CANCELLED = "CANCELLED"
+private const val CLOSED = "CLOSED"
+private const val MEETING_REQUEST = "MEETING REQUEST"
+
 @RunWith(AndroidJUnit4::class)
 @HiltAndroidTest
 class ReceiveRequestFlowEndToEnd {
@@ -86,7 +95,7 @@ class ReceiveRequestFlowEndToEnd {
       receiveRequestAndCheckProfile()
 
       // receives a cancellation for time :
-      message.addData("message", "TIME").addData("title", "MEETING CANCELLATION")
+      message.addData(MESSAGE, TIME).addData(TITLE, MEETING_CANCELLATION)
       service.onMessageReceived(message.build())
 
       composeTestRule.waitForIdle()
@@ -101,12 +110,12 @@ class ReceiveRequestFlowEndToEnd {
   }
 
   @Test
-  fun receiveRequestDistanceCancellationFlowEndToEnd() {
+  fun receiveRequestAndDistanceCancellationFlowEndToEnd() {
     ActivityScenario.launch<Icebreakrr>(intent).use { scenario ->
       receiveRequestAndCheckProfile()
 
       // receives a cancellation for distance :
-      message.addData("message", "DISTANCE").addData("title", "MEETING CANCELLATION")
+      message.addData(MESSAGE, DISTANCE).addData(TITLE, MEETING_CANCELLATION)
       service.onMessageReceived(message.build())
 
       composeTestRule.waitForIdle()
@@ -126,7 +135,7 @@ class ReceiveRequestFlowEndToEnd {
       receiveRequestAndCheckProfile()
 
       // receives a cancellation because the other one cancelled :
-      message.addData("message", "CANCELLED").addData("title", "MEETING CANCELLATION")
+      message.addData(MESSAGE, CANCELLED).addData(TITLE, MEETING_CANCELLATION)
       service.onMessageReceived(message.build())
 
       composeTestRule.waitForIdle()
@@ -146,7 +155,7 @@ class ReceiveRequestFlowEndToEnd {
       receiveRequestAndCheckProfile()
 
       // receives a cancellation because the other one cancelled :
-      message.addData("message", "CLOSED").addData("title", "MEETING CANCELLATION")
+      message.addData(MESSAGE, CLOSED).addData(TITLE, MEETING_CANCELLATION)
       service.onMessageReceived(message.build())
 
       composeTestRule.waitForIdle()
@@ -192,6 +201,12 @@ class ReceiveRequestFlowEndToEnd {
     }
   }
 
+  /**
+   * This function checks everything in the around you Then it receives a meeting request with two
+   * messages and a location check that you received the message on the UI (badge) go to
+   * notification and check that the UI is coherent click on the request you received (Alice) checks
+   * everything in Alice's profile and the location of the request comes back in Alice's profile
+   */
   private fun receiveRequestAndCheckProfile() {
     // check if everything is displayed in the around you
     composeTestRule.onNodeWithTag("aroundYouScreen").assertIsDisplayed()
@@ -201,8 +216,8 @@ class ReceiveRequestFlowEndToEnd {
 
     // receives a message
     message
-        .addData("title", "MEETING REQUEST")
-        .addData("message", "Hey, do you want to meet?")
+        .addData(TITLE, MEETING_REQUEST)
+        .addData(MESSAGE, "Hey, do you want to meet?")
         .addData("locationMessage", "Let's meet in the 3'rd floor of the building!")
         .addData("location", "46.0, 6.0")
     service.onMessageReceived(message.build())
