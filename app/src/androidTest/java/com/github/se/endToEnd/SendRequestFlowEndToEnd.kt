@@ -13,7 +13,7 @@ import androidx.core.app.ActivityCompat
 import androidx.test.core.app.ActivityScenario
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
-import com.github.se.icebreakrr.MainActivity
+import com.github.se.icebreakrr.Icebreakrr
 import com.github.se.icebreakrr.model.message.MeetingRequestService
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -32,7 +32,7 @@ private const val ALICE = "Alice Inwonderland"
 @HiltAndroidTest
 class SendRequestFlowEndToEnd {
   val intent =
-      Intent(InstrumentationRegistry.getInstrumentation().targetContext, MainActivity::class.java)
+      Intent(InstrumentationRegistry.getInstrumentation().targetContext, Icebreakrr::class.java)
   @Inject lateinit var authInjected: FirebaseAuth
   @Inject lateinit var firestoreInjected: FirebaseFirestore
   @Inject lateinit var authStateListener: FirebaseAuth.AuthStateListener
@@ -60,7 +60,7 @@ class SendRequestFlowEndToEnd {
 
   @Test
   fun sendYouCancelRequestFlowEndToEnd() {
-    ActivityScenario.launch<MainActivity>(intent).use { scenario ->
+    ActivityScenario.launch<Icebreakrr>(intent).use { scenario ->
       sendRequestAliceAndCheck()
       // click on alice to cancel the meeting request
       composeTestRule.onNodeWithText(ALICE).assertIsDisplayed().performClick()
@@ -85,7 +85,7 @@ class SendRequestFlowEndToEnd {
 
   @Test
   fun sendRequestDeclineFlowEndToEnd() {
-    ActivityScenario.launch<MainActivity>(intent).use { scenario ->
+    ActivityScenario.launch<Icebreakrr>(intent).use { scenario ->
       sendRequestAliceAndCheck()
 
       // receives a message
@@ -105,7 +105,7 @@ class SendRequestFlowEndToEnd {
 
   @Test
   fun sendRequestDistanceCancellationFlowEndToEnd() {
-    ActivityScenario.launch<MainActivity>(intent).use { scenario ->
+    ActivityScenario.launch<Icebreakrr>(intent).use { scenario ->
       sendRequestAliceAndCheck()
 
       // receives a cancellation for time :
@@ -122,7 +122,7 @@ class SendRequestFlowEndToEnd {
 
   @Test
   fun sendRequestCancelledCancellationFlowEndToEnd() {
-    ActivityScenario.launch<MainActivity>(intent).use { scenario ->
+    ActivityScenario.launch<Icebreakrr>(intent).use { scenario ->
       sendRequestAliceAndCheck()
 
       // receives a cancellation for time :
@@ -139,7 +139,7 @@ class SendRequestFlowEndToEnd {
 
   @Test
   fun sendRequestClosedCancellationFlowEndToEnd() {
-    ActivityScenario.launch<MainActivity>(intent).use { scenario ->
+    ActivityScenario.launch<Icebreakrr>(intent).use { scenario ->
       sendRequestAliceAndCheck()
 
       // receives a cancellation for time :
@@ -156,7 +156,7 @@ class SendRequestFlowEndToEnd {
 
   @Test
   fun sendAcceptRequestFlowEndToEnd() {
-    ActivityScenario.launch<MainActivity>(intent).use { scenario ->
+    ActivityScenario.launch<Icebreakrr>(intent).use { scenario ->
       sendRequestAliceAndCheck()
 
       // receives a message

@@ -20,7 +20,7 @@ import androidx.core.app.ActivityCompat
 import androidx.test.core.app.ActivityScenario
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
-import com.github.se.icebreakrr.MainActivity
+import com.github.se.icebreakrr.Icebreakrr
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import dagger.hilt.android.testing.HiltAndroidRule
@@ -37,7 +37,7 @@ private const val ALICE = "Alice Inwonderland"
 @HiltAndroidTest
 class AroundYouFlowEndToEnd {
   val intent =
-      Intent(InstrumentationRegistry.getInstrumentation().targetContext, MainActivity::class.java)
+      Intent(InstrumentationRegistry.getInstrumentation().targetContext, Icebreakrr::class.java)
   @Inject lateinit var authInjected: FirebaseAuth
   @Inject lateinit var firestoreInjected: FirebaseFirestore
   @Inject lateinit var authStateListener: FirebaseAuth.AuthStateListener
@@ -55,7 +55,7 @@ class AroundYouFlowEndToEnd {
 
   @Test
   fun AroundYouFlowEndToEndTest() {
-    ActivityScenario.launch<MainActivity>(intent).use { scenario ->
+    ActivityScenario.launch<Icebreakrr>(intent).use { scenario ->
       // check if everything is displayed in the around you
       composeTestRule.onNodeWithTag("aroundYouScreen").assertIsDisplayed()
       composeTestRule.onNodeWithTag("topBar").assertIsDisplayed()

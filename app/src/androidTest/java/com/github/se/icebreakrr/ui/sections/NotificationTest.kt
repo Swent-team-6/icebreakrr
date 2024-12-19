@@ -9,7 +9,6 @@ import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
-import com.github.se.icebreakrr.R
 import com.github.se.icebreakrr.model.message.MeetingRequestViewModel
 import com.github.se.icebreakrr.model.profile.Gender
 import com.github.se.icebreakrr.model.profile.Profile
@@ -215,10 +214,10 @@ class NotificationTest {
     composeTestRule.setContent {
       NotificationScreen(navigationActions, profilesViewModel, meetingRequestViewModel)
     }
-    composeTestRule.onNodeWithTag("navItem_${R.string.settings}").performClick()
+    composeTestRule.onNodeWithTag("navItem_Settings").performClick()
     verify(navigationActions).navigateTo(TopLevelDestinations.SETTINGS)
 
-    composeTestRule.onNodeWithTag("navItem_${R.string.around_you}").performClick()
+    composeTestRule.onNodeWithTag("navItem_Around You").performClick()
     verify(navigationActions).navigateTo(TopLevelDestinations.AROUND_YOU)
   }
 

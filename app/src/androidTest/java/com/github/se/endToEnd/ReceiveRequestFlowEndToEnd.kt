@@ -13,7 +13,7 @@ import androidx.core.app.ActivityCompat
 import androidx.test.core.app.ActivityScenario
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
-import com.github.se.icebreakrr.MainActivity
+import com.github.se.icebreakrr.Icebreakrr
 import com.github.se.icebreakrr.model.message.MeetingRequestService
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
@@ -30,7 +30,7 @@ import org.junit.runner.RunWith
 @HiltAndroidTest
 class ReceiveRequestFlowEndToEnd {
   val intent =
-      Intent(InstrumentationRegistry.getInstrumentation().targetContext, MainActivity::class.java)
+      Intent(InstrumentationRegistry.getInstrumentation().targetContext, Icebreakrr::class.java)
 
   @Inject lateinit var authInjected: FirebaseAuth
 
@@ -61,7 +61,7 @@ class ReceiveRequestFlowEndToEnd {
 
   @Test
   fun receiveRequestDeclineFlowEndToEnd() {
-    ActivityScenario.launch<MainActivity>(intent).use { scenario ->
+    ActivityScenario.launch<Icebreakrr>(intent).use { scenario ->
       receiveRequestAndCheckProfile()
 
       composeTestRule.waitForIdle()
@@ -82,7 +82,7 @@ class ReceiveRequestFlowEndToEnd {
 
   @Test
   fun receiveRequestTimeCancellationFlowEndToEnd() {
-    ActivityScenario.launch<MainActivity>(intent).use { scenario ->
+    ActivityScenario.launch<Icebreakrr>(intent).use { scenario ->
       receiveRequestAndCheckProfile()
 
       // receives a cancellation for time :
@@ -102,7 +102,7 @@ class ReceiveRequestFlowEndToEnd {
 
   @Test
   fun receiveRequestDistanceCancellationFlowEndToEnd() {
-    ActivityScenario.launch<MainActivity>(intent).use { scenario ->
+    ActivityScenario.launch<Icebreakrr>(intent).use { scenario ->
       receiveRequestAndCheckProfile()
 
       // receives a cancellation for distance :
@@ -122,7 +122,7 @@ class ReceiveRequestFlowEndToEnd {
 
   @Test
   fun receiveRequestCancelledCancellationFlowEndToEnd() {
-    ActivityScenario.launch<MainActivity>(intent).use { scenario ->
+    ActivityScenario.launch<Icebreakrr>(intent).use { scenario ->
       receiveRequestAndCheckProfile()
 
       // receives a cancellation because the other one cancelled :
@@ -142,7 +142,7 @@ class ReceiveRequestFlowEndToEnd {
 
   @Test
   fun receiveRequestClosedCancellationFlowEndToEnd() {
-    ActivityScenario.launch<MainActivity>(intent).use { scenario ->
+    ActivityScenario.launch<Icebreakrr>(intent).use { scenario ->
       receiveRequestAndCheckProfile()
 
       // receives a cancellation because the other one cancelled :
@@ -162,7 +162,7 @@ class ReceiveRequestFlowEndToEnd {
 
   @Test
   fun receiveRequestAcceptFlowEndToEnd() {
-    ActivityScenario.launch<MainActivity>(intent).use { scenario ->
+    ActivityScenario.launch<Icebreakrr>(intent).use { scenario ->
       receiveRequestAndCheckProfile()
 
       // accept and check everything updates

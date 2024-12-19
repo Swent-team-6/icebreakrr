@@ -7,7 +7,7 @@ import androidx.test.core.app.ActivityScenario
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.github.se.endToEnd.TestPermissionDelegate
-import com.github.se.icebreakrr.MainActivity
+import com.github.se.icebreakrr.Icebreakrr
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
@@ -28,7 +28,7 @@ import org.junit.runner.RunWith
 @HiltAndroidTest
 class MainActivityTest : TestCase() {
   val intent =
-      Intent(InstrumentationRegistry.getInstrumentation().targetContext, MainActivity::class.java)
+      Intent(InstrumentationRegistry.getInstrumentation().targetContext, Icebreakrr::class.java)
   @Inject lateinit var authInjected: FirebaseAuth
   @Inject lateinit var firestoreInjected: FirebaseFirestore
   @Inject lateinit var authStateListener: FirebaseAuth.AuthStateListener
@@ -44,5 +44,5 @@ class MainActivityTest : TestCase() {
     ActivityCompat.setPermissionCompatDelegate(TestPermissionDelegate())
   }
 
-  @Test fun test() = run { ActivityScenario.launch<MainActivity>(intent).use {} }
+  @Test fun test() = run { ActivityScenario.launch<Icebreakrr>(intent).use {} }
 }

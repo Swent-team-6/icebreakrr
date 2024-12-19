@@ -8,7 +8,7 @@ import android.content.Context
 import android.content.Intent
 import android.util.Log
 import androidx.core.app.NotificationCompat
-import com.github.se.icebreakrr.MainActivity
+import com.github.se.icebreakrr.Icebreakrr
 import com.github.se.icebreakrr.R
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
@@ -218,7 +218,7 @@ class MeetingRequestService : FirebaseMessagingService() {
   fun createNotificationBuilder(title: String, message: String): NotificationCompat.Builder {
     // Create an intent to launch the MainActivity
     val intent =
-        Intent(this, MainActivity::class.java).apply {
+        Intent(this, Icebreakrr::class.java).apply {
           flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         }
 
