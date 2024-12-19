@@ -1,7 +1,10 @@
 package com.github.se.icebreakrr.model.location
 
+import android.Manifest
+import android.content.pm.PackageManager
 import android.location.Location
 import android.os.Looper
+import androidx.core.content.ContextCompat
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationAvailability
 import com.google.android.gms.location.LocationCallback
@@ -13,6 +16,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runBlockingTest
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Assert.fail
@@ -296,5 +300,82 @@ class LocationServiceTest {
 
     // Verify the interaction with getLastLocation
     verify(mockFusedLocationProviderClient).getLastLocation()
+  }
+
+  @Test
+  fun test_hasRequiredPermissions_returnsTrueWhenAllPermissionsGranted() {
+    // Arrange
+    val mockContext = mock<LocationService> { on { applicationContext } doReturn this.mock }
+
+    // Simulate granted permissions
+    whenever(
+            ContextCompat.checkSelfPermission(
+                mockContext, Manifest.permission.ACCESS_FINE_LOCATION))
+        .thenReturn(PackageManager.PERMISSION_GRANTED)
+    whenever(
+            ContextCompat.checkSelfPermission(
+                mockContext, Manifest.permission.FOREGROUND_SERVICE_LOCATION))
+        .thenReturn(PackageManager.PERMISSION_GRANTED)
+
+    val service =
+        object : LocationService() {
+          override fun getApplicationContext(): LocationService {
+            return mockContext
+          }
+
+          override fun hasRequiredPermissions(): Boolean {
+            return super.hasRequiredPermissions()
+          }
+        }
+
+    // Act
+    val hasPermissions = service.hasRequiredPermissions()
+
+    // Assert
+    assertTrue("Expected permissions to be granted", hasPermissions)
+  }
+
+  @Test
+  fun test_hasRequiredPermissions_returnsFalseWhenFineLocationPermissionDenied() {
+    // Arrange
+    val mockService = mock<LocationService> { on { applicationContext } doReturn this.mock }
+
+    // Simulate denied ACCESS_FINE_LOCATION permission
+    whenever(
+            ContextCompat.checkSelfPermission(
+                mockService, Manifest.permission.ACCESS_FINE_LOCATION))
+        .thenReturn(PackageManager.PERMISSION_DENIED)
+    whenever(
+            ContextCompat.checkSelfPermission(
+                mockService, Manifest.permission.FOREGROUND_SERVICE_LOCATION))
+        .thenReturn(PackageManager.PERMISSION_GRANTED)
+
+    // Act
+    val hasPermissions = mockService.hasRequiredPermissions()
+
+    // Assert
+    assertFalse("Expected permissions to be denied", hasPermissions)
+  }
+
+  @Test
+  fun test_hasRequiredPermissions_returnsFalseWhenForegroundServicePermissionDenied() {
+    // Arrange
+    val mockService = mock<LocationService> { on { applicationContext } doReturn this.mock }
+
+    // Simulate denied FOREGROUND_SERVICE_LOCATION permission
+    whenever(
+            ContextCompat.checkSelfPermission(
+                mockService, Manifest.permission.ACCESS_FINE_LOCATION))
+        .thenReturn(PackageManager.PERMISSION_GRANTED)
+    whenever(
+            ContextCompat.checkSelfPermission(
+                mockService, Manifest.permission.FOREGROUND_SERVICE_LOCATION))
+        .thenReturn(PackageManager.PERMISSION_DENIED)
+
+    // Act
+    val hasPermissions = mockService.hasRequiredPermissions()
+
+    // Assert
+    assertFalse("Expected permissions to be denied", hasPermissions)
   }
 }

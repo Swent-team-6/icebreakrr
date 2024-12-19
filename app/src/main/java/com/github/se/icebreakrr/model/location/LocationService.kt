@@ -1,16 +1,21 @@
 package com.github.se.icebreakrr.model.location
 
+import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.Service
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.location.Location
 import android.os.Binder
+import android.os.Build
 import android.os.IBinder
 import android.os.Looper
 import android.util.Log
+import androidx.annotation.RequiresApi
+import androidx.core.content.ContextCompat
 import com.github.se.icebreakrr.R
 import com.github.se.icebreakrr.model.message.MeetingRequestManager
 import com.google.android.gms.location.FusedLocationProviderClient
@@ -21,7 +26,7 @@ import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
 
-class LocationService(
+open class LocationService(
     private val providedFusedLocationProviderClient: FusedLocationProviderClient? = null
 ) : Service(), ILocationService {
 
@@ -87,8 +92,27 @@ class LocationService(
     super.onDestroy()
   }
 
-  /** Starts the service in the foreground with a persistent notification. */
+  /**
+   * Handles the start command for the service, ensuring required permissions are present before
+   * proceeding.
+   * - If required permissions are missing, logs an error and stops the service.
+   * - Starts the service in the foreground with a notification if permissions are granted.
+   *
+   * @param intent The Intent supplied to `startService`, if any.
+   * @param flags Additional data about this start request.
+   * @param startId A unique integer representing this specific request to start.
+   * @return `START_STICKY` if the service should continue running until explicitly stopped, or
+   *   `START_NOT_STICKY` if it should not restart after being killed.
+   *
+   * @requiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+   */
+  @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
   override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+    if (!hasRequiredPermissions()) {
+      Log.e("LocationService", "Missing permissions. Stopping service.")
+      stopSelf() // Stop the service if permissions are missing
+      return START_NOT_STICKY
+    }
     startForeground(NOTIFICATION_ID, createNotification())
     return START_STICKY
   }
@@ -183,7 +207,7 @@ class LocationService(
   }
 
   /** Creates the notification channel required for Android Oreo and later. */
-  override fun createNotificationChannel() {
+  internal fun createNotificationChannel() {
     val channel =
         NotificationChannel(
             NOTIFICATION_CHANNEL_ID, "Location Service", NotificationManager.IMPORTANCE_LOW)
@@ -203,5 +227,26 @@ class LocationService(
         .setSmallIcon(android.R.drawable.ic_menu_mylocation)
         .setOngoing(true)
         .build()
+  }
+
+  /**
+   * Checks whether the application has the necessary permissions to access location services.
+   *
+   * @return `true` if both `ACCESS_FINE_LOCATION` and `FOREGROUND_SERVICE_LOCATION` permissions are
+   *   granted, `false` otherwise.
+   *
+   * @requiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+   */
+  @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+  internal open fun hasRequiredPermissions(): Boolean {
+    val fineLocationPermission =
+        ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) ==
+            PackageManager.PERMISSION_GRANTED
+
+    val foregroundServicePermission =
+        ContextCompat.checkSelfPermission(this, Manifest.permission.FOREGROUND_SERVICE_LOCATION) ==
+            PackageManager.PERMISSION_GRANTED
+
+    return (fineLocationPermission && foregroundServicePermission)
   }
 }
