@@ -5,8 +5,10 @@ Welcome to our project: Icebreakrr, an application designed to facilitate first 
 Icebreakrr uses the location of the phone to allow people in close proximity to discover each other and meet in real life.
 Each user creates a profile based on a photo, a catchphrase, a brief description and a few relevant tags, then shares it with all nearby users. By sharing profiles with nearby users, people can identify common interests, break the ice, and initiate conversations more naturally.
 
-## Architecture
-[Architecture Diagram](https://excalidraw.com/#json=xr8nIGOyFCQl1ITXszMxX,HQjWMof_Uxx4vO8OCieNZw)
+## Architecture Diagram
+[Link](https://excalidraw.com/#json=xr8nIGOyFCQl1ITXszMxX,HQjWMof_Uxx4vO8OCieNZw)
+
+![Untitled-2024-12-19-1500](https://github.com/user-attachments/assets/852a8abb-b1ad-4c00-b576-c647c349a644)
 
 ## Design
 [Figma](https://www.figma.com/design/eCJ4gIM5Yq8mz8Fblrk8Yb/IceBreakrr-App-Mockup?node-id=21-9&p=f&t=Dy2pDPcABQN4weOJ-0)
