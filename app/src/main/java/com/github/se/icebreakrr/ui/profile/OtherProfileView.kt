@@ -16,6 +16,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -36,10 +38,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.TextUnitType
@@ -73,7 +77,10 @@ private val HEADER_FONT_SIZE = 25f
 private val HEADER_LINE_HEIGHT = 30f
 private val CONTENT_FONT_SIZE = 20f
 private val CONTENT_LINE_HEIGHT = 25f
+private val BUTTONS_ELEVATION = 2.dp
 private val ICON_SPACING = 8.dp
+private val AI_OPTIONS_SPACING = 20.dp
+private val AI_OPTIONS_TOP_SPACING = 30.dp
 private const val USER_ALREADY_SEND_REQUEST_TOAST_MESSAGE =
     "this user has already send you a meeting request!"
 
@@ -140,6 +147,7 @@ fun OtherProfileView(
                     bottomSheetVisible = true
                     aiViewModel.findDiscussionStarter()
                   },
+                  elevation = ButtonDefaults.buttonElevation(BUTTONS_ELEVATION),
                   colors =
                       ButtonDefaults.buttonColors(
                           containerColor = MaterialTheme.colorScheme.primary),
@@ -159,7 +167,7 @@ fun OtherProfileView(
 
                           Icon(
                               painter = painterResource(id = R.drawable.sparkles),
-                              contentDescription = "AI icon",
+                              contentDescription = stringResource(R.string.ai_icon),
                               tint = MaterialTheme.colorScheme.onPrimary)
                         }
                   }
@@ -179,6 +187,7 @@ fun OtherProfileView(
                       showNoInternetToast(context = context)
                     }
                   },
+                  elevation = ButtonDefaults.buttonElevation(BUTTONS_ELEVATION),
                   colors =
                       ButtonDefaults.buttonColors(
                           containerColor = MaterialTheme.colorScheme.primary),
@@ -224,7 +233,10 @@ fun OtherProfileView(
 
       // this displays the bottom sheet
       if (bottomSheetVisible) {
-        BottomSheet(aiState) { bottomSheetVisible = false }
+        BottomSheet(
+            aiState = aiState,
+            onDismissRequest = { bottomSheetVisible = false },
+            onAiRetry = { aiViewModel.findDiscussionStarter() })
       }
     }
   }
@@ -232,8 +244,9 @@ fun OtherProfileView(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun BottomSheet(aiState: AiViewModel.UiState, onDismissRequest: () -> Unit) {
+fun BottomSheet(aiState: AiViewModel.UiState, onDismissRequest: () -> Unit, onAiRetry: () -> Unit) {
   val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+  val clipboardManager = LocalClipboardManager.current
 
   ModalBottomSheet(
       sheetState = sheetState,
@@ -259,11 +272,37 @@ fun BottomSheet(aiState: AiViewModel.UiState, onDismissRequest: () -> Unit) {
               when (aiState) {
                 is AiViewModel.UiState.Success -> {
                   Text(
-                      text = "\"${aiState.data}\"",
+                      text = "«${aiState.data}»",
                       fontWeight = FontWeight.Normal,
                       fontSize = TextUnit(CONTENT_FONT_SIZE, TextUnitType.Sp),
                       lineHeight = TextUnit(CONTENT_LINE_HEIGHT, TextUnitType.Sp),
                       modifier = Modifier.testTag("aiResponse"))
+
+                  Spacer(modifier = Modifier.height(AI_OPTIONS_TOP_SPACING))
+
+                  Row(
+                      horizontalArrangement = Arrangement.Center,
+                      modifier = Modifier.fillMaxWidth()) {
+                        Button(
+                            onClick = onAiRetry,
+                            elevation = ButtonDefaults.buttonElevation(BUTTONS_ELEVATION),
+                            modifier = Modifier.testTag("aiRetry")) {
+                              Icon(
+                                  imageVector = Icons.Filled.Refresh,
+                                  contentDescription = stringResource(R.string.ai_retry))
+                            }
+
+                        Spacer(modifier = Modifier.width(AI_OPTIONS_SPACING))
+
+                        Button(
+                            onClick = { clipboardManager.setText(AnnotatedString(aiState.data)) },
+                            elevation = ButtonDefaults.buttonElevation(BUTTONS_ELEVATION),
+                            modifier = Modifier.testTag("aiCopy")) {
+                              Icon(
+                                  painter = painterResource(id = R.drawable.copy_icon),
+                                  contentDescription = stringResource(R.string.ai_copy))
+                            }
+                      }
                 }
                 is AiViewModel.UiState.Loading -> {
                   Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {

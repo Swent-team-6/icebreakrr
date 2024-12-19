@@ -1,16 +1,21 @@
 package com.github.se.icebreakrr.model.location
 
+import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.Service
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.location.Location
 import android.os.Binder
+import android.os.Build
 import android.os.IBinder
 import android.os.Looper
 import android.util.Log
+import androidx.annotation.RequiresApi
+import androidx.core.content.ContextCompat
 import com.github.se.icebreakrr.R
 import com.github.se.icebreakrr.model.message.MeetingRequestManager
 import com.google.android.gms.location.FusedLocationProviderClient
@@ -21,7 +26,7 @@ import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
 
-class LocationService(
+open class LocationService(
     private val providedFusedLocationProviderClient: FusedLocationProviderClient? = null
 ) : Service(), ILocationService {
 
@@ -52,7 +57,7 @@ class LocationService(
   }
 
   // LocationCallback instance used to handle location updates and availability changes
-  private val locationCallback: LocationCallback =
+  val locationCallback: LocationCallback =
       object : LocationCallback() {
         override fun onLocationResult(locationResult: LocationResult) {
           locationResult.lastLocation?.let { newLocation ->
@@ -87,8 +92,27 @@ class LocationService(
     super.onDestroy()
   }
 
-  /** Starts the service in the foreground with a persistent notification. */
+  /**
+   * Handles the start command for the service, ensuring required permissions are present before
+   * proceeding.
+   * - If required permissions are missing, logs an error and stops the service.
+   * - Starts the service in the foreground with a notification if permissions are granted.
+   *
+   * @param intent The Intent supplied to `startService`, if any.
+   * @param flags Additional data about this start request.
+   * @param startId A unique integer representing this specific request to start.
+   * @return `START_STICKY` if the service should continue running until explicitly stopped, or
+   *   `START_NOT_STICKY` if it should not restart after being killed.
+   *
+   * @requiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+   */
+  @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
   override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+    if (!hasRequiredPermissions()) {
+      Log.e("LocationService", "Missing permissions. Stopping service.")
+      stopSelf() // Stop the service if permissions are missing
+      return START_NOT_STICKY
+    }
     startForeground(NOTIFICATION_ID, createNotification())
     return START_STICKY
   }
@@ -109,13 +133,16 @@ class LocationService(
   }
 
   /**
-   * Starts high-accuracy location updates.
+   * Starts high-accuracy location updates and sets the initial location immediately.
    *
-   * Requests location updates, invoking [onLocationUpdate] with each new [Location]. Returns `true`
-   * if updates start successfully, `false` otherwise.
+   * This function begins by retrieving the last known location or, if unavailable, requesting the
+   * current location. The retrieved location is immediately passed to the provided callback
+   * `onLocationUpdate`. Subsequently, it starts regular location updates to track the user's
+   * movement in real-time.
    *
-   * @param onLocationUpdate Callback with the latest [Location].
-   * @return `true` if updates started, `false` if an error occurred.
+   * @param onLocationUpdate Callback invoked with the latest [Location].
+   * @param onError Callback invoked with an error message in case of failure.
+   * @return `true` if updates started successfully, `false` otherwise.
    */
   @SuppressLint("MissingPermission")
   override fun startLocationUpdates(
@@ -130,6 +157,35 @@ class LocationService(
               .setMinUpdateIntervalMillis(MIN_UPDATE_INTERVAL_MS)
               .setWaitForAccurateLocation(true)
               .build()
+
+      // Request the last known location immediately
+      fusedLocationProviderClient.lastLocation
+          .addOnSuccessListener { lastLocation ->
+            if (lastLocation != null) {
+              this.lastKnownLocation = lastLocation
+              onLocationUpdate.invoke(lastLocation)
+            } else {
+              // In case there is no last known location, request an immediate update
+              fusedLocationProviderClient
+                  .getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, null)
+                  .addOnSuccessListener { currentLocation ->
+                    if (currentLocation != null) {
+                      this.lastKnownLocation = currentLocation
+                      onLocationUpdate.invoke(currentLocation)
+                    } else {
+                      onError?.invoke("Failed to retrieve initial location.")
+                    }
+                  }
+                  .addOnFailureListener { e ->
+                    onError?.invoke("Error retrieving current location: ${e.message}")
+                  }
+            }
+          }
+          .addOnFailureListener { e ->
+            onError?.invoke("Error retrieving last known location: ${e.message}")
+          }
+
+      // Start regular location updates
       fusedLocationProviderClient.requestLocationUpdates(
           locationRequest, locationCallback, Looper.getMainLooper())
       Log.d("LocationService", "Location updates started")
@@ -150,6 +206,15 @@ class LocationService(
     stopSelf()
   }
 
+  /** Creates the notification channel required for Android Oreo and later. */
+  internal fun createNotificationChannel() {
+    val channel =
+        NotificationChannel(
+            NOTIFICATION_CHANNEL_ID, "Location Service", NotificationManager.IMPORTANCE_LOW)
+    val manager = getSystemService(NotificationManager::class.java)
+    manager?.createNotificationChannel(channel)
+  }
+
   /**
    * Creates a notification for the foreground service.
    *
@@ -164,12 +229,24 @@ class LocationService(
         .build()
   }
 
-  /** Creates the notification channel required for Android Oreo and later. */
-  private fun createNotificationChannel() {
-    val channel =
-        NotificationChannel(
-            NOTIFICATION_CHANNEL_ID, "Location Service", NotificationManager.IMPORTANCE_LOW)
-    val manager = getSystemService(NotificationManager::class.java)
-    manager?.createNotificationChannel(channel)
+  /**
+   * Checks whether the application has the necessary permissions to access location services.
+   *
+   * @return `true` if both `ACCESS_FINE_LOCATION` and `FOREGROUND_SERVICE_LOCATION` permissions are
+   *   granted, `false` otherwise.
+   *
+   * @requiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+   */
+  @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+  internal open fun hasRequiredPermissions(): Boolean {
+    val fineLocationPermission =
+        ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) ==
+            PackageManager.PERMISSION_GRANTED
+
+    val foregroundServicePermission =
+        ContextCompat.checkSelfPermission(this, Manifest.permission.FOREGROUND_SERVICE_LOCATION) ==
+            PackageManager.PERMISSION_GRANTED
+
+    return (fineLocationPermission && foregroundServicePermission)
   }
 }

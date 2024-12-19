@@ -208,7 +208,7 @@ private fun MeetingRequestButton(
               contentColor = MaterialTheme.colorScheme.onSecondary)) {
         Box(
             modifier = Modifier.padding(vertical = DROPDOWN_VERTICAL_PADDING),
-            contentAlignment = Alignment.Center,
+            contentAlignment = Alignment.TopEnd,
         ) {
           Text(text = option.displayName, fontSize = 15.sp, maxLines = 1)
           if (badgeCount > 0) {

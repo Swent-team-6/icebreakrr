@@ -97,11 +97,17 @@ class LocationViewModel(
     if (permissionObserverJob == null) observePermissions()
   }
 
-  /** Stops location updates and stops observing permission status changes. */
+  /**
+   * Stops location updates and cleans up resources.
+   *
+   * Removes the user's geohash to prevent their profile from being returned by
+   * `getProfileInRadius`.
+   */
   fun stopLocationUpdates() {
     if (_isUpdatingLocation.value) {
       locationService.stopLocationUpdates()
       stopObservingPermissions()
+      locationRepositoryFirestore.removeUserGeohash()
       _isUpdatingLocation.value = false
     }
   }

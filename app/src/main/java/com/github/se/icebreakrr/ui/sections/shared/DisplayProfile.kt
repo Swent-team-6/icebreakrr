@@ -26,6 +26,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -48,7 +49,7 @@ import com.github.se.icebreakrr.utils.NetworkUtils.showNoInternetToast
 
 // Constants
 private val INFO_SECTION_PADDING = 16.dp
-private val INFO_SECTION_SPACING = 11.dp
+private val INFO_SECTION_SPACING = 16.dp
 private val TAG_HEIGHT_DP = 54.dp
 private val REQUEST_BUTTON_SIZE = 55.dp
 private val REQUEST_BUTTON_ELEVATION = 8.dp
@@ -57,11 +58,18 @@ private val PROFILE_IMAGE_ASPECT_RATIO = 1f
 private val PROFILE_IMAGE_PADDING = 16.dp
 private val USERNAME_TEXT_STYLE =
     TextStyle(fontSize = 26.sp, fontWeight = FontWeight.Bold, color = Color.White)
-private val INFO_TEXT_STYLE =
+private val CONTENT_TEXT_STYLE =
     TextStyle(
-        fontSize = 14.sp, lineHeight = 20.sp, fontWeight = FontWeight.W500, letterSpacing = 0.1.sp)
+        fontSize = 16.sp, lineHeight = 20.sp, fontWeight = FontWeight.W400, letterSpacing = 0.1.sp)
+private val INFO_SUBTITLE_STYLE =
+    TextStyle(
+        fontSize = 18.sp, lineHeight = 20.sp, fontWeight = FontWeight.W500, letterSpacing = 0.1.sp)
 private val CATCHPHRASE_TEXT_STYLE =
-    TextStyle(fontSize = 22.sp, lineHeight = 28.sp, fontWeight = FontWeight.W400)
+    TextStyle(
+        fontSize = 22.sp,
+        lineHeight = 28.sp,
+        fontWeight = FontWeight.W400,
+        fontStyle = FontStyle.Italic)
 
 private val DESCRIPTION_PADDING = 4.dp
 private val COLUMN_PADDING = 4.dp
@@ -107,13 +115,8 @@ fun InfoSection(profile: Profile, tagsViewModel: TagsViewModel) {
             verticalArrangement = Arrangement.spacedBy(VERTICAL_ARRANGEMENT)) {
               Text(
                   text = "Description",
-                  style =
-                      TextStyle(
-                          fontSize = 14.sp,
-                          lineHeight = 20.sp,
-                          fontWeight = FontWeight.W500,
-                          color = MaterialTheme.colorScheme.secondary,
-                          letterSpacing = 0.1.sp))
+                  style = INFO_SUBTITLE_STYLE,
+                  color = MaterialTheme.colorScheme.secondary)
               ProfileDescription(profile.description)
             }
 
@@ -123,7 +126,7 @@ fun InfoSection(profile: Profile, tagsViewModel: TagsViewModel) {
             verticalArrangement = Arrangement.spacedBy(VERTICAL_ARRANGEMENT)) {
               Text(
                   text = "Tags",
-                  style = INFO_TEXT_STYLE,
+                  style = INFO_SUBTITLE_STYLE,
                   color = MaterialTheme.colorScheme.secondary)
               TagsSection(userTags)
             }
@@ -163,19 +166,18 @@ fun ProfileHeader(
               .aspectRatio(PROFILE_IMAGE_ASPECT_RATIO)
               .background(Color.LightGray)
               .testTag("profileHeader")) {
-        val boxHeight =
 
-            // Profile image
-            AsyncImage(
-                model = profile.profilePictureUrl,
-                contentDescription = "Profile Image",
-                contentScale = ContentScale.Crop,
-                modifier =
-                    Modifier.fillMaxSize()
-                        .background(MaterialTheme.colorScheme.surfaceVariant, CircleShape)
-                        .testTag("profilePicture"),
-                placeholder = painterResource(id = R.drawable.nopp),
-                error = painterResource(id = R.drawable.nopp))
+        // Profile image
+        AsyncImage(
+            model = profile.profilePictureUrl,
+            contentDescription = "Profile Image",
+            contentScale = ContentScale.Crop,
+            modifier =
+                Modifier.fillMaxSize()
+                    .background(MaterialTheme.colorScheme.surfaceVariant, CircleShape)
+                    .testTag("profilePicture"),
+            placeholder = painterResource(id = R.drawable.nopp),
+            error = painterResource(id = R.drawable.nopp))
 
         // Back button
         IconButton(
@@ -410,7 +412,7 @@ fun ProfileHeader(
 @Composable
 fun ProfileCatchPhrase(catchPhrase: String) {
   Text(
-      text = catchPhrase,
+      text = "«${catchPhrase}»",
       style = CATCHPHRASE_TEXT_STYLE,
       color = MaterialTheme.colorScheme.onSecondary,
       textAlign = TextAlign.Left,
@@ -440,9 +442,9 @@ fun TagsSection(listOfTags: List<Pair<String, Color>>) {
 fun ProfileDescription(description: String) {
   Text(
       text = description,
-      style = INFO_TEXT_STYLE,
+      style = CONTENT_TEXT_STYLE,
       color = MaterialTheme.colorScheme.onSecondary,
-      modifier = Modifier.padding(DESCRIPTION_PADDING).testTag("profileDescription"))
+      modifier = Modifier.padding(vertical = DESCRIPTION_PADDING).testTag("profileDescription"))
 }
 
 @Composable

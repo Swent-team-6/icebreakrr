@@ -44,4 +44,22 @@ class LocationRepositoryFirestore(
           Log.e("LocationRepositoryFirestore", "Failed to set location", exception)
         }
   }
+
+  /** Removes the geohash field for the current user in Firestore. */
+  override fun removeUserGeohash() {
+    val userId = auth.currentUser?.uid
+    if (userId == null) {
+      Log.w("LocationRepositoryFirestore", "User is not authenticated. Cannot remove geohash.")
+      return
+    }
+
+    // Remove the geohash field from the user's document in Firestore
+    db.collection(collectionPath)
+        .document(userId)
+        .update("geohash", null)
+        .addOnSuccessListener {}
+        .addOnFailureListener { exception ->
+          Log.e("LocationRepositoryFirestore", "Failed to remove geohash", exception)
+        }
+  }
 }

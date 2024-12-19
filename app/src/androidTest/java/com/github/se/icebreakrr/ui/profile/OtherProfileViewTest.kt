@@ -325,6 +325,8 @@ class OtherProfileViewTest {
 
     composeTestRule.onNodeWithTag("aiBottomSheet").assertIsDisplayed()
     composeTestRule.onNodeWithTag("aiResponse").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("aiRetry").assertIsDisplayed()
+    composeTestRule.onNodeWithTag("aiCopy").assertIsDisplayed()
   }
 
   @Test

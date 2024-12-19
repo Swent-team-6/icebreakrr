@@ -60,7 +60,7 @@ class AroundYouFlowEndToEnd {
     intent.putExtra("IS_TESTING", true)
     ActivityCompat.setPermissionCompatDelegate(TestPermissionDelegate())
   }
-  
+
 
   @Test
   fun AroundYouFlowEndToEndTest() {
