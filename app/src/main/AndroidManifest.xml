@@ -36,7 +36,7 @@
             android:label="@string/title_activity_second"
             android:theme="@style/Theme.SampleApp" />
         <activity
-            android:name="com.github.se.icebreakrr.MainActivity"
+            android:name="com.github.se.icebreakrr.Icebreakrr"
             android:screenOrientation="portrait"
             android:exported="true"
             android:label="@string/title_activity_main"
