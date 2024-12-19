@@ -4,6 +4,7 @@ package com.github.se.endToEnd
 
 import android.app.Activity
 import android.content.Intent
+import android.os.Bundle
 import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotDisplayed
@@ -17,19 +18,26 @@ import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
 import androidx.core.app.ActivityCompat
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.LifecycleObserver
 import androidx.test.core.app.ActivityScenario
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.github.se.icebreakrr.MainActivity
+import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
+import junit.framework.TestCase.assertNotNull
 import javax.inject.Inject
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.Mockito.mock
+import org.mockito.Mockito.verify
 
 private const val ALICE = "Alice Inwonderland"
 
@@ -52,6 +60,7 @@ class AroundYouFlowEndToEnd {
     intent.putExtra("IS_TESTING", true)
     ActivityCompat.setPermissionCompatDelegate(TestPermissionDelegate())
   }
+  
 
   @Test
   fun AroundYouFlowEndToEndTest() {
