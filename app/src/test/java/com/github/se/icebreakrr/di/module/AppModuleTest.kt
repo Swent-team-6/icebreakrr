@@ -12,27 +12,27 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class AppModuleTest {
 
-    @Before
-    fun setup(){
-        val context = ApplicationProvider.getApplicationContext<Context>()
-        FirebaseApp.initializeApp(context)
-    }
+  @Before
+  fun setup() {
+    val context = ApplicationProvider.getApplicationContext<Context>()
+    FirebaseApp.initializeApp(context)
+  }
 
-    @Test
-    fun testFirebaseAuthProvider() {
-        val auth = FirebaseAuthModule.provideFirebaseAuth()
-        assertNotNull(auth)
-    }
+  @Test
+  fun testFirebaseAuthProvider() {
+    val auth = FirebaseAuthModule.provideFirebaseAuth()
+    assertNotNull(auth)
+  }
 
-    @Test
-    fun testFirebaseFirestoreProvider() {
-        val firestore = FirestoreModule.provideFirebaseFirestore()
-        assertNotNull(firestore)
-    }
+  @Test
+  fun testFirebaseFirestoreProvider() {
+    val firestore = FirestoreModule.provideFirebaseFirestore()
+    assertNotNull(firestore)
+  }
 
-    @Test
-    fun testAuthStateListenerProvider(){
-        val authState = AuthStateListenerModule.provideAuthStateListener()
-        assertNotNull(authState)
-    }
+  @Test
+  fun testAuthStateListenerProvider() {
+    val authState = AuthStateListenerModule.provideAuthStateListener()
+    assertNotNull(authState)
+  }
 }

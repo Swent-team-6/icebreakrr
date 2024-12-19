@@ -1,6 +1,5 @@
 package com.github.se.di.module
 
-import android.util.Log
 import com.github.se.icebreakrr.di.module.AuthStateListenerModule
 import com.github.se.icebreakrr.di.module.FirebaseAuthModule
 import com.github.se.icebreakrr.di.module.FirestoreModule
@@ -229,7 +228,6 @@ object MockFirebaseFirestoreModule {
               .thenReturn(myProfile.meetingRequestInbox)
           `when`(mockMyDocumentSnapshot.get("meetingRequestChosenLocalisation"))
               .thenReturn(myProfile.meetingRequestChosenLocalisation)
-          Log.d("TESTEST", "[TestModule] update my profile ${myProfile}")
           mockMyTask
         }
         .`when`(mockMyDocumentReference)

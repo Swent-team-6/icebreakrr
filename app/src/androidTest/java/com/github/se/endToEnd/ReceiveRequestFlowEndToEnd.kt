@@ -7,10 +7,8 @@ import androidx.compose.ui.test.assertIsNotDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
-import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
-import androidx.compose.ui.test.printToLog
 import androidx.core.app.ActivityCompat
 import androidx.test.core.app.ActivityScenario
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -77,7 +75,7 @@ class ReceiveRequestFlowEndToEnd {
       composeTestRule.onNodeWithTag("badgeHeatmap").assertIsNotDisplayed()
 
       // go on heatmap
-      composeTestRule.onNodeWithTag("navItem_2131689769").performClick()
+      composeTestRule.onNodeWithTag("navItem_Map").performClick()
       scenario.close()
     }
   }
@@ -178,7 +176,7 @@ class ReceiveRequestFlowEndToEnd {
 
       // go in heatmap
       composeTestRule
-          .onNodeWithTag("navItem_2131689769")
+          .onNodeWithTag("navItem_Map")
           .assertIsDisplayed()
           .assertHasClickAction()
           .performClick()
@@ -195,7 +193,6 @@ class ReceiveRequestFlowEndToEnd {
   }
 
   private fun receiveRequestAndCheckProfile() {
-    composeTestRule.onRoot().printToLog("UIHierarchy")
     // check if everything is displayed in the around you
     composeTestRule.onNodeWithTag("aroundYouScreen").assertIsDisplayed()
     composeTestRule.onNodeWithTag("topBar").assertIsDisplayed()
@@ -217,7 +214,7 @@ class ReceiveRequestFlowEndToEnd {
 
     // go to notification to see the profile :
     composeTestRule
-        .onNodeWithTag("navItem_2131689863")
+        .onNodeWithTag("navItem_Notifications")
         .assertIsDisplayed()
         .assertHasClickAction()
         .performClick()

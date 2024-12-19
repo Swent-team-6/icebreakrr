@@ -75,7 +75,7 @@ class SettingsFlowEndToEnd {
       composeTestRule.onNodeWithTag("filterButton").assertIsDisplayed()
 
       // go to settings :
-      composeTestRule.onNodeWithTag("navItem_2131689884").performClick()
+      composeTestRule.onNodeWithTag("navItem_Settings").performClick()
 
       // check if everything is displayed :
       composeTestRule.onNodeWithTag("profileCard").assertIsDisplayed()
@@ -141,7 +141,7 @@ class SettingsFlowEndToEnd {
       // click on discard changes :
       composeTestRule.onNodeWithText("Discard changes").performClick()
       // test that profile hasent changed :
-      composeTestRule.onNodeWithText(NEW_CATCHPHRASE).assertIsNotDisplayed()
+      composeTestRule.onNodeWithText("«$NEW_CATCHPHRASE»").assertIsNotDisplayed()
       composeTestRule.onNodeWithText(NEW_DESCRIPTION).assertIsNotDisplayed()
       composeTestRule.onNodeWithText("#$TRAVEL_TAG").assertIsNotDisplayed()
       // click on edit profile :
@@ -156,13 +156,13 @@ class SettingsFlowEndToEnd {
       // save changes :
       composeTestRule.onNodeWithTag("checkButton").performClick()
       // check if profile has been updated :
-      composeTestRule.onNodeWithText(NEW_CATCHPHRASE).assertIsDisplayed()
+      composeTestRule.onNodeWithText("«$NEW_CATCHPHRASE»").assertIsDisplayed()
       composeTestRule.onNodeWithText(NEW_DESCRIPTION).assertIsDisplayed()
       composeTestRule.onNodeWithText("#$TRAVEL_TAG").assertIsDisplayed()
       // click on go back :
       composeTestRule.onNodeWithTag("goBackButton").performClick()
 
-      // deactivate toogle discoverability :
+      // deactivate togle discoverability :
       composeTestRule
           .onNodeWithTag("switchToggle Discoverability")
           .assertIsDisplayed()
@@ -179,12 +179,12 @@ class SettingsFlowEndToEnd {
           .assertIsDisplayed()
           .assertIsOff()
       // go to around you and check that the right text is displayed :
-      composeTestRule.onNodeWithTag("navItem_2131689514").assertIsDisplayed().performClick()
+      composeTestRule.onNodeWithTag("navItem_Around You").assertIsDisplayed().performClick()
       composeTestRule
           .onNodeWithText("Activate location sharing in the app settings!")
           .assertIsDisplayed()
       // come back to settings and toggle option
-      composeTestRule.onNodeWithTag("navItem_2131689884").assertIsDisplayed().performClick()
+      composeTestRule.onNodeWithTag("navItem_Settings").assertIsDisplayed().performClick()
       composeTestRule
           .onNodeWithTag("switchToggle Discoverability")
           .assertIsDisplayed()
@@ -203,7 +203,7 @@ class SettingsFlowEndToEnd {
       composeTestRule.onNodeWithText("You have not blocked any users!").assertIsDisplayed()
       composeTestRule.onNodeWithTag("goBackButton").assertIsDisplayed().performClick()
       // go in around you to block alice :
-      composeTestRule.onNodeWithTag("navItem_2131689514").assertIsDisplayed().performClick()
+      composeTestRule.onNodeWithTag("navItem_Around You").assertIsDisplayed().performClick()
       composeTestRule.onNodeWithText(ALICE).assertIsDisplayed().performClick()
       composeTestRule.onNodeWithTag("flagButton").assertIsDisplayed().performClick()
       composeTestRule.onNodeWithTag("alertDialogReportBlock").assertIsDisplayed()
@@ -218,7 +218,7 @@ class SettingsFlowEndToEnd {
       composeTestRule.waitForIdle()
       composeTestRule.onNodeWithText(ALICE).assertIsNotDisplayed()
       // go back in blocked users to see if it has been updated :
-      composeTestRule.onNodeWithTag("navItem_2131689884").assertIsDisplayed().performClick()
+      composeTestRule.onNodeWithTag("navItem_Settings").assertIsDisplayed().performClick()
       composeTestRule.onNodeWithTag("blockedUsersButton").assertIsDisplayed().performClick()
       composeTestRule.onNodeWithText(ALICE).assertIsDisplayed()
       // unblock and check it is updated :
@@ -236,9 +236,9 @@ class SettingsFlowEndToEnd {
           .assertIsDisplayed()
           .assertHasClickAction()
           .performClick()
-      composeTestRule.onNodeWithTag("navItem_2131689514").assertIsDisplayed().performClick()
+      composeTestRule.onNodeWithTag("navItem_Around You").assertIsDisplayed().performClick()
       composeTestRule.onNodeWithText(ALICE).assertIsDisplayed()
-      composeTestRule.onNodeWithTag("navItem_2131689884").assertIsDisplayed().performClick()
+      composeTestRule.onNodeWithTag("navItem_Settings").assertIsDisplayed().performClick()
 
       // already met alice and check everything updated :
       composeTestRule.onNodeWithTag("alreadyMetButton").assertIsDisplayed().performClick()
@@ -250,7 +250,7 @@ class SettingsFlowEndToEnd {
           .assertIsDisplayed()
           .assertHasClickAction()
           .performClick()
-      composeTestRule.onNodeWithTag("navItem_2131689514").assertIsDisplayed().performClick()
+      composeTestRule.onNodeWithTag("navItem_Around You").assertIsDisplayed().performClick()
       composeTestRule.onNodeWithText(ALICE).assertIsDisplayed().performClick()
       composeTestRule
           .onNodeWithTag("alreadyMetButton")
@@ -259,7 +259,7 @@ class SettingsFlowEndToEnd {
           .assertHasClickAction()
           .performClick()
       composeTestRule.onNodeWithText(ALICE).assertIsNotDisplayed()
-      composeTestRule.onNodeWithTag("navItem_2131689884").assertIsDisplayed().performClick()
+      composeTestRule.onNodeWithTag("navItem_Settings").assertIsDisplayed().performClick()
       // remove alice from already met to see if updated :
       composeTestRule.onNodeWithTag("alreadyMetButton").assertIsDisplayed().performClick()
       composeTestRule.onNodeWithText(ALICE).assertIsDisplayed().performClick()
@@ -274,7 +274,7 @@ class SettingsFlowEndToEnd {
           .onNodeWithText("You haven't met anyone yet. Go explore the world!")
           .assertIsDisplayed()
       composeTestRule.onNodeWithTag("goBackButton").assertIsDisplayed().performClick()
-      composeTestRule.onNodeWithTag("navItem_2131689514").assertIsDisplayed().performClick()
+      composeTestRule.onNodeWithTag("navItem_Around You").assertIsDisplayed().performClick()
       composeTestRule.onNodeWithText(ALICE).assertIsDisplayed()
 
       // report alice
@@ -294,7 +294,7 @@ class SettingsFlowEndToEnd {
       composeTestRule.onNodeWithText(ALICE).assertIsNotDisplayed()
 
       // log out :
-      composeTestRule.onNodeWithTag("navItem_2131689884").assertIsDisplayed().performClick()
+      composeTestRule.onNodeWithTag("navItem_Settings").assertIsDisplayed().performClick()
       composeTestRule
           .onNodeWithTag("logOutButton")
           .assertIsDisplayed()

@@ -17,6 +17,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -76,7 +77,7 @@ fun BottomNavigationMenu(
                       selectedTextColor = MaterialTheme.colorScheme.onPrimary,
                       unselectedTextColor = MaterialTheme.colorScheme.onPrimaryContainer,
                       indicatorColor = Color.Transparent),
-              modifier = Modifier.testTag("navItem_${tab.textId}"))
+              modifier = Modifier.testTag("navItem_${LocalContext.current.getString(tab.textId)}"))
         }
       }
 }

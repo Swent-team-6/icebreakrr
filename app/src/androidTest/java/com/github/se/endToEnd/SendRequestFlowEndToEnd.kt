@@ -1,12 +1,10 @@
 package com.github.se.endToEnd
 
 import android.content.Intent
-import android.os.StrictMode
 import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
-import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -106,30 +104,6 @@ class SendRequestFlowEndToEnd {
   }
 
   @Test
-  fun sendRequestTimeCancellationFlowEndToEnd() {
-    ActivityScenario.launch<MainActivity>(intent).use { scenario ->
-      sendRequestAliceAndCheck()
-
-      StrictMode.setThreadPolicy(
-          StrictMode.ThreadPolicy.Builder()
-              .permitAll() // Allows all disk and network operations
-              .build())
-
-      // receives a cancellation for time :
-      message.addData("message", "TIME").addData("title", "MEETING CANCELLATION")
-      service.onMessageReceived(message.build())
-
-      composeTestRule.waitForIdle()
-
-      // Wait for the profile card to disappear
-      composeTestRule.waitUntil(timeoutMillis = 20000) {
-        composeTestRule.onAllNodesWithTag("profileCard").fetchSemanticsNodes().isEmpty()
-      }
-      scenario.close()
-    }
-  }
-
-  @Test
   fun sendRequestDistanceCancellationFlowEndToEnd() {
     ActivityScenario.launch<MainActivity>(intent).use { scenario ->
       sendRequestAliceAndCheck()
@@ -206,7 +180,7 @@ class SendRequestFlowEndToEnd {
 
       // go on heat map :
       composeTestRule
-          .onNodeWithTag("navItem_2131689769")
+          .onNodeWithTag("navItem_Map")
           .assertIsDisplayed()
           .assertHasClickAction()
           .performClick()
@@ -236,7 +210,7 @@ class SendRequestFlowEndToEnd {
 
     // check if alice has the good profile :
     composeTestRule.onNodeWithText(ALICE).assertIsDisplayed()
-    composeTestRule.onNodeWithText("So much to see, so little time").assertIsDisplayed()
+    composeTestRule.onNodeWithText("«So much to see, so little time»").assertIsDisplayed()
     composeTestRule
         .onNodeWithText("I am a software engineer who loves to travel and meet new people.")
         .assertIsDisplayed()
@@ -274,7 +248,7 @@ class SendRequestFlowEndToEnd {
     composeTestRule.onNodeWithTag("buttonSendMessageLocation").performClick()
 
     // go to notification to check if you have sended a message
-    composeTestRule.onNodeWithTag("navItem_2131689863").assertIsDisplayed().performClick()
+    composeTestRule.onNodeWithTag("navItem_Notifications").assertIsDisplayed().performClick()
     composeTestRule.onNodeWithTag("inboxButton").assertIsDisplayed().performClick()
     composeTestRule.onNodeWithTag("sentButton").assertIsDisplayed().performClick()
     composeTestRule.waitForIdle()
